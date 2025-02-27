@@ -25,10 +25,10 @@ async def root():
     return """
     <html>
         <head>
-            <title>EventSpace API</title>
+            <title>App API</title>
         </head>
         <body>
-            <h1>Welcome to EventSpace API</h1>
+            <h1>Welcome to app API</h1>
             <p>Explore the available endpoints and documentation:</p>
             <a href="/docs">OpenAPI Documentation</a>
         </body>

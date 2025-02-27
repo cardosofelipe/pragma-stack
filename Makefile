@@ -1,7 +1,7 @@
 .PHONY: dev prod down clean
 
 VERSION ?= latest
-REGISTRY := gitea.pragmazest.com/cardosofelipe/eventspace
+REGISTRY := gitea.pragmazest.com/cardosofelipe/app
 
 
 dev:

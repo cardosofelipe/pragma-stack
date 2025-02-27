@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "docker:build": "docker build -t eventspace-frontend .",
-    "docker:run": "docker run -p 3000:3000 eventspace-frontend"
+    "docker:build": "docker build -t app-frontend .",
+    "docker:run": "docker run -p 3000:3000 app-frontend"
 
   },
   "dependencies": {

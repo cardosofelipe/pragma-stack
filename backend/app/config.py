@@ -3,7 +3,7 @@ from typing import Optional, List
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: Optional[str] = "EventSpace"
+    PROJECT_NAME: Optional[str] = "App"
     VERSION: Optional[str] = "1.0.0"
     API_V1_STR: Optional[str] = "/api/v1"
 
