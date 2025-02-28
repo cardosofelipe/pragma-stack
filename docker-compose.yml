@@ -21,6 +21,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: production
+    env_file:
+      - .env
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - SECRET_KEY=${SECRET_KEY}

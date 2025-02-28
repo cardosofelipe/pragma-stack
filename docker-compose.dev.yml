@@ -28,6 +28,8 @@ services:
       - backend_dev_modules:/app/.venv
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - SECRET_KEY=${SECRET_KEY}
