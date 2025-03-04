@@ -1,9 +1,18 @@
+import logging
+
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
-from app.config import settings
+from app.api.main import api_router
+from app.core.config import settings
 
+scheduler = AsyncIOScheduler()
+
+logger = logging.getLogger(__name__)
+
+logger.info(f"Starting app!!!")
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
@@ -34,3 +43,6 @@ async def root():
         </body>
     </html>
     """
+
+
+app.include_router(api_router, prefix=settings.API_V1_STR)
