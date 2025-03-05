@@ -23,14 +23,14 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED, operation_id="register")
 async def register_user(
         user_data: UserCreate,
         db: Session = Depends(get_db)
 ) -> Any:
     """
     Register a new user.
-    
+
     Returns:
         The created user information.
     """
@@ -51,14 +51,14 @@ async def register_user(
         )
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=Token, operation_id="login")
 async def login(
         login_data: LoginRequest,
         db: Session = Depends(get_db)
 ) -> Any:
     """
     Login with username and password.
-    
+
     Returns:
         Access and refresh tokens.
     """
@@ -100,14 +100,14 @@ async def login(
         )
 
 
-@router.post("/login/oauth", response_model=Token)
+@router.post("/login/oauth", response_model=Token, operation_id='login_oauth')
 async def login_oauth(
         form_data: OAuth2PasswordRequestForm = Depends(),
         db: Session = Depends(get_db)
 ) -> Any:
     """
     OAuth2-compatible login endpoint, used by the OpenAPI UI.
-    
+
     Returns:
         Access and refresh tokens.
     """
@@ -147,14 +147,14 @@ async def login_oauth(
         )
 
 
-@router.post("/refresh", response_model=Token)
+@router.post("/refresh", response_model=Token, operation_id="refresh_token")
 async def refresh_token(
         refresh_data: RefreshTokenRequest,
         db: Session = Depends(get_db)
 ) -> Any:
     """
     Refresh access token using a refresh token.
-    
+
     Returns:
         New access and refresh tokens.
     """
@@ -183,7 +183,7 @@ async def refresh_token(
         )
 
 
-@router.post("/change-password", status_code=status.HTTP_200_OK)
+@router.post("/change-password", status_code=status.HTTP_200_OK, operation_id="change_password")
 async def change_password(
         current_password: str = Body(..., embed=True),
         new_password: str = Body(..., embed=True),
@@ -192,7 +192,7 @@ async def change_password(
 ) -> Any:
     """
     Change current user's password.
-    
+
     Requires authentication.
     """
     try:
@@ -219,7 +219,7 @@ async def change_password(
         )
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me", response_model=UserResponse, operation_id="get_current_user_info")
 async def get_current_user_info(
         current_user: User = Depends(get_current_user)
 ) -> Any:
