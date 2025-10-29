@@ -2,8 +2,10 @@
 import logging
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Depends, HTTPException, status, Body, Request
 from fastapi.security import OAuth2PasswordRequestForm
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 from app.api.dependencies.auth import get_current_user
@@ -22,9 +24,14 @@ from app.services.auth_service import AuthService, AuthenticationError
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
+# Initialize limiter for this router
+limiter = Limiter(key_func=get_remote_address)
+
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED, operation_id="register")
+@limiter.limit("5/minute")
 async def register_user(
+        request: Request,
         user_data: UserCreate,
         db: Session = Depends(get_db)
 ) -> Any:
@@ -52,7 +59,9 @@ async def register_user(
 
 
 @router.post("/login", response_model=Token, operation_id="login")
+@limiter.limit("10/minute")
 async def login(
+        request: Request,
         login_data: LoginRequest,
         db: Session = Depends(get_db)
 ) -> Any:
@@ -101,7 +110,9 @@ async def login(
 
 
 @router.post("/login/oauth", response_model=Token, operation_id='login_oauth')
+@limiter.limit("10/minute")
 async def login_oauth(
+        request: Request,
         form_data: OAuth2PasswordRequestForm = Depends(),
         db: Session = Depends(get_db)
 ) -> Any:
@@ -148,7 +159,9 @@ async def login_oauth(
 
 
 @router.post("/refresh", response_model=Token, operation_id="refresh_token")
+@limiter.limit("30/minute")
 async def refresh_token(
+        request: Request,
         refresh_data: RefreshTokenRequest,
         db: Session = Depends(get_db)
 ) -> Any:
@@ -184,7 +197,9 @@ async def refresh_token(
 
 
 @router.post("/change-password", status_code=status.HTTP_200_OK, operation_id="change_password")
+@limiter.limit("5/minute")
 async def change_password(
+        request: Request,
         current_password: str = Body(..., embed=True),
         new_password: str = Body(..., embed=True),
         current_user: User = Depends(get_current_user),
@@ -220,7 +235,9 @@ async def change_password(
 
 
 @router.get("/me", response_model=UserResponse, operation_id="get_current_user_info")
+@limiter.limit("60/minute")
 async def get_current_user_info(
+        request: Request,
         current_user: User = Depends(get_current_user)
 ) -> Any:
     """

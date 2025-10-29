@@ -22,7 +22,6 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str = "5432"
     POSTGRES_DB: str = "app"
     DATABASE_URL: Optional[str] = None
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 60
     db_pool_size: int = 20  # Default connection pool size
     db_max_overflow: int = 50  # Maximum overflow connections
     db_pool_timeout: int = 30  # Seconds to wait for a connection
@@ -48,7 +47,7 @@ class Settings(BaseSettings):
 
     # JWT configuration
     SECRET_KEY: str = Field(
-        default="your_secret_key_here",
+        default="dev_only_insecure_key_change_in_production_32chars_min",
         min_length=32,
         description="JWT signing key. MUST be changed in production. Generate with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
     )
