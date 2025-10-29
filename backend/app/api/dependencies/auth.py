@@ -1,7 +1,8 @@
 from typing import Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.security.utils import get_authorization_scheme_param
 from sqlalchemy.orm import Session
 
 from app.core.auth import get_token_data, TokenExpiredError, TokenInvalidError
@@ -109,9 +110,32 @@ def get_current_superuser(
     return current_user
 
 
+async def get_optional_token(authorization: str = Header(None)) -> Optional[str]:
+    """
+    Get the token from the Authorization header without requiring it.
+
+    This is a custom dependency that doesn't raise an exception when no token is provided,
+    unlike the standard OAuth2PasswordBearer.
+
+    Args:
+        authorization: Authorization header value
+
+    Returns:
+        The token string if valid Bearer token is provided, None otherwise
+    """
+    if not authorization:
+        return None
+
+    scheme, token = get_authorization_scheme_param(authorization)
+    if scheme.lower() != "bearer":
+        return None
+
+    return token
+
+
 def get_optional_current_user(
         db: Session = Depends(get_db),
-        token: Optional[str] = Depends(oauth2_scheme)
+        token: Optional[str] = Depends(get_optional_token)
 ) -> Optional[User]:
     """
     Get the current user if authenticated, otherwise return None.

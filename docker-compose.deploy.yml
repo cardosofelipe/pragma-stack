@@ -1,0 +1,98 @@
+# Docker Compose configuration for DEPLOYMENT with pre-built images
+#
+# IMPORTANT: This configuration is designed for deployment scenarios where you have
+# already built and pushed your Docker images to a container registry.
+#
+# Since this is a template project, you'll need to:
+# 1. Build your images: docker-compose build
+# 2. Tag them appropriately: docker tag <image> <your-registry>/<your-project>:<tag>
+# 3. Push to your registry: docker push <your-registry>/<your-project>:<tag>
+# 4. Update the image references below to point to your registry
+#
+# Example registry paths:
+# - Docker Hub: username/project-backend:latest
+# - GitHub Container Registry: ghcr.io/username/project-backend:latest
+# - GitLab Registry: registry.gitlab.com/username/project/backend:latest
+# - Private Registry: registry.example.com/project-backend:latest
+
+services:
+  db:
+    image: postgres:17-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  backend:
+    # REPLACE THIS with your actual image from your container registry
+    # Examples:
+    #   image: ghcr.io/your-username/your-project-backend:latest
+    #   image: your-registry.com/your-project/backend:v1.0.0
+    #   image: username/your-project-backend:latest
+    image: YOUR_REGISTRY/YOUR_PROJECT_BACKEND:latest
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - ENVIRONMENT=production
+      - DEBUG=false
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    # Uncomment if you need persistent data storage for uploads, etc.
+    # volumes:
+    #   - ${HOST_DATA_FILES_DIR:-./data}:${DATA_FILES_DIR:-/app/data}
+
+  frontend:
+    # REPLACE THIS with your actual image from your container registry
+    # Examples:
+    #   image: ghcr.io/your-username/your-project-frontend:latest
+    #   image: your-registry.com/your-project/frontend:v1.0.0
+    #   image: username/your-project-frontend:latest
+    image: YOUR_REGISTRY/YOUR_PROJECT_FRONTEND:latest
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # Optional: Add a reverse proxy like nginx or traefik here
+  # nginx:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - frontend
+  #     - backend
+  #   networks:
+  #     - app-network
+  #   restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
