@@ -1,11 +1,19 @@
 from pydantic_settings import BaseSettings
 from typing import Optional, List
+from pydantic import Field, field_validator
+import logging
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "EventSpace"
+    PROJECT_NAME: str = "App"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
+
+    # Environment (must be before SECRET_KEY for validation)
+    ENVIRONMENT: str = Field(
+        default="development",
+        description="Environment: development, staging, or production"
+    )
 
     # Database configuration
     POSTGRES_USER: str = "postgres"
@@ -39,21 +47,90 @@ class Settings(BaseSettings):
         return self.DATABASE_URL
 
     # JWT configuration
-    SECRET_KEY: str = "your_secret_key_here"
+    SECRET_KEY: str = Field(
+        default="your_secret_key_here",
+        min_length=32,
+        description="JWT signing key. MUST be changed in production. Generate with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+    )
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440 # 1 day
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15  # 15 minutes (production standard)
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7  # 7 days
 
     # CORS configuration
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000"]
 
     # Admin user
-    FIRST_SUPERUSER_EMAIL: Optional[str] = None
-    FIRST_SUPERUSER_PASSWORD: Optional[str] = None
+    FIRST_SUPERUSER_EMAIL: Optional[str] = Field(
+        default=None,
+        description="Email for first superuser account"
+    )
+    FIRST_SUPERUSER_PASSWORD: Optional[str] = Field(
+        default=None,
+        description="Password for first superuser (min 12 characters)"
+    )
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
+    @field_validator('SECRET_KEY')
+    @classmethod
+    def validate_secret_key(cls, v: str, info) -> str:
+        """Validate SECRET_KEY is secure, especially in production."""
+        # Get environment from values if available
+        values_data = info.data if info.data else {}
+        env = values_data.get('ENVIRONMENT', 'development')
+
+        if v.startswith("your_secret_key_here"):
+            if env == "production":
+                raise ValueError(
+                    "SECRET_KEY must be set to a secure random value in production. "
+                    "Generate one with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+                )
+            # Warn in development but allow
+            logger = logging.getLogger(__name__)
+            logger.warning(
+                "⚠️  Using default SECRET_KEY. This is ONLY acceptable in development. "
+                "Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+            )
+
+        if len(v) < 32:
+            raise ValueError("SECRET_KEY must be at least 32 characters long for security")
+
+        return v
+
+    @field_validator('FIRST_SUPERUSER_PASSWORD')
+    @classmethod
+    def validate_superuser_password(cls, v: Optional[str]) -> Optional[str]:
+        """Validate superuser password strength."""
+        if v is None:
+            return v
+
+        if len(v) < 12:
+            raise ValueError("FIRST_SUPERUSER_PASSWORD must be at least 12 characters")
+
+        # Check for common weak passwords
+        weak_passwords = {'admin123', 'Admin123', 'password123', 'Password123', '123456789012'}
+        if v in weak_passwords:
+            raise ValueError(
+                "FIRST_SUPERUSER_PASSWORD is too weak. "
+                "Use a strong, unique password with mixed case, numbers, and symbols."
+            )
+
+        # Basic strength check
+        has_lower = any(c.islower() for c in v)
+        has_upper = any(c.isupper() for c in v)
+        has_digit = any(c.isdigit() for c in v)
+
+        if not (has_lower and has_upper and has_digit):
+            raise ValueError(
+                "FIRST_SUPERUSER_PASSWORD must contain lowercase, uppercase, and digits"
+            )
+
+        return v
+
+    model_config = {
+        "env_file": "../.env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": True,
+        "extra": "ignore"  # Ignore extra fields from .env (e.g., frontend-specific vars)
+    }
 
 
 settings = Settings()
