@@ -13,17 +13,10 @@ from app.core.database import get_db
 @pytest.fixture
 def client():
     """Create a FastAPI test client for the main app with mocked database."""
-    # Mock get_db to avoid connecting to the actual database
-    with patch("app.main.get_db") as mock_get_db:
-        def mock_session_generator():
-            mock_session = MagicMock()
-            # Mock the execute method to return successfully
-            mock_session.execute.return_value = None
-            mock_session.close.return_value = None
-            yield mock_session
-
-        # Return a new generator each time get_db is called
-        mock_get_db.side_effect = lambda: mock_session_generator()
+    # Mock check_database_health to avoid connecting to the actual database
+    with patch("app.main.check_database_health") as mock_health_check:
+        # By default, return True (healthy)
+        mock_health_check.return_value = True
         yield TestClient(app)
 
 
@@ -90,23 +83,14 @@ class TestHealthEndpoint:
 
         assert data["environment"] == settings.ENVIRONMENT
 
-    def test_health_check_database_connection_failure(self, client):
+    def test_health_check_database_connection_failure(self):
         """Test that health check returns unhealthy when database is not accessible"""
-        # Mock the database session to raise an exception
-        with patch("app.main.get_db") as mock_get_db:
-            def mock_session():
-                from unittest.mock import MagicMock
-                mock = MagicMock()
-                mock.execute.side_effect = OperationalError(
-                    "Connection refused",
-                    params=None,
-                    orig=Exception("Connection refused")
-                )
-                yield mock
+        # Mock check_database_health to return False (unhealthy)
+        with patch("app.main.check_database_health") as mock_health_check:
+            mock_health_check.return_value = False
 
-            mock_get_db.return_value = mock_session()
-
-            response = client.get("/health")
+            test_client = TestClient(app)
+            response = test_client.get("/health")
 
             assert response.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
             data = response.json()

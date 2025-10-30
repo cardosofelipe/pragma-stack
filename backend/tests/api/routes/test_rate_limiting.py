@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 
 from app.api.routes.auth import router as auth_router, limiter
+from app.api.routes.users import router as users_router
 from app.core.database import get_db
 
 
@@ -26,6 +27,7 @@ def app(override_get_db):
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
+    app.include_router(users_router, prefix="/api/v1/users", tags=["users"])
 
     # Override the get_db dependency
     app.dependency_overrides[get_db] = lambda: override_get_db
@@ -159,10 +161,10 @@ class TestChangePasswordRateLimiting:
                 "new_password": "NewPassword123!"
             }
 
-            # Make 6 requests (limit is 5/minute)
+            # Make 6 requests (limit is 5/minute) - using new endpoint
             responses = []
             for i in range(6):
-                response = client.post("/auth/change-password", json=password_data)
+                response = client.patch("/api/v1/users/me/password", json=password_data)
                 responses.append(response)
 
             # Last request should be rate limited

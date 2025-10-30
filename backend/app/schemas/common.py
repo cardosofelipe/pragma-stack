@@ -1,12 +1,19 @@
 """
-Common schemas used across the API for pagination, responses, etc.
+Common schemas used across the API for pagination, responses, filtering, and sorting.
 """
 from typing import Generic, TypeVar, List, Optional
+from enum import Enum
 from pydantic import BaseModel, Field
 from math import ceil
 
 
 T = TypeVar('T')
+
+
+class SortOrder(str, Enum):
+    """Sort order options."""
+    ASC = "asc"
+    DESC = "desc"
 
 
 class PaginationParams(BaseModel):
@@ -39,6 +46,28 @@ class PaginationParams(BaseModel):
             "example": {
                 "page": 1,
                 "limit": 20
+            }
+        }
+    }
+
+
+class SortParams(BaseModel):
+    """Parameters for sorting."""
+
+    sort_by: Optional[str] = Field(
+        default=None,
+        description="Field name to sort by"
+    )
+    sort_order: SortOrder = Field(
+        default=SortOrder.ASC,
+        description="Sort order (asc or desc)"
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "sort_by": "created_at",
+                "sort_order": "desc"
             }
         }
     }

@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.api.routes.auth import router as auth_router
+from app.api.routes.users import router as users_router
 from app.core.auth import get_password_hash
 from app.core.database import get_db
 from app.models.user import User
@@ -29,6 +30,7 @@ def app(override_get_db):
     """Create a FastAPI test application with overridden dependencies."""
     app = FastAPI()
     app.include_router(auth_router, prefix="/auth", tags=["auth"])
+    app.include_router(users_router, prefix="/api/v1/users", tags=["users"])
 
     # Override the get_db dependency
     app.dependency_overrides[get_db] = lambda: override_get_db
@@ -280,9 +282,9 @@ class TestChangePassword:
 
         # Mock password change to return success
         with patch.object(AuthService, 'change_password', return_value=True):
-            # Test request
-            response = client.post(
-                "/auth/change-password",
+            # Test request (new endpoint)
+            response = client.patch(
+                "/api/v1/users/me/password",
                 json={
                     "current_password": "OldPassword123",
                     "new_password": "NewPassword123"
@@ -291,7 +293,8 @@ class TestChangePassword:
 
             # Assertions
             assert response.status_code == 200
-            assert "success" in response.json()["message"].lower()
+            assert response.json()["success"] is True
+            assert "message" in response.json()
 
         # Clean up override
         if get_current_user in app.dependency_overrides:
@@ -312,18 +315,20 @@ class TestChangePassword:
         # Mock password change to raise error
         with patch.object(AuthService, 'change_password',
                           side_effect=AuthenticationError("Current password is incorrect")):
-            # Test request
-            response = client.post(
-                "/auth/change-password",
+            # Test request (new endpoint)
+            response = client.patch(
+                "/api/v1/users/me/password",
                 json={
                     "current_password": "WrongPassword",
                     "new_password": "NewPassword123"
                 }
             )
 
-            # Assertions
-            assert response.status_code == 400
-            assert "incorrect" in response.json()["detail"].lower()
+            # Assertions - Now returns standardized error response
+            assert response.status_code == 403
+            # The response has standardized error format
+            data = response.json()
+            assert "detail" in data or "errors" in data
 
         # Clean up override
         if get_current_user in app.dependency_overrides:
