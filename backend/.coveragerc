@@ -1,0 +1,68 @@
+[run]
+source = app
+omit =
+    # Migration files - these are generated code and shouldn't be tested
+    app/alembic/versions/*
+    app/alembic/env.py
+
+    # Test utilities - these are used BY tests, not tested themselves
+    app/utils/test_utils.py
+    app/utils/auth_test_utils.py
+
+    # Async implementations not yet in use
+    app/crud/base_async.py
+    app/core/database_async.py
+
+    # __init__ files with no logic
+    app/__init__.py
+    app/api/__init__.py
+    app/api/routes/__init__.py
+    app/api/dependencies/__init__.py
+    app/core/__init__.py
+    app/crud/__init__.py
+    app/models/__init__.py
+    app/schemas/__init__.py
+    app/services/__init__.py
+    app/utils/__init__.py
+    app/alembic/__init__.py
+    app/alembic/versions/__init__.py
+
+[report]
+# Show missing lines in the report
+show_missing = True
+
+# Exclude lines with these patterns
+exclude_lines =
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code
+    def __repr__
+    def __str__
+
+    # Don't complain if tests don't hit defensive assertion code
+    raise AssertionError
+    raise NotImplementedError
+
+    # Don't complain if non-runnable code isn't run
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+
+    # Don't complain about abstract methods
+    @abstractmethod
+    @abc.abstractmethod
+
+    # Don't complain about ellipsis in protocols/stubs
+    \.\.\.
+
+    # Don't complain about logger debug statements in production
+    logger\.debug
+
+    # Pass statements (often in abstract base classes or placeholders)
+    pass
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml
