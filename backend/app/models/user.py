@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean
+from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.dialects.postgresql import JSONB
 
 from .base import Base, TimestampMixin, UUIDMixin
@@ -15,6 +15,7 @@ class User(Base, UUIDMixin, TimestampMixin):
     is_active = Column(Boolean, default=True, nullable=False, index=True)
     is_superuser = Column(Boolean, default=False, nullable=False, index=True)
     preferences = Column(JSONB)
+    deleted_at = Column(DateTime(timezone=True), nullable=True, index=True)
 
     def __repr__(self):
         return f"<User {self.email}>"

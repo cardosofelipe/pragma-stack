@@ -2,7 +2,7 @@
 User management endpoints for CRUD operations.
 """
 import logging
-from typing import Any
+from typing import Any, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status, Request
@@ -19,9 +19,10 @@ from app.schemas.common import (
     PaginationParams,
     PaginatedResponse,
     MessageResponse,
+    SortParams,
     create_pagination_meta
 )
-from app.services.auth_service import AuthService
+from app.services.auth_service import AuthService, AuthenticationError
 from app.core.exceptions import (
     NotFoundError,
     AuthorizationError,
@@ -39,10 +40,13 @@ limiter = Limiter(key_func=get_remote_address)
     response_model=PaginatedResponse[UserResponse],
     summary="List Users",
     description="""
-    List all users with pagination (admin only).
+    List all users with pagination, filtering, and sorting (admin only).
 
     **Authentication**: Required (Bearer token)
     **Authorization**: Superuser only
+
+    **Filtering**: is_active, is_superuser
+    **Sorting**: Any user field (email, first_name, last_name, created_at, etc.)
 
     **Rate Limit**: 60 requests/minute
     """,
@@ -50,20 +54,33 @@ limiter = Limiter(key_func=get_remote_address)
 )
 def list_users(
     pagination: PaginationParams = Depends(),
+    sort: SortParams = Depends(),
+    is_active: Optional[bool] = Query(None, description="Filter by active status"),
+    is_superuser: Optional[bool] = Query(None, description="Filter by superuser status"),
     current_user: User = Depends(get_current_superuser),
     db: Session = Depends(get_db)
 ) -> Any:
     """
-    List all users with pagination.
+    List all users with pagination, filtering, and sorting.
 
     Only accessible by superusers.
     """
     try:
+        # Build filters
+        filters = {}
+        if is_active is not None:
+            filters["is_active"] = is_active
+        if is_superuser is not None:
+            filters["is_superuser"] = is_superuser
+
         # Get paginated users with total count
         users, total = user_crud.get_multi_with_total(
             db,
             skip=pagination.offset,
-            limit=pagination.limit
+            limit=pagination.limit,
+            sort_by=sort.sort_by,
+            sort_order=sort.sort_order.value if sort.sort_order else "asc",
+            filters=filters if filters else None
         )
 
         # Create pagination metadata
@@ -129,7 +146,7 @@ def update_current_user(
     Users cannot elevate their own permissions (is_superuser).
     """
     # Prevent users from making themselves superuser
-    if user_update.is_superuser is not None:
+    if getattr(user_update, 'is_superuser', None) is not None:
         logger.warning(f"User {current_user.id} attempted to modify is_superuser field")
         raise AuthorizationError(
             message="Cannot modify superuser status",
@@ -248,7 +265,7 @@ def update_user(
         )
 
     # Prevent non-superusers from modifying superuser status
-    if user_update.is_superuser is not None and not current_user.is_superuser:
+    if getattr(user_update, 'is_superuser', None) is not None and not current_user.is_superuser:
         logger.warning(f"User {current_user.id} attempted to modify is_superuser field")
         raise AuthorizationError(
             message="Cannot modify superuser status",
@@ -308,6 +325,12 @@ def change_current_user_password(
                 success=True,
                 message="Password changed successfully"
             )
+    except AuthenticationError as e:
+        logger.warning(f"Failed password change attempt for user {current_user.id}: {str(e)}")
+        raise AuthorizationError(
+            message=str(e),
+            error_code=ErrorCode.INVALID_CREDENTIALS
+        )
     except Exception as e:
         logger.error(f"Error changing password for user {current_user.id}: {str(e)}")
         raise
@@ -356,8 +379,9 @@ def delete_user(
         )
 
     try:
-        user_crud.remove(db, id=str(user_id))
-        logger.info(f"User {user_id} deleted by {current_user.id}")
+        # Use soft delete instead of hard delete
+        user_crud.soft_delete(db, id=str(user_id))
+        logger.info(f"User {user_id} soft-deleted by {current_user.id}")
         return MessageResponse(
             success=True,
             message=f"User {user_id} deleted successfully"
