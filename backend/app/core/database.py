@@ -1,8 +1,10 @@
 # app/core/database.py
 import logging
-from sqlalchemy import create_engine
+from contextlib import contextmanager
+from typing import Generator
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 
@@ -49,12 +51,62 @@ def create_production_engine():
 
 # Default production engine and session factory
 engine = create_production_engine()
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine,
+    expire_on_commit=False  # Prevent unnecessary queries after commit
+)
 
 # FastAPI dependency
-def get_db():
+def get_db() -> Generator[Session, None, None]:
+    """
+    FastAPI dependency that provides a database session.
+    Automatically closes the session after the request completes.
+    """
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+
+@contextmanager
+def transaction_scope() -> Generator[Session, None, None]:
+    """
+    Provide a transactional scope for database operations.
+
+    Automatically commits on success or rolls back on exception.
+    Useful for grouping multiple operations in a single transaction.
+
+    Usage:
+        with transaction_scope() as db:
+            user = user_crud.create(db, obj_in=user_create)
+            profile = profile_crud.create(db, obj_in=profile_create)
+            # Both operations committed together
+    """
+    db = SessionLocal()
+    try:
+        yield db
+        db.commit()
+        logger.debug("Transaction committed successfully")
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Transaction failed, rolling back: {str(e)}")
+        raise
+    finally:
+        db.close()
+
+
+def check_database_health() -> bool:
+    """
+    Check if database connection is healthy.
+    Returns True if connection is successful, False otherwise.
+    """
+    try:
+        with transaction_scope() as db:
+            db.execute(text("SELECT 1"))
+        return True
+    except Exception as e:
+        logger.error(f"Database health check failed: {str(e)}")
+        return False

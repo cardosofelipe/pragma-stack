@@ -3,9 +3,10 @@ from datetime import datetime
 from typing import Dict, Any
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import FastAPI, status, Request
+from fastapi import FastAPI, status, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.exceptions import RequestValidationError
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -13,7 +14,14 @@ from sqlalchemy import text
 
 from app.api.main import api_router
 from app.core.config import settings
-from app.core.database import get_db
+from app.core.database import get_db, check_database_health
+from app.core.exceptions import (
+    APIException,
+    api_exception_handler,
+    validation_exception_handler,
+    http_exception_handler,
+    unhandled_exception_handler
+)
 
 scheduler = AsyncIOScheduler()
 
@@ -33,13 +41,30 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Set up CORS middleware
+# Register custom exception handlers (order matters - most specific first)
+app.add_exception_handler(APIException, api_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(Exception, unhandled_exception_handler)
+
+# Set up CORS middleware with explicit allowed methods and headers
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],  # Explicit methods only
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "Accept",
+        "Origin",
+        "User-Agent",
+        "DNT",
+        "Cache-Control",
+        "X-Requested-With",
+    ],  # Explicit headers only
+    expose_headers=["Content-Length"],
+    max_age=600,  # Cache preflight requests for 10 minutes
 )
 
 
@@ -120,15 +145,16 @@ async def health_check() -> JSONResponse:
 
     response_status = status.HTTP_200_OK
 
-    # Database health check
+    # Database health check using dedicated health check function
     try:
-        db = next(get_db())
-        db.execute(text("SELECT 1"))
-        health_status["checks"]["database"] = {
-            "status": "healthy",
-            "message": "Database connection successful"
-        }
-        db.close()
+        db_healthy = check_database_health()
+        if db_healthy:
+            health_status["checks"]["database"] = {
+                "status": "healthy",
+                "message": "Database connection successful"
+            }
+        else:
+            raise Exception("Database health check returned unhealthy status")
     except Exception as e:
         health_status["status"] = "unhealthy"
         health_status["checks"]["database"] = {

@@ -196,44 +196,6 @@ async def refresh_token(
         )
 
 
-@router.post("/change-password", status_code=status.HTTP_200_OK, operation_id="change_password")
-@limiter.limit("5/minute")
-async def change_password(
-        request: Request,
-        current_password: str = Body(..., embed=True),
-        new_password: str = Body(..., embed=True),
-        current_user: User = Depends(get_current_user),
-        db: Session = Depends(get_db)
-) -> Any:
-    """
-    Change current user's password.
-
-    Requires authentication.
-    """
-    try:
-        success = AuthService.change_password(
-            db=db,
-            user_id=current_user.id,
-            current_password=current_password,
-            new_password=new_password
-        )
-
-        if success:
-            return {"message": "Password changed successfully"}
-    except AuthenticationError as e:
-        logger.warning(f"Password change failed: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
-    except Exception as e:
-        logger.error(f"Unexpected error during password change: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred. Please try again later."
-        )
-
-
 @router.get("/me", response_model=UserResponse, operation_id="get_current_user_info")
 @limiter.limit("60/minute")
 async def get_current_user_info(
