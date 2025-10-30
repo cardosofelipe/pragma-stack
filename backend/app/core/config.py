@@ -58,6 +58,12 @@ class Settings(BaseSettings):
     # CORS configuration
     BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000"]
 
+    # Frontend URL for email links
+    FRONTEND_URL: str = Field(
+        default="http://localhost:3000",
+        description="Frontend application URL for email links"
+    )
+
     # Admin user
     FIRST_SUPERUSER_EMAIL: Optional[str] = Field(
         default=None,

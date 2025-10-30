@@ -17,9 +17,16 @@ from app.schemas.users import (
     UserResponse,
     Token,
     LoginRequest,
-    RefreshTokenRequest
+    RefreshTokenRequest,
+    PasswordResetRequest,
+    PasswordResetConfirm
 )
+from app.schemas.common import MessageResponse
 from app.services.auth_service import AuthService, AuthenticationError
+from app.services.email_service import email_service
+from app.utils.security import create_password_reset_token, verify_password_reset_token
+from app.crud.user import user as user_crud
+from app.core.auth import get_password_hash
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -204,7 +211,139 @@ async def get_current_user_info(
 ) -> Any:
     """
     Get current user information.
-    
+
     Requires authentication.
     """
     return current_user
+
+
+@router.post(
+    "/password-reset/request",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Request Password Reset",
+    description="""
+    Request a password reset link.
+
+    An email will be sent with a reset link if the email exists.
+    Always returns success to prevent email enumeration.
+
+    **Rate Limit**: 3 requests/minute
+    """,
+    operation_id="request_password_reset"
+)
+@limiter.limit("3/minute")
+async def request_password_reset(
+    request: Request,
+    reset_request: PasswordResetRequest,
+    db: Session = Depends(get_db)
+) -> Any:
+    """
+    Request a password reset.
+
+    Sends an email with a password reset link.
+    Always returns success to prevent email enumeration.
+    """
+    try:
+        # Look up user by email
+        user = user_crud.get_by_email(db, email=reset_request.email)
+
+        # Only send email if user exists and is active
+        if user and user.is_active:
+            # Generate reset token
+            reset_token = create_password_reset_token(user.email)
+
+            # Send password reset email
+            await email_service.send_password_reset_email(
+                to_email=user.email,
+                reset_token=reset_token,
+                user_name=user.first_name
+            )
+            logger.info(f"Password reset requested for {user.email}")
+        else:
+            # Log attempt but don't reveal if email exists
+            logger.warning(f"Password reset requested for non-existent or inactive email: {reset_request.email}")
+
+        # Always return success to prevent email enumeration
+        return MessageResponse(
+            success=True,
+            message="If your email is registered, you will receive a password reset link shortly"
+        )
+    except Exception as e:
+        logger.error(f"Error processing password reset request: {str(e)}", exc_info=True)
+        # Still return success to prevent information leakage
+        return MessageResponse(
+            success=True,
+            message="If your email is registered, you will receive a password reset link shortly"
+        )
+
+
+@router.post(
+    "/password-reset/confirm",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Confirm Password Reset",
+    description="""
+    Reset password using a token from email.
+
+    **Rate Limit**: 5 requests/minute
+    """,
+    operation_id="confirm_password_reset"
+)
+@limiter.limit("5/minute")
+def confirm_password_reset(
+    request: Request,
+    reset_confirm: PasswordResetConfirm,
+    db: Session = Depends(get_db)
+) -> Any:
+    """
+    Confirm password reset with token.
+
+    Verifies the token and updates the user's password.
+    """
+    try:
+        # Verify the reset token
+        email = verify_password_reset_token(reset_confirm.token)
+
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired password reset token"
+            )
+
+        # Look up user
+        user = user_crud.get_by_email(db, email=email)
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User account is inactive"
+            )
+
+        # Update password
+        user.password_hash = get_password_hash(reset_confirm.new_password)
+        db.add(user)
+        db.commit()
+
+        logger.info(f"Password reset successful for {user.email}")
+
+        return MessageResponse(
+            success=True,
+            message="Password has been reset successfully. You can now log in with your new password."
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error confirming password reset: {str(e)}", exc_info=True)
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while resetting your password"
+        )

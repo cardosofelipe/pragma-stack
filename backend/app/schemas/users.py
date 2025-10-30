@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, Dict, Any
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
+from pydantic import BaseModel, EmailStr, field_validator, ConfigDict, Field
 
 
 class UserBase(BaseModel):
@@ -166,3 +166,43 @@ class LoginRequest(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+
+
+class PasswordResetRequest(BaseModel):
+    """Schema for requesting a password reset."""
+    email: EmailStr = Field(..., description="Email address of the account")
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "email": "user@example.com"
+            }
+        }
+    }
+
+
+class PasswordResetConfirm(BaseModel):
+    """Schema for confirming a password reset with token."""
+    token: str = Field(..., description="Password reset token from email")
+    new_password: str = Field(..., min_length=8, description="New password")
+
+    @field_validator('new_password')
+    @classmethod
+    def password_strength(cls, v: str) -> str:
+        """Basic password strength validation"""
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters')
+        if not any(char.isdigit() for char in v):
+            raise ValueError('Password must contain at least one digit')
+        if not any(char.isupper() for char in v):
+            raise ValueError('Password must contain at least one uppercase letter')
+        return v
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "token": "eyJwYXlsb2FkIjp7ImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImV4cCI6MTcxMjM0NTY3OH19",
+                "new_password": "NewSecurePassword123"
+            }
+        }
+    }
