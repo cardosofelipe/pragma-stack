@@ -8,7 +8,14 @@ import json
 import pytest
 from unittest.mock import patch, MagicMock
 
-from app.utils.security import create_upload_token, verify_upload_token
+from app.utils.security import (
+    create_upload_token,
+    verify_upload_token,
+    create_password_reset_token,
+    verify_password_reset_token,
+    create_email_verification_token,
+    verify_email_verification_token
+)
 
 
 class TestCreateUploadToken:
@@ -231,3 +238,189 @@ class TestVerifyUploadToken:
     # The signature validation is already tested by test_verify_invalid_signature
     # and test_verify_tampered_payload. Testing with different SECRET_KEY
     # requires complex mocking that can interfere with other tests.
+
+
+class TestPasswordResetTokens:
+    """Tests for password reset token functions."""
+
+    def test_create_password_reset_token(self):
+        """Test creating a password reset token."""
+        email = "user@example.com"
+        token = create_password_reset_token(email)
+
+        assert token is not None
+        assert isinstance(token, str)
+        assert len(token) > 0
+
+    def test_verify_password_reset_token_valid(self):
+        """Test verifying a valid password reset token."""
+        email = "user@example.com"
+        token = create_password_reset_token(email)
+
+        verified_email = verify_password_reset_token(token)
+
+        assert verified_email == email
+
+    def test_verify_password_reset_token_expired(self):
+        """Test that expired password reset tokens are rejected."""
+        email = "user@example.com"
+
+        # Create token that expires in 1 second
+        with patch('app.utils.security.time') as mock_time:
+            mock_time.time = MagicMock(return_value=1000000)
+            token = create_password_reset_token(email, expires_in=1)
+
+            # Fast forward time
+            mock_time.time.return_value = 1000002
+
+            verified_email = verify_password_reset_token(token)
+            assert verified_email is None
+
+    def test_verify_password_reset_token_invalid(self):
+        """Test that invalid tokens are rejected."""
+        assert verify_password_reset_token("invalid_token") is None
+        assert verify_password_reset_token("") is None
+
+    def test_verify_password_reset_token_tampered(self):
+        """Test that tampered tokens are rejected."""
+        email = "user@example.com"
+        token = create_password_reset_token(email)
+
+        # Decode and tamper
+        decoded = base64.urlsafe_b64decode(token.encode('utf-8')).decode('utf-8')
+        token_data = json.loads(decoded)
+        token_data["payload"]["email"] = "hacker@example.com"
+
+        # Re-encode
+        tampered = base64.urlsafe_b64encode(json.dumps(token_data).encode('utf-8')).decode('utf-8')
+
+        verified_email = verify_password_reset_token(tampered)
+        assert verified_email is None
+
+    def test_verify_password_reset_token_wrong_purpose(self):
+        """Test that email verification tokens can't be used for password reset."""
+        email = "user@example.com"
+        # Create an email verification token
+        token = create_email_verification_token(email)
+
+        # Try to verify as password reset token
+        verified_email = verify_password_reset_token(token)
+        assert verified_email is None
+
+    def test_password_reset_token_custom_expiration(self):
+        """Test password reset token with custom expiration."""
+        email = "user@example.com"
+        custom_exp = 7200  # 2 hours
+
+        with patch('app.utils.security.time') as mock_time:
+            current_time = 1000000
+            mock_time.time = MagicMock(return_value=current_time)
+
+            token = create_password_reset_token(email, expires_in=custom_exp)
+
+            # Decode to check expiration
+            decoded = base64.urlsafe_b64decode(token.encode('utf-8')).decode('utf-8')
+            token_data = json.loads(decoded)
+
+            assert token_data["payload"]["exp"] == current_time + custom_exp
+
+
+class TestEmailVerificationTokens:
+    """Tests for email verification token functions."""
+
+    def test_create_email_verification_token(self):
+        """Test creating an email verification token."""
+        email = "user@example.com"
+        token = create_email_verification_token(email)
+
+        assert token is not None
+        assert isinstance(token, str)
+        assert len(token) > 0
+
+    def test_verify_email_verification_token_valid(self):
+        """Test verifying a valid email verification token."""
+        email = "user@example.com"
+        token = create_email_verification_token(email)
+
+        verified_email = verify_email_verification_token(token)
+
+        assert verified_email == email
+
+    def test_verify_email_verification_token_expired(self):
+        """Test that expired verification tokens are rejected."""
+        email = "user@example.com"
+
+        with patch('app.utils.security.time') as mock_time:
+            mock_time.time = MagicMock(return_value=1000000)
+            token = create_email_verification_token(email, expires_in=1)
+
+            # Fast forward time
+            mock_time.time.return_value = 1000002
+
+            verified_email = verify_email_verification_token(token)
+            assert verified_email is None
+
+    def test_verify_email_verification_token_invalid(self):
+        """Test that invalid tokens are rejected."""
+        assert verify_email_verification_token("invalid_token") is None
+        assert verify_email_verification_token("") is None
+
+    def test_verify_email_verification_token_tampered(self):
+        """Test that tampered verification tokens are rejected."""
+        email = "user@example.com"
+        token = create_email_verification_token(email)
+
+        # Decode and tamper
+        decoded = base64.urlsafe_b64decode(token.encode('utf-8')).decode('utf-8')
+        token_data = json.loads(decoded)
+        token_data["payload"]["email"] = "hacker@example.com"
+
+        # Re-encode
+        tampered = base64.urlsafe_b64encode(json.dumps(token_data).encode('utf-8')).decode('utf-8')
+
+        verified_email = verify_email_verification_token(tampered)
+        assert verified_email is None
+
+    def test_verify_email_verification_token_wrong_purpose(self):
+        """Test that password reset tokens can't be used for email verification."""
+        email = "user@example.com"
+        # Create a password reset token
+        token = create_password_reset_token(email)
+
+        # Try to verify as email verification token
+        verified_email = verify_email_verification_token(token)
+        assert verified_email is None
+
+    def test_email_verification_token_default_expiration(self):
+        """Test email verification token with default 24-hour expiration."""
+        email = "user@example.com"
+
+        with patch('app.utils.security.time') as mock_time:
+            current_time = 1000000
+            mock_time.time = MagicMock(return_value=current_time)
+
+            token = create_email_verification_token(email)
+
+            # Decode to check expiration (should be 86400 seconds = 24 hours)
+            decoded = base64.urlsafe_b64decode(token.encode('utf-8')).decode('utf-8')
+            token_data = json.loads(decoded)
+
+            assert token_data["payload"]["exp"] == current_time + 86400
+
+    def test_tokens_are_unique(self):
+        """Test that multiple tokens for the same email are unique."""
+        email = "user@example.com"
+
+        token1 = create_password_reset_token(email)
+        token2 = create_password_reset_token(email)
+
+        assert token1 != token2
+
+    def test_verification_and_reset_tokens_are_different(self):
+        """Test that verification and reset tokens for same email are different."""
+        email = "user@example.com"
+
+        reset_token = create_password_reset_token(email)
+        verify_token = create_email_verification_token(email)
+
+        assert reset_token != verify_token
