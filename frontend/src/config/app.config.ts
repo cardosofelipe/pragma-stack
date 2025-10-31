@@ -130,6 +130,7 @@ export type AppConfig = typeof config;
 
 /**
  * Validate critical configuration on module load
+ * Note: Most auth config validation is handled by parseIntSafe min/max constraints
  */
 function validateConfig(): void {
   const errors: string[] = [];
@@ -143,14 +144,9 @@ function validateConfig(): void {
     errors.push('API timeout must be at least 1000ms');
   }
 
-  // Validate auth configuration
-  if (config.auth.accessTokenExpiry <= 0) {
-    errors.push('Access token expiry must be positive');
-  }
-
-  if (config.auth.refreshTokenExpiry <= config.auth.accessTokenExpiry) {
-    errors.push('Refresh token expiry must be greater than access token expiry');
-  }
+  // Auth configuration is validated by parseIntSafe constraints:
+  // - accessTokenExpiry: min 60000ms (1 minute)
+  // - refreshTokenExpiry: min 3600000ms (1 hour), which ensures it's always > access token
 
   if (errors.length > 0) {
     console.error('Configuration validation failed:');

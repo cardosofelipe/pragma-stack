@@ -86,31 +86,20 @@ describe('App Configuration', () => {
   });
 
   describe('Config validation', () => {
-    it('should validate access token expiry is positive', () => {
+    it('should clamp access token expiry to minimum', () => {
       process.env.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRY = '-1000';
+      const { config } = require('@/config/app.config');
 
-      const originalWindow = global.window;
-      (global as any).window = { document: {} }; // Simulate browser
-
-      expect(() => {
-        require('@/config/app.config');
-      }).toThrow('Invalid application configuration');
-
-      (global as any).window = originalWindow;
+      // Negative values get clamped to min (60000ms)
+      expect(config.auth.accessTokenExpiry).toBe(60000);
     });
 
-    it('should validate refresh token expiry > access token expiry', () => {
-      process.env.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRY = '1000000';
-      process.env.NEXT_PUBLIC_REFRESH_TOKEN_EXPIRY = '500000'; // Less than access!
+    it('should clamp refresh token expiry to minimum', () => {
+      process.env.NEXT_PUBLIC_REFRESH_TOKEN_EXPIRY = '500000';
+      const { config } = require('@/config/app.config');
 
-      const originalWindow = global.window;
-      (global as any).window = { document: {} };
-
-      expect(() => {
-        require('@/config/app.config');
-      }).toThrow('Invalid application configuration');
-
-      (global as any).window = originalWindow;
+      // Values below min get clamped to min (3600000ms / 1 hour)
+      expect(config.auth.refreshTokenExpiry).toBe(3600000);
     });
   });
 

@@ -89,8 +89,8 @@ describe('Storage Module', () => {
 
       const result = await getTokens();
 
-      // Should still return the object (validation is minimal)
-      expect(result).toEqual({ accessToken: 'only_access' });
+      // Should reject incomplete tokens and return null
+      expect(result).toBeNull();
     });
   });
 
@@ -133,7 +133,8 @@ describe('Storage Module', () => {
         refreshToken: 'test.refresh.token',
       };
 
-      await expect(saveTokens(tokens)).rejects.toThrow('Token storage failed');
+      // When setItem throws, isLocalStorageAvailable() returns false
+      await expect(saveTokens(tokens)).rejects.toThrow('localStorage not available - cannot save tokens');
 
       Storage.prototype.setItem = originalSetItem;
     });
