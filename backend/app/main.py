@@ -14,7 +14,7 @@ from sqlalchemy import text
 
 from app.api.main import api_router
 from app.core.config import settings
-from app.core.database import get_db, check_database_health
+from app.core.database_async import check_database_health
 from app.core.exceptions import (
     APIException,
     api_exception_handler,
@@ -218,7 +218,7 @@ async def health_check() -> JSONResponse:
 
     # Database health check using dedicated health check function
     try:
-        db_healthy = check_database_health()
+        db_healthy = await check_database_health()
         if db_healthy:
             health_status["checks"]["database"] = {
                 "status": "healthy",

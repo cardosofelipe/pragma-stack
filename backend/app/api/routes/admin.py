@@ -11,13 +11,13 @@ from uuid import UUID
 from enum import Enum
 
 from fastapi import APIRouter, Depends, Query, Body, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from app.api.dependencies.permissions import require_superuser
-from app.core.database import get_db
-from app.crud.user import user as user_crud
-from app.crud.organization import organization as organization_crud
+from app.core.database_async import get_async_db
+from app.crud.user_async import user_async as user_crud
+from app.crud.organization_async import organization_async as organization_crud
 from app.models.user import User
 from app.models.user_organization import OrganizationRole
 from app.schemas.users import UserResponse, UserCreate, UserUpdate
@@ -73,14 +73,14 @@ class BulkActionResult(BaseModel):
     description="Get paginated list of all users with filtering and search (admin only)",
     operation_id="admin_list_users"
 )
-def admin_list_users(
+async def admin_list_users(
     pagination: PaginationParams = Depends(),
     sort: SortParams = Depends(),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     is_superuser: Optional[bool] = Query(None, description="Filter by superuser status"),
     search: Optional[str] = Query(None, description="Search by email, name"),
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     List all users with comprehensive filtering and search.
@@ -96,7 +96,7 @@ def admin_list_users(
             filters["is_superuser"] = is_superuser
 
         # Get users with search
-        users, total = user_crud.get_multi_with_total(
+        users, total = await user_crud.get_multi_with_total(
             db,
             skip=pagination.offset,
             limit=pagination.limit,
@@ -128,10 +128,10 @@ def admin_list_users(
     description="Create a new user (admin only)",
     operation_id="admin_create_user"
 )
-def admin_create_user(
+async def admin_create_user(
     user_in: UserCreate,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Create a new user with admin privileges.
@@ -139,7 +139,7 @@ def admin_create_user(
     Allows setting is_superuser and other fields.
     """
     try:
-        user = user_crud.create(db, obj_in=user_in)
+        user = await user_crud.create(db, obj_in=user_in)
         logger.info(f"Admin {admin.email} created user {user.email}")
         return user
     except ValueError as e:
@@ -160,13 +160,13 @@ def admin_create_user(
     description="Get detailed user information (admin only)",
     operation_id="admin_get_user"
 )
-def admin_get_user(
+async def admin_get_user(
     user_id: UUID,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """Get detailed information about a specific user."""
-    user = user_crud.get(db, id=user_id)
+    user = await user_crud.get(db, id=user_id)
     if not user:
         raise NotFoundError(
             detail=f"User {user_id} not found",
@@ -182,22 +182,22 @@ def admin_get_user(
     description="Update user information (admin only)",
     operation_id="admin_update_user"
 )
-def admin_update_user(
+async def admin_update_user(
     user_id: UUID,
     user_in: UserUpdate,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """Update user information with admin privileges."""
     try:
-        user = user_crud.get(db, id=user_id)
+        user = await user_crud.get(db, id=user_id)
         if not user:
             raise NotFoundError(
                 detail=f"User {user_id} not found",
                 error_code=ErrorCode.USER_NOT_FOUND
             )
 
-        updated_user = user_crud.update(db, db_obj=user, obj_in=user_in)
+        updated_user = await user_crud.update(db, db_obj=user, obj_in=user_in)
         logger.info(f"Admin {admin.email} updated user {updated_user.email}")
         return updated_user
 
@@ -215,14 +215,14 @@ def admin_update_user(
     description="Soft delete a user (admin only)",
     operation_id="admin_delete_user"
 )
-def admin_delete_user(
+async def admin_delete_user(
     user_id: UUID,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """Soft delete a user (sets deleted_at timestamp)."""
     try:
-        user = user_crud.get(db, id=user_id)
+        user = await user_crud.get(db, id=user_id)
         if not user:
             raise NotFoundError(
                 detail=f"User {user_id} not found",
@@ -236,7 +236,7 @@ def admin_delete_user(
                 error_code=ErrorCode.OPERATION_FORBIDDEN
             )
 
-        user_crud.soft_delete(db, id=user_id)
+        await user_crud.soft_delete(db, id=user_id)
         logger.info(f"Admin {admin.email} deleted user {user.email}")
 
         return MessageResponse(
@@ -258,21 +258,21 @@ def admin_delete_user(
     description="Activate a user account (admin only)",
     operation_id="admin_activate_user"
 )
-def admin_activate_user(
+async def admin_activate_user(
     user_id: UUID,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """Activate a user account."""
     try:
-        user = user_crud.get(db, id=user_id)
+        user = await user_crud.get(db, id=user_id)
         if not user:
             raise NotFoundError(
                 detail=f"User {user_id} not found",
                 error_code=ErrorCode.USER_NOT_FOUND
             )
 
-        user_crud.update(db, db_obj=user, obj_in={"is_active": True})
+        await user_crud.update(db, db_obj=user, obj_in={"is_active": True})
         logger.info(f"Admin {admin.email} activated user {user.email}")
 
         return MessageResponse(
@@ -294,14 +294,14 @@ def admin_activate_user(
     description="Deactivate a user account (admin only)",
     operation_id="admin_deactivate_user"
 )
-def admin_deactivate_user(
+async def admin_deactivate_user(
     user_id: UUID,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """Deactivate a user account."""
     try:
-        user = user_crud.get(db, id=user_id)
+        user = await user_crud.get(db, id=user_id)
         if not user:
             raise NotFoundError(
                 detail=f"User {user_id} not found",
@@ -315,7 +315,7 @@ def admin_deactivate_user(
                 error_code=ErrorCode.OPERATION_FORBIDDEN
             )
 
-        user_crud.update(db, db_obj=user, obj_in={"is_active": False})
+        await user_crud.update(db, db_obj=user, obj_in={"is_active": False})
         logger.info(f"Admin {admin.email} deactivated user {user.email}")
 
         return MessageResponse(
@@ -337,10 +337,10 @@ def admin_deactivate_user(
     description="Perform bulk actions on multiple users (admin only)",
     operation_id="admin_bulk_user_action"
 )
-def admin_bulk_user_action(
+async def admin_bulk_user_action(
     bulk_action: BulkUserAction,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Perform bulk actions on multiple users.
@@ -354,7 +354,7 @@ def admin_bulk_user_action(
     try:
         for user_id in bulk_action.user_ids:
             try:
-                user = user_crud.get(db, id=user_id)
+                user = await user_crud.get(db, id=user_id)
                 if not user:
                     failed_count += 1
                     failed_ids.append(user_id)
@@ -367,11 +367,11 @@ def admin_bulk_user_action(
                     continue
 
                 if bulk_action.action == BulkAction.ACTIVATE:
-                    user_crud.update(db, db_obj=user, obj_in={"is_active": True})
+                    await user_crud.update(db, db_obj=user, obj_in={"is_active": True})
                 elif bulk_action.action == BulkAction.DEACTIVATE:
-                    user_crud.update(db, db_obj=user, obj_in={"is_active": False})
+                    await user_crud.update(db, db_obj=user, obj_in={"is_active": False})
                 elif bulk_action.action == BulkAction.DELETE:
-                    user_crud.soft_delete(db, id=user_id)
+                    await user_crud.soft_delete(db, id=user_id)
 
                 affected_count += 1
 
@@ -407,16 +407,16 @@ def admin_bulk_user_action(
     description="Get paginated list of all organizations (admin only)",
     operation_id="admin_list_organizations"
 )
-def admin_list_organizations(
+async def admin_list_organizations(
     pagination: PaginationParams = Depends(),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     search: Optional[str] = Query(None, description="Search by name, slug, description"),
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """List all organizations with filtering and search."""
     try:
-        orgs, total = organization_crud.get_multi_with_filters(
+        orgs, total = await organization_crud.get_multi_with_filters(
             db,
             skip=pagination.offset,
             limit=pagination.limit,
@@ -438,7 +438,7 @@ def admin_list_organizations(
                 "settings": org.settings,
                 "created_at": org.created_at,
                 "updated_at": org.updated_at,
-                "member_count": organization_crud.get_member_count(db, organization_id=org.id)
+                "member_count": await organization_crud.get_member_count(db, organization_id=org.id)
             }
             orgs_with_count.append(OrganizationResponse(**org_dict))
 
@@ -464,14 +464,14 @@ def admin_list_organizations(
     description="Create a new organization (admin only)",
     operation_id="admin_create_organization"
 )
-def admin_create_organization(
+async def admin_create_organization(
     org_in: OrganizationCreate,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """Create a new organization."""
     try:
-        org = organization_crud.create(db, obj_in=org_in)
+        org = await organization_crud.create(db, obj_in=org_in)
         logger.info(f"Admin {admin.email} created organization {org.name}")
 
         # Add member count
@@ -506,13 +506,13 @@ def admin_create_organization(
     description="Get detailed organization information (admin only)",
     operation_id="admin_get_organization"
 )
-def admin_get_organization(
+async def admin_get_organization(
     org_id: UUID,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """Get detailed information about a specific organization."""
-    org = organization_crud.get(db, id=org_id)
+    org = await organization_crud.get(db, id=org_id)
     if not org:
         raise NotFoundError(
             detail=f"Organization {org_id} not found",
@@ -528,7 +528,7 @@ def admin_get_organization(
         "settings": org.settings,
         "created_at": org.created_at,
         "updated_at": org.updated_at,
-        "member_count": organization_crud.get_member_count(db, organization_id=org.id)
+        "member_count": await organization_crud.get_member_count(db, organization_id=org.id)
     }
     return OrganizationResponse(**org_dict)
 
@@ -540,22 +540,22 @@ def admin_get_organization(
     description="Update organization information (admin only)",
     operation_id="admin_update_organization"
 )
-def admin_update_organization(
+async def admin_update_organization(
     org_id: UUID,
     org_in: OrganizationUpdate,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """Update organization information."""
     try:
-        org = organization_crud.get(db, id=org_id)
+        org = await organization_crud.get(db, id=org_id)
         if not org:
             raise NotFoundError(
                 detail=f"Organization {org_id} not found",
                 error_code=ErrorCode.NOT_FOUND
             )
 
-        updated_org = organization_crud.update(db, db_obj=org, obj_in=org_in)
+        updated_org = await organization_crud.update(db, db_obj=org, obj_in=org_in)
         logger.info(f"Admin {admin.email} updated organization {updated_org.name}")
 
         org_dict = {
@@ -567,7 +567,7 @@ def admin_update_organization(
             "settings": updated_org.settings,
             "created_at": updated_org.created_at,
             "updated_at": updated_org.updated_at,
-            "member_count": organization_crud.get_member_count(db, organization_id=updated_org.id)
+            "member_count": await organization_crud.get_member_count(db, organization_id=updated_org.id)
         }
         return OrganizationResponse(**org_dict)
 
@@ -585,21 +585,21 @@ def admin_update_organization(
     description="Delete an organization (admin only)",
     operation_id="admin_delete_organization"
 )
-def admin_delete_organization(
+async def admin_delete_organization(
     org_id: UUID,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """Delete an organization and all its relationships."""
     try:
-        org = organization_crud.get(db, id=org_id)
+        org = await organization_crud.get(db, id=org_id)
         if not org:
             raise NotFoundError(
                 detail=f"Organization {org_id} not found",
                 error_code=ErrorCode.NOT_FOUND
             )
 
-        organization_crud.remove(db, id=org_id)
+        await organization_crud.remove(db, id=org_id)
         logger.info(f"Admin {admin.email} deleted organization {org.name}")
 
         return MessageResponse(
@@ -621,23 +621,23 @@ def admin_delete_organization(
     description="Get all members of an organization (admin only)",
     operation_id="admin_list_organization_members"
 )
-def admin_list_organization_members(
+async def admin_list_organization_members(
     org_id: UUID,
     pagination: PaginationParams = Depends(),
     is_active: Optional[bool] = Query(True, description="Filter by active status"),
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """List all members of an organization."""
     try:
-        org = organization_crud.get(db, id=org_id)
+        org = await organization_crud.get(db, id=org_id)
         if not org:
             raise NotFoundError(
                 detail=f"Organization {org_id} not found",
                 error_code=ErrorCode.NOT_FOUND
             )
 
-        members, total = organization_crud.get_organization_members(
+        members, total = await organization_crud.get_organization_members(
             db,
             organization_id=org_id,
             skip=pagination.offset,
@@ -677,29 +677,29 @@ class AddMemberRequest(BaseModel):
     description="Add a user to an organization (admin only)",
     operation_id="admin_add_organization_member"
 )
-def admin_add_organization_member(
+async def admin_add_organization_member(
     org_id: UUID,
     request: AddMemberRequest,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """Add a user to an organization."""
     try:
-        org = organization_crud.get(db, id=org_id)
+        org = await organization_crud.get(db, id=org_id)
         if not org:
             raise NotFoundError(
                 detail=f"Organization {org_id} not found",
                 error_code=ErrorCode.NOT_FOUND
             )
 
-        user = user_crud.get(db, id=request.user_id)
+        user = await user_crud.get(db, id=request.user_id)
         if not user:
             raise NotFoundError(
                 detail=f"User {request.user_id} not found",
                 error_code=ErrorCode.USER_NOT_FOUND
             )
 
-        organization_crud.add_user(
+        await organization_crud.add_user(
             db,
             organization_id=org_id,
             user_id=request.user_id,
@@ -733,29 +733,29 @@ def admin_add_organization_member(
     description="Remove a user from an organization (admin only)",
     operation_id="admin_remove_organization_member"
 )
-def admin_remove_organization_member(
+async def admin_remove_organization_member(
     org_id: UUID,
     user_id: UUID,
     admin: User = Depends(require_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """Remove a user from an organization."""
     try:
-        org = organization_crud.get(db, id=org_id)
+        org = await organization_crud.get(db, id=org_id)
         if not org:
             raise NotFoundError(
                 detail=f"Organization {org_id} not found",
                 error_code=ErrorCode.NOT_FOUND
             )
 
-        user = user_crud.get(db, id=user_id)
+        user = await user_crud.get(db, id=user_id)
         if not user:
             raise NotFoundError(
                 detail=f"User {user_id} not found",
                 error_code=ErrorCode.USER_NOT_FOUND
             )
 
-        success = organization_crud.remove_user(
+        success = await organization_crud.remove_user(
             db,
             organization_id=org_id,
             user_id=user_id

@@ -10,13 +10,13 @@ These dependencies are optional and flexible:
 from typing import Optional
 from uuid import UUID
 from fastapi import Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
+from app.core.database_async import get_async_db
 from app.models.user import User
 from app.models.user_organization import OrganizationRole
 from app.api.dependencies.auth import get_current_user
-from app.crud.organization import organization as organization_crud
+from app.crud.organization_async import organization_async as organization_crud
 
 
 def require_superuser(
@@ -73,11 +73,11 @@ class OrganizationPermission:
         """
         self.allowed_roles = allowed_roles
 
-    def __call__(
+    async def __call__(
         self,
         organization_id: UUID,
         current_user: User = Depends(get_current_user),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_async_db)
     ) -> User:
         """
         Check if user has required role in the organization.
@@ -98,7 +98,7 @@ class OrganizationPermission:
             return current_user
 
         # Get user's role in organization
-        user_role = organization_crud.get_user_role_in_org(
+        user_role = await organization_crud.get_user_role_in_org(
             db,
             user_id=current_user.id,
             organization_id=organization_id
@@ -129,10 +129,10 @@ require_org_member = OrganizationPermission([
 ])
 
 
-def get_current_org_role(
+async def get_current_org_role(
     organization_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Optional[OrganizationRole]:
     """
     Get the current user's role in an organization.
@@ -142,7 +142,7 @@ def get_current_org_role(
 
     Example:
         @router.get("/organizations/{org_id}/items")
-        def list_items(
+        async def list_items(
             org_id: UUID,
             role: OrganizationRole = Depends(get_current_org_role)
         ):
@@ -153,17 +153,17 @@ def get_current_org_role(
     if current_user.is_superuser:
         return OrganizationRole.OWNER
 
-    return organization_crud.get_user_role_in_org(
+    return await organization_crud.get_user_role_in_org(
         db,
         user_id=current_user.id,
         organization_id=organization_id
     )
 
 
-def require_org_membership(
+async def require_org_membership(
     organization_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> User:
     """
     Ensure user is a member of the organization (any role).
@@ -173,7 +173,7 @@ def require_org_membership(
     if current_user.is_superuser:
         return current_user
 
-    user_role = organization_crud.get_user_role_in_org(
+    user_role = await organization_crud.get_user_role_in_org(
         db,
         user_id=current_user.id,
         organization_id=organization_id

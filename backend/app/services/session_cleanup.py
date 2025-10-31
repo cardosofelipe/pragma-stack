@@ -6,13 +6,13 @@ This service runs periodically to remove old session records from the database.
 import logging
 from datetime import datetime, timezone
 
-from app.core.database import SessionLocal
-from app.crud.session import session as session_crud
+from app.core.database_async import AsyncSessionLocal
+from app.crud.session_async import session_async as session_crud
 
 logger = logging.getLogger(__name__)
 
 
-def cleanup_expired_sessions(keep_days: int = 30) -> int:
+async def cleanup_expired_sessions(keep_days: int = 30) -> int:
     """
     Clean up expired and inactive sessions.
 
@@ -29,52 +29,58 @@ def cleanup_expired_sessions(keep_days: int = 30) -> int:
     """
     logger.info("Starting session cleanup job...")
 
-    db = SessionLocal()
-    try:
-        # Use CRUD method to cleanup
-        count = session_crud.cleanup_expired(db, keep_days=keep_days)
+    async with AsyncSessionLocal() as db:
+        try:
+            # Use CRUD method to cleanup
+            count = await session_crud.cleanup_expired(db, keep_days=keep_days)
 
-        logger.info(f"Session cleanup complete: {count} sessions deleted")
+            logger.info(f"Session cleanup complete: {count} sessions deleted")
 
-        return count
+            return count
 
-    except Exception as e:
-        logger.error(f"Error during session cleanup: {str(e)}", exc_info=True)
-        return 0
-    finally:
-        db.close()
+        except Exception as e:
+            logger.error(f"Error during session cleanup: {str(e)}", exc_info=True)
+            return 0
 
 
-def get_session_statistics() -> dict:
+async def get_session_statistics() -> dict:
     """
     Get statistics about current sessions.
 
     Returns:
         Dictionary with session stats
     """
-    db = SessionLocal()
-    try:
-        from app.models.user_session import UserSession
+    async with AsyncSessionLocal() as db:
+        try:
+            from app.models.user_session import UserSession
+            from sqlalchemy import select, func
 
-        total_sessions = db.query(UserSession).count()
-        active_sessions = db.query(UserSession).filter(UserSession.is_active == True).count()
-        expired_sessions = db.query(UserSession).filter(
-            UserSession.expires_at < datetime.now(timezone.utc)
-        ).count()
+            total_result = await db.execute(select(func.count(UserSession.id)))
+            total_sessions = total_result.scalar_one()
 
-        stats = {
-            "total": total_sessions,
-            "active": active_sessions,
-            "inactive": total_sessions - active_sessions,
-            "expired": expired_sessions,
-        }
+            active_result = await db.execute(
+                select(func.count(UserSession.id)).where(UserSession.is_active == True)
+            )
+            active_sessions = active_result.scalar_one()
 
-        logger.info(f"Session statistics: {stats}")
+            expired_result = await db.execute(
+                select(func.count(UserSession.id)).where(
+                    UserSession.expires_at < datetime.now(timezone.utc)
+                )
+            )
+            expired_sessions = expired_result.scalar_one()
 
-        return stats
+            stats = {
+                "total": total_sessions,
+                "active": active_sessions,
+                "inactive": total_sessions - active_sessions,
+                "expired": expired_sessions,
+            }
 
-    except Exception as e:
-        logger.error(f"Error getting session statistics: {str(e)}", exc_info=True)
-        return {}
-    finally:
-        db.close()
+            logger.info(f"Session statistics: {stats}")
+
+            return stats
+
+        except Exception as e:
+            logger.error(f"Error getting session statistics: {str(e)}", exc_info=True)
+            return {}

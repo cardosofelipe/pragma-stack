@@ -3,18 +3,19 @@ from typing import Optional
 from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.security.utils import get_authorization_scheme_param
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.core.auth import get_token_data, TokenExpiredError, TokenInvalidError
-from app.core.database import get_db
+from app.core.database_async import get_async_db
 from app.models.user import User
 
 # OAuth2 configuration
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
-def get_current_user(
-        db: Session = Depends(get_db),
+async def get_current_user(
+        db: AsyncSession = Depends(get_async_db),
         token: str = Depends(oauth2_scheme)
 ) -> User:
     """
@@ -35,7 +36,11 @@ def get_current_user(
         token_data = get_token_data(token)
 
         # Get user from database
-        user = db.query(User).filter(User.id == token_data.user_id).first()
+        result = await db.execute(
+            select(User).where(User.id == token_data.user_id)
+        )
+        user = result.scalar_one_or_none()
+
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -133,8 +138,8 @@ async def get_optional_token(authorization: str = Header(None)) -> Optional[str]
     return token
 
 
-def get_optional_current_user(
-        db: Session = Depends(get_db),
+async def get_optional_current_user(
+        db: AsyncSession = Depends(get_async_db),
         token: Optional[str] = Depends(get_optional_token)
 ) -> Optional[User]:
     """
@@ -153,7 +158,10 @@ def get_optional_current_user(
 
     try:
         token_data = get_token_data(token)
-        user = db.query(User).filter(User.id == token_data.user_id).first()
+        result = await db.execute(
+            select(User).where(User.id == token_data.user_id)
+        )
+        user = result.scalar_one_or_none()
         if not user or not user.is_active:
             return None
         return user

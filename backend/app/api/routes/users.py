@@ -6,13 +6,13 @@ from typing import Any, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status, Request
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 from app.api.dependencies.auth import get_current_user, get_current_superuser
-from app.core.database import get_db
-from app.crud.user import user as user_crud
+from app.core.database_async import get_async_db
+from app.crud.user_async import user_async as user_crud
 from app.models.user import User
 from app.schemas.users import UserResponse, UserUpdate, PasswordChange
 from app.schemas.common import (
@@ -52,13 +52,13 @@ limiter = Limiter(key_func=get_remote_address)
     """,
     operation_id="list_users"
 )
-def list_users(
+async def list_users(
     pagination: PaginationParams = Depends(),
     sort: SortParams = Depends(),
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     is_superuser: Optional[bool] = Query(None, description="Filter by superuser status"),
     current_user: User = Depends(get_current_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     List all users with pagination, filtering, and sorting.
@@ -74,7 +74,7 @@ def list_users(
             filters["is_superuser"] = is_superuser
 
         # Get paginated users with total count
-        users, total = user_crud.get_multi_with_total(
+        users, total = await user_crud.get_multi_with_total(
             db,
             skip=pagination.offset,
             limit=pagination.limit,
@@ -135,10 +135,10 @@ def get_current_user_profile(
     """,
     operation_id="update_current_user"
 )
-def update_current_user(
+async def update_current_user(
     user_update: UserUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Update current user's profile.
@@ -154,7 +154,7 @@ def update_current_user(
         )
 
     try:
-        updated_user = user_crud.update(
+        updated_user = await user_crud.update(
             db,
             db_obj=current_user,
             obj_in=user_update
@@ -185,10 +185,10 @@ def update_current_user(
     """,
     operation_id="get_user_by_id"
 )
-def get_user_by_id(
+async def get_user_by_id(
     user_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Get user by ID.
@@ -206,7 +206,7 @@ def get_user_by_id(
         )
 
     # Get user
-    user = user_crud.get(db, id=str(user_id))
+    user = await user_crud.get(db, id=str(user_id))
     if not user:
         raise NotFoundError(
             message=f"User with id {user_id} not found",
@@ -232,11 +232,11 @@ def get_user_by_id(
     """,
     operation_id="update_user"
 )
-def update_user(
+async def update_user(
     user_id: UUID,
     user_update: UserUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Update user by ID.
@@ -257,7 +257,7 @@ def update_user(
         )
 
     # Get user
-    user = user_crud.get(db, id=str(user_id))
+    user = await user_crud.get(db, id=str(user_id))
     if not user:
         raise NotFoundError(
             message=f"User with id {user_id} not found",
@@ -273,7 +273,7 @@ def update_user(
         )
 
     try:
-        updated_user = user_crud.update(db, db_obj=user, obj_in=user_update)
+        updated_user = await user_crud.update(db, db_obj=user, obj_in=user_update)
         logger.info(f"User {user_id} updated by {current_user.id}")
         return updated_user
     except ValueError as e:
@@ -300,11 +300,11 @@ def update_user(
     operation_id="change_current_user_password"
 )
 @limiter.limit("5/minute")
-def change_current_user_password(
+async def change_current_user_password(
     request: Request,
     password_change: PasswordChange,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Change current user's password.
@@ -312,7 +312,7 @@ def change_current_user_password(
     Requires current password for verification.
     """
     try:
-        success = AuthService.change_password(
+        success = await AuthService.change_password(
             db=db,
             user_id=current_user.id,
             current_password=password_change.current_password,
@@ -353,10 +353,10 @@ def change_current_user_password(
     """,
     operation_id="delete_user"
 )
-def delete_user(
+async def delete_user(
     user_id: UUID,
     current_user: User = Depends(get_current_superuser),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Delete user by ID (superuser only).
@@ -371,7 +371,7 @@ def delete_user(
         )
 
     # Get user
-    user = user_crud.get(db, id=str(user_id))
+    user = await user_crud.get(db, id=str(user_id))
     if not user:
         raise NotFoundError(
             message=f"User with id {user_id} not found",
@@ -380,7 +380,7 @@ def delete_user(
 
     try:
         # Use soft delete instead of hard delete
-        user_crud.soft_delete(db, id=str(user_id))
+        await user_crud.soft_delete(db, id=str(user_id))
         logger.info(f"User {user_id} soft-deleted by {current_user.id}")
         return MessageResponse(
             success=True,

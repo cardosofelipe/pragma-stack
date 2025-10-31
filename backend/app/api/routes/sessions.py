@@ -10,15 +10,15 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user
-from app.core.database import get_db
+from app.core.database_async import get_async_db
 from app.core.auth import decode_token
 from app.models.user import User
 from app.schemas.sessions import SessionResponse, SessionListResponse
 from app.schemas.common import MessageResponse
-from app.crud.session import session as session_crud
+from app.crud.session_async import session_async as session_crud
 from app.core.exceptions import NotFoundError, AuthorizationError, ErrorCode
 
 router = APIRouter()
@@ -42,10 +42,10 @@ limiter = Limiter(key_func=get_remote_address)
     operation_id="list_my_sessions"
 )
 @limiter.limit("30/minute")
-def list_my_sessions(
+async def list_my_sessions(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     List all active sessions for the current user.
@@ -59,7 +59,7 @@ def list_my_sessions(
     """
     try:
         # Get all active sessions for user
-        sessions = session_crud.get_user_sessions(
+        sessions = await session_crud.get_user_sessions(
             db,
             user_id=str(current_user.id),
             active_only=True
@@ -125,11 +125,11 @@ def list_my_sessions(
     operation_id="revoke_session"
 )
 @limiter.limit("10/minute")
-def revoke_session(
+async def revoke_session(
     request: Request,
     session_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Revoke a specific session by ID.
@@ -144,7 +144,7 @@ def revoke_session(
     """
     try:
         # Get the session
-        session = session_crud.get(db, id=str(session_id))
+        session = await session_crud.get(db, id=str(session_id))
 
         if not session:
             raise NotFoundError(
@@ -164,7 +164,7 @@ def revoke_session(
             )
 
         # Deactivate the session
-        session_crud.deactivate(db, session_id=str(session_id))
+        await session_crud.deactivate(db, session_id=str(session_id))
 
         logger.info(
             f"User {current_user.id} revoked session {session_id} "
@@ -201,10 +201,10 @@ def revoke_session(
     operation_id="cleanup_expired_sessions"
 )
 @limiter.limit("5/minute")
-def cleanup_expired_sessions(
+async def cleanup_expired_sessions(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Cleanup expired sessions for the current user.
@@ -220,7 +220,7 @@ def cleanup_expired_sessions(
         from datetime import datetime, timezone
 
         # Get all sessions for user
-        all_sessions = session_crud.get_user_sessions(
+        all_sessions = await session_crud.get_user_sessions(
             db,
             user_id=str(current_user.id),
             active_only=False
@@ -230,10 +230,10 @@ def cleanup_expired_sessions(
         deleted_count = 0
         for s in all_sessions:
             if not s.is_active and s.expires_at < datetime.now(timezone.utc):
-                db.delete(s)
+                await db.delete(s)
                 deleted_count += 1
 
-        db.commit()
+        await db.commit()
 
         logger.info(f"User {current_user.id} cleaned up {deleted_count} expired sessions")
 
@@ -244,7 +244,7 @@ def cleanup_expired_sessions(
 
     except Exception as e:
         logger.error(f"Error cleaning up sessions for user {current_user.id}: {str(e)}", exc_info=True)
-        db.rollback()
+        await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to cleanup sessions"

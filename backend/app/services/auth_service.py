@@ -3,7 +3,8 @@ import logging
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.core.auth import (
     verify_password,
@@ -28,7 +29,7 @@ class AuthService:
     """Service for handling authentication operations"""
 
     @staticmethod
-    def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
+    async def authenticate_user(db: AsyncSession, email: str, password: str) -> Optional[User]:
         """
         Authenticate a user with email and password.
 
@@ -40,7 +41,8 @@ class AuthService:
         Returns:
             User if authenticated, None otherwise
         """
-        user = db.query(User).filter(User.email == email).first()
+        result = await db.execute(select(User).where(User.email == email))
+        user = result.scalar_one_or_none()
 
         if not user:
             return None
@@ -54,7 +56,7 @@ class AuthService:
         return user
 
     @staticmethod
-    def create_user(db: Session, user_data: UserCreate) -> User:
+    async def create_user(db: AsyncSession, user_data: UserCreate) -> User:
         """
         Create a new user.
 
@@ -66,7 +68,8 @@ class AuthService:
             Created user
         """
         # Check if user already exists
-        existing_user = db.query(User).filter(User.email == user_data.email).first()
+        result = await db.execute(select(User).where(User.email == user_data.email))
+        existing_user = result.scalar_one_or_none()
         if existing_user:
             raise AuthenticationError("User with this email already exists")
 
@@ -85,8 +88,8 @@ class AuthService:
         )
 
         db.add(user)
-        db.commit()
-        db.refresh(user)
+        await db.commit()
+        await db.refresh(user)
 
         return user
 
@@ -124,7 +127,7 @@ class AuthService:
         )
 
     @staticmethod
-    def refresh_tokens(db: Session, refresh_token: str) -> Token:
+    async def refresh_tokens(db: AsyncSession, refresh_token: str) -> Token:
         """
         Generate new tokens using a refresh token.
 
@@ -150,7 +153,8 @@ class AuthService:
             user_id = token_data.user_id
 
             # Get user from database
-            user = db.query(User).filter(User.id == user_id).first()
+            result = await db.execute(select(User).where(User.id == user_id))
+            user = result.scalar_one_or_none()
             if not user or not user.is_active:
                 raise TokenInvalidError("Invalid user or inactive account")
 
@@ -162,7 +166,7 @@ class AuthService:
             raise
 
     @staticmethod
-    def change_password(db: Session, user_id: UUID, current_password: str, new_password: str) -> bool:
+    async def change_password(db: AsyncSession, user_id: UUID, current_password: str, new_password: str) -> bool:
         """
         Change a user's password.
 
@@ -178,7 +182,8 @@ class AuthService:
         Raises:
             AuthenticationError: If current password is incorrect
         """
-        user = db.query(User).filter(User.id == user_id).first()
+        result = await db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
         if not user:
             raise AuthenticationError("User not found")
 
@@ -188,6 +193,6 @@ class AuthService:
 
         # Update password
         user.password_hash = get_password_hash(new_password)
-        db.commit()
+        await db.commit()
 
         return True

@@ -159,6 +159,10 @@ async def check_async_database_health() -> bool:
         return False
 
 
+# Alias for consistency with main.py
+check_database_health = check_async_database_health
+
+
 async def init_async_db() -> None:
     """
     Initialize async database tables.

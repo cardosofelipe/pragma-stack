@@ -9,12 +9,12 @@ from typing import Any, List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user
 from app.api.dependencies.permissions import require_org_admin, require_org_membership, get_current_org_role
-from app.core.database import get_db
-from app.crud.organization import organization as organization_crud
+from app.core.database_async import get_async_db
+from app.crud.organization_async import organization_async as organization_crud
 from app.models.user import User
 from app.models.user_organization import OrganizationRole
 from app.schemas.organizations import (
@@ -42,10 +42,10 @@ router = APIRouter()
     description="Get all organizations the current user belongs to",
     operation_id="get_my_organizations"
 )
-def get_my_organizations(
+async def get_my_organizations(
     is_active: bool = Query(True, description="Filter by active membership"),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Get all organizations the current user belongs to.
@@ -53,7 +53,7 @@ def get_my_organizations(
     Returns organizations with member count for each.
     """
     try:
-        orgs = organization_crud.get_user_organizations(
+        orgs = await organization_crud.get_user_organizations(
             db,
             user_id=current_user.id,
             is_active=is_active
@@ -77,7 +77,7 @@ def get_my_organizations(
                 "settings": org.settings,
                 "created_at": org.created_at,
                 "updated_at": org.updated_at,
-                "member_count": organization_crud.get_member_count(db, organization_id=org.id)
+                "member_count": await organization_crud.get_member_count(db, organization_id=org.id)
             }
             orgs_with_data.append(OrganizationResponse(**org_dict))
 
@@ -95,10 +95,10 @@ def get_my_organizations(
     description="Get details of an organization the user belongs to",
     operation_id="get_organization"
 )
-def get_organization(
+async def get_organization(
     organization_id: UUID,
     current_user: User = Depends(require_org_membership),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Get details of a specific organization.
@@ -106,7 +106,7 @@ def get_organization(
     User must be a member of the organization.
     """
     try:
-        org = organization_crud.get(db, id=organization_id)
+        org = await organization_crud.get(db, id=organization_id)
         if not org:
             raise NotFoundError(
                 detail=f"Organization {organization_id} not found",
@@ -122,7 +122,7 @@ def get_organization(
             "settings": org.settings,
             "created_at": org.created_at,
             "updated_at": org.updated_at,
-            "member_count": organization_crud.get_member_count(db, organization_id=org.id)
+            "member_count": await organization_crud.get_member_count(db, organization_id=org.id)
         }
         return OrganizationResponse(**org_dict)
 
@@ -140,12 +140,12 @@ def get_organization(
     description="Get all members of an organization (members can view)",
     operation_id="get_organization_members"
 )
-def get_organization_members(
+async def get_organization_members(
     organization_id: UUID,
     pagination: PaginationParams = Depends(),
     is_active: bool = Query(True, description="Filter by active status"),
     current_user: User = Depends(require_org_membership),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Get all members of an organization.
@@ -153,7 +153,7 @@ def get_organization_members(
     User must be a member of the organization to view members.
     """
     try:
-        members, total = organization_crud.get_organization_members(
+        members, total = await organization_crud.get_organization_members(
             db,
             organization_id=organization_id,
             skip=pagination.offset,
@@ -184,11 +184,11 @@ def get_organization_members(
     description="Update organization details (admin/owner only)",
     operation_id="update_organization"
 )
-def update_organization(
+async def update_organization(
     organization_id: UUID,
     org_in: OrganizationUpdate,
     current_user: User = Depends(require_org_admin),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
     Update organization details.
@@ -196,14 +196,14 @@ def update_organization(
     Requires owner or admin role in the organization.
     """
     try:
-        org = organization_crud.get(db, id=organization_id)
+        org = await organization_crud.get(db, id=organization_id)
         if not org:
             raise NotFoundError(
                 detail=f"Organization {organization_id} not found",
                 error_code=ErrorCode.NOT_FOUND
             )
 
-        updated_org = organization_crud.update(db, db_obj=org, obj_in=org_in)
+        updated_org = await organization_crud.update(db, db_obj=org, obj_in=org_in)
         logger.info(f"User {current_user.email} updated organization {updated_org.name}")
 
         org_dict = {
@@ -215,7 +215,7 @@ def update_organization(
             "settings": updated_org.settings,
             "created_at": updated_org.created_at,
             "updated_at": updated_org.updated_at,
-            "member_count": organization_crud.get_member_count(db, organization_id=updated_org.id)
+            "member_count": await organization_crud.get_member_count(db, organization_id=updated_org.id)
         }
         return OrganizationResponse(**org_dict)
 
