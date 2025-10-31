@@ -15,6 +15,15 @@ class Settings(BaseSettings):
         description="Environment: development, staging, or production"
     )
 
+    # Security: Content Security Policy
+    # Set to False to disable CSP entirely (not recommended)
+    # Set to True for strict CSP (blocks most external resources)
+    # Set to "relaxed" for modern frontend development
+    CSP_MODE: str = Field(
+        default="relaxed",
+        description="CSP mode: 'strict', 'relaxed', or 'disabled'"
+    )
+
     # Database configuration
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"

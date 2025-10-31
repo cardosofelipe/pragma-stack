@@ -72,7 +72,14 @@ app.add_middleware(
 # Add security headers middleware
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
-    """Add security headers to all responses"""
+    """
+    Add security headers to all responses.
+
+    CSP modes (set via CSP_MODE env var):
+    - 'strict': Maximum security, blocks most external resources (default for production)
+    - 'relaxed': Allows common CDNs and modern frontend features (default for development)
+    - 'disabled': No CSP (not recommended, use only for debugging)
+    """
     response = await call_next(request)
 
     # Prevent clickjacking
@@ -89,7 +96,70 @@ async def add_security_headers(request: Request, call_next):
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
 
     # Content Security Policy
-    response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'"
+    csp_mode = settings.CSP_MODE.lower()
+
+    # Special handling for API docs
+    is_docs = request.url.path in ["/docs", "/redoc"] or \
+              request.url.path.startswith("/docs/") or \
+              request.url.path.startswith("/redoc/")
+
+    if csp_mode == "disabled":
+        # No CSP (only for local development/debugging)
+        pass
+    elif is_docs:
+        # Always allow Swagger UI/ReDoc resources on docs pages
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data: https://fastapi.tiangolo.com; "
+            "frame-ancestors 'none'"
+        )
+    elif csp_mode == "strict":
+        # Maximum security - blocks most external resources
+        # Use this in production if you don't need external CDNs
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self'; "
+            "style-src 'self'; "
+            "img-src 'self' data:; "
+            "font-src 'self'; "
+            "connect-src 'self'; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'"
+        )
+    else:  # 'relaxed' mode (default)
+        # Modern frontend development - allows common CDNs and features
+        # Safe for most production apps that use external resources
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            # Allow common script sources
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
+            "https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com "
+            "https://www.googletagmanager.com https://www.google-analytics.com; "
+            # Allow common style sources
+            "style-src 'self' 'unsafe-inline' "
+            "https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com "
+            "https://fonts.googleapis.com; "
+            # Allow common font sources
+            "font-src 'self' data: "
+            "https://fonts.gstatic.com https://cdn.jsdelivr.net; "
+            # Allow images from self, data URIs, and common CDNs
+            "img-src 'self' data: blob: https:; "
+            # Allow API calls to self and common services
+            "connect-src 'self' "
+            "https://www.google-analytics.com https://analytics.google.com; "
+            # Media from self and data URIs
+            "media-src 'self' data: blob:; "
+            # Prevent framing
+            "frame-ancestors 'none'; "
+            # Restrict base URI
+            "base-uri 'self'; "
+            # Restrict form submissions
+            "form-action 'self'"
+        )
 
     # Permissions Policy (formerly Feature Policy)
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
