@@ -3,8 +3,10 @@
 Tests for authentication endpoints.
 """
 import pytest
+import pytest_asyncio
 from unittest.mock import patch, MagicMock
 from fastapi import status
+from sqlalchemy import select
 
 from app.models.user import User
 from app.schemas.users import UserCreate
@@ -21,9 +23,10 @@ def disable_rate_limit():
 class TestRegisterEndpoint:
     """Tests for POST /auth/register endpoint."""
 
-    def test_register_success(self, client, test_db):
+    @pytest.mark.asyncio
+    async def test_register_success(self, client):
         """Test successful user registration."""
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/register",
             json={
                 "email": "newuser@example.com",
@@ -39,12 +42,13 @@ class TestRegisterEndpoint:
         assert data["first_name"] == "New"
         assert "password" not in data
 
-    def test_register_duplicate_email(self, client, test_user):
+    @pytest.mark.asyncio
+    async def test_register_duplicate_email(self, client, async_test_user):
         """Test registering with existing email."""
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/register",
             json={
-                "email": test_user.email,
+                "email": async_test_user.email,
                 "password": "SecurePassword123",
                 "first_name": "Duplicate",
                 "last_name": "User"
@@ -55,9 +59,10 @@ class TestRegisterEndpoint:
         data = response.json()
         assert data["success"] is False
 
-    def test_register_weak_password(self, client):
+    @pytest.mark.asyncio
+    async def test_register_weak_password(self, client):
         """Test registration with weak password."""
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/register",
             json={
                 "email": "weakpass@example.com",
@@ -69,12 +74,13 @@ class TestRegisterEndpoint:
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def test_register_unexpected_error(self, client, test_db):
+    @pytest.mark.asyncio
+    async def test_register_unexpected_error(self, client):
         """Test registration with unexpected error."""
         with patch('app.services.auth_service.AuthService.create_user') as mock_create:
             mock_create.side_effect = Exception("Unexpected error")
 
-            response = client.post(
+            response = await client.post(
                 "/api/v1/auth/register",
                 json={
                     "email": "error@example.com",
@@ -90,12 +96,13 @@ class TestRegisterEndpoint:
 class TestLoginEndpoint:
     """Tests for POST /auth/login endpoint."""
 
-    def test_login_success(self, client, test_user):
+    @pytest.mark.asyncio
+    async def test_login_success(self, client, async_test_user):
         """Test successful login."""
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/login",
             json={
-                "email": test_user.email,
+                "email": async_test_user.email,
                 "password": "TestPassword123"
             }
         )
@@ -106,21 +113,23 @@ class TestLoginEndpoint:
         assert "refresh_token" in data
         assert data["token_type"] == "bearer"
 
-    def test_login_wrong_password(self, client, test_user):
+    @pytest.mark.asyncio
+    async def test_login_wrong_password(self, client, async_test_user):
         """Test login with wrong password."""
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/login",
             json={
-                "email": test_user.email,
+                "email": async_test_user.email,
                 "password": "WrongPassword123"
             }
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_login_nonexistent_user(self, client):
+    @pytest.mark.asyncio
+    async def test_login_nonexistent_user(self, client):
         """Test login with non-existent email."""
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/login",
             json={
                 "email": "nonexistent@example.com",
@@ -130,31 +139,37 @@ class TestLoginEndpoint:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_login_inactive_user(self, client, test_user, test_db):
+    @pytest.mark.asyncio
+    async def test_login_inactive_user(self, client, async_test_user, async_test_db):
         """Test login with inactive user."""
-        test_user.is_active = False
-        test_db.add(test_user)
-        test_db.commit()
+        test_engine, AsyncTestingSessionLocal = async_test_db
+        async with AsyncTestingSessionLocal() as session:
+            # Get the user in this session and make it inactive
+            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            user_in_session = result.scalar_one_or_none()
+            user_in_session.is_active = False
+            await session.commit()
 
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/login",
             json={
-                "email": test_user.email,
+                "email": async_test_user.email,
                 "password": "TestPassword123"
             }
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_login_unexpected_error(self, client, test_user):
+    @pytest.mark.asyncio
+    async def test_login_unexpected_error(self, client, async_test_user):
         """Test login with unexpected error."""
         with patch('app.services.auth_service.AuthService.authenticate_user') as mock_auth:
             mock_auth.side_effect = Exception("Database error")
 
-            response = client.post(
+            response = await client.post(
                 "/api/v1/auth/login",
                 json={
-                    "email": test_user.email,
+                    "email": async_test_user.email,
                     "password": "TestPassword123"
                 }
             )
@@ -165,12 +180,13 @@ class TestLoginEndpoint:
 class TestOAuthLoginEndpoint:
     """Tests for POST /auth/login/oauth endpoint."""
 
-    def test_oauth_login_success(self, client, test_user):
+    @pytest.mark.asyncio
+    async def test_oauth_login_success(self, client, async_test_user):
         """Test successful OAuth login."""
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/login/oauth",
             data={
-                "username": test_user.email,
+                "username": async_test_user.email,
                 "password": "TestPassword123"
             }
         )
@@ -180,43 +196,50 @@ class TestOAuthLoginEndpoint:
         assert "access_token" in data
         assert "refresh_token" in data
 
-    def test_oauth_login_wrong_credentials(self, client, test_user):
+    @pytest.mark.asyncio
+    async def test_oauth_login_wrong_credentials(self, client, async_test_user):
         """Test OAuth login with wrong credentials."""
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/login/oauth",
             data={
-                "username": test_user.email,
+                "username": async_test_user.email,
                 "password": "WrongPassword"
             }
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_oauth_login_inactive_user(self, client, test_user, test_db):
+    @pytest.mark.asyncio
+    async def test_oauth_login_inactive_user(self, client, async_test_user, async_test_db):
         """Test OAuth login with inactive user."""
-        test_user.is_active = False
-        test_db.add(test_user)
-        test_db.commit()
+        test_engine, AsyncTestingSessionLocal = async_test_db
+        async with AsyncTestingSessionLocal() as session:
+            # Get the user in this session and make it inactive
+            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            user_in_session = result.scalar_one_or_none()
+            user_in_session.is_active = False
+            await session.commit()
 
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/login/oauth",
             data={
-                "username": test_user.email,
+                "username": async_test_user.email,
                 "password": "TestPassword123"
             }
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_oauth_login_unexpected_error(self, client, test_user):
+    @pytest.mark.asyncio
+    async def test_oauth_login_unexpected_error(self, client, async_test_user):
         """Test OAuth login with unexpected error."""
         with patch('app.services.auth_service.AuthService.authenticate_user') as mock_auth:
             mock_auth.side_effect = Exception("Unexpected error")
 
-            response = client.post(
+            response = await client.post(
                 "/api/v1/auth/login/oauth",
                 data={
-                    "username": test_user.email,
+                    "username": async_test_user.email,
                     "password": "TestPassword123"
                 }
             )
@@ -227,20 +250,21 @@ class TestOAuthLoginEndpoint:
 class TestRefreshTokenEndpoint:
     """Tests for POST /auth/refresh endpoint."""
 
-    def test_refresh_token_success(self, client, test_user):
+    @pytest.mark.asyncio
+    async def test_refresh_token_success(self, client, async_test_user):
         """Test successful token refresh."""
         # First, login to get a refresh token
-        login_response = client.post(
+        login_response = await client.post(
             "/api/v1/auth/login",
             json={
-                "email": test_user.email,
+                "email": async_test_user.email,
                 "password": "TestPassword123"
             }
         )
         refresh_token = login_response.json()["refresh_token"]
 
         # Now refresh the token
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/refresh",
             json={"refresh_token": refresh_token}
         )
@@ -250,36 +274,39 @@ class TestRefreshTokenEndpoint:
         assert "access_token" in data
         assert "refresh_token" in data
 
-    def test_refresh_token_expired(self, client):
+    @pytest.mark.asyncio
+    async def test_refresh_token_expired(self, client):
         """Test refresh with expired token."""
         from app.core.auth import TokenExpiredError
 
         with patch('app.services.auth_service.AuthService.refresh_tokens') as mock_refresh:
             mock_refresh.side_effect = TokenExpiredError("Token expired")
 
-            response = client.post(
+            response = await client.post(
                 "/api/v1/auth/refresh",
                 json={"refresh_token": "some_token"}
             )
 
             assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_refresh_token_invalid(self, client):
+    @pytest.mark.asyncio
+    async def test_refresh_token_invalid(self, client):
         """Test refresh with invalid token."""
-        response = client.post(
+        response = await client.post(
             "/api/v1/auth/refresh",
             json={"refresh_token": "invalid_token"}
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_refresh_token_unexpected_error(self, client, test_user):
+    @pytest.mark.asyncio
+    async def test_refresh_token_unexpected_error(self, client, async_test_user):
         """Test refresh with unexpected error."""
         # Get a valid refresh token first
-        login_response = client.post(
+        login_response = await client.post(
             "/api/v1/auth/login",
             json={
-                "email": test_user.email,
+                "email": async_test_user.email,
                 "password": "TestPassword123"
             }
         )
@@ -288,7 +315,7 @@ class TestRefreshTokenEndpoint:
         with patch('app.services.auth_service.AuthService.refresh_tokens') as mock_refresh:
             mock_refresh.side_effect = Exception("Unexpected error")
 
-            response = client.post(
+            response = await client.post(
                 "/api/v1/auth/refresh",
                 json={"refresh_token": refresh_token}
             )
@@ -299,48 +326,52 @@ class TestRefreshTokenEndpoint:
 class TestGetCurrentUserEndpoint:
     """Tests for GET /auth/me endpoint."""
 
-    def test_get_current_user_success(self, client, test_user):
+    @pytest.mark.asyncio
+    async def test_get_current_user_success(self, client, async_test_user):
         """Test getting current user info."""
         # First, login to get an access token
-        login_response = client.post(
+        login_response = await client.post(
             "/api/v1/auth/login",
             json={
-                "email": test_user.email,
+                "email": async_test_user.email,
                 "password": "TestPassword123"
             }
         )
         access_token = login_response.json()["access_token"]
 
         # Get current user info
-        response = client.get(
+        response = await client.get(
             "/api/v1/auth/me",
             headers={"Authorization": f"Bearer {access_token}"}
         )
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
-        assert data["email"] == test_user.email
-        assert data["first_name"] == test_user.first_name
+        assert data["email"] == async_test_user.email
+        assert data["first_name"] == async_test_user.first_name
 
-    def test_get_current_user_no_token(self, client):
+    @pytest.mark.asyncio
+    async def test_get_current_user_no_token(self, client):
         """Test getting current user without token."""
-        response = client.get("/api/v1/auth/me")
+        response = await client.get("/api/v1/auth/me")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_get_current_user_invalid_token(self, client):
+    @pytest.mark.asyncio
+    async def test_get_current_user_invalid_token(self, client):
         """Test getting current user with invalid token."""
-        response = client.get(
+        response = await client.get(
             "/api/v1/auth/me",
             headers={"Authorization": "Bearer invalid_token"}
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_get_current_user_expired_token(self, client):
+    @pytest.mark.asyncio
+    async def test_get_current_user_expired_token(self, client):
         """Test getting current user with expired token."""
         # Use a clearly invalid/malformed token
-        response = client.get(
+        response = await client.get(
             "/api/v1/auth/me",
             headers={"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid"}
         )

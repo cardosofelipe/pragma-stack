@@ -4,14 +4,15 @@ import uuid
 from datetime import datetime, timezone
 
 import pytest
-from fastapi.testclient import TestClient
+import pytest_asyncio
+from httpx import AsyncClient
 
 # Set IS_TEST environment variable BEFORE importing app
 # This prevents the scheduler from starting during tests
 os.environ["IS_TEST"] = "True"
 
 from app.main import app
-from app.core.database import get_db
+from app.core.database_async import get_async_db
 from app.models.user import User
 from app.core.auth import get_password_hash
 from app.utils.test_utils import setup_test_db, teardown_test_db, setup_async_test_db, teardown_async_test_db
@@ -35,7 +36,7 @@ def db_session():
     teardown_test_db(test_engine)
 
 
-@pytest.fixture(scope="function")  # Define a fixture
+@pytest_asyncio.fixture(scope="function")  # Define a fixture
 async def async_test_db():
     """Fixture provides new testing engine and session for each test run to improve isolation."""
 
@@ -92,22 +93,25 @@ def test_db():
     teardown_test_db(test_engine)
 
 
-@pytest.fixture(scope="function")
-def client(test_db):
+@pytest_asyncio.fixture(scope="function")
+async def client(async_test_db):
     """
-    Create a FastAPI test client with a test database.
+    Create a FastAPI async test client with a test database.
 
-    This overrides the get_db dependency to use the test database.
+    This overrides the get_async_db dependency to use the test database.
     """
-    def override_get_db():
-        try:
-            yield test_db
-        finally:
-            pass
+    test_engine, AsyncTestingSessionLocal = async_test_db
 
-    app.dependency_overrides[get_db] = override_get_db
+    async def override_get_async_db():
+        async with AsyncTestingSessionLocal() as session:
+            try:
+                yield session
+            finally:
+                pass
 
-    with TestClient(app) as test_client:
+    app.dependency_overrides[get_async_db] = override_get_async_db
+
+    async with AsyncClient(app=app, base_url="http://test") as test_client:
         yield test_client
 
     app.dependency_overrides.clear()
@@ -116,7 +120,7 @@ def client(test_db):
 @pytest.fixture
 def test_user(test_db):
     """
-    Create a test user in the database.
+    Create a test user in the database (sync version for legacy tests).
 
     Password: TestPassword123
     """
@@ -140,7 +144,7 @@ def test_user(test_db):
 @pytest.fixture
 def test_superuser(test_db):
     """
-    Create a test superuser in the database.
+    Create a test superuser in the database (sync version for legacy tests).
 
     Password: SuperPassword123
     """
@@ -159,3 +163,55 @@ def test_superuser(test_db):
     test_db.commit()
     test_db.refresh(user)
     return user
+
+
+@pytest_asyncio.fixture
+async def async_test_user(async_test_db):
+    """
+    Create a test user in the database (async version).
+
+    Password: TestPassword123
+    """
+    test_engine, AsyncTestingSessionLocal = async_test_db
+    async with AsyncTestingSessionLocal() as session:
+        user = User(
+            id=uuid.uuid4(),
+            email="testuser@example.com",
+            password_hash=get_password_hash("TestPassword123"),
+            first_name="Test",
+            last_name="User",
+            phone_number="+1234567890",
+            is_active=True,
+            is_superuser=False,
+            preferences=None,
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        return user
+
+
+@pytest_asyncio.fixture
+async def async_test_superuser(async_test_db):
+    """
+    Create a test superuser in the database (async version).
+
+    Password: SuperPassword123
+    """
+    test_engine, AsyncTestingSessionLocal = async_test_db
+    async with AsyncTestingSessionLocal() as session:
+        user = User(
+            id=uuid.uuid4(),
+            email="superuser@example.com",
+            password_hash=get_password_hash("SuperPassword123"),
+            first_name="Super",
+            last_name="User",
+            phone_number="+9876543210",
+            is_active=True,
+            is_superuser=True,
+            preferences=None,
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        return user
