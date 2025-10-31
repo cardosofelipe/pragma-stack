@@ -50,8 +50,15 @@ function isValidToken(token: string): boolean {
  * @returns Unix timestamp
  */
 function calculateExpiry(expiresIn?: number): number {
-  // Default to 15 minutes if not provided
-  const seconds = expiresIn || 900;
+  // Default to 15 minutes if not provided or invalid
+  let seconds = expiresIn || 900;
+
+  // Validate positive number and prevent overflow
+  if (seconds <= 0 || seconds > 31536000) { // Max 1 year
+    console.warn(`Invalid expiresIn value: ${expiresIn}, using default 900s`);
+    seconds = 900;
+  }
+
   return Date.now() + seconds * 1000;
 }
 
@@ -67,8 +74,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // Set complete auth state (user + tokens)
   setAuth: async (user, accessToken, refreshToken, expiresIn) => {
     // Validate inputs
-    if (!user || !user.id || !user.email) {
-      throw new Error('Invalid user object');
+    if (!user || !user.id || !user.email ||
+        typeof user.id !== 'string' || typeof user.email !== 'string' ||
+        user.id.trim() === '' || user.email.trim() === '') {
+      throw new Error('Invalid user object: id and email must be non-empty strings');
     }
 
     if (!isValidToken(accessToken) || !isValidToken(refreshToken)) {
@@ -116,8 +125,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   // Update user only
   setUser: (user) => {
-    if (!user || !user.id || !user.email) {
-      throw new Error('Invalid user object');
+    if (!user || !user.id || !user.email ||
+        typeof user.id !== 'string' || typeof user.email !== 'string' ||
+        user.id.trim() === '' || user.email.trim() === '') {
+      throw new Error('Invalid user object: id and email must be non-empty strings');
     }
 
     set({ user });
@@ -178,7 +189,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 /**
  * Initialize auth store from storage
  * Call this on app startup
+ * Errors are logged but don't throw to prevent app crashes
  */
 export async function initializeAuth(): Promise<void> {
-  await useAuthStore.getState().loadAuthFromStorage();
+  try {
+    await useAuthStore.getState().loadAuthFromStorage();
+  } catch (error) {
+    // Log error but don't throw - app should continue even if auth init fails
+    console.error('Failed to initialize auth:', error);
+  }
 }
