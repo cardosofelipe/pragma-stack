@@ -62,6 +62,7 @@ app.add_middleware(
         "DNT",
         "Cache-Control",
         "X-Requested-With",
+        "X-Device-Id",  # For session management
     ],  # Explicit headers only
     expose_headers=["Content-Length"],
     max_age=600,  # Cache preflight requests for 10 minutes
@@ -171,3 +172,48 @@ async def health_check() -> JSONResponse:
 
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+
+@app.on_event("startup")
+async def startup_event():
+    """
+    Application startup event.
+
+    Sets up background jobs and scheduled tasks.
+    """
+    import os
+
+    # Skip scheduler in test environment
+    if os.getenv("IS_TEST", "False") == "True":
+        logger.info("Test environment detected - skipping scheduler")
+        return
+
+    from app.services.session_cleanup import cleanup_expired_sessions
+
+    # Schedule session cleanup job
+    # Runs daily at 2:00 AM server time
+    scheduler.add_job(
+        cleanup_expired_sessions,
+        'cron',
+        hour=2,
+        minute=0,
+        id='cleanup_expired_sessions',
+        replace_existing=True
+    )
+
+    scheduler.start()
+    logger.info("Scheduled jobs started: session cleanup (daily at 2 AM)")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """
+    Application shutdown event.
+
+    Cleans up resources and stops background jobs.
+    """
+    import os
+
+    if os.getenv("IS_TEST", "False") != "True":
+        scheduler.shutdown()
+        logger.info("Scheduled jobs stopped")

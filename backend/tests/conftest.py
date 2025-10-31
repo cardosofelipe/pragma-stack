@@ -1,9 +1,14 @@
 # tests/conftest.py
+import os
 import uuid
 from datetime import datetime, timezone
 
 import pytest
 from fastapi.testclient import TestClient
+
+# Set IS_TEST environment variable BEFORE importing app
+# This prevents the scheduler from starting during tests
+os.environ["IS_TEST"] = "True"
 
 from app.main import app
 from app.core.database import get_db

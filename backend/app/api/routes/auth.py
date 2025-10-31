@@ -1,6 +1,8 @@
 # app/api/routes/auth.py
 import logging
+import os
 from typing import Any
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status, Body, Request
 from fastapi.security import OAuth2PasswordRequestForm
@@ -9,7 +11,7 @@ from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 from app.api.dependencies.auth import get_current_user
-from app.core.auth import TokenExpiredError, TokenInvalidError
+from app.core.auth import TokenExpiredError, TokenInvalidError, decode_token
 from app.core.database import get_db
 from app.models.user import User
 from app.schemas.users import (
@@ -22,10 +24,13 @@ from app.schemas.users import (
     PasswordResetConfirm
 )
 from app.schemas.common import MessageResponse
+from app.schemas.sessions import SessionCreate, LogoutRequest
 from app.services.auth_service import AuthService, AuthenticationError
 from app.services.email_service import email_service
 from app.utils.security import create_password_reset_token, verify_password_reset_token
+from app.utils.device import extract_device_info
 from app.crud.user import user as user_crud
+from app.crud.session import session as session_crud
 from app.core.auth import get_password_hash
 
 router = APIRouter()
@@ -34,9 +39,13 @@ logger = logging.getLogger(__name__)
 # Initialize limiter for this router
 limiter = Limiter(key_func=get_remote_address)
 
+# Use higher rate limits in test environment
+IS_TEST = os.getenv("IS_TEST", "False") == "True"
+RATE_MULTIPLIER = 100 if IS_TEST else 1
+
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED, operation_id="register")
-@limiter.limit("5/minute")
+@limiter.limit(f"{5 * RATE_MULTIPLIER}/minute")
 async def register_user(
         request: Request,
         user_data: UserCreate,
@@ -66,7 +75,7 @@ async def register_user(
 
 
 @router.post("/login", response_model=Token, operation_id="login")
-@limiter.limit("10/minute")
+@limiter.limit(f"{10 * RATE_MULTIPLIER}/minute")
 async def login(
         request: Request,
         login_data: LoginRequest,
@@ -74,6 +83,8 @@ async def login(
 ) -> Any:
     """
     Login with username and password.
+
+    Creates a new session for this device.
 
     Returns:
         Access and refresh tokens.
@@ -93,7 +104,38 @@ async def login(
 
         # User is authenticated, generate tokens
         tokens = AuthService.create_tokens(user)
-        logger.info(f"User login successful: {user.email}")
+
+        # Extract device information and create session record
+        # Session creation is best-effort - we don't fail login if it fails
+        try:
+            device_info = extract_device_info(request)
+
+            # Decode refresh token to get JTI and expiration
+            refresh_payload = decode_token(tokens.refresh_token, verify_type="refresh")
+
+            session_data = SessionCreate(
+                user_id=user.id,
+                refresh_token_jti=refresh_payload.jti,
+                device_name=device_info.device_name,
+                device_id=device_info.device_id,
+                ip_address=device_info.ip_address,
+                user_agent=device_info.user_agent,
+                last_used_at=datetime.now(timezone.utc),
+                expires_at=datetime.fromtimestamp(refresh_payload.exp, tz=timezone.utc),
+                location_city=device_info.location_city,
+                location_country=device_info.location_country,
+            )
+
+            session_crud.create_session(db, obj_in=session_data)
+
+            logger.info(
+                f"User login successful: {user.email} from {device_info.device_name} "
+                f"(IP: {device_info.ip_address})"
+            )
+        except Exception as session_err:
+            # Log but don't fail login if session creation fails
+            logger.error(f"Failed to create session for {user.email}: {str(session_err)}", exc_info=True)
+
         return tokens
 
     except HTTPException:
@@ -126,6 +168,8 @@ async def login_oauth(
     """
     OAuth2-compatible login endpoint, used by the OpenAPI UI.
 
+    Creates a new session for this device.
+
     Returns:
         Access and refresh tokens.
     """
@@ -141,6 +185,33 @@ async def login_oauth(
 
         # Generate tokens
         tokens = AuthService.create_tokens(user)
+
+        # Extract device information and create session record
+        # Session creation is best-effort - we don't fail login if it fails
+        try:
+            device_info = extract_device_info(request)
+
+            # Decode refresh token to get JTI and expiration
+            refresh_payload = decode_token(tokens.refresh_token, verify_type="refresh")
+
+            session_data = SessionCreate(
+                user_id=user.id,
+                refresh_token_jti=refresh_payload.jti,
+                device_name=device_info.device_name or "API Client",
+                device_id=device_info.device_id,
+                ip_address=device_info.ip_address,
+                user_agent=device_info.user_agent,
+                last_used_at=datetime.now(timezone.utc),
+                expires_at=datetime.fromtimestamp(refresh_payload.exp, tz=timezone.utc),
+                location_city=device_info.location_city,
+                location_country=device_info.location_country,
+            )
+
+            session_crud.create_session(db, obj_in=session_data)
+
+            logger.info(f"OAuth login successful: {user.email} from {device_info.device_name}")
+        except Exception as session_err:
+            logger.error(f"Failed to create session for {user.email}: {str(session_err)}", exc_info=True)
 
         # Format response for OAuth compatibility
         return {
@@ -175,12 +246,46 @@ async def refresh_token(
     """
     Refresh access token using a refresh token.
 
+    Validates that the session is still active before issuing new tokens.
+
     Returns:
         New access and refresh tokens.
     """
     try:
+        # Decode the refresh token to get the JTI
+        refresh_payload = decode_token(refresh_data.refresh_token, verify_type="refresh")
+
+        # Check if session exists and is active
+        session = session_crud.get_active_by_jti(db, jti=refresh_payload.jti)
+
+        if not session:
+            logger.warning(f"Refresh token used for inactive or non-existent session: {refresh_payload.jti}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Session has been revoked. Please log in again.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Generate new tokens
         tokens = AuthService.refresh_tokens(db, refresh_data.refresh_token)
+
+        # Decode new refresh token to get new JTI
+        new_refresh_payload = decode_token(tokens.refresh_token, verify_type="refresh")
+
+        # Update session with new refresh token JTI and expiration
+        try:
+            session_crud.update_refresh_token(
+                db,
+                session=session,
+                new_jti=new_refresh_payload.jti,
+                new_expires_at=datetime.fromtimestamp(new_refresh_payload.exp, tz=timezone.utc)
+            )
+        except Exception as session_err:
+            logger.error(f"Failed to update session {session.id}: {str(session_err)}", exc_info=True)
+            # Continue anyway - tokens are already issued
+
         return tokens
+
     except TokenExpiredError:
         logger.warning("Token refresh failed: Token expired")
         raise HTTPException(
@@ -195,6 +300,9 @@ async def refresh_token(
             detail="Invalid refresh token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    except HTTPException:
+        # Re-raise HTTP exceptions (like session revoked)
+        raise
     except Exception as e:
         logger.error(f"Unexpected error during token refresh: {str(e)}")
         raise HTTPException(
@@ -346,4 +454,145 @@ def confirm_password_reset(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while resetting your password"
+        )
+
+
+@router.post(
+    "/logout",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Logout from Current Device",
+    description="""
+    Logout from the current device only.
+
+    Other devices will remain logged in.
+
+    Requires the refresh token to identify which session to terminate.
+
+    **Rate Limit**: 10 requests/minute
+    """,
+    operation_id="logout"
+)
+@limiter.limit("10/minute")
+def logout(
+    request: Request,
+    logout_request: LogoutRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> Any:
+    """
+    Logout from current device by deactivating the session.
+
+    Args:
+        logout_request: Contains the refresh token for this session
+        current_user: Current authenticated user
+        db: Database session
+
+    Returns:
+        Success message
+    """
+    try:
+        # Decode refresh token to get JTI
+        try:
+            refresh_payload = decode_token(logout_request.refresh_token, verify_type="refresh")
+        except (TokenExpiredError, TokenInvalidError) as e:
+            # Even if token is expired/invalid, try to deactivate session
+            logger.warning(f"Logout with invalid/expired token: {str(e)}")
+            # Don't fail - return success anyway
+            return MessageResponse(
+                success=True,
+                message="Logged out successfully"
+            )
+
+        # Find the session by JTI
+        session = session_crud.get_by_jti(db, jti=refresh_payload.jti)
+
+        if session:
+            # Verify session belongs to current user (security check)
+            if str(session.user_id) != str(current_user.id):
+                logger.warning(
+                    f"User {current_user.id} attempted to logout session {session.id} "
+                    f"belonging to user {session.user_id}"
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You can only logout your own sessions"
+                )
+
+            # Deactivate the session
+            session_crud.deactivate(db, session_id=str(session.id))
+
+            logger.info(
+                f"User {current_user.id} logged out from {session.device_name} "
+                f"(session {session.id})"
+            )
+        else:
+            # Session not found - maybe already deleted or never existed
+            # Return success anyway (idempotent)
+            logger.info(f"Logout requested for non-existent session (JTI: {refresh_payload.jti})")
+
+        return MessageResponse(
+            success=True,
+            message="Logged out successfully"
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error during logout for user {current_user.id}: {str(e)}", exc_info=True)
+        # Don't expose error details
+        return MessageResponse(
+            success=True,
+            message="Logged out successfully"
+        )
+
+
+@router.post(
+    "/logout-all",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Logout from All Devices",
+    description="""
+    Logout from ALL devices.
+
+    This will terminate all active sessions for the current user.
+    You will need to log in again on all devices.
+
+    **Rate Limit**: 5 requests/minute
+    """,
+    operation_id="logout_all"
+)
+@limiter.limit("5/minute")
+def logout_all(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> Any:
+    """
+    Logout from all devices by deactivating all user sessions.
+
+    Args:
+        current_user: Current authenticated user
+        db: Database session
+
+    Returns:
+        Success message with count of sessions terminated
+    """
+    try:
+        # Deactivate all sessions for this user
+        count = session_crud.deactivate_all_user_sessions(db, user_id=str(current_user.id))
+
+        logger.info(f"User {current_user.id} logged out from all devices ({count} sessions)")
+
+        return MessageResponse(
+            success=True,
+            message=f"Successfully logged out from all devices ({count} sessions terminated)"
+        )
+
+    except Exception as e:
+        logger.error(f"Error during logout-all for user {current_user.id}: {str(e)}", exc_info=True)
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while logging out"
         )

@@ -207,33 +207,54 @@ class TestRefreshToken:
 
     def test_refresh_token_success(self, client, db_session):
         """Test successful token refresh."""
-        # Mock refresh to return tokens
-        mock_tokens = MagicMock(
-            access_token="new_access_token",
-            refresh_token="new_refresh_token",
-            token_type="bearer"
+        from app.models.user import User
+        from app.core.auth import get_password_hash
+        import uuid
+
+        # Create a test user
+        test_user = User(
+            id=uuid.uuid4(),
+            email="refreshtest@example.com",
+            password_hash=get_password_hash("TestPassword123"),
+            first_name="Refresh",
+            last_name="Test",
+            is_active=True
+        )
+        db_session.add(test_user)
+        db_session.commit()
+
+        # Login to get real tokens with a session
+        login_response = client.post(
+            "/auth/login",
+            json={
+                "email": "refreshtest@example.com",
+                "password": "TestPassword123"
+            }
+        )
+        assert login_response.status_code == 200
+        tokens = login_response.json()
+
+        # Test refresh with real token
+        response = client.post(
+            "/auth/refresh",
+            json={
+                "refresh_token": tokens["refresh_token"]
+            }
         )
 
-        with patch.object(AuthService, 'refresh_tokens', return_value=mock_tokens):
-            # Test request
-            response = client.post(
-                "/auth/refresh",
-                json={
-                    "refresh_token": "valid_refresh_token"
-                }
-            )
-
-            # Assertions
-            assert response.status_code == 200
-            data = response.json()
-            assert data["access_token"] == "new_access_token"
-            assert data["refresh_token"] == "new_refresh_token"
-            assert data["token_type"] == "bearer"
+        # Assertions
+        assert response.status_code == 200
+        data = response.json()
+        assert "access_token" in data
+        assert "refresh_token" in data
+        assert data["token_type"] == "bearer"
 
     def test_refresh_token_expired(self, client, db_session):
         """Test refresh with expired token."""
-        # Mock refresh to raise expired token error
-        with patch.object(AuthService, 'refresh_tokens',
+        from app.api.routes import auth as auth_routes
+
+        # Mock decode_token to raise expired token error
+        with patch.object(auth_routes, 'decode_token',
                           side_effect=TokenExpiredError("Token expired")):
             # Test request
             response = client.post(
@@ -245,7 +266,13 @@ class TestRefreshToken:
 
             # Assertions
             assert response.status_code == 401
-            assert "expired" in response.json()["detail"]
+            # Check if it's in the new error format or old detail format
+            response_data = response.json()
+            if "errors" in response_data:
+                assert "expired" in response_data["errors"][0]["message"].lower()
+            else:
+                assert "detail" in response_data
+                assert "expired" in response_data["detail"].lower()
 
     def test_refresh_token_invalid(self, client, db_session):
         """Test refresh with invalid token."""

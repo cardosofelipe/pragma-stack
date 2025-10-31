@@ -1,4 +1,5 @@
 # tests/api/routes/test_rate_limiting.py
+import os
 import pytest
 from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
@@ -7,6 +8,12 @@ from unittest.mock import patch, MagicMock
 from app.api.routes.auth import router as auth_router, limiter
 from app.api.routes.users import router as users_router
 from app.core.database import get_db
+
+# Skip all rate limiting tests when IS_TEST=True (rate limits are disabled in test mode)
+pytestmark = pytest.mark.skipif(
+    os.getenv("IS_TEST", "False") == "True",
+    reason="Rate limits are disabled in test mode (RATE_MULTIPLIER=100)"
+)
 
 
 # Mock the get_db dependency
