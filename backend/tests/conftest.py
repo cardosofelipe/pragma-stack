@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 # Set IS_TEST environment variable BEFORE importing app
 # This prevents the scheduler from starting during tests
@@ -36,10 +36,12 @@ def db_session():
     teardown_test_db(test_engine)
 
 
-@pytest_asyncio.fixture(scope="function")  # Define a fixture
+@pytest_asyncio.fixture(scope="function")  # Function scope for isolation
 async def async_test_db():
-    """Fixture provides new testing engine and session for each test run to improve isolation."""
+    """Fixture provides testing engine and session for each test.
 
+    Each test gets a fresh database for complete isolation.
+    """
     test_engine, AsyncTestingSessionLocal = await setup_async_test_db()
     yield test_engine, AsyncTestingSessionLocal
     await teardown_async_test_db(test_engine)
@@ -111,7 +113,9 @@ async def client(async_test_db):
 
     app.dependency_overrides[get_async_db] = override_get_async_db
 
-    async with AsyncClient(app=app, base_url="http://test") as test_client:
+    # Use ASGITransport for httpx >= 0.27
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as test_client:
         yield test_client
 
     app.dependency_overrides.clear()

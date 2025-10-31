@@ -9,13 +9,13 @@ from app.main import app
 @pytest.fixture
 def client():
     """Create a FastAPI test client for the main app."""
-    # Mock get_db to avoid database connection issues
-    with patch("app.main.get_db") as mock_get_db:
-        def mock_session_generator():
-            from unittest.mock import MagicMock
+    # Mock get_async_db to avoid database connection issues
+    with patch("app.core.database_async.get_async_db") as mock_get_db:
+        async def mock_session_generator():
+            from unittest.mock import MagicMock, AsyncMock
             mock_session = MagicMock()
-            mock_session.execute.return_value = None
-            mock_session.close.return_value = None
+            mock_session.execute = AsyncMock(return_value=None)
+            mock_session.close = AsyncMock(return_value=None)
             yield mock_session
 
         mock_get_db.side_effect = lambda: mock_session_generator()
