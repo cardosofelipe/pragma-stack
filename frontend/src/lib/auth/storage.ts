@@ -134,14 +134,17 @@ export async function getTokens(): Promise<TokenStorage | null> {
     }
 
     const decrypted = await decryptData(encrypted);
-    const tokens = JSON.parse(decrypted) as TokenStorage;
+    const parsed = JSON.parse(decrypted);
 
-    // Validate structure
-    if (!tokens || typeof tokens !== 'object') {
+    // Validate structure - must have required fields
+    if (!parsed || typeof parsed !== 'object' ||
+        !('accessToken' in parsed) || !('refreshToken' in parsed) ||
+        (parsed.accessToken !== null && typeof parsed.accessToken !== 'string') ||
+        (parsed.refreshToken !== null && typeof parsed.refreshToken !== 'string')) {
       throw new Error('Invalid token structure');
     }
 
-    return tokens;
+    return parsed as TokenStorage;
   } catch (error) {
     console.error('Failed to retrieve tokens:', error);
     // If decryption fails, clear invalid data

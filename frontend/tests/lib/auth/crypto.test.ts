@@ -2,7 +2,7 @@
  * Tests for crypto utilities
  */
 
-import { encryptData, decryptData, clearEncryptionKey } from '../crypto';
+import { encryptData, decryptData, clearEncryptionKey } from '@/lib/auth/crypto';
 
 describe('Crypto Utilities', () => {
   beforeEach(() => {
