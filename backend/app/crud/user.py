@@ -1,7 +1,8 @@
 # app/crud/user.py
-from typing import Optional, Union, Dict, Any
+from typing import Optional, Union, Dict, Any, List, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import or_, asc, desc
 from app.crud.base import CRUDBase
 from app.models.user import User
 from app.schemas.users import UserCreate, UserUpdate
@@ -62,6 +63,82 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             del update_data["password"]
 
         return super().update(db, db_obj=db_obj, obj_in=update_data)
+
+    def get_multi_with_total(
+        self,
+        db: Session,
+        *,
+        skip: int = 0,
+        limit: int = 100,
+        sort_by: Optional[str] = None,
+        sort_order: str = "asc",
+        filters: Optional[Dict[str, Any]] = None,
+        search: Optional[str] = None
+    ) -> Tuple[List[User], int]:
+        """
+        Get multiple users with total count, filtering, sorting, and search.
+
+        Args:
+            db: Database session
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            sort_by: Field name to sort by
+            sort_order: Sort order ("asc" or "desc")
+            filters: Dictionary of filters (field_name: value)
+            search: Search term to match against email, first_name, last_name
+
+        Returns:
+            Tuple of (users list, total count)
+        """
+        # Validate pagination
+        if skip < 0:
+            raise ValueError("skip must be non-negative")
+        if limit < 0:
+            raise ValueError("limit must be non-negative")
+        if limit > 1000:
+            raise ValueError("Maximum limit is 1000")
+
+        try:
+            # Build base query
+            query = db.query(User)
+
+            # Exclude soft-deleted users
+            query = query.filter(User.deleted_at.is_(None))
+
+            # Apply filters
+            if filters:
+                for field, value in filters.items():
+                    if hasattr(User, field) and value is not None:
+                        query = query.filter(getattr(User, field) == value)
+
+            # Apply search
+            if search:
+                search_filter = or_(
+                    User.email.ilike(f"%{search}%"),
+                    User.first_name.ilike(f"%{search}%"),
+                    User.last_name.ilike(f"%{search}%")
+                )
+                query = query.filter(search_filter)
+
+            # Get total count
+            total = query.count()
+
+            # Apply sorting
+            if sort_by and hasattr(User, sort_by):
+                sort_column = getattr(User, sort_by)
+                if sort_order.lower() == "desc":
+                    query = query.order_by(desc(sort_column))
+                else:
+                    query = query.order_by(asc(sort_column))
+
+            # Apply pagination
+            users = query.offset(skip).limit(limit).all()
+
+            return users, total
+
+        except Exception as e:
+            logger.error(f"Error retrieving paginated users: {str(e)}")
+            raise
 
     def is_active(self, user: User) -> bool:
         return user.is_active

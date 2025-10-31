@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import relationship
 
 from .base import Base, TimestampMixin, UUIDMixin
 
@@ -16,6 +17,9 @@ class User(Base, UUIDMixin, TimestampMixin):
     is_superuser = Column(Boolean, default=False, nullable=False, index=True)
     preferences = Column(JSONB)
     deleted_at = Column(DateTime(timezone=True), nullable=True, index=True)
+
+    # Relationships
+    user_organizations = relationship("UserOrganization", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User {self.email}>"
