@@ -48,10 +48,7 @@ echo -e "${YELLOW}⚙️  Generating TypeScript API client...${NC}"
 if npx @hey-api/openapi-ts \
     --input /tmp/openapi.json \
     --output "$OUTPUT_DIR" \
-    --client axios \
-    --name ApiClient \
-    --useOptions true \
-    --exportSchemas true; then
+    --client @hey-api/client-axios; then
     echo -e "${GREEN}✓ API client generated successfully${NC}"
 else
     echo -e "${RED}✗ Failed to generate API client${NC}"

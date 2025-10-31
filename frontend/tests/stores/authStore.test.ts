@@ -21,6 +21,11 @@ describe('Auth Store', () => {
     });
 
     jest.clearAllMocks();
+
+    // Reset storage mocks to default successful implementations
+    (storage.saveTokens as jest.Mock).mockResolvedValue(undefined);
+    (storage.getTokens as jest.Mock).mockResolvedValue(null);
+    (storage.clearTokens as jest.Mock).mockResolvedValue(undefined);
   });
 
   describe('User validation', () => {
