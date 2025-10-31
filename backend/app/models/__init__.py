@@ -6,9 +6,11 @@ Imports all models to ensure they're registered with SQLAlchemy.
 from app.core.database import Base
 from .base import TimestampMixin, UUIDMixin
 
-# Import user model
+# Import models
 from .user import User
+from .user_session import UserSession
+
 __all__ = [
     'Base', 'TimestampMixin', 'UUIDMixin',
-    'User',
+    'User', 'UserSession',
 ]
