@@ -31,13 +31,22 @@ All Python code should follow [PEP 8](https://www.python.org/dev/peps/pep-0008/)
 Always use type hints for function parameters and return values:
 
 ```python
-from typing import Optional, List
+from typing import Optional
 from uuid import UUID
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
-def get_user(db: Session, user_id: UUID) -> Optional[User]:
+async def get_user(db: AsyncSession, user_id: UUID) -> Optional[User]:
     """Retrieve a user by ID."""
-    return db.query(User).filter(User.id == user_id).first()
+    result = await db.execute(select(User).where(User.id == user_id))
+    return result.scalar_one_or_none()
 ```
+
+**Modern Python Type Hints:**
+- Use `list[T]` instead of `List[T]` (Python 3.10+)
+- Use `dict[K, V]` instead of `Dict[K, V]`
+- Use `T | None` instead of `Optional[T]`
+- Use `str | int` instead of `Union[str, int]`
 
 ### 3. Docstrings
 
@@ -207,23 +216,24 @@ if not user:
 
 ### Error Handling Pattern
 
-Always follow this pattern in CRUD operations:
+Always follow this pattern in CRUD operations (Async version):
 
 ```python
 from sqlalchemy.exc import IntegrityError, OperationalError, DataError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-def create_user(db: Session, user_in: UserCreate) -> User:
+async def create_user(db: AsyncSession, user_in: UserCreate) -> User:
     """Create a new user."""
     try:
         db_user = User(**user_in.model_dump())
         db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+        await db.commit()
+        await db.refresh(db_user)
         logger.info(f"User created: {db_user.id}")
         return db_user
 
     except IntegrityError as e:
-        db.rollback()
+        await db.rollback()
         logger.error(f"Integrity error creating user: {str(e)}")
 
         # Check for specific constraint violations
@@ -237,7 +247,7 @@ def create_user(db: Session, user_in: UserCreate) -> User:
         raise DatabaseError(message="Failed to create user")
 
     except OperationalError as e:
-        db.rollback()
+        await db.rollback()
         logger.error(f"Database operational error: {str(e)}", exc_info=True)
         raise DatabaseError(message="Database is currently unavailable")
 
@@ -274,11 +284,25 @@ All error responses follow this structure:
 
 ## Database Operations
 
-### Use the CRUD Base Class
+### Async CRUD Pattern
+
+**IMPORTANT**: This application uses **async SQLAlchemy** with modern patterns for better performance and testability.
+
+#### Core Principles
+
+1. **Async by Default**: All database operations are async
+2. **Modern SQLAlchemy 2.0**: Use `select()` instead of `.query()`
+3. **Type Safety**: Full type hints with generics
+4. **Testability**: Easy to mock and test
+5. **Consistent Ordering**: Always order queries for pagination
+
+### Use the Async CRUD Base Class
 
 Always inherit from `CRUDBase` for database operations:
 
 ```python
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.crud.base import CRUDBase
 from app.models.user import User
 from app.schemas.users import UserCreate, UserUpdate
@@ -286,11 +310,92 @@ from app.schemas.users import UserCreate, UserUpdate
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     """CRUD operations for User model."""
 
-    def get_by_email(self, db: Session, email: str) -> Optional[User]:
+    async def get_by_email(
+        self,
+        db: AsyncSession,
+        email: str
+    ) -> User | None:
         """Get user by email address."""
-        return db.query(User).filter(User.email == email).first()
+        result = await db.execute(
+            select(User).where(User.email == email)
+        )
+        return result.scalar_one_or_none()
 
 user_crud = CRUDUser(User)
+```
+
+**Key Points:**
+- Use `async def` for all methods
+- Use `select()` instead of `db.query()`
+- Use `await db.execute()` for queries
+- Use `.scalar_one_or_none()` instead of `.first()`
+- Use `T | None` instead of `Optional[T]`
+
+### Modern SQLAlchemy Patterns
+
+#### Query Pattern (Old vs New)
+
+```python
+# ❌ OLD - Legacy query() API (sync)
+def get_user(db: Session, user_id: UUID) -> Optional[User]:
+    return db.query(User).filter(User.id == user_id).first()
+
+# ✅ NEW - Modern select() API (async)
+async def get_user(db: AsyncSession, user_id: UUID) -> User | None:
+    result = await db.execute(
+        select(User).where(User.id == user_id)
+    )
+    return result.scalar_one_or_none()
+```
+
+#### Multiple Results
+
+```python
+# ❌ OLD
+def get_users(db: Session) -> List[User]:
+    return db.query(User).all()
+
+# ✅ NEW
+async def get_users(db: AsyncSession) -> list[User]:
+    result = await db.execute(select(User))
+    return list(result.scalars().all())
+```
+
+#### With Ordering and Pagination
+
+```python
+# ✅ CORRECT - Always use ordering for pagination
+async def get_users_paginated(
+    db: AsyncSession,
+    skip: int = 0,
+    limit: int = 100
+) -> list[User]:
+    result = await db.execute(
+        select(User)
+        .where(User.deleted_at.is_(None))  # Soft delete filter
+        .order_by(User.created_at.desc())  # Consistent ordering
+        .offset(skip)
+        .limit(limit)
+    )
+    return list(result.scalars().all())
+```
+
+#### With Relationships (Eager Loading)
+
+```python
+from sqlalchemy.orm import selectinload
+
+# Load user with sessions
+async def get_user_with_sessions(
+    db: AsyncSession,
+    user_id: UUID
+) -> User | None:
+    result = await db.execute(
+        select(User)
+        .where(User.id == user_id)
+        .options(selectinload(User.sessions))  # Eager load relationship
+    )
+    return result.scalar_one_or_none()
 ```
 
 ### Transaction Management
@@ -298,10 +403,13 @@ user_crud = CRUDUser(User)
 #### In Routes (Dependency Injection)
 
 ```python
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_db
+
 @router.post("/users", response_model=UserResponse)
-def create_user(
+async def create_user(
     user_in: UserCreate,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ):
     """
     Create a new user.
@@ -309,25 +417,32 @@ def create_user(
     The database session is automatically managed by FastAPI.
     Commit on success, rollback on error.
     """
-    return user_crud.create(db, obj_in=user_in)
+    return await user_crud.create(db, obj_in=user_in)
 ```
 
-#### In Services (Context Manager)
+**Key Points:**
+- Route functions must be `async def`
+- Database parameter is `AsyncSession`
+- Always `await` CRUD operations
+
+#### In Services (Multiple Operations)
 
 ```python
-from app.core.database import transaction_scope
-
-def complex_operation():
+async def complex_operation(
+    db: AsyncSession,
+    user_data: UserCreate,
+    session_data: SessionCreate
+) -> tuple[User, UserSession]:
     """
     Perform multiple database operations atomically.
 
-    The context manager automatically commits on success
-    or rolls back on error.
+    The session automatically commits on success or rolls back on error.
     """
-    with transaction_scope() as db:
-        user = user_crud.create(db, obj_in=user_data)
-        session = session_crud.create(db, obj_in=session_data)
-        return user, session
+    user = await user_crud.create(db, obj_in=user_data)
+    session = await session_crud.create(db, obj_in=session_data)
+
+    # Commit is handled by the route's dependency
+    return user, session
 ```
 
 ### Use Soft Deletes
@@ -336,7 +451,7 @@ Prefer soft deletes over hard deletes for audit trails:
 
 ```python
 # Good - Soft delete (sets deleted_at)
-user_crud.soft_delete(db, id=user_id)
+await user_crud.soft_delete(db, id=user_id)
 
 # Acceptable only when required - Hard delete
 user_crud.remove(db, id=user_id)
@@ -597,7 +712,7 @@ Follow the existing test structure:
 
 ```
 tests/
-├── conftest.py              # Shared fixtures
+├── conftest.py              # Shared fixtures (async)
 ├── api/                     # Integration tests
 │   ├── test_users.py
 │   └── test_auth.py
@@ -606,31 +721,52 @@ tests/
 └── services/                # Service tests
 ```
 
+### Async Testing with pytest-asyncio
+
+**IMPORTANT**: All tests using async database operations must use `pytest-asyncio`.
+
+```python
+import pytest
+import pytest_asyncio
+from sqlalchemy.ext.asyncio import AsyncSession
+
+# Mark async tests
+@pytest.mark.asyncio
+async def test_create_user():
+    """Test async user creation."""
+    pass
+```
+
 ### Test Naming Convention
 
 ```python
-# Test function names should be descriptive
-def test_create_user_with_valid_data():
+# Test function names should be descriptive and use async
+@pytest.mark.asyncio
+async def test_create_user_with_valid_data():
     """Test creating a user with valid data succeeds."""
     pass
 
-def test_create_user_with_duplicate_email_raises_error():
+@pytest.mark.asyncio
+async def test_create_user_with_duplicate_email_raises_error():
     """Test creating a user with duplicate email raises DuplicateError."""
     pass
 
-def test_get_user_that_does_not_exist_returns_none():
+@pytest.mark.asyncio
+async def test_get_user_that_does_not_exist_returns_none():
     """Test getting non-existent user returns None."""
     pass
 ```
 
-### Use Fixtures
+### Use Async Fixtures
 
 ```python
 import pytest
+import pytest_asyncio
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 
-@pytest.fixture
-def test_user(db_session: Session) -> User:
+@pytest_asyncio.fixture
+async def test_user(db_session: AsyncSession) -> User:
     """Create a test user."""
     user = User(
         email="test@example.com",
@@ -638,53 +774,107 @@ def test_user(db_session: Session) -> User:
         is_active=True
     )
     db_session.add(user)
-    db_session.commit()
-    db_session.refresh(user)
+    await db_session.commit()
+    await db_session.refresh(user)
     return user
 
-def test_get_user(db_session: Session, test_user: User):
+@pytest.mark.asyncio
+async def test_get_user(db_session: AsyncSession, test_user: User):
     """Test retrieving a user by ID."""
-    user = user_crud.get(db_session, id=test_user.id)
+    user = await user_crud.get(db_session, id=test_user.id)
     assert user is not None
     assert user.email == test_user.email
 ```
 
+### Database Test Configuration
+
+Use SQLite in-memory for tests with proper pooling:
+
+```python
+# tests/conftest.py
+import pytest
+import pytest_asyncio
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
+from app.models.base import Base
+
+@pytest_asyncio.fixture(scope="function")
+async def db_engine():
+    """Create async engine for testing."""
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,  # IMPORTANT: Share single in-memory DB
+    )
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    yield engine
+
+    await engine.dispose()
+
+@pytest_asyncio.fixture
+async def db_session(db_engine):
+    """Create async session for tests."""
+    async_session = sessionmaker(
+        db_engine,
+        class_=AsyncSession,
+        expire_on_commit=False
+    )
+
+    async with async_session() as session:
+        yield session
+        await session.rollback()
+```
+
 ### Test Coverage
 
-Aim for high test coverage:
+Aim for 80%+ test coverage:
 
 ```python
 # Test the happy path
-def test_create_user_success():
+@pytest.mark.asyncio
+async def test_create_user_success():
     pass
 
 # Test error cases
-def test_create_user_with_duplicate_email():
+@pytest.mark.asyncio
+async def test_create_user_with_duplicate_email():
     pass
 
-def test_create_user_with_invalid_email():
+@pytest.mark.asyncio
+async def test_create_user_with_invalid_email():
     pass
 
 # Test edge cases
-def test_create_user_with_empty_password():
+@pytest.mark.asyncio
+async def test_create_user_with_empty_password():
     pass
 
 # Test authorization
-def test_user_cannot_delete_other_users_resources():
+@pytest.mark.asyncio
+async def test_user_cannot_delete_other_users_resources():
     pass
 
-def test_superuser_can_delete_any_resource():
+@pytest.mark.asyncio
+async def test_superuser_can_delete_any_resource():
     pass
 ```
 
-### API Testing Pattern
+### API Testing Pattern (Async)
 
 ```python
-from fastapi.testclient import TestClient
+import pytest
+from httpx import AsyncClient
+from app.main import app
 
-def test_create_user_endpoint(client: TestClient):
-    """Test POST /api/v1/users endpoint."""
-    response = client.post(
+@pytest.mark.asyncio
+async def test_create_user_endpoint():
+    """Test POST /api/v1/users endpoint (async)."""
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        response = await client.post(
         "/api/v1/users",
         json={
             "email": "newuser@example.com",
