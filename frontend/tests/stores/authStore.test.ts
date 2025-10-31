@@ -84,9 +84,8 @@ describe('Auth Store', () => {
       };
 
       await expect(
-        // @ts-expect-error - Testing invalid input
         useAuthStore.getState().setAuth(
-          invalidUser,
+          invalidUser as any, // Testing runtime validation with invalid type
           'valid.access.token',
           'valid.refresh.token'
         )
@@ -335,6 +334,167 @@ describe('Auth Store', () => {
 
       const state = useAuthStore.getState();
       expect(state.isAuthenticated).toBe(false);
+    });
+  });
+
+  describe('setTokens', () => {
+    it('should update tokens while preserving user state', async () => {
+      // First set initial auth with user
+      await useAuthStore.getState().setAuth(
+        { id: 'user-1', email: 'test@example.com', is_active: true, is_superuser: false },
+        'old.access.token',
+        'old.refresh.token'
+      );
+
+      const oldUser = useAuthStore.getState().user;
+
+      // Now update just the tokens
+      await useAuthStore.getState().setTokens(
+        'new.access.token',
+        'new.refresh.token',
+        900
+      );
+
+      const state = useAuthStore.getState();
+      expect(state.accessToken).toBe('new.access.token');
+      expect(state.refreshToken).toBe('new.refresh.token');
+      expect(state.user).toBe(oldUser); // User should remain unchanged
+      expect(state.tokenExpiresAt).toBeGreaterThan(Date.now());
+    });
+
+    it('should reject invalid access token in setTokens', async () => {
+      await expect(
+        useAuthStore.getState().setTokens('invalid', 'valid.refresh.token', 900)
+      ).rejects.toThrow('Invalid token format');
+    });
+
+    it('should reject invalid refresh token in setTokens', async () => {
+      await expect(
+        useAuthStore.getState().setTokens('valid.access.token', 'invalid', 900)
+      ).rejects.toThrow('Invalid token format');
+    });
+
+    it('should throw if storage fails in setTokens', async () => {
+      (storage.saveTokens as jest.Mock).mockRejectedValue(new Error('Storage error'));
+
+      await expect(
+        useAuthStore.getState().setTokens('valid.access.token', 'valid.refresh.token', 900)
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('setUser', () => {
+    it('should update user while preserving auth state', async () => {
+      // First set initial auth
+      await useAuthStore.getState().setAuth(
+        { id: 'user-1', email: 'test@example.com', is_active: true, is_superuser: false },
+        'valid.access.token',
+        'valid.refresh.token'
+      );
+
+      const oldToken = useAuthStore.getState().accessToken;
+
+      // Update just the user
+      const newUser = { id: 'user-1', email: 'updated@example.com', is_active: true, is_superuser: true };
+      useAuthStore.getState().setUser(newUser);
+
+      const state = useAuthStore.getState();
+      expect(state.user).toEqual(newUser);
+      expect(state.accessToken).toBe(oldToken); // Tokens unchanged
+    });
+
+    it('should reject null user', () => {
+      expect(() => {
+        useAuthStore.getState().setUser(null as any);
+      }).toThrow('Invalid user object');
+    });
+
+    it('should reject user with empty id', () => {
+      expect(() => {
+        useAuthStore.getState().setUser({ id: '', email: 'test@example.com', is_active: true, is_superuser: false });
+      }).toThrow('Invalid user object');
+    });
+
+    it('should reject user with whitespace-only id', () => {
+      expect(() => {
+        useAuthStore.getState().setUser({ id: '   ', email: 'test@example.com', is_active: true, is_superuser: false });
+      }).toThrow('Invalid user object');
+    });
+
+    it('should reject user with non-string email', () => {
+      expect(() => {
+        useAuthStore.getState().setUser({ id: 'user-1', email: 123 as any, is_active: true, is_superuser: false });
+      }).toThrow('Invalid user object');
+    });
+  });
+
+  describe('loadAuthFromStorage', () => {
+    it('should load valid tokens from storage', async () => {
+      (storage.getTokens as jest.Mock).mockResolvedValue({
+        accessToken: 'valid.access.token',
+        refreshToken: 'valid.refresh.token',
+      });
+
+      await useAuthStore.getState().loadAuthFromStorage();
+
+      const state = useAuthStore.getState();
+      expect(state.accessToken).toBe('valid.access.token');
+      expect(state.refreshToken).toBe('valid.refresh.token');
+      expect(state.isAuthenticated).toBe(true);
+      expect(state.isLoading).toBe(false);
+    });
+
+    it('should handle null tokens from storage', async () => {
+      (storage.getTokens as jest.Mock).mockResolvedValue(null);
+
+      await useAuthStore.getState().loadAuthFromStorage();
+
+      const state = useAuthStore.getState();
+      expect(state.isAuthenticated).toBe(false);
+      expect(state.isLoading).toBe(false);
+    });
+
+    it('should reject invalid token format from storage', async () => {
+      (storage.getTokens as jest.Mock).mockResolvedValue({
+        accessToken: 'invalid',
+        refreshToken: 'valid.refresh.token',
+      });
+
+      await useAuthStore.getState().loadAuthFromStorage();
+
+      const state = useAuthStore.getState();
+      expect(state.isAuthenticated).toBe(false);
+      expect(state.isLoading).toBe(false);
+    });
+
+    it('should handle storage errors gracefully', async () => {
+      (storage.getTokens as jest.Mock).mockRejectedValue(new Error('Storage error'));
+
+      await useAuthStore.getState().loadAuthFromStorage();
+
+      const state = useAuthStore.getState();
+      expect(state.isLoading).toBe(false);
+    });
+  });
+
+  describe('initializeAuth', () => {
+    it('should call loadAuthFromStorage', async () => {
+      (storage.getTokens as jest.Mock).mockResolvedValue({
+        accessToken: 'valid.access.token',
+        refreshToken: 'valid.refresh.token',
+      });
+
+      const { initializeAuth } = await import('@/stores/authStore');
+      await initializeAuth();
+
+      expect(storage.getTokens).toHaveBeenCalled();
+    });
+
+    it('should not throw even if loadAuthFromStorage fails', async () => {
+      (storage.getTokens as jest.Mock).mockRejectedValue(new Error('Storage error'));
+
+      const { initializeAuth } = await import('@/stores/authStore');
+      await expect(initializeAuth()).resolves.not.toThrow();
     });
   });
 });

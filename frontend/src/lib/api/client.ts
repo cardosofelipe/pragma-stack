@@ -6,7 +6,7 @@
 import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/stores/authStore';
 import { parseAPIError, type APIErrorResponse } from './errors';
-import config from '@/config';
+import config from '@/config/app.config';
 
 /**
  * Separate axios instance for auth endpoints
