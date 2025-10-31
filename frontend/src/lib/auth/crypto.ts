@@ -1,27 +1,50 @@
 /**
  * Cryptographic utilities for secure token storage
  * Implements AES-GCM encryption for localStorage fallback
+ * SSR-safe: All browser APIs guarded
  */
 
 const ENCRYPTION_KEY_NAME = 'auth_encryption_key';
+
+/**
+ * Check if crypto APIs are available (browser only)
+ */
+function isCryptoAvailable(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    typeof crypto !== 'undefined' &&
+    typeof crypto.subtle !== 'undefined' &&
+    typeof sessionStorage !== 'undefined'
+  );
+}
 
 /**
  * Generate or retrieve encryption key
  * Key is stored in sessionStorage (cleared on browser close)
  */
 async function getEncryptionKey(): Promise<CryptoKey> {
+  if (!isCryptoAvailable()) {
+    throw new Error('Crypto API not available - must be called in browser context');
+  }
+
   // Check if key exists in session
   const storedKey = sessionStorage.getItem(ENCRYPTION_KEY_NAME);
 
   if (storedKey) {
-    const keyData = JSON.parse(storedKey);
-    return await crypto.subtle.importKey(
-      'jwk',
-      keyData,
-      { name: 'AES-GCM', length: 256 },
-      true,
-      ['encrypt', 'decrypt']
-    );
+    try {
+      const keyData = JSON.parse(storedKey);
+      return await crypto.subtle.importKey(
+        'jwk',
+        keyData,
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt', 'decrypt']
+      );
+    } catch (error) {
+      // Corrupted key, regenerate
+      console.warn('Failed to import stored key, generating new key:', error);
+      sessionStorage.removeItem(ENCRYPTION_KEY_NAME);
+    }
   }
 
   // Generate new key
@@ -32,8 +55,13 @@ async function getEncryptionKey(): Promise<CryptoKey> {
   );
 
   // Store key in sessionStorage
-  const exportedKey = await crypto.subtle.exportKey('jwk', key);
-  sessionStorage.setItem(ENCRYPTION_KEY_NAME, JSON.stringify(exportedKey));
+  try {
+    const exportedKey = await crypto.subtle.exportKey('jwk', key);
+    sessionStorage.setItem(ENCRYPTION_KEY_NAME, JSON.stringify(exportedKey));
+  } catch (error) {
+    console.warn('Failed to store encryption key:', error);
+    // Continue anyway - key is in memory
+  }
 
   return key;
 }
@@ -42,8 +70,13 @@ async function getEncryptionKey(): Promise<CryptoKey> {
  * Encrypt data using AES-GCM
  * @param data - Data to encrypt
  * @returns Base64 encoded encrypted data with IV
+ * @throws Error if crypto is not available or encryption fails
  */
 export async function encryptData(data: string): Promise<string> {
+  if (!isCryptoAvailable()) {
+    throw new Error('Encryption not available in SSR context');
+  }
+
   try {
     const key = await getEncryptionKey();
     const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV for GCM
@@ -73,8 +106,13 @@ export async function encryptData(data: string): Promise<string> {
  * Decrypt data encrypted with encryptData
  * @param encryptedData - Base64 encoded encrypted data with IV
  * @returns Decrypted string
+ * @throws Error if crypto is not available or decryption fails
  */
 export async function decryptData(encryptedData: string): Promise<string> {
+  if (!isCryptoAvailable()) {
+    throw new Error('Decryption not available in SSR context');
+  }
+
   try {
     const key = await getEncryptionKey();
 
@@ -102,7 +140,14 @@ export async function decryptData(encryptedData: string): Promise<string> {
 /**
  * Clear encryption key from session
  * Call this on logout to invalidate encrypted data
+ * SSR-safe: No-op if sessionStorage not available
  */
 export function clearEncryptionKey(): void {
-  sessionStorage.removeItem(ENCRYPTION_KEY_NAME);
+  if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
+    try {
+      sessionStorage.removeItem(ENCRYPTION_KEY_NAME);
+    } catch (error) {
+      console.warn('Failed to clear encryption key:', error);
+    }
+  }
 }

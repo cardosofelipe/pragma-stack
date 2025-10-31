@@ -2,6 +2,7 @@
  * Secure token storage abstraction
  * Primary: httpOnly cookies (server-side)
  * Fallback: Encrypted localStorage (client-side)
+ * SSR-safe: All browser APIs guarded
  */
 
 import { encryptData, decryptData, clearEncryptionKey } from './crypto';
@@ -17,13 +18,40 @@ const STORAGE_METHOD_KEY = 'auth_storage_method';
 export type StorageMethod = 'cookie' | 'localStorage';
 
 /**
+ * Check if localStorage is available (browser only)
+ */
+function isLocalStorageAvailable(): boolean {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+    return false;
+  }
+
+  try {
+    const test = '__storage_test__';
+    localStorage.setItem(test, test);
+    localStorage.removeItem(test);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Get current storage method
+ * SSR-safe: Returns 'localStorage' as default (actual check happens client-side)
  */
 export function getStorageMethod(): StorageMethod {
-  // Check if we previously set a storage method
-  const stored = localStorage.getItem(STORAGE_METHOD_KEY);
-  if (stored === 'cookie' || stored === 'localStorage') {
-    return stored;
+  if (!isLocalStorageAvailable()) {
+    return 'localStorage'; // Default, will be checked again client-side
+  }
+
+  try {
+    // Check if we previously set a storage method
+    const stored = localStorage.getItem(STORAGE_METHOD_KEY);
+    if (stored === 'cookie' || stored === 'localStorage') {
+      return stored;
+    }
+  } catch (error) {
+    console.warn('Failed to get storage method:', error);
   }
 
   // Default to localStorage for client-side auth
@@ -33,14 +61,25 @@ export function getStorageMethod(): StorageMethod {
 
 /**
  * Set storage method preference
+ * SSR-safe: No-op if localStorage not available
  */
 export function setStorageMethod(method: StorageMethod): void {
-  localStorage.setItem(STORAGE_METHOD_KEY, method);
+  if (!isLocalStorageAvailable()) {
+    console.warn('Cannot set storage method: localStorage not available');
+    return;
+  }
+
+  try {
+    localStorage.setItem(STORAGE_METHOD_KEY, method);
+  } catch (error) {
+    console.error('Failed to set storage method:', error);
+  }
 }
 
 /**
  * Save tokens securely
  * @param tokens - Access and refresh tokens
+ * @throws Error if storage fails
  */
 export async function saveTokens(tokens: TokenStorage): Promise<void> {
   const method = getStorageMethod();
@@ -54,6 +93,10 @@ export async function saveTokens(tokens: TokenStorage): Promise<void> {
   }
 
   // Fallback: Encrypted localStorage
+  if (!isLocalStorageAvailable()) {
+    throw new Error('localStorage not available - cannot save tokens');
+  }
+
   try {
     const encrypted = await encryptData(JSON.stringify(tokens));
     localStorage.setItem(STORAGE_KEY, encrypted);
@@ -66,6 +109,7 @@ export async function saveTokens(tokens: TokenStorage): Promise<void> {
 /**
  * Retrieve tokens from storage
  * @returns Stored tokens or null
+ * SSR-safe: Returns null if localStorage not available
  */
 export async function getTokens(): Promise<TokenStorage | null> {
   const method = getStorageMethod();
@@ -79,6 +123,10 @@ export async function getTokens(): Promise<TokenStorage | null> {
   }
 
   // Fallback: Encrypted localStorage
+  if (!isLocalStorageAvailable()) {
+    return null;
+  }
+
   try {
     const encrypted = localStorage.getItem(STORAGE_KEY);
     if (!encrypted) {
@@ -86,17 +134,29 @@ export async function getTokens(): Promise<TokenStorage | null> {
     }
 
     const decrypted = await decryptData(encrypted);
-    return JSON.parse(decrypted) as TokenStorage;
+    const tokens = JSON.parse(decrypted) as TokenStorage;
+
+    // Validate structure
+    if (!tokens || typeof tokens !== 'object') {
+      throw new Error('Invalid token structure');
+    }
+
+    return tokens;
   } catch (error) {
     console.error('Failed to retrieve tokens:', error);
     // If decryption fails, clear invalid data
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore cleanup errors
+    }
     return null;
   }
 }
 
 /**
  * Clear all tokens from storage
+ * SSR-safe: No-op if localStorage not available
  */
 export async function clearTokens(): Promise<void> {
   const method = getStorageMethod();
@@ -108,21 +168,23 @@ export async function clearTokens(): Promise<void> {
   }
 
   // Always clear localStorage (belt and suspenders)
-  localStorage.removeItem(STORAGE_KEY);
+  if (isLocalStorageAvailable()) {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.warn('Failed to clear tokens from localStorage:', error);
+    }
+  }
+
+  // Clear encryption key
   clearEncryptionKey();
 }
 
 /**
  * Check if storage is available
  * @returns true if localStorage is accessible
+ * SSR-safe: Returns false on server
  */
 export function isStorageAvailable(): boolean {
-  try {
-    const test = '__storage_test__';
-    localStorage.setItem(test, test);
-    localStorage.removeItem(test);
-    return true;
-  } catch {
-    return false;
-  }
+  return isLocalStorageAvailable();
 }
