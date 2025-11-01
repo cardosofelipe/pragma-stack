@@ -67,7 +67,7 @@ function isAxiosError(error: unknown): error is AxiosError {
     typeof error === 'object' &&
     error !== null &&
     'isAxiosError' in error &&
-    (error as any).isAxiosError === true
+    (error as Record<string, unknown>).isAxiosError === true
   );
 }
 
@@ -92,9 +92,9 @@ export function parseAPIError(error: unknown): APIError[] {
     error.response?.data &&
     typeof error.response.data === 'object' &&
     'errors' in error.response.data &&
-    Array.isArray((error.response.data as any).errors)
+    Array.isArray((error.response.data as Record<string, unknown>).errors)
   ) {
-    return (error.response.data as any).errors;
+    return (error.response.data as { errors: APIError[] }).errors;
   }
 
   // Network errors (no response)

@@ -23,7 +23,7 @@ import {
 import { useAuthStore } from '@/stores/authStore';
 import type { User } from '@/stores/authStore';
 import { parseAPIError, getGeneralError } from '../errors';
-import { isTokenWithUser, type TokenWithUser } from '../types';
+import { isTokenWithUser } from '../types';
 import config from '@/config/app.config';
 
 // ============================================================================
@@ -359,8 +359,8 @@ export function usePasswordResetRequest(onSuccess?: (message: string) => void) {
         typeof data === 'object' &&
         data !== null &&
         'message' in data &&
-        typeof (data as any).message === 'string'
-          ? (data as any).message
+        typeof (data as Record<string, unknown>).message === 'string'
+          ? (data as { message: string }).message
           : 'Password reset email sent successfully';
 
       if (onSuccess) {
@@ -406,8 +406,8 @@ export function usePasswordResetConfirm(onSuccess?: (message: string) => void) {
         typeof data === 'object' &&
         data !== null &&
         'message' in data &&
-        typeof (data as any).message === 'string'
-          ? (data as any).message
+        typeof (data as Record<string, unknown>).message === 'string'
+          ? (data as { message: string }).message
           : 'Password reset successful';
 
       if (onSuccess) {
@@ -456,8 +456,8 @@ export function usePasswordChange(onSuccess?: (message: string) => void) {
         typeof data === 'object' &&
         data !== null &&
         'message' in data &&
-        typeof (data as any).message === 'string'
-          ? (data as any).message
+        typeof (data as Record<string, unknown>).message === 'string'
+          ? (data as { message: string }).message
           : 'Password changed successfully';
 
       if (onSuccess) {

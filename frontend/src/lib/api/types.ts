@@ -35,15 +35,16 @@ export interface SuccessResponse {
  * Type guard to check if response includes user data
  */
 export function isTokenWithUser(token: unknown): token is TokenWithUser {
+  const obj = token as Record<string, unknown>;
   return (
     typeof token === 'object' &&
     token !== null &&
     'access_token' in token &&
     'user' in token &&
-    typeof (token as any).access_token === 'string' &&
-    typeof (token as any).user === 'object' &&
-    (token as any).user !== null &&
-    !Array.isArray((token as any).user)
+    typeof obj.access_token === 'string' &&
+    typeof obj.user === 'object' &&
+    obj.user !== null &&
+    !Array.isArray(obj.user)
   );
 }
 
@@ -51,12 +52,13 @@ export function isTokenWithUser(token: unknown): token is TokenWithUser {
  * Type guard to check if response is a success message
  */
 export function isSuccessResponse(response: unknown): response is SuccessResponse {
+  const obj = response as Record<string, unknown>;
   return (
     typeof response === 'object' &&
     response !== null &&
     'success' in response &&
     'message' in response &&
-    (response as any).success === true &&
-    typeof (response as any).message === 'string'
+    obj.success === true &&
+    typeof obj.message === 'string'
   );
 }

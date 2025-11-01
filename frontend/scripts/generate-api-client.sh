@@ -55,6 +55,22 @@ else
     exit 1
 fi
 
+# Add eslint-disable to all generated .ts files
+echo -e "${YELLOW}🔧 Adding eslint-disable to generated files...${NC}"
+for file in "$OUTPUT_DIR"/**/*.ts "$OUTPUT_DIR"/*.ts; do
+    if [ -f "$file" ] && ! grep -q "^/\* eslint-disable \*/$" "$file"; then
+        # Get first line
+        first_line=$(head -n 1 "$file")
+        # Add eslint-disable after the auto-generated comment
+        if [[ "$first_line" == "// This file is auto-generated"* ]]; then
+            sed -i '1 a /* eslint-disable */' "$file"
+        else
+            sed -i '1 i /* eslint-disable */' "$file"
+        fi
+    fi
+done
+echo -e "${GREEN}✓ ESLint disabled for generated files${NC}"
+
 # Clean up
 rm /tmp/openapi.json
 

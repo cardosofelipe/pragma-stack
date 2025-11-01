@@ -7,6 +7,21 @@
     "build",
     "dist",
     "coverage",
-    "src/lib/api/generated"
-  ]
+    "**/*.gen.ts",
+    "**/*.gen.tsx",
+    "src/lib/api/generated/**"
+  ],
+  "rules": {
+    "@typescript-eslint/ban-ts-comment": "off",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "eslint-comments/no-unused-disable": "off"
+  }
 }

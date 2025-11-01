@@ -11,10 +11,10 @@ const nextConfig: NextConfig = {
             },
         ];
     },
-    // Exclude generated API client from ESLint
+    // ESLint configuration
     eslint: {
         ignoreDuringBuilds: false,
-        dirs: ['src', 'tests'],
+        dirs: ['src'],
     },
 };
 
