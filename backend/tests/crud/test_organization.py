@@ -7,7 +7,7 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.organization_async import organization_async
+from app.crud.organization import organization as organization_crud
 from app.models.organization import Organization
 from app.models.user_organization import UserOrganization, OrganizationRole
 from app.models.user import User
@@ -35,7 +35,7 @@ class TestGetBySlug:
 
         # Get by slug
         async with AsyncTestingSessionLocal() as session:
-            result = await organization_async.get_by_slug(session, slug="test-org")
+            result = await organization_crud.get_by_slug(session, slug="test-org")
             assert result is not None
             assert result.id == org_id
             assert result.slug == "test-org"
@@ -46,7 +46,7 @@ class TestGetBySlug:
         test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            result = await organization_async.get_by_slug(session, slug="nonexistent")
+            result = await organization_crud.get_by_slug(session, slug="nonexistent")
             assert result is None
 
 
@@ -55,7 +55,7 @@ class TestCreate:
 
     @pytest.mark.asyncio
     async def test_create_success(self, async_test_db):
-        """Test successfully creating an organization."""
+        """Test successfully creating an organization_crud."""
         test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
@@ -66,7 +66,7 @@ class TestCreate:
                 is_active=True,
                 settings={"key": "value"}
             )
-            result = await organization_async.create(session, obj_in=org_in)
+            result = await organization_crud.create(session, obj_in=org_in)
 
             assert result.name == "New Org"
             assert result.slug == "new-org"
@@ -92,7 +92,7 @@ class TestCreate:
                 slug="duplicate-slug"
             )
             with pytest.raises(ValueError, match="already exists"):
-                await organization_async.create(session, obj_in=org_in)
+                await organization_crud.create(session, obj_in=org_in)
 
     @pytest.mark.asyncio
     async def test_create_without_settings(self, async_test_db):
@@ -104,7 +104,7 @@ class TestCreate:
                 name="No Settings Org",
                 slug="no-settings"
             )
-            result = await organization_async.create(session, obj_in=org_in)
+            result = await organization_crud.create(session, obj_in=org_in)
 
             assert result.settings == {}
 
@@ -125,7 +125,7 @@ class TestGetMultiWithFilters:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs, total = await organization_async.get_multi_with_filters(session)
+            orgs, total = await organization_crud.get_multi_with_filters(session)
             assert total == 5
             assert len(orgs) == 5
 
@@ -141,7 +141,7 @@ class TestGetMultiWithFilters:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs, total = await organization_async.get_multi_with_filters(
+            orgs, total = await organization_crud.get_multi_with_filters(
                 session,
                 is_active=True
             )
@@ -160,7 +160,7 @@ class TestGetMultiWithFilters:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs, total = await organization_async.get_multi_with_filters(
+            orgs, total = await organization_crud.get_multi_with_filters(
                 session,
                 search="tech"
             )
@@ -179,7 +179,7 @@ class TestGetMultiWithFilters:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs, total = await organization_async.get_multi_with_filters(
+            orgs, total = await organization_crud.get_multi_with_filters(
                 session,
                 skip=2,
                 limit=3
@@ -199,7 +199,7 @@ class TestGetMultiWithFilters:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs, total = await organization_async.get_multi_with_filters(
+            orgs, total = await organization_crud.get_multi_with_filters(
                 session,
                 sort_by="name",
                 sort_order="asc"
@@ -213,7 +213,7 @@ class TestGetMemberCount:
 
     @pytest.mark.asyncio
     async def test_get_member_count_success(self, async_test_db, async_test_user):
-        """Test getting member count for organization."""
+        """Test getting member count for organization_crud."""
         test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
@@ -233,7 +233,7 @@ class TestGetMemberCount:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            count = await organization_async.get_member_count(session, organization_id=org_id)
+            count = await organization_crud.get_member_count(session, organization_id=org_id)
             assert count == 1
 
     @pytest.mark.asyncio
@@ -248,7 +248,7 @@ class TestGetMemberCount:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            count = await organization_async.get_member_count(session, organization_id=org_id)
+            count = await organization_crud.get_member_count(session, organization_id=org_id)
             assert count == 0
 
 
@@ -257,7 +257,7 @@ class TestAddUser:
 
     @pytest.mark.asyncio
     async def test_add_user_success(self, async_test_db, async_test_user):
-        """Test successfully adding a user to organization."""
+        """Test successfully adding a user to organization_crud."""
         test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
@@ -267,7 +267,7 @@ class TestAddUser:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            result = await organization_async.add_user(
+            result = await organization_crud.add_user(
                 session,
                 organization_id=org_id,
                 user_id=async_test_user.id,
@@ -301,7 +301,7 @@ class TestAddUser:
 
         async with AsyncTestingSessionLocal() as session:
             with pytest.raises(ValueError, match="already a member"):
-                await organization_async.add_user(
+                await organization_crud.add_user(
                     session,
                     organization_id=org_id,
                     user_id=async_test_user.id
@@ -328,7 +328,7 @@ class TestAddUser:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            result = await organization_async.add_user(
+            result = await organization_crud.add_user(
                 session,
                 organization_id=org_id,
                 user_id=async_test_user.id,
@@ -344,7 +344,7 @@ class TestRemoveUser:
 
     @pytest.mark.asyncio
     async def test_remove_user_success(self, async_test_db, async_test_user):
-        """Test successfully removing a user from organization."""
+        """Test successfully removing a user from organization_crud."""
         test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
@@ -363,7 +363,7 @@ class TestRemoveUser:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            result = await organization_async.remove_user(
+            result = await organization_crud.remove_user(
                 session,
                 organization_id=org_id,
                 user_id=async_test_user.id
@@ -393,7 +393,7 @@ class TestRemoveUser:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            result = await organization_async.remove_user(
+            result = await organization_crud.remove_user(
                 session,
                 organization_id=org_id,
                 user_id=uuid4()
@@ -426,7 +426,7 @@ class TestUpdateUserRole:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            result = await organization_async.update_user_role(
+            result = await organization_crud.update_user_role(
                 session,
                 organization_id=org_id,
                 user_id=async_test_user.id,
@@ -449,7 +449,7 @@ class TestUpdateUserRole:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            result = await organization_async.update_user_role(
+            result = await organization_crud.update_user_role(
                 session,
                 organization_id=org_id,
                 user_id=uuid4(),
@@ -483,7 +483,7 @@ class TestGetOrganizationMembers:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            members, total = await organization_async.get_organization_members(
+            members, total = await organization_crud.get_organization_members(
                 session,
                 organization_id=org_id
             )
@@ -515,7 +515,7 @@ class TestGetOrganizationMembers:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            members, total = await organization_async.get_organization_members(
+            members, total = await organization_crud.get_organization_members(
                 session,
                 organization_id=org_id,
                 skip=0,
@@ -549,7 +549,7 @@ class TestGetUserOrganizations:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs = await organization_async.get_user_organizations(
+            orgs = await organization_crud.get_user_organizations(
                 session,
                 user_id=async_test_user.id
             )
@@ -584,7 +584,7 @@ class TestGetUserOrganizations:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs = await organization_async.get_user_organizations(
+            orgs = await organization_crud.get_user_organizations(
                 session,
                 user_id=async_test_user.id,
                 is_active=True
@@ -599,7 +599,7 @@ class TestGetUserRole:
 
     @pytest.mark.asyncio
     async def test_get_user_role_in_org_success(self, async_test_db, async_test_user):
-        """Test getting user role in organization."""
+        """Test getting user role in organization_crud."""
         test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
@@ -618,7 +618,7 @@ class TestGetUserRole:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            role = await organization_async.get_user_role_in_org(
+            role = await organization_crud.get_user_role_in_org(
                 session,
                 user_id=async_test_user.id,
                 organization_id=org_id
@@ -638,7 +638,7 @@ class TestGetUserRole:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            role = await organization_async.get_user_role_in_org(
+            role = await organization_crud.get_user_role_in_org(
                 session,
                 user_id=uuid4(),
                 organization_id=org_id
@@ -671,7 +671,7 @@ class TestIsUserOrgOwner:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            is_owner = await organization_async.is_user_org_owner(
+            is_owner = await organization_crud.is_user_org_owner(
                 session,
                 user_id=async_test_user.id,
                 organization_id=org_id
@@ -700,7 +700,7 @@ class TestIsUserOrgOwner:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            is_owner = await organization_async.is_user_org_owner(
+            is_owner = await organization_crud.is_user_org_owner(
                 session,
                 user_id=async_test_user.id,
                 organization_id=org_id
@@ -734,7 +734,7 @@ class TestGetMultiWithMemberCounts:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs_with_counts, total = await organization_async.get_multi_with_member_counts(session)
+            orgs_with_counts, total = await organization_crud.get_multi_with_member_counts(session)
 
             assert total == 2
             assert len(orgs_with_counts) == 2
@@ -754,7 +754,7 @@ class TestGetMultiWithMemberCounts:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs_with_counts, total = await organization_async.get_multi_with_member_counts(
+            orgs_with_counts, total = await organization_crud.get_multi_with_member_counts(
                 session,
                 is_active=True
             )
@@ -774,7 +774,7 @@ class TestGetMultiWithMemberCounts:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs_with_counts, total = await organization_async.get_multi_with_member_counts(
+            orgs_with_counts, total = await organization_crud.get_multi_with_member_counts(
                 session,
                 search="tech"
             )
@@ -806,7 +806,7 @@ class TestGetUserOrganizationsWithDetails:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs_with_details = await organization_async.get_user_organizations_with_details(
+            orgs_with_details = await organization_crud.get_user_organizations_with_details(
                 session,
                 user_id=async_test_user.id
             )
@@ -843,7 +843,7 @@ class TestGetUserOrganizationsWithDetails:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            orgs_with_details = await organization_async.get_user_organizations_with_details(
+            orgs_with_details = await organization_crud.get_user_organizations_with_details(
                 session,
                 user_id=async_test_user.id,
                 is_active=True
@@ -877,7 +877,7 @@ class TestIsUserOrgAdmin:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            is_admin = await organization_async.is_user_org_admin(
+            is_admin = await organization_crud.is_user_org_admin(
                 session,
                 user_id=async_test_user.id,
                 organization_id=org_id
@@ -906,7 +906,7 @@ class TestIsUserOrgAdmin:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            is_admin = await organization_async.is_user_org_admin(
+            is_admin = await organization_crud.is_user_org_admin(
                 session,
                 user_id=async_test_user.id,
                 organization_id=org_id
@@ -935,7 +935,7 @@ class TestIsUserOrgAdmin:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            is_admin = await organization_async.is_user_org_admin(
+            is_admin = await organization_crud.is_user_org_admin(
                 session,
                 user_id=async_test_user.id,
                 organization_id=org_id

@@ -64,8 +64,8 @@ class TestCleanupExpiredSessions:
             session.add_all([active_session, old_expired_session, recent_expired_session])
             await session.commit()
 
-        # Mock AsyncSessionLocal to return our test session
-        with patch('app.services.session_cleanup.AsyncSessionLocal', return_value=AsyncTestingSessionLocal()):
+        # Mock SessionLocal to return our test session
+        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
             from app.services.session_cleanup import cleanup_expired_sessions
             deleted_count = await cleanup_expired_sessions(keep_days=30)
 
@@ -102,7 +102,7 @@ class TestCleanupExpiredSessions:
             session.add(active)
             await session.commit()
 
-        with patch('app.services.session_cleanup.AsyncSessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
             from app.services.session_cleanup import cleanup_expired_sessions
             deleted_count = await cleanup_expired_sessions(keep_days=30)
 
@@ -113,7 +113,7 @@ class TestCleanupExpiredSessions:
         """Test cleanup with no sessions in database."""
         test_engine, AsyncTestingSessionLocal = async_test_db
 
-        with patch('app.services.session_cleanup.AsyncSessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
             from app.services.session_cleanup import cleanup_expired_sessions
             deleted_count = await cleanup_expired_sessions(keep_days=30)
 
@@ -139,7 +139,7 @@ class TestCleanupExpiredSessions:
             session.add(today_expired)
             await session.commit()
 
-        with patch('app.services.session_cleanup.AsyncSessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
             from app.services.session_cleanup import cleanup_expired_sessions
             deleted_count = await cleanup_expired_sessions(keep_days=0)
 
@@ -169,7 +169,7 @@ class TestCleanupExpiredSessions:
             session.add_all(sessions_to_add)
             await session.commit()
 
-        with patch('app.services.session_cleanup.AsyncSessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
             from app.services.session_cleanup import cleanup_expired_sessions
             deleted_count = await cleanup_expired_sessions(keep_days=30)
 
@@ -181,7 +181,7 @@ class TestCleanupExpiredSessions:
         test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Mock session_crud.cleanup_expired to raise error
-        with patch('app.services.session_cleanup.AsyncSessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
             with patch('app.services.session_cleanup.session_crud.cleanup_expired') as mock_cleanup:
                 mock_cleanup.side_effect = Exception("Database connection lost")
 
@@ -247,7 +247,7 @@ class TestGetSessionStatistics:
 
             await session.commit()
 
-        with patch('app.services.session_cleanup.AsyncSessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
             from app.services.session_cleanup import get_session_statistics
             stats = await get_session_statistics()
 
@@ -261,7 +261,7 @@ class TestGetSessionStatistics:
         """Test getting statistics with no sessions."""
         test_engine, AsyncTestingSessionLocal = async_test_db
 
-        with patch('app.services.session_cleanup.AsyncSessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
             from app.services.session_cleanup import get_session_statistics
             stats = await get_session_statistics()
 
@@ -283,7 +283,7 @@ class TestGetSessionStatistics:
         async def mock_session_local():
             yield mock_session
 
-        with patch('app.services.session_cleanup.AsyncSessionLocal', return_value=mock_session_local()):
+        with patch('app.services.session_cleanup.SessionLocal', return_value=mock_session_local()):
             from app.services.session_cleanup import get_session_statistics
             stats = await get_session_statistics()
 
@@ -317,7 +317,7 @@ class TestConcurrentCleanup:
 
         # Run two cleanups concurrently
         # Use side_effect to return fresh session instances for each call
-        with patch('app.services.session_cleanup.AsyncSessionLocal', side_effect=lambda: AsyncTestingSessionLocal()):
+        with patch('app.services.session_cleanup.SessionLocal', side_effect=lambda: AsyncTestingSessionLocal()):
             from app.services.session_cleanup import cleanup_expired_sessions
             results = await asyncio.gather(
                 cleanup_expired_sessions(keep_days=30),

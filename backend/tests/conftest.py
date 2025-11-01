@@ -12,7 +12,7 @@ from httpx import AsyncClient, ASGITransport
 os.environ["IS_TEST"] = "True"
 
 from app.main import app
-from app.core.database_async import get_async_db
+from app.core.database import get_db
 from app.models.user import User
 from app.core.auth import get_password_hash
 from app.utils.test_utils import setup_test_db, teardown_test_db, setup_async_test_db, teardown_async_test_db
@@ -100,18 +100,18 @@ async def client(async_test_db):
     """
     Create a FastAPI async test client with a test database.
 
-    This overrides the get_async_db dependency to use the test database.
+    This overrides the get_db dependency to use the test database.
     """
     test_engine, AsyncTestingSessionLocal = async_test_db
 
-    async def override_get_async_db():
+    async def override_get_db():
         async with AsyncTestingSessionLocal() as session:
             try:
                 yield session
             finally:
                 pass
 
-    app.dependency_overrides[get_async_db] = override_get_async_db
+    app.dependency_overrides[get_db] = override_get_db
 
     # Use ASGITransport for httpx >= 0.27
     transport = ASGITransport(app=app)
