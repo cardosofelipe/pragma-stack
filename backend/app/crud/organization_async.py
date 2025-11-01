@@ -130,6 +130,83 @@ class CRUDOrganizationAsync(CRUDBaseAsync[Organization, OrganizationCreate, Orga
             logger.error(f"Error getting member count for organization {organization_id}: {str(e)}")
             raise
 
+    async def get_multi_with_member_counts(
+        self,
+        db: AsyncSession,
+        *,
+        skip: int = 0,
+        limit: int = 100,
+        is_active: Optional[bool] = None,
+        search: Optional[str] = None
+    ) -> tuple[List[Dict[str, Any]], int]:
+        """
+        Get organizations with member counts in a SINGLE QUERY using JOIN and GROUP BY.
+        This eliminates the N+1 query problem.
+
+        Returns:
+            Tuple of (list of dicts with org and member_count, total count)
+        """
+        try:
+            # Build base query with LEFT JOIN and GROUP BY
+            query = (
+                select(
+                    Organization,
+                    func.count(
+                        func.distinct(
+                            and_(
+                                UserOrganization.is_active == True,
+                                UserOrganization.user_id
+                            ).self_group()
+                        )
+                    ).label('member_count')
+                )
+                .outerjoin(UserOrganization, Organization.id == UserOrganization.organization_id)
+                .group_by(Organization.id)
+            )
+
+            # Apply filters
+            if is_active is not None:
+                query = query.where(Organization.is_active == is_active)
+
+            if search:
+                search_filter = or_(
+                    Organization.name.ilike(f"%{search}%"),
+                    Organization.slug.ilike(f"%{search}%"),
+                    Organization.description.ilike(f"%{search}%")
+                )
+                query = query.where(search_filter)
+
+            # Get total count
+            count_query = select(func.count(Organization.id))
+            if is_active is not None:
+                count_query = count_query.where(Organization.is_active == is_active)
+            if search:
+                count_query = count_query.where(search_filter)
+
+            count_result = await db.execute(count_query)
+            total = count_result.scalar_one()
+
+            # Apply pagination and ordering
+            query = query.order_by(Organization.created_at.desc()).offset(skip).limit(limit)
+
+            result = await db.execute(query)
+            rows = result.all()
+
+            # Convert to list of dicts
+            orgs_with_counts = [
+                {
+                    'organization': org,
+                    'member_count': member_count
+                }
+                for org, member_count in rows
+            ]
+
+            return orgs_with_counts, total
+
+        except Exception as e:
+            logger.error(f"Error getting organizations with member counts: {str(e)}", exc_info=True)
+            raise
+
     async def add_user(
         self,
         db: AsyncSession,
@@ -330,6 +407,63 @@ class CRUDOrganizationAsync(CRUDBaseAsync[Organization, OrganizationCreate, Orga
             return list(result.scalars().all())
         except Exception as e:
             logger.error(f"Error getting user organizations: {str(e)}")
+            raise
+
+    async def get_user_organizations_with_details(
+        self,
+        db: AsyncSession,
+        *,
+        user_id: UUID,
+        is_active: bool = True
+    ) -> List[Dict[str, Any]]:
+        """
+        Get user's organizations with role and member count in SINGLE QUERY.
+        Eliminates N+1 problem by using subquery for member counts.
+
+        Returns:
+            List of dicts with organization, role, and member_count
+        """
+        try:
+            # Subquery to get member counts for each organization
+            member_count_subq = (
+                select(
+                    UserOrganization.organization_id,
+                    func.count(UserOrganization.user_id).label('member_count')
+                )
+                .where(UserOrganization.is_active == True)
+                .group_by(UserOrganization.organization_id)
+                .subquery()
+            )
+
+            # Main query with JOIN to get org, role, and member count
+            query = (
+                select(
+                    Organization,
+                    UserOrganization.role,
+                    func.coalesce(member_count_subq.c.member_count, 0).label('member_count')
+                )
+                .join(UserOrganization, Organization.id == UserOrganization.organization_id)
+                .outerjoin(member_count_subq, Organization.id == member_count_subq.c.organization_id)
+                .where(UserOrganization.user_id == user_id)
+            )
+
+            if is_active is not None:
+                query = query.where(UserOrganization.is_active == is_active)
+
+            result = await db.execute(query)
+            rows = result.all()
+
+            return [
+                {
+                    'organization': org,
+                    'role': role,
+                    'member_count': member_count
+                }
+                for org, role, member_count in rows
+            ]
+
+        except Exception as e:
+            logger.error(f"Error getting user organizations with details: {str(e)}", exc_info=True)
             raise
 
     async def get_user_role_in_org(

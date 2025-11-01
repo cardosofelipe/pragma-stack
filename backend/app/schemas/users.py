@@ -6,6 +6,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, field_validator, ConfigDict, Field
 
+from app.schemas.validators import validate_password_strength, validate_phone_number
+
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -15,13 +17,8 @@ class UserBase(BaseModel):
 
     @field_validator('phone_number')
     @classmethod
-    def validate_phone_number(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return v
-        # Simple regex for phone validation
-        if not re.match(r'^\+?[0-9\s\-\(\)]{8,20}$', v):
-            raise ValueError('Invalid phone number format')
-        return v
+    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
+        return validate_phone_number(v)
 
 
 class UserCreate(UserBase):
@@ -31,14 +28,8 @@ class UserCreate(UserBase):
     @field_validator('password')
     @classmethod
     def password_strength(cls, v: str) -> str:
-        """Basic password strength validation"""
-        if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters')
-        if not any(char.isdigit() for char in v):
-            raise ValueError('Password must contain at least one digit')
-        if not any(char.isupper() for char in v):
-            raise ValueError('Password must contain at least one uppercase letter')
-        return v
+        """Enterprise-grade password strength validation"""
+        return validate_password_strength(v)
 
 
 class UserUpdate(BaseModel):
@@ -46,39 +37,12 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = None
     phone_number: Optional[str] = None
     preferences: Optional[Dict[str, Any]] = None
-    is_active: Optional[bool] = True
+    is_active: Optional[bool] = None  # Changed default from True to None to avoid unintended updates
+
     @field_validator('phone_number')
-    def validate_phone_number(cls, v: Optional[str]) -> Optional[str]:
-        if v is None:
-            return v
-
-        # Return early for empty strings or whitespace-only strings
-        if not v or v.strip() == "":
-            raise ValueError('Phone number cannot be empty')
-
-        # Remove all spaces and formatting characters
-        cleaned = re.sub(r'[\s\-\(\)]', '', v)
-
-        # Basic pattern:
-        # Must start with + or 0
-        # After + must have at least 8 digits
-        # After 0 must have at least 8 digits
-        # Maximum total length of 15 digits (international standard)
-        # Only allowed characters are + at start and digits
-        pattern = r'^(?:\+[0-9]{8,14}|0[0-9]{8,14})$'
-
-        if not re.match(pattern, cleaned):
-            raise ValueError('Phone number must start with + or 0 followed by 8-14 digits')
-
-        # Additional validation to catch specific invalid cases
-        if cleaned.count('+') > 1:
-            raise ValueError('Phone number can only contain one + symbol at the start')
-
-        # Check for any non-digit characters (except the leading +)
-        if not all(c.isdigit() for c in cleaned[1:]):
-            raise ValueError('Phone number can only contain digits after the prefix')
-
-        return cleaned
+    @classmethod
+    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
+        return validate_phone_number(v)
 
 
 class UserInDB(UserBase):
@@ -131,14 +95,8 @@ class PasswordChange(BaseModel):
     @field_validator('new_password')
     @classmethod
     def password_strength(cls, v: str) -> str:
-        """Basic password strength validation"""
-        if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters')
-        if not any(char.isdigit() for char in v):
-            raise ValueError('Password must contain at least one digit')
-        if not any(char.isupper() for char in v):
-            raise ValueError('Password must contain at least one uppercase letter')
-        return v
+        """Enterprise-grade password strength validation"""
+        return validate_password_strength(v)
 
 
 class PasswordReset(BaseModel):
@@ -149,14 +107,8 @@ class PasswordReset(BaseModel):
     @field_validator('new_password')
     @classmethod
     def password_strength(cls, v: str) -> str:
-        """Basic password strength validation"""
-        if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters')
-        if not any(char.isdigit() for char in v):
-            raise ValueError('Password must contain at least one digit')
-        if not any(char.isupper() for char in v):
-            raise ValueError('Password must contain at least one uppercase letter')
-        return v
+        """Enterprise-grade password strength validation"""
+        return validate_password_strength(v)
 
 
 class LoginRequest(BaseModel):
@@ -189,14 +141,8 @@ class PasswordResetConfirm(BaseModel):
     @field_validator('new_password')
     @classmethod
     def password_strength(cls, v: str) -> str:
-        """Basic password strength validation"""
-        if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters')
-        if not any(char.isdigit() for char in v):
-            raise ValueError('Password must contain at least one digit')
-        if not any(char.isupper() for char in v):
-            raise ValueError('Password must contain at least one uppercase letter')
-        return v
+        """Enterprise-grade password strength validation"""
+        return validate_password_strength(v)
 
     model_config = {
         "json_schema_extra": {

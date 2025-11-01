@@ -34,7 +34,7 @@ from app.schemas.common import (
     SortParams,
     create_pagination_meta
 )
-from app.core.exceptions import NotFoundError, ErrorCode
+from app.core.exceptions import NotFoundError, DuplicateError, AuthorizationError, ErrorCode
 
 logger = logging.getLogger(__name__)
 
@@ -231,8 +231,9 @@ async def admin_delete_user(
 
         # Prevent deleting yourself
         if user.id == admin.id:
-            raise NotFoundError(
-                detail="Cannot delete your own account",
+            # Use AuthorizationError for permission/operation restrictions
+            raise AuthorizationError(
+                message="Cannot delete your own account",
                 error_code=ErrorCode.OPERATION_FORBIDDEN
             )
 
@@ -310,8 +311,9 @@ async def admin_deactivate_user(
 
         # Prevent deactivating yourself
         if user.id == admin.id:
-            raise NotFoundError(
-                detail="Cannot deactivate your own account",
+            # Use AuthorizationError for permission/operation restrictions
+            raise AuthorizationError(
+                message="Cannot deactivate your own account",
                 error_code=ErrorCode.OPERATION_FORBIDDEN
             )
 
@@ -416,19 +418,21 @@ async def admin_list_organizations(
 ) -> Any:
     """List all organizations with filtering and search."""
     try:
-        orgs, total = await organization_crud.get_multi_with_filters(
+        # Use optimized method that gets member counts in single query (no N+1)
+        orgs_with_data, total = await organization_crud.get_multi_with_member_counts(
             db,
             skip=pagination.offset,
             limit=pagination.limit,
             is_active=is_active,
-            search=search,
-            sort_by="created_at",
-            sort_order="desc"
+            search=search
         )
 
-        # Add member count to each organization
+        # Build response objects from optimized query results
         orgs_with_count = []
-        for org in orgs:
+        for item in orgs_with_data:
+            org = item['organization']
+            member_count = item['member_count']
+
             org_dict = {
                 "id": org.id,
                 "name": org.name,
@@ -438,7 +442,7 @@ async def admin_list_organizations(
                 "settings": org.settings,
                 "created_at": org.created_at,
                 "updated_at": org.updated_at,
-                "member_count": await organization_crud.get_member_count(db, organization_id=org.id)
+                "member_count": member_count
             }
             orgs_with_count.append(OrganizationResponse(**org_dict))
 
@@ -718,7 +722,12 @@ async def admin_add_organization_member(
 
     except ValueError as e:
         logger.warning(f"Failed to add user to organization: {str(e)}")
-        raise NotFoundError(detail=str(e), error_code=ErrorCode.ALREADY_EXISTS)
+        # Use DuplicateError for "already exists" scenarios
+        raise DuplicateError(
+            message=str(e),
+            error_code=ErrorCode.USER_ALREADY_EXISTS,
+            field="user_id"
+        )
     except NotFoundError:
         raise
     except Exception as e:

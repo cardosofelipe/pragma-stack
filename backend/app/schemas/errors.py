@@ -16,6 +16,7 @@ class ErrorCode(str, Enum):
     INSUFFICIENT_PERMISSIONS = "AUTH_004"
     USER_INACTIVE = "AUTH_005"
     AUTHENTICATION_REQUIRED = "AUTH_006"
+    OPERATION_FORBIDDEN = "AUTH_007"  # Operation not allowed for this user/role
 
     # User errors (USER_xxx)
     USER_NOT_FOUND = "USER_001"
@@ -43,6 +44,7 @@ class ErrorCode(str, Enum):
     NOT_FOUND = "SYS_002"
     METHOD_NOT_ALLOWED = "SYS_003"
     RATE_LIMIT_EXCEEDED = "SYS_004"
+    ALREADY_EXISTS = "SYS_005"  # Generic resource already exists error
 
 
 class ErrorDetail(BaseModel):

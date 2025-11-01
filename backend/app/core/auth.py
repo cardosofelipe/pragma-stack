@@ -141,11 +141,30 @@ def decode_token(token: str, verify_type: Optional[str] = None) -> TokenPayload:
         TokenMissingClaimError: If a required claim is missing
     """
     try:
+        # Decode token with strict algorithm validation
         payload = jwt.decode(
             token,
             settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
+            algorithms=[settings.ALGORITHM],
+            options={
+                "verify_signature": True,
+                "verify_exp": True,
+                "verify_iat": True,
+                "require": ["exp", "sub", "iat"]
+            }
         )
+
+        # SECURITY: Explicitly verify the algorithm to prevent algorithm confusion attacks
+        # Decode header to check algorithm (without verification, just to inspect)
+        header = jwt.get_unverified_header(token)
+        token_algorithm = header.get("alg", "").upper()
+
+        # Reject weak or unexpected algorithms
+        if token_algorithm == "NONE":
+            raise TokenInvalidError("Algorithm 'none' is not allowed")
+
+        if token_algorithm != settings.ALGORITHM.upper():
+            raise TokenInvalidError(f"Invalid algorithm: {token_algorithm}")
 
         # Check required claims before Pydantic validation
         if not payload.get("sub"):
