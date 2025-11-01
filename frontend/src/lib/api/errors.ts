@@ -60,14 +60,41 @@ export const ERROR_MESSAGES: Record<string, string> = {
 };
 
 /**
+ * Type guard to check if error is an AxiosError
+ */
+function isAxiosError(error: unknown): error is AxiosError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'isAxiosError' in error &&
+    (error as any).isAxiosError === true
+  );
+}
+
+/**
  * Parse API error response
- * @param error AxiosError from API request
+ * @param error Error from API request (unknown type for flexibility)
  * @returns Array of structured APIError objects
  */
-export function parseAPIError(error: AxiosError<APIErrorResponse>): APIError[] {
+export function parseAPIError(error: unknown): APIError[] {
+  // Type guard: check if it's an AxiosError
+  if (!isAxiosError(error)) {
+    // Generic error
+    return [
+      {
+        code: 'UNKNOWN',
+        message: error instanceof Error ? error.message : ERROR_MESSAGES['UNKNOWN'],
+      },
+    ];
+  }
   // Backend structured errors
-  if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
-    return error.response.data.errors;
+  if (
+    error.response?.data &&
+    typeof error.response.data === 'object' &&
+    'errors' in error.response.data &&
+    Array.isArray((error.response.data as any).errors)
+  ) {
+    return (error.response.data as any).errors;
   }
 
   // Network errors (no response)

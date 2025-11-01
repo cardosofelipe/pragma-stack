@@ -1,98 +1,106 @@
 /**
- * API Client with secure token refresh and error handling
- * Implements singleton refresh pattern to prevent race conditions
+ * API Client Configuration with Interceptors
+ *
+ * This module configures the auto-generated API client with:
+ * - Token refresh interceptor (prevents race conditions with singleton pattern)
+ * - Request interceptor (adds Authorization header)
+ * - Response interceptor (handles 401, 403, 429, 500 errors)
+ *
+ * IMPORTANT: Do NOT modify generated files. All customization happens here.
+ *
+ * @module lib/api/client
  */
 
-import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
-import { useAuthStore } from '@/stores/authStore';
-import { parseAPIError, type APIErrorResponse } from './errors';
+import type { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import { client } from './generated/client.gen';
+import { refreshToken as refreshTokenFn } from './generated/sdk.gen';
 import config from '@/config/app.config';
 
 /**
- * Separate axios instance for auth endpoints
- * Prevents interceptor loops during token refresh
- */
-const authClient = axios.create({
-  baseURL: config.api.url,
-  timeout: config.api.timeout,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-/**
- * Main API client instance
- */
-export const apiClient = axios.create({
-  baseURL: config.api.url,
-  timeout: config.api.timeout,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-/**
- * Token refresh state
- * Singleton pattern prevents multiple simultaneous refresh requests
+ * Token refresh state management (singleton pattern)
+ * Prevents race conditions when multiple requests fail with 401 simultaneously
  */
 let isRefreshing = false;
 let refreshPromise: Promise<string> | null = null;
 
 /**
+ * Auth store accessor
+ * Dynamically imported to avoid circular dependencies
+ */
+const getAuthStore = async () => {
+  const { useAuthStore } = await import('@/stores/authStore');
+  return useAuthStore.getState();
+};
+
+/**
  * Refresh access token using refresh token
- * Implements singleton pattern to prevent race conditions
- * @returns Promise resolving to new access token
+ *
+ * @returns Promise<string> New access token
+ * @throws Error if refresh fails
  */
 async function refreshAccessToken(): Promise<string> {
-  // If already refreshing, return existing promise
+  // Singleton pattern: reuse in-flight refresh request
   if (isRefreshing && refreshPromise) {
     return refreshPromise;
   }
 
-  // Start new refresh
   isRefreshing = true;
-
   refreshPromise = (async () => {
     try {
-      const refreshToken = useAuthStore.getState().refreshToken;
+      const authStore = await getAuthStore();
+      const { refreshToken } = authStore;
 
       if (!refreshToken) {
         throw new Error('No refresh token available');
       }
 
-      // Use separate auth client to avoid interceptor loop
-      const response = await authClient.post<{
-        access_token: string;
-        refresh_token: string;
-        expires_in?: number;
-        token_type: string;
-      }>('/auth/refresh', {
-        refresh_token: refreshToken,
-      });
-
-      // Validate response structure
-      if (!response.data?.access_token || !response.data?.refresh_token) {
-        throw new Error('Invalid refresh response format');
+      if (config.debug.api) {
+        console.log('[API Client] Refreshing access token...');
       }
 
-      const { access_token, refresh_token, expires_in } = response.data;
+      // Use generated SDK function for refresh
+      const response = await refreshTokenFn({
+        body: { refresh_token: refreshToken },
+        throwOnError: true,
+      });
+
+      const newAccessToken = response.data.access_token;
+      const newRefreshToken = response.data.refresh_token || refreshToken;
 
       // Update tokens in store
-      await useAuthStore.getState().setTokens(access_token, refresh_token, expires_in);
+      // Note: Token type from OpenAPI spec doesn't include expires_in,
+      // but backend may return it. We handle both cases gracefully.
+      await authStore.setTokens(
+        newAccessToken,
+        newRefreshToken,
+        undefined // expires_in not in spec, will use default
+      );
 
-      return access_token;
+      if (config.debug.api) {
+        console.log('[API Client] Token refreshed successfully');
+      }
+
+      return newAccessToken;
     } catch (error) {
-      // Refresh failed - clear auth and redirect
-      console.error('Token refresh failed:', error);
-      await useAuthStore.getState().clearAuth();
+      if (config.debug.api) {
+        console.error('[API Client] Token refresh failed:', error);
+      }
 
+      // Clear auth and redirect to login
+      const authStore = await getAuthStore();
+      await authStore.clearAuth();
+
+      // Redirect to login if we're in browser
       if (typeof window !== 'undefined') {
-        window.location.href = config.routes.login;
+        const currentPath = window.location.pathname;
+        const returnUrl = currentPath !== '/login' && currentPath !== '/register'
+          ? `?returnUrl=${encodeURIComponent(currentPath)}`
+          : '';
+        window.location.href = `/login${returnUrl}`;
       }
 
       throw error;
     } finally {
-      // Reset refresh state
       isRefreshing = false;
       refreshPromise = null;
     }
@@ -102,68 +110,62 @@ async function refreshAccessToken(): Promise<string> {
 }
 
 /**
- * Request interceptor - Add authentication token
+ * Request Interceptor
+ * Adds Authorization header with access token to all requests
  */
-apiClient.interceptors.request.use(
-  (requestConfig: InternalAxiosRequestConfig) => {
-    // Get access token from auth store
-    const accessToken = useAuthStore.getState().accessToken;
+client.instance.interceptors.request.use(
+  async (requestConfig: InternalAxiosRequestConfig) => {
+    const authStore = await getAuthStore();
+    const { accessToken } = authStore;
 
     // Add Authorization header if token exists
-    if (accessToken) {
+    if (accessToken && requestConfig.headers) {
       requestConfig.headers.Authorization = `Bearer ${accessToken}`;
     }
 
-    // Debug logging in development
     if (config.debug.api) {
-      console.log('🚀 API Request:', {
-        method: requestConfig.method?.toUpperCase(),
-        url: requestConfig.url,
-        hasAuth: !!accessToken,
-      });
+      console.log('[API Client] Request:', requestConfig.method?.toUpperCase(), requestConfig.url);
     }
 
     return requestConfig;
   },
-  (error: AxiosError) => {
-    console.error('Request interceptor error:', error);
+  (error) => {
+    if (config.debug.api) {
+      console.error('[API Client] Request error:', error);
+    }
     return Promise.reject(error);
   }
 );
 
 /**
- * Response interceptor - Handle errors and token refresh
+ * Response Interceptor
+ * Handles errors and token refresh
  */
-apiClient.interceptors.response.use(
-  (response) => {
-    // Debug logging in development
+client.instance.interceptors.response.use(
+  (response: AxiosResponse) => {
     if (config.debug.api) {
-      console.log('✅ API Response:', {
-        status: response.status,
-        url: response.config.url,
-      });
+      console.log('[API Client] Response:', response.status, response.config.url);
     }
-
     return response;
   },
-  async (error: AxiosError<APIErrorResponse>) => {
-    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // Debug logging in development
-    if (config.env.isDevelopment) {
-      console.error('❌ API Error:', {
-        status: error.response?.status,
-        url: error.config?.url,
-        message: error.message,
-      });
+    if (config.debug.api) {
+      console.error('[API Client] Response error:', error.response?.status, error.config?.url);
     }
 
-    // Handle 401 Unauthorized - Token refresh logic
+    // Handle 401 Unauthorized - Token expired
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      // Avoid retrying refresh endpoint itself
+      if (originalRequest.url?.includes('/auth/refresh')) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
 
       try {
-        // Attempt to refresh token (singleton pattern)
+        // Refresh token
         const newAccessToken = await refreshAccessToken();
 
         // Retry original request with new token
@@ -171,43 +173,64 @@ apiClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
 
-        return apiClient.request(originalRequest);
+        return client.instance(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - error already logged, auth cleared
         return Promise.reject(refreshError);
       }
     }
 
     // Handle 403 Forbidden
     if (error.response?.status === 403) {
-      console.warn('Access forbidden - insufficient permissions');
-      // Toast notification would be added here in Phase 4
+      if (config.debug.api) {
+        console.warn('[API Client] Access forbidden (403)');
+      }
+      // Let the component handle this (might be permission issue, not auth)
     }
 
     // Handle 429 Too Many Requests
     if (error.response?.status === 429) {
-      const retryAfter = error.response.headers['retry-after'];
-      console.warn(`Rate limit exceeded${retryAfter ? `. Retry after ${retryAfter}s` : ''}`);
-      // Toast notification would be added here in Phase 4
+      if (config.debug.api) {
+        console.warn('[API Client] Rate limit exceeded (429)');
+      }
+      // Add retry-after handling if needed in future
     }
 
     // Handle 500+ Server Errors
     if (error.response?.status && error.response.status >= 500) {
-      console.error('Server error occurred');
-      // Toast notification would be added here in Phase 4
+      if (config.debug.api) {
+        console.error('[API Client] Server error:', error.response.status);
+      }
+      // Could add error tracking service integration here
     }
 
-    // Handle Network Errors
-    if (!error.response) {
-      console.error('Network error - check your connection');
-      // Toast notification would be added here in Phase 4
-    }
-
-    // Parse and reject with structured error
-    const parsedErrors = parseAPIError(error);
-    return Promise.reject(parsedErrors);
+    return Promise.reject(error);
   }
 );
 
-// Export default for convenience
-export default apiClient;
+/**
+ * Configure the generated client with base settings
+ */
+client.setConfig({
+  baseURL: config.api.url,
+  timeout: config.api.timeout,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+/**
+ * Configured API client instance
+ * Use this for all API calls
+ */
+export { client as apiClient };
+
+/**
+ * Re-export all SDK functions for convenience
+ * These are already configured with interceptors
+ */
+export * from './generated/sdk.gen';
+
+/**
+ * Re-export types for convenience
+ */
+export type * from './generated/types.gen';

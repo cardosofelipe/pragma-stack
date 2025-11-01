@@ -22,8 +22,6 @@ const customJestConfig = {
     '!src/**/*.stories.{js,jsx,ts,tsx}',
     '!src/**/__tests__/**',
     '!src/lib/api/generated/**', // Auto-generated API client - do not test
-    '!src/lib/api/client.ts', // TODO: Replace with generated client + thin interceptor wrapper
-    '!src/lib/api/errors.ts', // TODO: Remove - error parsing should be in generated client
     '!src/**/*.old.{js,jsx,ts,tsx}', // Old implementation files
     '!src/components/ui/**', // shadcn/ui components - third-party, no need to test
     '!src/app/**', // Next.js app directory - layout/page files (test in E2E)

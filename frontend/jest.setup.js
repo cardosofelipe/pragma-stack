@@ -1,9 +1,21 @@
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
+import 'whatwg-fetch'; // Polyfill fetch API for MSW
 import { Crypto } from '@peculiar/webcrypto';
 
 // Mock window object
 global.window = global.window || {};
+
+// Mock BroadcastChannel for MSW
+global.BroadcastChannel = class BroadcastChannel {
+  constructor(name) {
+    this.name = name;
+  }
+  postMessage() {}
+  close() {}
+  addEventListener() {}
+  removeEventListener() {}
+};
 
 // Use real Web Crypto API polyfill for Node environment
 const cryptoPolyfill = new Crypto();

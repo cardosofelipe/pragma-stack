@@ -1,59 +1,30 @@
 /**
  * Authentication React Query Hooks
- * Integrates with authStore for state management
- * Implements all auth endpoints from backend API
+ *
+ * Integrates with auto-generated API client and authStore for state management.
+ * All hooks use generated SDK functions for type safety and OpenAPI compliance.
+ *
+ * @module lib/api/hooks/useAuth
  */
 
 import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { apiClient } from '../client';
+import {
+  login,
+  register,
+  logout,
+  logoutAll,
+  getCurrentUserInfo,
+  requestPasswordReset,
+  confirmPasswordReset,
+  changeCurrentUserPassword,
+} from '../client';
 import { useAuthStore } from '@/stores/authStore';
 import type { User } from '@/stores/authStore';
-import type { APIError } from '../errors';
+import { parseAPIError, getGeneralError } from '../errors';
+import { isTokenWithUser, type TokenWithUser } from '../types';
 import config from '@/config/app.config';
-
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  email: string;
-  password: string;
-  first_name: string;
-  last_name?: string;
-}
-
-export interface PasswordResetRequest {
-  email: string;
-}
-
-export interface PasswordResetConfirm {
-  token: string;
-  new_password: string;
-}
-
-export interface PasswordChange {
-  current_password: string;
-  new_password: string;
-}
-
-export interface AuthResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type: 'bearer';
-  user: User;
-}
-
-export interface SuccessResponse {
-  success: true;
-  message: string;
-}
 
 // ============================================================================
 // Query Keys
@@ -71,7 +42,11 @@ export const authKeys = {
 /**
  * Get current user from token
  * GET /api/v1/auth/me
- * Updates auth store with fetched user data
+ *
+ * Automatically syncs user data to auth store when fetched.
+ * Only enabled when user is authenticated with access token.
+ *
+ * @returns React Query result with user data
  */
 export function useMe() {
   const { isAuthenticated, accessToken } = useAuthStore();
@@ -80,8 +55,10 @@ export function useMe() {
   const query = useQuery({
     queryKey: authKeys.me,
     queryFn: async (): Promise<User> => {
-      const response = await apiClient.get<User>('/auth/me');
-      return response.data;
+      const response = await getCurrentUserInfo({
+        throwOnError: true,
+      });
+      return response.data as User;
     },
     enabled: isAuthenticated && !!accessToken,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -105,33 +82,67 @@ export function useMe() {
 /**
  * Login mutation
  * POST /api/v1/auth/login
+ *
+ * On success:
+ * - Stores tokens and user in auth store
+ * - Invalidates auth queries
+ * - Redirects to home page
+ *
+ * @param onSuccess Optional callback after successful login
+ * @returns React Query mutation
  */
-export function useLogin() {
+export function useLogin(onSuccess?: () => void) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const setAuth = useAuthStore((state) => state.setAuth);
 
   return useMutation({
-    mutationFn: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-      const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
-      return response.data;
+    mutationFn: async (credentials: { email: string; password: string }) => {
+      const response = await login({
+        body: credentials,
+        throwOnError: false, // Handle errors manually
+      });
+
+      if ('error' in response) {
+        throw response.error;
+      }
+
+      // Type assertion: if no error, response has data
+      const data = (response as { data: unknown }).data;
+
+      // Type guard to ensure response has user data
+      if (!isTokenWithUser(data)) {
+        throw new Error('Invalid login response: missing user data');
+      }
+
+      return data;
     },
     onSuccess: async (data) => {
-      const { access_token, refresh_token, user } = data;
+      const { access_token, refresh_token, user, expires_in } = data;
 
       // Update auth store with user and tokens
-      await setAuth(user, access_token, refresh_token);
+      await setAuth(
+        user as User,
+        access_token,
+        refresh_token || '',
+        expires_in
+      );
 
       // Invalidate and refetch user data
       queryClient.invalidateQueries({ queryKey: authKeys.all });
 
+      // Call custom success callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+
       // Redirect to home or intended destination
-      // TODO: Add redirect to intended route from query params
-      router.push('/');
+      router.push(config.routes.home);
     },
-    onError: (errors: APIError[]) => {
-      console.error('Login failed:', errors);
-      // Error toast will be handled in the component
+    onError: (error: unknown) => {
+      const errors = parseAPIError(error);
+      const generalError = getGeneralError(errors);
+      console.error('Login failed:', generalError || 'Unknown error');
     },
   });
 }
@@ -139,48 +150,115 @@ export function useLogin() {
 /**
  * Register mutation
  * POST /api/v1/auth/register
+ *
+ * On success:
+ * - Stores tokens and user in auth store
+ * - Invalidates auth queries
+ * - Redirects to home page (auto-login)
+ *
+ * @param onSuccess Optional callback after successful registration
+ * @returns React Query mutation
  */
-export function useRegister() {
+export function useRegister(onSuccess?: () => void) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const setAuth = useAuthStore((state) => state.setAuth);
 
   return useMutation({
-    mutationFn: async (data: RegisterData): Promise<AuthResponse> => {
-      const response = await apiClient.post<AuthResponse>('/auth/register', data);
-      return response.data;
+    mutationFn: async (data: {
+      email: string;
+      password: string;
+      first_name: string;
+      last_name?: string;
+    }) => {
+      const response = await register({
+        body: {
+          email: data.email,
+          password: data.password,
+          first_name: data.first_name,
+          last_name: data.last_name || '',
+        },
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw response.error;
+      }
+
+      // Type assertion: if no error, response has data
+      const responseData = (response as { data: unknown }).data;
+
+      // Type guard to ensure response has user data
+      if (!isTokenWithUser(responseData)) {
+        throw new Error('Invalid registration response: missing user data');
+      }
+
+      return responseData;
     },
     onSuccess: async (data) => {
-      const { access_token, refresh_token, user } = data;
+      const { access_token, refresh_token, user, expires_in } = data;
 
-      // Update auth store with user and tokens
-      await setAuth(user, access_token, refresh_token);
+      // Update auth store with user and tokens (auto-login)
+      await setAuth(
+        user as User,
+        access_token,
+        refresh_token || '',
+        expires_in
+      );
 
       // Invalidate and refetch user data
       queryClient.invalidateQueries({ queryKey: authKeys.all });
 
+      // Call custom success callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+
       // Redirect to home
-      router.push('/');
+      router.push(config.routes.home);
     },
-    onError: (errors: APIError[]) => {
-      console.error('Registration failed:', errors);
-      // Error toast will be handled in the component
+    onError: (error: unknown) => {
+      const errors = parseAPIError(error);
+      const generalError = getGeneralError(errors);
+      console.error('Registration failed:', generalError || 'Unknown error');
     },
   });
 }
 
 /**
- * Logout mutation (current device only)
+ * Logout mutation
  * POST /api/v1/auth/logout
+ *
+ * On success:
+ * - Clears auth store
+ * - Clears React Query cache
+ * - Redirects to login
+ *
+ * @returns React Query mutation
  */
 export function useLogout() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const clearAuth = useAuthStore((state) => state.clearAuth);
+  const refreshToken = useAuthStore((state) => state.refreshToken);
 
   return useMutation({
-    mutationFn: async (): Promise<SuccessResponse> => {
-      const response = await apiClient.post<SuccessResponse>('/auth/logout');
+    mutationFn: async () => {
+      if (!refreshToken) {
+        // If no refresh token, just clear local state
+        return { success: true, message: 'Logged out locally' };
+      }
+
+      const response = await logout({
+        body: { refresh_token: refreshToken },
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        // Still clear local state even if server logout fails
+        console.warn('Server logout failed, clearing local state anyway');
+      }
+
       return response.data;
     },
     onSuccess: async () => {
@@ -193,10 +271,9 @@ export function useLogout() {
       // Redirect to login
       router.push(config.routes.login);
     },
-    onError: async (errors: APIError[]) => {
-      console.error('Logout failed:', errors);
-
-      // Even if logout fails, clear local state
+    onError: async (error: unknown) => {
+      console.error('Logout error:', error);
+      // Still clear auth and redirect even on error
       await clearAuth();
       queryClient.clear();
       router.push(config.routes.login);
@@ -205,8 +282,15 @@ export function useLogout() {
 }
 
 /**
- * Logout all devices mutation
+ * Logout from all devices mutation
  * POST /api/v1/auth/logout-all
+ *
+ * On success:
+ * - Clears auth store
+ * - Clears React Query cache
+ * - Redirects to login
+ *
+ * @returns React Query mutation
  */
 export function useLogoutAll() {
   const router = useRouter();
@@ -214,8 +298,16 @@ export function useLogoutAll() {
   const clearAuth = useAuthStore((state) => state.clearAuth);
 
   return useMutation({
-    mutationFn: async (): Promise<SuccessResponse> => {
-      const response = await apiClient.post<SuccessResponse>('/auth/logout-all');
+    mutationFn: async () => {
+      const response = await logoutAll({
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        // Still clear local state even if server logout fails
+        console.warn('Server logout-all failed, clearing local state anyway');
+      }
+
       return response.data;
     },
     onSuccess: async () => {
@@ -228,10 +320,9 @@ export function useLogoutAll() {
       // Redirect to login
       router.push(config.routes.login);
     },
-    onError: async (errors: APIError[]) => {
-      console.error('Logout all failed:', errors);
-
-      // Even if logout fails, clear local state
+    onError: async (error: unknown) => {
+      console.error('Logout-all error:', error);
+      // Still clear auth and redirect even on error
       await clearAuth();
       queryClient.clear();
       router.push(config.routes.login);
@@ -242,23 +333,44 @@ export function useLogoutAll() {
 /**
  * Password reset request mutation
  * POST /api/v1/auth/password-reset/request
+ *
+ * Sends password reset email to user.
+ *
+ * @param onSuccess Optional callback after successful request
+ * @returns React Query mutation
  */
-export function usePasswordResetRequest() {
+export function usePasswordResetRequest(onSuccess?: (message: string) => void) {
   return useMutation({
-    mutationFn: async (data: PasswordResetRequest): Promise<SuccessResponse> => {
-      const response = await apiClient.post<SuccessResponse>(
-        '/auth/password-reset/request',
-        data
-      );
-      return response.data;
+    mutationFn: async (data: { email: string }) => {
+      const response = await requestPasswordReset({
+        body: data,
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw response.error;
+      }
+
+      // Type assertion: if no error, response has data
+      return (response as { data: unknown }).data;
     },
     onSuccess: (data) => {
-      console.log('Password reset email sent:', data.message);
-      // Success toast will be handled in the component
+      const message =
+        typeof data === 'object' &&
+        data !== null &&
+        'message' in data &&
+        typeof (data as any).message === 'string'
+          ? (data as any).message
+          : 'Password reset email sent successfully';
+
+      if (onSuccess) {
+        onSuccess(message);
+      }
     },
-    onError: (errors: APIError[]) => {
-      console.error('Password reset request failed:', errors);
-      // Error toast will be handled in the component
+    onError: (error: unknown) => {
+      const errors = parseAPIError(error);
+      const generalError = getGeneralError(errors);
+      console.error('Password reset request failed:', generalError || 'Unknown error');
     },
   });
 }
@@ -266,50 +378,96 @@ export function usePasswordResetRequest() {
 /**
  * Password reset confirm mutation
  * POST /api/v1/auth/password-reset/confirm
+ *
+ * Resets password using token from email.
+ *
+ * @param onSuccess Optional callback after successful reset
+ * @returns React Query mutation
  */
-export function usePasswordResetConfirm() {
+export function usePasswordResetConfirm(onSuccess?: (message: string) => void) {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: async (data: PasswordResetConfirm): Promise<SuccessResponse> => {
-      const response = await apiClient.post<SuccessResponse>(
-        '/auth/password-reset/confirm',
-        data
-      );
-      return response.data;
+    mutationFn: async (data: { token: string; new_password: string }) => {
+      const response = await confirmPasswordReset({
+        body: data,
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw response.error;
+      }
+
+      // Type assertion: if no error, response has data
+      return (response as { data: unknown }).data;
     },
     onSuccess: (data) => {
-      console.log('Password reset successful:', data.message);
-      // Redirect to login
-      router.push(`${config.routes.login}?reset=success`);
+      const message =
+        typeof data === 'object' &&
+        data !== null &&
+        'message' in data &&
+        typeof (data as any).message === 'string'
+          ? (data as any).message
+          : 'Password reset successful';
+
+      if (onSuccess) {
+        onSuccess(message);
+      }
+
+      // Redirect to login after success
+      setTimeout(() => {
+        router.push(config.routes.login);
+      }, 2000);
     },
-    onError: (errors: APIError[]) => {
-      console.error('Password reset confirm failed:', errors);
-      // Error toast will be handled in the component
+    onError: (error: unknown) => {
+      const errors = parseAPIError(error);
+      const generalError = getGeneralError(errors);
+      console.error('Password reset failed:', generalError || 'Unknown error');
     },
   });
 }
 
 /**
- * Change password mutation (authenticated users)
- * PATCH /api/v1/users/me/password
+ * Password change mutation (for authenticated users)
+ * POST /api/v1/auth/password/change
+ *
+ * Changes password for currently authenticated user.
+ *
+ * @param onSuccess Optional callback after successful change
+ * @returns React Query mutation
  */
-export function usePasswordChange() {
+export function usePasswordChange(onSuccess?: (message: string) => void) {
   return useMutation({
-    mutationFn: async (data: PasswordChange): Promise<SuccessResponse> => {
-      const response = await apiClient.patch<SuccessResponse>(
-        '/users/me/password',
-        data
-      );
-      return response.data;
+    mutationFn: async (data: { current_password: string; new_password: string }) => {
+      const response = await changeCurrentUserPassword({
+        body: data,
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw response.error;
+      }
+
+      // Type assertion: if no error, response has data
+      return (response as { data: unknown }).data;
     },
     onSuccess: (data) => {
-      console.log('Password changed successfully:', data.message);
-      // Success toast will be handled in the component
+      const message =
+        typeof data === 'object' &&
+        data !== null &&
+        'message' in data &&
+        typeof (data as any).message === 'string'
+          ? (data as any).message
+          : 'Password changed successfully';
+
+      if (onSuccess) {
+        onSuccess(message);
+      }
     },
-    onError: (errors: APIError[]) => {
-      console.error('Password change failed:', errors);
-      // Error toast will be handled in the component
+    onError: (error: unknown) => {
+      const errors = parseAPIError(error);
+      const generalError = getGeneralError(errors);
+      console.error('Password change failed:', generalError || 'Unknown error');
     },
   });
 }
@@ -320,15 +478,15 @@ export function usePasswordChange() {
 
 /**
  * Check if user is authenticated
- * Convenience hook wrapping auth store
+ * @returns boolean indicating authentication status
  */
 export function useIsAuthenticated(): boolean {
   return useAuthStore((state) => state.isAuthenticated);
 }
 
 /**
- * Get current user
- * Convenience hook wrapping auth store
+ * Get current user from auth store
+ * @returns Current user or null
  */
 export function useCurrentUser(): User | null {
   return useAuthStore((state) => state.user);
@@ -336,6 +494,7 @@ export function useCurrentUser(): User | null {
 
 /**
  * Check if current user is admin
+ * @returns boolean indicating admin status
  */
 export function useIsAdmin(): boolean {
   const user = useCurrentUser();
