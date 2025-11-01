@@ -2,6 +2,7 @@
 Async CRUD operations for user sessions using SQLAlchemy 2.0 patterns.
 """
 import logging
+import uuid
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from uuid import UUID
