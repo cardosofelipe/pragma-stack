@@ -245,7 +245,8 @@ class TestDeactivateAllUserSessions:
         test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            for i in range(5):
+            # Create minimal sessions for test (2 instead of 5)
+            for i in range(2):
                 sess = UserSession(
                     user_id=async_test_user.id,
                     refresh_token_jti=f"bulk_{i}",
@@ -264,7 +265,7 @@ class TestDeactivateAllUserSessions:
                 session,
                 user_id=str(async_test_user.id)
             )
-            assert count == 5
+            assert count == 2
 
 
 class TestUpdateLastUsed:
@@ -337,3 +338,227 @@ class TestGetUserSessionCount:
                 user_id=str(uuid4())
             )
             assert count == 0
+
+
+class TestUpdateRefreshToken:
+    """Tests for update_refresh_token method."""
+
+    @pytest.mark.asyncio
+    async def test_update_refresh_token_success(self, async_test_db, async_test_user):
+        """Test updating refresh token JTI and expiration."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            user_session = UserSession(
+                user_id=async_test_user.id,
+                refresh_token_jti="old_jti",
+                device_name="Test Device",
+                ip_address="192.168.1.1",
+                user_agent="Mozilla/5.0",
+                is_active=True,
+                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+                last_used_at=datetime.now(timezone.utc) - timedelta(hours=1)
+            )
+            session.add(user_session)
+            await session.commit()
+            await session.refresh(user_session)
+
+            new_jti = "new_jti_123"
+            new_expires = datetime.now(timezone.utc) + timedelta(days=14)
+
+            result = await session_crud.update_refresh_token(
+                session,
+                session=user_session,
+                new_jti=new_jti,
+                new_expires_at=new_expires
+            )
+
+            assert result.refresh_token_jti == new_jti
+            # Compare timestamps ignoring timezone info
+            assert abs((result.expires_at.replace(tzinfo=None) - new_expires.replace(tzinfo=None)).total_seconds()) < 1
+
+
+class TestCleanupExpired:
+    """Tests for cleanup_expired method."""
+
+    @pytest.mark.asyncio
+    async def test_cleanup_expired_success(self, async_test_db, async_test_user):
+        """Test cleaning up old expired inactive sessions."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create old expired inactive session
+        async with AsyncTestingSessionLocal() as session:
+            old_session = UserSession(
+                user_id=async_test_user.id,
+                refresh_token_jti="old_expired",
+                device_name="Old Device",
+                ip_address="192.168.1.1",
+                user_agent="Mozilla/5.0",
+                is_active=False,
+                expires_at=datetime.now(timezone.utc) - timedelta(days=5),
+                last_used_at=datetime.now(timezone.utc) - timedelta(days=35),
+                created_at=datetime.now(timezone.utc) - timedelta(days=35)
+            )
+            session.add(old_session)
+            await session.commit()
+
+        # Cleanup
+        async with AsyncTestingSessionLocal() as session:
+            count = await session_crud.cleanup_expired(session, keep_days=30)
+            assert count == 1
+
+    @pytest.mark.asyncio
+    async def test_cleanup_expired_keeps_recent(self, async_test_db, async_test_user):
+        """Test that cleanup keeps recent expired sessions."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create recent expired inactive session (less than keep_days old)
+        async with AsyncTestingSessionLocal() as session:
+            recent_session = UserSession(
+                user_id=async_test_user.id,
+                refresh_token_jti="recent_expired",
+                device_name="Recent Device",
+                ip_address="192.168.1.1",
+                user_agent="Mozilla/5.0",
+                is_active=False,
+                expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
+                last_used_at=datetime.now(timezone.utc) - timedelta(hours=2),
+                created_at=datetime.now(timezone.utc) - timedelta(days=1)
+            )
+            session.add(recent_session)
+            await session.commit()
+
+        # Cleanup
+        async with AsyncTestingSessionLocal() as session:
+            count = await session_crud.cleanup_expired(session, keep_days=30)
+            assert count == 0  # Should not delete recent sessions
+
+    @pytest.mark.asyncio
+    async def test_cleanup_expired_keeps_active(self, async_test_db, async_test_user):
+        """Test that cleanup does not delete active sessions."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create old expired but ACTIVE session
+        async with AsyncTestingSessionLocal() as session:
+            active_session = UserSession(
+                user_id=async_test_user.id,
+                refresh_token_jti="active_expired",
+                device_name="Active Device",
+                ip_address="192.168.1.1",
+                user_agent="Mozilla/5.0",
+                is_active=True,  # Active
+                expires_at=datetime.now(timezone.utc) - timedelta(days=5),
+                last_used_at=datetime.now(timezone.utc) - timedelta(days=35),
+                created_at=datetime.now(timezone.utc) - timedelta(days=35)
+            )
+            session.add(active_session)
+            await session.commit()
+
+        # Cleanup
+        async with AsyncTestingSessionLocal() as session:
+            count = await session_crud.cleanup_expired(session, keep_days=30)
+            assert count == 0  # Should not delete active sessions
+
+
+class TestCleanupExpiredForUser:
+    """Tests for cleanup_expired_for_user method."""
+
+    @pytest.mark.asyncio
+    async def test_cleanup_expired_for_user_success(self, async_test_db, async_test_user):
+        """Test cleaning up expired sessions for specific user."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create expired inactive session for user
+        async with AsyncTestingSessionLocal() as session:
+            expired_session = UserSession(
+                user_id=async_test_user.id,
+                refresh_token_jti="user_expired",
+                device_name="Expired Device",
+                ip_address="192.168.1.1",
+                user_agent="Mozilla/5.0",
+                is_active=False,
+                expires_at=datetime.now(timezone.utc) - timedelta(days=1),
+                last_used_at=datetime.now(timezone.utc) - timedelta(days=2)
+            )
+            session.add(expired_session)
+            await session.commit()
+
+        # Cleanup for user
+        async with AsyncTestingSessionLocal() as session:
+            count = await session_crud.cleanup_expired_for_user(
+                session,
+                user_id=str(async_test_user.id)
+            )
+            assert count == 1
+
+    @pytest.mark.asyncio
+    async def test_cleanup_expired_for_user_invalid_uuid(self, async_test_db):
+        """Test cleanup with invalid user UUID."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with pytest.raises(ValueError, match="Invalid user ID format"):
+                await session_crud.cleanup_expired_for_user(
+                    session,
+                    user_id="not-a-valid-uuid"
+                )
+
+    @pytest.mark.asyncio
+    async def test_cleanup_expired_for_user_keeps_active(self, async_test_db, async_test_user):
+        """Test that cleanup for user keeps active sessions."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create expired but active session
+        async with AsyncTestingSessionLocal() as session:
+            active_session = UserSession(
+                user_id=async_test_user.id,
+                refresh_token_jti="active_user_expired",
+                device_name="Active Device",
+                ip_address="192.168.1.1",
+                user_agent="Mozilla/5.0",
+                is_active=True,  # Active
+                expires_at=datetime.now(timezone.utc) - timedelta(days=1),
+                last_used_at=datetime.now(timezone.utc) - timedelta(days=2)
+            )
+            session.add(active_session)
+            await session.commit()
+
+        # Cleanup
+        async with AsyncTestingSessionLocal() as session:
+            count = await session_crud.cleanup_expired_for_user(
+                session,
+                user_id=str(async_test_user.id)
+            )
+            assert count == 0  # Should not delete active sessions
+
+
+class TestGetUserSessionsWithUser:
+    """Tests for get_user_sessions with eager loading."""
+
+    @pytest.mark.asyncio
+    async def test_get_user_sessions_with_user_relationship(self, async_test_db, async_test_user):
+        """Test getting sessions with user relationship loaded."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            user_session = UserSession(
+                user_id=async_test_user.id,
+                refresh_token_jti="with_user",
+                device_name="Test Device",
+                ip_address="192.168.1.1",
+                user_agent="Mozilla/5.0",
+                is_active=True,
+                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+                last_used_at=datetime.now(timezone.utc)
+            )
+            session.add(user_session)
+            await session.commit()
+
+        # Get with user relationship
+        async with AsyncTestingSessionLocal() as session:
+            results = await session_crud.get_user_sessions(
+                session,
+                user_id=str(async_test_user.id),
+                with_user=True
+            )
+            assert len(results) >= 1

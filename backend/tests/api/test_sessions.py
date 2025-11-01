@@ -365,3 +365,99 @@ class TestCleanupExpiredSessions:
         response = await client.delete("/api/v1/sessions/me/expired")
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+# Additional tests for better coverage
+
+class TestSessionsAdditionalCases:
+    """Additional tests to improve sessions endpoint coverage."""
+
+    @pytest.mark.asyncio
+    async def test_list_sessions_pagination(self, client, async_test_user, async_test_db, user_token):
+        """Test listing sessions with pagination."""
+        test_engine, SessionLocal = async_test_db
+
+        # Create multiple sessions
+        async with SessionLocal() as session:
+            from app.crud.session import session as session_crud
+            from app.schemas.sessions import SessionCreate
+
+            for i in range(5):
+                session_data = SessionCreate(
+                    user_id=async_test_user.id,
+                    refresh_token_jti=str(uuid4()),
+                    device_name=f"Device {i}",
+                    ip_address=f"192.168.1.{i}",
+                    user_agent="Mozilla/5.0",
+                    expires_at=datetime.now(timezone.utc) + timedelta(days=7),
+                    last_used_at=datetime.now(timezone.utc)
+                )
+                await session_crud.create_session(session, obj_in=session_data)
+            await session.commit()
+
+        response = await client.get(
+            "/api/v1/sessions/me?page=1&limit=3",
+            headers={"Authorization": f"Bearer {user_token}"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert "sessions" in data
+        assert "total" in data
+
+    @pytest.mark.asyncio
+    async def test_revoke_session_invalid_uuid(self, client, user_token):
+        """Test revoking session with invalid UUID."""
+        response = await client.delete(
+            "/api/v1/sessions/not-a-uuid",
+            headers={"Authorization": f"Bearer {user_token}"}
+        )
+
+        # Should return 422 for invalid UUID format
+        assert response.status_code in [status.HTTP_422_UNPROCESSABLE_ENTITY, status.HTTP_404_NOT_FOUND]
+
+    @pytest.mark.asyncio
+    async def test_cleanup_expired_sessions_with_mixed_states(self, client, async_test_user, async_test_db, user_token):
+        """Test cleanup with mix of active/inactive and expired/not-expired sessions."""
+        test_engine, SessionLocal = async_test_db
+
+        from app.crud.session import session as session_crud
+        from app.schemas.sessions import SessionCreate
+
+        async with SessionLocal() as db:
+            # Expired + inactive (should be cleaned)
+            e1_data = SessionCreate(
+                user_id=async_test_user.id,
+                refresh_token_jti=str(uuid4()),
+                device_name="Expired Inactive",
+                ip_address="192.168.1.100",
+                user_agent="Mozilla/5.0",
+                expires_at=datetime.now(timezone.utc) - timedelta(days=1),
+                last_used_at=datetime.now(timezone.utc) - timedelta(days=2)
+            )
+            e1 = await session_crud.create_session(db, obj_in=e1_data)
+            e1.is_active = False
+            db.add(e1)
+
+            # Expired but still active (should NOT be cleaned - only inactive+expired)
+            e2_data = SessionCreate(
+                user_id=async_test_user.id,
+                refresh_token_jti=str(uuid4()),
+                device_name="Expired Active",
+                ip_address="192.168.1.101",
+                user_agent="Mozilla/5.0",
+                expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
+                last_used_at=datetime.now(timezone.utc) - timedelta(hours=2)
+            )
+            await session_crud.create_session(db, obj_in=e2_data)
+
+            await db.commit()
+
+        response = await client.delete(
+            "/api/v1/sessions/me/expired",
+            headers={"Authorization": f"Bearer {user_token}"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["success"] is True
