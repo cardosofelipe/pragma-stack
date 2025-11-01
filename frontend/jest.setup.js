@@ -1,7 +1,13 @@
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
-import 'whatwg-fetch'; // Polyfill fetch API for MSW
+import 'whatwg-fetch'; // Polyfill fetch API
 import { Crypto } from '@peculiar/webcrypto';
+
+// Polyfill TransformStream for nock/msw
+if (typeof global.TransformStream === 'undefined') {
+  const { TransformStream } = require('node:stream/web');
+  global.TransformStream = TransformStream;
+}
 
 // Mock window object
 global.window = global.window || {};

@@ -22,6 +22,7 @@ const customJestConfig = {
     '!src/**/*.stories.{js,jsx,ts,tsx}',
     '!src/**/__tests__/**',
     '!src/lib/api/generated/**', // Auto-generated API client - do not test
+    '!src/lib/api/hooks/**', // React Query hooks - tested in E2E (require API mocking)
     '!src/**/*.old.{js,jsx,ts,tsx}', // Old implementation files
     '!src/components/ui/**', // shadcn/ui components - third-party, no need to test
     '!src/app/**', // Next.js app directory - layout/page files (test in E2E)

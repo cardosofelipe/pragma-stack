@@ -3,7 +3,14 @@
  * Note: Uses real crypto implementation to test actual encryption/decryption
  */
 
-import { saveTokens, getTokens, clearTokens, isStorageAvailable } from '@/lib/auth/storage';
+import {
+  saveTokens,
+  getTokens,
+  clearTokens,
+  isStorageAvailable,
+  getStorageMethod,
+  setStorageMethod,
+} from '@/lib/auth/storage';
 import { clearEncryptionKey } from '@/lib/auth/crypto';
 
 describe('Storage Module', () => {
@@ -126,6 +133,83 @@ describe('Storage Module', () => {
       await expect(saveTokens(tokens)).rejects.toThrow('localStorage not available - cannot save tokens');
 
       Storage.prototype.setItem = originalSetItem;
+    });
+
+    it('should handle getStorageMethod errors gracefully', () => {
+      const originalGetItem = localStorage.getItem;
+      localStorage.getItem = jest.fn(() => {
+        throw new Error('Storage access denied');
+      });
+
+      // Should still return default method
+      const method = getStorageMethod();
+      expect(method).toBe('localStorage');
+
+      localStorage.getItem = originalGetItem;
+    });
+
+    it('should handle setStorageMethod errors gracefully', () => {
+      const originalSetItem = localStorage.setItem;
+      localStorage.setItem = jest.fn(() => {
+        throw new Error('Storage quota exceeded');
+      });
+
+      // Should not throw
+      expect(() => setStorageMethod('cookie')).not.toThrow();
+
+      localStorage.setItem = originalSetItem;
+    });
+
+    it('should handle clearTokens localStorage errors gracefully', async () => {
+      const originalRemoveItem = localStorage.removeItem;
+      localStorage.removeItem = jest.fn(() => {
+        throw new Error('Storage access denied');
+      });
+
+      // Should not throw
+      await expect(clearTokens()).resolves.not.toThrow();
+
+      localStorage.removeItem = originalRemoveItem;
+    });
+
+  });
+
+  describe('Storage method handling', () => {
+    it('should return stored method when set to cookie', () => {
+      setStorageMethod('cookie');
+      expect(getStorageMethod()).toBe('cookie');
+    });
+
+    it('should return stored method when set to localStorage', () => {
+      setStorageMethod('localStorage');
+      expect(getStorageMethod()).toBe('localStorage');
+    });
+
+    it('should handle cookie method in saveTokens', async () => {
+      setStorageMethod('cookie');
+
+      const tokens = {
+        accessToken: 'test.access.token',
+        refreshToken: 'test.refresh.token',
+      };
+
+      // Should not throw and return immediately (cookie handling is server-side)
+      await expect(saveTokens(tokens)).resolves.not.toThrow();
+    });
+
+    it('should handle cookie method in getTokens', async () => {
+      setStorageMethod('cookie');
+
+      // Should return null (cookie reading is server-side)
+      const result = await getTokens();
+      expect(result).toBeNull();
+    });
+
+    it('should handle cookie method in clearTokens', async () => {
+      setStorageMethod('cookie');
+
+      // Should not throw
+      await expect(clearTokens()).resolves.not.toThrow();
     });
   });
 });

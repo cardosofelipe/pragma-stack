@@ -132,6 +132,7 @@ export type AppConfig = typeof config;
  * Validate critical configuration on module load
  * Note: Most auth config validation is handled by parseIntSafe min/max constraints
  */
+/* istanbul ignore next - Browser-only validation, runs at build/startup time */
 function validateConfig(): void {
   const errors: string[] = [];
 

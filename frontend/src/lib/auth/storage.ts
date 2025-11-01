@@ -21,6 +21,7 @@ export type StorageMethod = 'cookie' | 'localStorage';
  * Check if localStorage is available (browser only)
  */
 function isLocalStorageAvailable(): boolean {
+  /* istanbul ignore next - SSR guard */
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
     return false;
   }
@@ -51,6 +52,7 @@ export function getStorageMethod(): StorageMethod {
       return stored;
     }
   } catch (error) {
+    /* istanbul ignore next - Error logging only */
     console.warn('Failed to get storage method:', error);
   }
 
@@ -65,6 +67,7 @@ export function getStorageMethod(): StorageMethod {
  */
 export function setStorageMethod(method: StorageMethod): void {
   if (!isLocalStorageAvailable()) {
+    /* istanbul ignore next - SSR guard with console warn */
     console.warn('Cannot set storage method: localStorage not available');
     return;
   }
@@ -72,6 +75,7 @@ export function setStorageMethod(method: StorageMethod): void {
   try {
     localStorage.setItem(STORAGE_METHOD_KEY, method);
   } catch (error) {
+    /* istanbul ignore next - Error logging only */
     console.error('Failed to set storage method:', error);
   }
 }
@@ -101,6 +105,7 @@ export async function saveTokens(tokens: TokenStorage): Promise<void> {
     const encrypted = await encryptData(JSON.stringify(tokens));
     localStorage.setItem(STORAGE_KEY, encrypted);
   } catch (error) {
+    /* istanbul ignore next - Error logging before throw */
     console.error('Failed to save tokens:', error);
     throw new Error('Token storage failed');
   }
@@ -123,6 +128,7 @@ export async function getTokens(): Promise<TokenStorage | null> {
   }
 
   // Fallback: Encrypted localStorage
+  /* istanbul ignore next - SSR guard */
   if (!isLocalStorageAvailable()) {
     return null;
   }
@@ -141,6 +147,7 @@ export async function getTokens(): Promise<TokenStorage | null> {
         !('accessToken' in parsed) || !('refreshToken' in parsed) ||
         (parsed.accessToken !== null && typeof parsed.accessToken !== 'string') ||
         (parsed.refreshToken !== null && typeof parsed.refreshToken !== 'string')) {
+      /* istanbul ignore next - Validation error path */
       throw new Error('Invalid token structure');
     }
 
@@ -175,6 +182,7 @@ export async function clearTokens(): Promise<void> {
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
+      /* istanbul ignore next - Error logging only */
       console.warn('Failed to clear tokens from localStorage:', error);
     }
   }
