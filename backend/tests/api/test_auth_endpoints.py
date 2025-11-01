@@ -44,7 +44,10 @@ class TestRegisterEndpoint:
 
     @pytest.mark.asyncio
     async def test_register_duplicate_email(self, client, async_test_user):
-        """Test registering with existing email."""
+        """Test registering with existing email.
+
+        Note: Returns 400 with generic message to prevent user enumeration.
+        """
         response = await client.post(
             "/api/v1/auth/register",
             json={
@@ -55,9 +58,11 @@ class TestRegisterEndpoint:
             }
         )
 
-        assert response.status_code == status.HTTP_409_CONFLICT
+        # Security: Returns 400 with generic message to prevent email enumeration
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         data = response.json()
         assert data["success"] is False
+        assert "registration failed" in data["errors"][0]["message"].lower()
 
     @pytest.mark.asyncio
     async def test_register_weak_password(self, client):
@@ -84,7 +89,7 @@ class TestRegisterEndpoint:
                 "/api/v1/auth/register",
                 json={
                     "email": "error@example.com",
-                    "password": "SecurePassword123",
+                    "password": "SecurePassword123!",
                     "first_name": "Error",
                     "last_name": "User"
                 }
