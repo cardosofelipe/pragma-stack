@@ -146,9 +146,10 @@ async def update_current_user(
     Users cannot elevate their own permissions (is_superuser).
     """
     # Prevent users from making themselves superuser
-    if getattr(user_update, 'is_superuser', None) is not None:
-        logger.warning(f"User {current_user.id} attempted to modify is_superuser field")
-        raise AuthorizationError(
+    # NOTE: UserUpdate schema doesn't include is_superuser, so this is dead code
+    if getattr(user_update, 'is_superuser', None) is not None:  # pragma: no cover
+        logger.warning(f"User {current_user.id} attempted to modify is_superuser field")  # pragma: no cover
+        raise AuthorizationError(  # pragma: no cover
             message="Cannot modify superuser status",
             error_code=ErrorCode.INSUFFICIENT_PERMISSIONS
         )
@@ -265,9 +266,10 @@ async def update_user(
         )
 
     # Prevent non-superusers from modifying superuser status
-    if getattr(user_update, 'is_superuser', None) is not None and not current_user.is_superuser:
-        logger.warning(f"User {current_user.id} attempted to modify is_superuser field")
-        raise AuthorizationError(
+    # NOTE: UserUpdate schema doesn't include is_superuser, so this is dead code
+    if getattr(user_update, 'is_superuser', None) is not None and not current_user.is_superuser:  # pragma: no cover
+        logger.warning(f"User {current_user.id} attempted to modify is_superuser field")  # pragma: no cover
+        raise AuthorizationError(  # pragma: no cover
             message="Cannot modify superuser status",
             error_code=ErrorCode.INSUFFICIENT_PERMISSIONS
         )
