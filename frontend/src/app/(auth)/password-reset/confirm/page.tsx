@@ -6,6 +6,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { PasswordResetConfirmForm } from '@/components/auth/PasswordResetConfirmForm';
 import { Alert } from '@/components/ui/alert';
 import Link from 'next/link';
@@ -14,11 +15,21 @@ export default function PasswordResetConfirmPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Handle successful password reset
   const handleSuccess = () => {
     // Wait 3 seconds then redirect to login
-    setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
       router.push('/login');
     }, 3000);
   };

@@ -210,6 +210,7 @@ export function PasswordResetConfirmForm({
                 ? 'new-password-error'
                 : 'password-requirements'
             }
+            aria-required="true"
           />
           {form.formState.errors.new_password && (
             <p id="new-password-error" className="text-sm text-destructive">
@@ -284,6 +285,7 @@ export function PasswordResetConfirmForm({
                 ? 'confirm-password-error'
                 : undefined
             }
+            aria-required="true"
           />
           {form.formState.errors.confirm_password && (
             <p id="confirm-password-error" className="text-sm text-destructive">

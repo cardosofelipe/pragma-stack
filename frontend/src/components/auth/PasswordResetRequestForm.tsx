@@ -157,6 +157,7 @@ export function PasswordResetRequestForm({
             {...form.register('email')}
             aria-invalid={!!form.formState.errors.email}
             aria-describedby={form.formState.errors.email ? 'email-error' : undefined}
+            aria-required="true"
           />
           {form.formState.errors.email && (
             <p id="email-error" className="text-sm text-destructive">
