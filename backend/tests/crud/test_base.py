@@ -757,3 +757,79 @@ class TestCRUDBaseRestore:
             restored = await user_crud.restore(session, id=user_id)  # UUID object
             assert restored is not None
             assert restored.deleted_at is None
+
+
+class TestCRUDBasePaginationValidation:
+    """Tests for pagination parameter validation (covers lines 254-260)."""
+
+    @pytest.mark.asyncio
+    async def test_get_multi_with_total_negative_skip(self, async_test_db):
+        """Test that negative skip raises ValueError."""
+        test_engine, SessionLocal = async_test_db
+
+        async with SessionLocal() as session:
+            with pytest.raises(ValueError, match="skip must be non-negative"):
+                await user_crud.get_multi_with_total(session, skip=-1, limit=10)
+
+    @pytest.mark.asyncio
+    async def test_get_multi_with_total_negative_limit(self, async_test_db):
+        """Test that negative limit raises ValueError."""
+        test_engine, SessionLocal = async_test_db
+
+        async with SessionLocal() as session:
+            with pytest.raises(ValueError, match="limit must be non-negative"):
+                await user_crud.get_multi_with_total(session, skip=0, limit=-1)
+
+    @pytest.mark.asyncio
+    async def test_get_multi_with_total_limit_too_large(self, async_test_db):
+        """Test that limit > 1000 raises ValueError."""
+        test_engine, SessionLocal = async_test_db
+
+        async with SessionLocal() as session:
+            with pytest.raises(ValueError, match="Maximum limit is 1000"):
+                await user_crud.get_multi_with_total(session, skip=0, limit=1001)
+
+    @pytest.mark.asyncio
+    async def test_get_multi_with_total_with_filters(self, async_test_db, async_test_user):
+        """Test pagination with filters (covers lines 270-273)."""
+        test_engine, SessionLocal = async_test_db
+
+        async with SessionLocal() as session:
+            users, total = await user_crud.get_multi_with_total(
+                session,
+                skip=0,
+                limit=10,
+                filters={"is_active": True}
+            )
+            assert isinstance(users, list)
+            assert total >= 0
+
+    @pytest.mark.asyncio
+    async def test_get_multi_with_total_with_sorting_desc(self, async_test_db):
+        """Test pagination with descending sort (covers lines 283-284)."""
+        test_engine, SessionLocal = async_test_db
+
+        async with SessionLocal() as session:
+            users, total = await user_crud.get_multi_with_total(
+                session,
+                skip=0,
+                limit=10,
+                sort_by="created_at",
+                sort_order="desc"
+            )
+            assert isinstance(users, list)
+
+    @pytest.mark.asyncio
+    async def test_get_multi_with_total_with_sorting_asc(self, async_test_db):
+        """Test pagination with ascending sort (covers lines 285-286)."""
+        test_engine, SessionLocal = async_test_db
+
+        async with SessionLocal() as session:
+            users, total = await user_crud.get_multi_with_total(
+                session,
+                skip=0,
+                limit=10,
+                sort_by="created_at",
+                sort_order="asc"
+            )
+            assert isinstance(users, list)
