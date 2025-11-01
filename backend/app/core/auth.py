@@ -4,6 +4,8 @@ logging.getLogger('passlib').setLevel(logging.ERROR)
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional, Union
 import uuid
+import asyncio
+from functools import partial
 
 from jose import jwt, JWTError
 from passlib.context import CryptContext
@@ -42,6 +44,49 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def get_password_hash(password: str) -> str:
     """Generate a password hash."""
     return pwd_context.hash(password)
+
+
+async def verify_password_async(plain_password: str, hashed_password: str) -> bool:
+    """
+    Verify a password against a hash asynchronously.
+
+    Runs the CPU-intensive bcrypt operation in a thread pool to avoid
+    blocking the event loop.
+
+    Args:
+        plain_password: Plain text password to verify
+        hashed_password: Hashed password to verify against
+
+    Returns:
+        True if password matches, False otherwise
+    """
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(
+        None,
+        partial(pwd_context.verify, plain_password, hashed_password)
+    )
+
+
+async def get_password_hash_async(password: str) -> str:
+    """
+    Generate a password hash asynchronously.
+
+    Runs the CPU-intensive bcrypt operation in a thread pool to avoid
+    blocking the event loop. This is especially important during user
+    registration and password changes.
+
+    Args:
+        password: Plain text password to hash
+
+    Returns:
+        Hashed password string
+    """
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(
+        None,
+        pwd_context.hash,
+        password
+    )
 
 
 def create_access_token(

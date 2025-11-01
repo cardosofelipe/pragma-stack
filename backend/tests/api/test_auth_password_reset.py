@@ -148,7 +148,7 @@ class TestPasswordResetConfirm:
         """Test password reset confirmation with valid token."""
         # Generate valid token
         token = create_password_reset_token(async_test_user.email)
-        new_password = "NewSecure123"
+        new_password = "NewSecure123!"
 
         response = await client.post(
             "/api/v1/auth/password-reset/confirm",
@@ -186,7 +186,7 @@ class TestPasswordResetConfirm:
             "/api/v1/auth/password-reset/confirm",
             json={
                 "token": token,
-                "new_password": "NewSecure123"
+                "new_password": "NewSecure123!"
             }
         )
 
@@ -204,7 +204,7 @@ class TestPasswordResetConfirm:
             "/api/v1/auth/password-reset/confirm",
             json={
                 "token": "invalid_token_xyz",
-                "new_password": "NewSecure123"
+                "new_password": "NewSecure123!"
             }
         )
 
@@ -233,7 +233,7 @@ class TestPasswordResetConfirm:
             "/api/v1/auth/password-reset/confirm",
             json={
                 "token": tampered,
-                "new_password": "NewSecure123"
+                "new_password": "NewSecure123!"
             }
         )
 
@@ -249,7 +249,7 @@ class TestPasswordResetConfirm:
             "/api/v1/auth/password-reset/confirm",
             json={
                 "token": token,
-                "new_password": "NewSecure123"
+                "new_password": "NewSecure123!"
             }
         )
 
@@ -276,7 +276,7 @@ class TestPasswordResetConfirm:
             "/api/v1/auth/password-reset/confirm",
             json={
                 "token": token,
-                "new_password": "NewSecure123"
+                "new_password": "NewSecure123!"
             }
         )
 
@@ -315,7 +315,7 @@ class TestPasswordResetConfirm:
         # Missing token
         response = await client.post(
             "/api/v1/auth/password-reset/confirm",
-            json={"new_password": "NewSecure123"}
+            json={"new_password": "NewSecure123!"}
         )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -340,7 +340,7 @@ class TestPasswordResetConfirm:
                 "/api/v1/auth/password-reset/confirm",
                 json={
                     "token": token,
-                    "new_password": "NewSecure123"
+                    "new_password": "NewSecure123!"
                 }
             )
 
@@ -354,7 +354,7 @@ class TestPasswordResetConfirm:
     async def test_password_reset_full_flow(self, client, async_test_user, async_test_db):
         """Test complete password reset flow."""
         original_password = async_test_user.password_hash
-        new_password = "BrandNew123"
+        new_password = "BrandNew123!"
 
         # Step 1: Request password reset
         with patch('app.api.routes.auth.email_service.send_password_reset_email') as mock_send:

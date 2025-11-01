@@ -345,54 +345,50 @@ async def admin_bulk_user_action(
     db: AsyncSession = Depends(get_async_db)
 ) -> Any:
     """
-    Perform bulk actions on multiple users.
+    Perform bulk actions on multiple users using optimized bulk operations.
 
+    Uses single UPDATE query instead of N individual queries for efficiency.
     Supported actions: activate, deactivate, delete
     """
-    affected_count = 0
-    failed_count = 0
-    failed_ids = []
-
     try:
-        for user_id in bulk_action.user_ids:
-            try:
-                user = await user_crud.get(db, id=user_id)
-                if not user:
-                    failed_count += 1
-                    failed_ids.append(user_id)
-                    continue
+        # Use efficient bulk operations instead of loop
+        if bulk_action.action == BulkAction.ACTIVATE:
+            affected_count = await user_crud.bulk_update_status(
+                db,
+                user_ids=bulk_action.user_ids,
+                is_active=True
+            )
+        elif bulk_action.action == BulkAction.DEACTIVATE:
+            affected_count = await user_crud.bulk_update_status(
+                db,
+                user_ids=bulk_action.user_ids,
+                is_active=False
+            )
+        elif bulk_action.action == BulkAction.DELETE:
+            # bulk_soft_delete automatically excludes the admin user
+            affected_count = await user_crud.bulk_soft_delete(
+                db,
+                user_ids=bulk_action.user_ids,
+                exclude_user_id=admin.id
+            )
+        else:
+            raise ValueError(f"Unsupported bulk action: {bulk_action.action}")
 
-                # Prevent affecting yourself
-                if user.id == admin.id:
-                    failed_count += 1
-                    failed_ids.append(user_id)
-                    continue
-
-                if bulk_action.action == BulkAction.ACTIVATE:
-                    await user_crud.update(db, db_obj=user, obj_in={"is_active": True})
-                elif bulk_action.action == BulkAction.DEACTIVATE:
-                    await user_crud.update(db, db_obj=user, obj_in={"is_active": False})
-                elif bulk_action.action == BulkAction.DELETE:
-                    await user_crud.soft_delete(db, id=user_id)
-
-                affected_count += 1
-
-            except Exception as e:
-                logger.error(f"Error processing user {user_id} in bulk action: {str(e)}")
-                failed_count += 1
-                failed_ids.append(user_id)
+        # Calculate failed count (requested - affected)
+        requested_count = len(bulk_action.user_ids)
+        failed_count = requested_count - affected_count
 
         logger.info(
             f"Admin {admin.email} performed bulk {bulk_action.action.value} "
-            f"on {affected_count} users ({failed_count} failed)"
+            f"on {affected_count} users ({failed_count} skipped/failed)"
         )
 
         return BulkActionResult(
             success=failed_count == 0,
             affected_count=affected_count,
             failed_count=failed_count,
-            message=f"Bulk {bulk_action.action.value}: {affected_count} users affected, {failed_count} failed",
-            failed_ids=failed_ids if failed_ids else None
+            message=f"Bulk {bulk_action.action.value}: {affected_count} users affected, {failed_count} skipped",
+            failed_ids=None  # Bulk operations don't track individual failures
         )
 
     except Exception as e:

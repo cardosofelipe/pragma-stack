@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.core.auth import (
-    verify_password,
-    get_password_hash,
+    verify_password_async,
+    get_password_hash_async,
     create_access_token,
     create_refresh_token,
     TokenExpiredError,
@@ -31,7 +31,7 @@ class AuthService:
     @staticmethod
     async def authenticate_user(db: AsyncSession, email: str, password: str) -> Optional[User]:
         """
-        Authenticate a user with email and password.
+        Authenticate a user with email and password using async password verification.
 
         Args:
             db: Database session
@@ -47,7 +47,8 @@ class AuthService:
         if not user:
             return None
 
-        if not verify_password(password, user.password_hash):
+        # Verify password asynchronously to avoid blocking event loop
+        if not await verify_password_async(password, user.password_hash):
             return None
 
         if not user.is_active:
@@ -77,8 +78,9 @@ class AuthService:
             if existing_user:
                 raise AuthenticationError("User with this email already exists")
 
-            # Create new user
-            hashed_password = get_password_hash(user_data.password)
+            # Create new user with async password hashing
+            # Hash password asynchronously to avoid blocking event loop
+            hashed_password = await get_password_hash_async(user_data.password)
 
             # Create user object from model
             user = User(
@@ -202,12 +204,12 @@ class AuthService:
             if not user:
                 raise AuthenticationError("User not found")
 
-            # Verify current password
-            if not verify_password(current_password, user.password_hash):
+            # Verify current password asynchronously
+            if not await verify_password_async(current_password, user.password_hash):
                 raise AuthenticationError("Current password is incorrect")
 
-            # Update password
-            user.password_hash = get_password_hash(new_password)
+            # Hash new password asynchronously to avoid blocking event loop
+            user.password_hash = await get_password_hash_async(new_password)
             await db.commit()
 
             logger.info(f"Password changed successfully for user {user_id}")

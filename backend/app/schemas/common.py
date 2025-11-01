@@ -2,6 +2,7 @@
 Common schemas used across the API for pagination, responses, filtering, and sorting.
 """
 from typing import Generic, TypeVar, List, Optional
+from uuid import UUID
 from enum import Enum
 from pydantic import BaseModel, Field
 from math import ceil
@@ -133,6 +134,46 @@ class MessageResponse(BaseModel):
             "example": {
                 "success": True,
                 "message": "Operation completed successfully"
+            }
+        }
+    }
+
+
+class BulkActionRequest(BaseModel):
+    """Request schema for bulk operations on multiple items."""
+
+    ids: List[UUID] = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="List of item IDs to perform action on (max 100)"
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "ids": [
+                    "550e8400-e29b-41d4-a716-446655440000",
+                    "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+                ]
+            }
+        }
+    }
+
+
+class BulkActionResponse(BaseModel):
+    """Response schema for bulk operations."""
+
+    success: bool = Field(default=True, description="Operation success status")
+    message: str = Field(..., description="Human-readable message")
+    affected_count: int = Field(..., description="Number of items affected by the operation")
+
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "success": True,
+                "message": "Successfully deactivated 5 users",
+                "affected_count": 5
             }
         }
     }

@@ -111,7 +111,7 @@ class TestPhoneNumberValidation:
             email="test@example.com",
             first_name="Test",
             last_name="User",
-            password="Password123",
+            password="Password123!",
             phone_number="+41791234567"
         )
         assert user.phone_number == "+41791234567"
@@ -122,6 +122,6 @@ class TestPhoneNumberValidation:
                 email="test@example.com",
                 first_name="Test",
                 last_name="User",
-                password="Password123",
+                password="Password123!",
                 phone_number="invalid-number"
             )

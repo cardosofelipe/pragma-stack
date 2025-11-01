@@ -131,7 +131,7 @@ def test_user(test_db):
     user = User(
         id=uuid.uuid4(),
         email="testuser@example.com",
-        password_hash=get_password_hash("TestPassword123"),
+        password_hash=get_password_hash("TestPassword123!"),
         first_name="Test",
         last_name="User",
         phone_number="+1234567890",
@@ -155,7 +155,7 @@ def test_superuser(test_db):
     user = User(
         id=uuid.uuid4(),
         email="superuser@example.com",
-        password_hash=get_password_hash("SuperPassword123"),
+        password_hash=get_password_hash("SuperPassword123!"),
         first_name="Super",
         last_name="User",
         phone_number="+9876543210",
@@ -181,7 +181,7 @@ async def async_test_user(async_test_db):
         user = User(
             id=uuid.uuid4(),
             email="testuser@example.com",
-            password_hash=get_password_hash("TestPassword123"),
+            password_hash=get_password_hash("TestPassword123!"),
             first_name="Test",
             last_name="User",
             phone_number="+1234567890",
@@ -207,7 +207,7 @@ async def async_test_superuser(async_test_db):
         user = User(
             id=uuid.uuid4(),
             email="superuser@example.com",
-            password_hash=get_password_hash("SuperPassword123"),
+            password_hash=get_password_hash("SuperPassword123!"),
             first_name="Super",
             last_name="User",
             phone_number="+9876543210",

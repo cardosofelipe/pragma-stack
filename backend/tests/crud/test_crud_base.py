@@ -318,7 +318,7 @@ class TestCRUDCreate:
         """Test basic record creation."""
         user_data = UserCreate(
             email="create@example.com",
-            password="Password123",
+            password="Password123!",
             first_name="Create",
             last_name="Test"
         )
@@ -333,7 +333,7 @@ class TestCRUDCreate:
         """Test that creating duplicate email raises error."""
         user_data = UserCreate(
             email="duplicate@example.com",
-            password="Password123",
+            password="Password123!",
             first_name="First"
         )
 

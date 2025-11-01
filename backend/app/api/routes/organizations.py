@@ -51,23 +51,20 @@ async def get_my_organizations(
     Get all organizations the current user belongs to.
 
     Returns organizations with member count for each.
+    Uses optimized single query to avoid N+1 problem.
     """
     try:
-        orgs = await organization_crud.get_user_organizations(
+        # Get all org data in single query with JOIN and subquery
+        orgs_data = await organization_crud.get_user_organizations_with_details(
             db,
             user_id=current_user.id,
             is_active=is_active
         )
 
-        # Add member count and role to each organization
+        # Transform to response objects
         orgs_with_data = []
-        for org in orgs:
-            role = await organization_crud.get_user_role_in_org(
-                db,
-                user_id=current_user.id,
-                organization_id=org.id
-            )
-
+        for item in orgs_data:
+            org = item['organization']
             org_dict = {
                 "id": org.id,
                 "name": org.name,
@@ -77,7 +74,7 @@ async def get_my_organizations(
                 "settings": org.settings,
                 "created_at": org.created_at,
                 "updated_at": org.updated_at,
-                "member_count": await organization_crud.get_member_count(db, organization_id=org.id)
+                "member_count": item['member_count']
             }
             orgs_with_data.append(OrganizationResponse(**org_dict))
 

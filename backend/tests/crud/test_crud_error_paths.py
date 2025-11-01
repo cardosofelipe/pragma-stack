@@ -39,7 +39,7 @@ class TestCRUDErrorPaths:
         # Create first user
         user_data = UserCreate(
             email="unique@example.com",
-            password="Password123",
+            password="Password123!",
             first_name="First"
         )
         user_crud.create(db_session, obj_in=user_data)
@@ -52,7 +52,7 @@ class TestCRUDErrorPaths:
         """Test create handles other integrity errors."""
         user_data = UserCreate(
             email="integrityerror@example.com",
-            password="Password123",
+            password="Password123!",
             first_name="Integrity"
         )
 
@@ -71,7 +71,7 @@ class TestCRUDErrorPaths:
         """Test create handles unexpected errors."""
         user_data = UserCreate(
             email="unexpectederror@example.com",
-            password="Password123",
+            password="Password123!",
             first_name="Unexpected"
         )
 

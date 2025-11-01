@@ -5,7 +5,8 @@ from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import and_, select, update, func
+from sqlalchemy import and_, select, update, delete, func
+from sqlalchemy.orm import selectinload, joinedload
 import logging
 
 from app.crud.base_async import CRUDBaseAsync
@@ -68,15 +69,17 @@ class CRUDSessionAsync(CRUDBaseAsync[UserSession, SessionCreate, SessionUpdate])
         db: AsyncSession,
         *,
         user_id: str,
-        active_only: bool = True
+        active_only: bool = True,
+        with_user: bool = False
     ) -> List[UserSession]:
         """
-        Get all sessions for a user.
+        Get all sessions for a user with optional eager loading.
 
         Args:
             db: Database session
             user_id: User ID
             active_only: If True, return only active sessions
+            with_user: If True, eager load user relationship to prevent N+1
 
         Returns:
             List of UserSession objects
@@ -86,6 +89,10 @@ class CRUDSessionAsync(CRUDBaseAsync[UserSession, SessionCreate, SessionUpdate])
             user_uuid = UUID(user_id) if isinstance(user_id, str) else user_id
 
             query = select(UserSession).where(UserSession.user_id == user_uuid)
+
+            # Add eager loading if requested to prevent N+1 queries
+            if with_user:
+                query = query.options(joinedload(UserSession.user))
 
             if active_only:
                 query = query.where(UserSession.is_active == True)
@@ -286,11 +293,13 @@ class CRUDSessionAsync(CRUDBaseAsync[UserSession, SessionCreate, SessionUpdate])
 
     async def cleanup_expired(self, db: AsyncSession, *, keep_days: int = 30) -> int:
         """
-        Clean up expired sessions.
+        Clean up expired sessions using optimized bulk DELETE.
 
         Deletes sessions that are:
         - Expired AND inactive
         - Older than keep_days
+
+        Uses single DELETE query instead of N individual deletes for efficiency.
 
         Args:
             db: Database session
@@ -301,28 +310,24 @@ class CRUDSessionAsync(CRUDBaseAsync[UserSession, SessionCreate, SessionUpdate])
         """
         try:
             cutoff_date = datetime.now(timezone.utc) - timedelta(days=keep_days)
+            now = datetime.now(timezone.utc)
 
-            # Get sessions to delete
-            stmt = select(UserSession).where(
+            # Use bulk DELETE with WHERE clause - single query
+            stmt = delete(UserSession).where(
                 and_(
                     UserSession.is_active == False,
-                    UserSession.expires_at < datetime.now(timezone.utc),
+                    UserSession.expires_at < now,
                     UserSession.created_at < cutoff_date
                 )
             )
+
             result = await db.execute(stmt)
-            sessions_to_delete = list(result.scalars().all())
-
-            # Delete them
-            for session in sessions_to_delete:
-                await db.delete(session)
-
             await db.commit()
 
-            count = len(sessions_to_delete)
+            count = result.rowcount
 
             if count > 0:
-                logger.info(f"Cleaned up {count} expired sessions")
+                logger.info(f"Cleaned up {count} expired sessions using bulk DELETE")
 
             return count
         except Exception as e:

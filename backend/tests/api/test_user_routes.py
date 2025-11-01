@@ -40,7 +40,7 @@ class TestListUsers:
     @pytest.mark.asyncio
     async def test_list_users_as_superuser(self, client, async_test_superuser):
         """Test listing users as superuser."""
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
 
         response = await client.get("/api/v1/users", headers=headers)
 
@@ -53,7 +53,7 @@ class TestListUsers:
     @pytest.mark.asyncio
     async def test_list_users_as_regular_user(self, client, async_test_user):
         """Test that regular users cannot list users."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.get("/api/v1/users", headers=headers)
 
@@ -77,7 +77,7 @@ class TestListUsers:
                 session.add(user)
             await session.commit()
 
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
 
         # Get first page
         response = await client.get("/api/v1/users?page=1&limit=5", headers=headers)
@@ -111,7 +111,7 @@ class TestListUsers:
             session.add_all([active_user, inactive_user])
             await session.commit()
 
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
 
         # Filter for active users
         response = await client.get("/api/v1/users?is_active=true", headers=headers)
@@ -130,7 +130,7 @@ class TestListUsers:
     @pytest.mark.asyncio
     async def test_list_users_sort_by_email(self, client, async_test_superuser):
         """Test sorting users by email."""
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
 
         response = await client.get("/api/v1/users?sort_by=email&sort_order=asc", headers=headers)
         assert response.status_code == status.HTTP_200_OK
@@ -154,7 +154,7 @@ class TestGetCurrentUserProfile:
     @pytest.mark.asyncio
     async def test_get_own_profile(self, client, async_test_user):
         """Test getting own profile."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.get("/api/v1/users/me", headers=headers)
 
@@ -176,7 +176,7 @@ class TestUpdateCurrentUser:
     @pytest.mark.asyncio
     async def test_update_own_profile(self, client, async_test_user):
         """Test updating own profile."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.patch(
             "/api/v1/users/me",
@@ -192,7 +192,7 @@ class TestUpdateCurrentUser:
     @pytest.mark.asyncio
     async def test_update_profile_phone_number(self, client, async_test_user, test_db):
         """Test updating phone number with validation."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.patch(
             "/api/v1/users/me",
@@ -207,7 +207,7 @@ class TestUpdateCurrentUser:
     @pytest.mark.asyncio
     async def test_update_profile_invalid_phone(self, client, async_test_user):
         """Test that invalid phone numbers are rejected."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.patch(
             "/api/v1/users/me",
@@ -220,7 +220,7 @@ class TestUpdateCurrentUser:
     @pytest.mark.asyncio
     async def test_cannot_elevate_to_superuser(self, client, async_test_user):
         """Test that users cannot make themselves superuser."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         # Note: is_superuser is not in UserUpdate schema, but the endpoint checks for it
         # This tests that even if someone tries to send it, it's rejected
@@ -255,7 +255,7 @@ class TestGetUserById:
     @pytest.mark.asyncio
     async def test_get_own_profile_by_id(self, client, async_test_user):
         """Test getting own profile by ID."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.get(f"/api/v1/users/{async_test_user.id}", headers=headers)
 
@@ -278,7 +278,7 @@ class TestGetUserById:
         test_db.commit()
         test_db.refresh(other_user)
 
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.get(f"/api/v1/users/{other_user.id}", headers=headers)
 
@@ -287,7 +287,7 @@ class TestGetUserById:
     @pytest.mark.asyncio
     async def test_get_other_user_as_superuser(self, client, async_test_superuser, async_test_user):
         """Test that superusers can view other profiles."""
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
 
         response = await client.get(f"/api/v1/users/{async_test_user.id}", headers=headers)
 
@@ -298,7 +298,7 @@ class TestGetUserById:
     @pytest.mark.asyncio
     async def test_get_nonexistent_user(self, client, async_test_superuser):
         """Test getting non-existent user."""
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
         fake_id = uuid.uuid4()
 
         response = await client.get(f"/api/v1/users/{fake_id}", headers=headers)
@@ -308,7 +308,7 @@ class TestGetUserById:
     @pytest.mark.asyncio
     async def test_get_user_invalid_uuid(self, client, async_test_superuser):
         """Test getting user with invalid UUID format."""
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
 
         response = await client.get("/api/v1/users/not-a-uuid", headers=headers)
 
@@ -321,7 +321,7 @@ class TestUpdateUserById:
     @pytest.mark.asyncio
     async def test_update_own_profile_by_id(self, client, async_test_user, test_db):
         """Test updating own profile by ID."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.patch(
             f"/api/v1/users/{async_test_user.id}",
@@ -348,7 +348,7 @@ class TestUpdateUserById:
         test_db.commit()
         test_db.refresh(other_user)
 
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.patch(
             f"/api/v1/users/{other_user.id}",
@@ -365,7 +365,7 @@ class TestUpdateUserById:
     @pytest.mark.asyncio
     async def test_update_other_user_as_superuser(self, client, async_test_superuser, async_test_user, test_db):
         """Test that superusers can update other profiles."""
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
 
         response = await client.patch(
             f"/api/v1/users/{async_test_user.id}",
@@ -380,7 +380,7 @@ class TestUpdateUserById:
     @pytest.mark.asyncio
     async def test_regular_user_cannot_modify_superuser_status(self, client, async_test_user):
         """Test that regular users cannot change superuser status even if they try."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         # is_superuser not in UserUpdate schema, so it gets ignored by Pydantic
         # Just verify the user stays the same
@@ -397,7 +397,7 @@ class TestUpdateUserById:
     @pytest.mark.asyncio
     async def test_superuser_can_update_users(self, client, async_test_superuser, async_test_user, test_db):
         """Test that superusers can update other users."""
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
 
         response = await client.patch(
             f"/api/v1/users/{async_test_user.id}",
@@ -413,7 +413,7 @@ class TestUpdateUserById:
     @pytest.mark.asyncio
     async def test_update_nonexistent_user(self, client, async_test_superuser):
         """Test updating non-existent user."""
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
         fake_id = uuid.uuid4()
 
         response = await client.patch(
@@ -433,14 +433,14 @@ class TestChangePassword:
     @pytest.mark.asyncio
     async def test_change_password_success(self, client, async_test_user, test_db):
         """Test successful password change."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.patch(
             "/api/v1/users/me/password",
             headers=headers,
             json={
-                "current_password": "TestPassword123",
-                "new_password": "NewPassword123"
+                "current_password": "TestPassword123!",
+                "new_password": "NewPassword123!"
             }
         )
 
@@ -453,7 +453,7 @@ class TestChangePassword:
             "/api/v1/auth/login",
             json={
                 "email": async_test_user.email,
-                "password": "NewPassword123"
+                "password": "NewPassword123!"
             }
         )
         assert login_response.status_code == status.HTTP_200_OK
@@ -461,14 +461,14 @@ class TestChangePassword:
     @pytest.mark.asyncio
     async def test_change_password_wrong_current(self, client, async_test_user):
         """Test that wrong current password is rejected."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.patch(
             "/api/v1/users/me/password",
             headers=headers,
             json={
                 "current_password": "WrongPassword123",
-                "new_password": "NewPassword123"
+                "new_password": "NewPassword123!"
             }
         )
 
@@ -477,13 +477,13 @@ class TestChangePassword:
     @pytest.mark.asyncio
     async def test_change_password_weak_new_password(self, client, async_test_user):
         """Test that weak new passwords are rejected."""
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.patch(
             "/api/v1/users/me/password",
             headers=headers,
             json={
-                "current_password": "TestPassword123",
+                "current_password": "TestPassword123!",
                 "new_password": "weak"
             }
         )
@@ -496,8 +496,8 @@ class TestChangePassword:
         response = await client.patch(
             "/api/v1/users/me/password",
             json={
-                "current_password": "TestPassword123",
-                "new_password": "NewPassword123"
+                "current_password": "TestPassword123!",
+                "new_password": "NewPassword123!"
             }
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -527,7 +527,7 @@ class TestDeleteUser:
             await session.refresh(user_to_delete)
             user_id = user_to_delete.id
 
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
 
         response = await client.delete(f"/api/v1/users/{user_id}", headers=headers)
 
@@ -545,7 +545,7 @@ class TestDeleteUser:
     @pytest.mark.asyncio
     async def test_cannot_delete_self(self, client, async_test_superuser):
         """Test that users cannot delete their own account."""
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
 
         response = await client.delete(f"/api/v1/users/{async_test_superuser.id}", headers=headers)
 
@@ -566,7 +566,7 @@ class TestDeleteUser:
         test_db.commit()
         test_db.refresh(other_user)
 
-        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123")
+        headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
         response = await client.delete(f"/api/v1/users/{other_user.id}", headers=headers)
 
@@ -575,7 +575,7 @@ class TestDeleteUser:
     @pytest.mark.asyncio
     async def test_delete_nonexistent_user(self, client, async_test_superuser):
         """Test deleting non-existent user."""
-        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123")
+        headers = await get_auth_headers(client, async_test_superuser.email, "SuperPassword123!")
         fake_id = uuid.uuid4()
 
         response = await client.delete(f"/api/v1/users/{fake_id}", headers=headers)

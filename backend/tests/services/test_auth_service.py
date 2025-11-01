@@ -20,7 +20,7 @@ class TestAuthServiceAuthentication:
         test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Set a known password for the mock user
-        password = "TestPassword123"
+        password = "TestPassword123!"
         async with AsyncTestingSessionLocal() as session:
             result = await session.execute(select(User).where(User.id == async_test_user.id))
             user = result.scalar_one_or_none()
@@ -59,7 +59,7 @@ class TestAuthServiceAuthentication:
         test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Set a known password for the mock user
-        password = "TestPassword123"
+        password = "TestPassword123!"
         async with AsyncTestingSessionLocal() as session:
             result = await session.execute(select(User).where(User.id == async_test_user.id))
             user = result.scalar_one_or_none()
@@ -82,7 +82,7 @@ class TestAuthServiceAuthentication:
         test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Set a known password and make user inactive
-        password = "TestPassword123"
+        password = "TestPassword123!"
         async with AsyncTestingSessionLocal() as session:
             result = await session.execute(select(User).where(User.id == async_test_user.id))
             user = result.scalar_one_or_none()
@@ -110,10 +110,10 @@ class TestAuthServiceUserCreation:
 
         user_data = UserCreate(
             email="newuser@example.com",
-            password="TestPassword123",
+            password="TestPassword123!",
             first_name="New",
             last_name="User",
-            phone_number="1234567890"
+            phone_number="+1234567890"
         )
 
         async with AsyncTestingSessionLocal() as session:
@@ -141,7 +141,7 @@ class TestAuthServiceUserCreation:
 
         user_data = UserCreate(
             email=async_test_user.email,  # Use existing email
-            password="TestPassword123",
+            password="TestPassword123!",
             first_name="Duplicate",
             last_name="User"
         )

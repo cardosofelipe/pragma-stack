@@ -30,7 +30,7 @@ class TestRegisterEndpoint:
             "/api/v1/auth/register",
             json={
                 "email": "newuser@example.com",
-                "password": "SecurePassword123",
+                "password": "SecurePassword123!",
                 "first_name": "New",
                 "last_name": "User"
             }
@@ -49,7 +49,7 @@ class TestRegisterEndpoint:
             "/api/v1/auth/register",
             json={
                 "email": async_test_user.email,
-                "password": "SecurePassword123",
+                "password": "SecurePassword123!",
                 "first_name": "Duplicate",
                 "last_name": "User"
             }
@@ -103,7 +103,7 @@ class TestLoginEndpoint:
             "/api/v1/auth/login",
             json={
                 "email": async_test_user.email,
-                "password": "TestPassword123"
+                "password": "TestPassword123!"
             }
         )
 
@@ -133,7 +133,7 @@ class TestLoginEndpoint:
             "/api/v1/auth/login",
             json={
                 "email": "nonexistent@example.com",
-                "password": "Password123"
+                "password": "Password123!"
             }
         )
 
@@ -154,7 +154,7 @@ class TestLoginEndpoint:
             "/api/v1/auth/login",
             json={
                 "email": async_test_user.email,
-                "password": "TestPassword123"
+                "password": "TestPassword123!"
             }
         )
 
@@ -170,7 +170,7 @@ class TestLoginEndpoint:
                 "/api/v1/auth/login",
                 json={
                     "email": async_test_user.email,
-                    "password": "TestPassword123"
+                    "password": "TestPassword123!"
                 }
             )
 
@@ -187,7 +187,7 @@ class TestOAuthLoginEndpoint:
             "/api/v1/auth/login/oauth",
             data={
                 "username": async_test_user.email,
-                "password": "TestPassword123"
+                "password": "TestPassword123!"
             }
         )
 
@@ -224,7 +224,7 @@ class TestOAuthLoginEndpoint:
             "/api/v1/auth/login/oauth",
             data={
                 "username": async_test_user.email,
-                "password": "TestPassword123"
+                "password": "TestPassword123!"
             }
         )
 
@@ -240,7 +240,7 @@ class TestOAuthLoginEndpoint:
                 "/api/v1/auth/login/oauth",
                 data={
                     "username": async_test_user.email,
-                    "password": "TestPassword123"
+                    "password": "TestPassword123!"
                 }
             )
 
@@ -258,7 +258,7 @@ class TestRefreshTokenEndpoint:
             "/api/v1/auth/login",
             json={
                 "email": async_test_user.email,
-                "password": "TestPassword123"
+                "password": "TestPassword123!"
             }
         )
         refresh_token = login_response.json()["refresh_token"]
@@ -307,7 +307,7 @@ class TestRefreshTokenEndpoint:
             "/api/v1/auth/login",
             json={
                 "email": async_test_user.email,
-                "password": "TestPassword123"
+                "password": "TestPassword123!"
             }
         )
         refresh_token = login_response.json()["refresh_token"]
@@ -334,7 +334,7 @@ class TestGetCurrentUserEndpoint:
             "/api/v1/auth/login",
             json={
                 "email": async_test_user.email,
-                "password": "TestPassword123"
+                "password": "TestPassword123!"
             }
         )
         access_token = login_response.json()["access_token"]

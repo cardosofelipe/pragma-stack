@@ -24,26 +24,26 @@ class TestPasswordHandling:
 
     def test_password_hash_different_from_password(self):
         """Test that a password hash is different from the original password"""
-        password = "TestPassword123"
+        password = "TestPassword123!"
         hashed = get_password_hash(password)
         assert hashed != password
 
     def test_verify_correct_password(self):
         """Test that verify_password returns True for the correct password"""
-        password = "TestPassword123"
+        password = "TestPassword123!"
         hashed = get_password_hash(password)
         assert verify_password(password, hashed) is True
 
     def test_verify_incorrect_password(self):
         """Test that verify_password returns False for an incorrect password"""
-        password = "TestPassword123"
-        wrong_password = "WrongPassword123"
+        password = "TestPassword123!"
+        wrong_password = "WrongPassword123!"
         hashed = get_password_hash(password)
         assert verify_password(wrong_password, hashed) is False
 
     def test_same_password_different_hash(self):
         """Test that the same password gets a different hash each time"""
-        password = "TestPassword123"
+        password = "TestPassword123!"
         hash1 = get_password_hash(password)
         hash2 = get_password_hash(password)
         assert hash1 != hash2

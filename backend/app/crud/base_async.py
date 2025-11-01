@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, OperationalError, DataError
+from sqlalchemy.orm import Load
 
 from app.core.database_async import Base
 
@@ -35,8 +36,29 @@ class CRUDBaseAsync(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         self.model = model
 
-    async def get(self, db: AsyncSession, id: str) -> Optional[ModelType]:
-        """Get a single record by ID with UUID validation."""
+    async def get(
+        self,
+        db: AsyncSession,
+        id: str,
+        options: Optional[List[Load]] = None
+    ) -> Optional[ModelType]:
+        """
+        Get a single record by ID with UUID validation and optional eager loading.
+
+        Args:
+            db: Database session
+            id: Record UUID
+            options: Optional list of SQLAlchemy load options (e.g., joinedload, selectinload)
+                    for eager loading relationships to prevent N+1 queries
+
+        Returns:
+            Model instance or None if not found
+
+        Example:
+            # Eager load user relationship
+            from sqlalchemy.orm import joinedload
+            session = await session_crud.get(db, id=session_id, options=[joinedload(UserSession.user)])
+        """
         # Validate UUID format and convert to UUID object if string
         try:
             if isinstance(id, uuid.UUID):
@@ -48,18 +70,39 @@ class CRUDBaseAsync(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             return None
 
         try:
-            result = await db.execute(
-                select(self.model).where(self.model.id == uuid_obj)
-            )
+            query = select(self.model).where(self.model.id == uuid_obj)
+
+            # Apply eager loading options if provided
+            if options:
+                for option in options:
+                    query = query.options(option)
+
+            result = await db.execute(query)
             return result.scalar_one_or_none()
         except Exception as e:
             logger.error(f"Error retrieving {self.model.__name__} with id {id}: {str(e)}")
             raise
 
     async def get_multi(
-        self, db: AsyncSession, *, skip: int = 0, limit: int = 100
+        self,
+        db: AsyncSession,
+        *,
+        skip: int = 0,
+        limit: int = 100,
+        options: Optional[List[Load]] = None
     ) -> List[ModelType]:
-        """Get multiple records with pagination validation."""
+        """
+        Get multiple records with pagination validation and optional eager loading.
+
+        Args:
+            db: Database session
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            options: Optional list of SQLAlchemy load options for eager loading
+
+        Returns:
+            List of model instances
+        """
         # Validate pagination parameters
         if skip < 0:
             raise ValueError("skip must be non-negative")
@@ -69,9 +112,14 @@ class CRUDBaseAsync(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             raise ValueError("Maximum limit is 1000")
 
         try:
-            result = await db.execute(
-                select(self.model).offset(skip).limit(limit)
-            )
+            query = select(self.model).offset(skip).limit(limit)
+
+            # Apply eager loading options if provided
+            if options:
+                for option in options:
+                    query = query.options(option)
+
+            result = await db.execute(query)
             return list(result.scalars().all())
         except Exception as e:
             logger.error(f"Error retrieving multiple {self.model.__name__} records: {str(e)}")
