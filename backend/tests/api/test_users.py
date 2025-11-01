@@ -1,0 +1,197 @@
+# tests/api/test_users.py
+"""
+Tests for user routes.
+"""
+import pytest
+import pytest_asyncio
+from fastapi import status
+from uuid import uuid4
+
+
+@pytest_asyncio.fixture
+async def superuser_token(client, async_test_superuser):
+    """Get access token for superuser."""
+    response = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "superuser@example.com",
+            "password": "SuperPassword123!"
+        }
+    )
+    assert response.status_code == 200
+    return response.json()["access_token"]
+
+
+@pytest_asyncio.fixture
+async def user_token(client, async_test_user):
+    """Get access token for regular user."""
+    response = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "testuser@example.com",
+            "password": "TestPassword123!"
+        }
+    )
+    assert response.status_code == 200
+    return response.json()["access_token"]
+
+
+class TestListUsers:
+    """Tests for GET /users endpoint (superuser only)."""
+
+    @pytest.mark.asyncio
+    async def test_list_users_success(self, client, superuser_token):
+        """Test listing users successfully (covers lines 87-100)."""
+        response = await client.get(
+            "/api/v1/users",
+            headers={"Authorization": f"Bearer {superuser_token}"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert "data" in data
+        assert "pagination" in data
+        assert isinstance(data["data"], list)
+
+    @pytest.mark.asyncio
+    async def test_list_users_with_is_superuser_filter(self, client, superuser_token):
+        """Test listing users with is_superuser filter (covers line 74)."""
+        response = await client.get(
+            "/api/v1/users?is_superuser=true",
+            headers={"Authorization": f"Bearer {superuser_token}"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert "data" in data
+
+
+class TestGetCurrentUser:
+    """Tests for GET /users/me endpoint."""
+
+    @pytest.mark.asyncio
+    async def test_get_current_user_success(self, client, async_test_user, user_token):
+        """Test getting current user profile."""
+        response = await client.get(
+            "/api/v1/users/me",
+            headers={"Authorization": f"Bearer {user_token}"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["email"] == "testuser@example.com"
+        assert data["id"] == str(async_test_user.id)
+
+
+class TestUpdateCurrentUser:
+    """Tests for PATCH /users/me endpoint."""
+
+    @pytest.mark.asyncio
+    async def test_update_current_user_success(self, client, user_token):
+        """Test updating current user profile (covers lines 150-151)."""
+        response = await client.patch(
+            "/api/v1/users/me",
+            headers={"Authorization": f"Bearer {user_token}"},
+            json={"first_name": "UpdatedName"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["first_name"] == "UpdatedName"
+
+    @pytest.mark.asyncio
+    async def test_update_current_user_database_error(self, client, user_token):
+        """Test database error handling during update (covers lines 162-169)."""
+        from unittest.mock import patch
+
+        with patch('app.api.routes.users.user_crud.update', side_effect=Exception("DB error")):
+            with pytest.raises(Exception):
+                await client.patch(
+                    "/api/v1/users/me",
+                    headers={"Authorization": f"Bearer {user_token}"},
+                    json={"first_name": "Updated"}
+                )
+
+
+class TestGetUser:
+    """Tests for GET /users/{user_id} endpoint."""
+
+    @pytest.mark.asyncio
+    async def test_get_user_success(self, client, async_test_user, superuser_token):
+        """Test getting user by ID."""
+        response = await client.get(
+            f"/api/v1/users/{async_test_user.id}",
+            headers={"Authorization": f"Bearer {superuser_token}"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["id"] == str(async_test_user.id)
+
+    @pytest.mark.asyncio
+    async def test_get_user_not_found(self, client, superuser_token):
+        """Test getting non-existent user (covers lines 210-216)."""
+        fake_id = uuid4()
+        response = await client.get(
+            f"/api/v1/users/{fake_id}",
+            headers={"Authorization": f"Bearer {superuser_token}"}
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+class TestChangePassword:
+    """Tests for PATCH /users/me/password endpoint."""
+
+    @pytest.mark.asyncio
+    async def test_change_password_success(self, client, async_test_db):
+        """Test changing password successfully (covers lines 261-284)."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create a fresh user
+        async with AsyncTestingSessionLocal() as session:
+            from app.models.user import User
+            from app.core.auth import get_password_hash
+
+            new_user = User(
+                email="changepass@example.com",
+                password_hash=get_password_hash("OldPassword123!"),
+                first_name="Change",
+                last_name="Pass"
+            )
+            session.add(new_user)
+            await session.commit()
+
+        # Login
+        login_response = await client.post(
+            "/api/v1/auth/login",
+            json={
+                "email": "changepass@example.com",
+                "password": "OldPassword123!"
+            }
+        )
+        token = login_response.json()["access_token"]
+
+        # Change password
+        response = await client.patch(
+            "/api/v1/users/me/password",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "current_password": "OldPassword123!",
+                "new_password": "NewPassword456!"
+            }
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["success"] is True
+
+        # Verify new password works
+        login_response = await client.post(
+            "/api/v1/auth/login",
+            json={
+                "email": "changepass@example.com",
+                "password": "NewPassword456!"
+            }
+        )
+        assert login_response.status_code == status.HTTP_200_OK
