@@ -7,6 +7,7 @@ time-limited, single-use operations.
 """
 import base64
 import hashlib
+import hmac
 import json
 import secrets
 import time
@@ -92,13 +93,13 @@ def verify_upload_token(token: str) -> Optional[Dict[str, Any]]:
         payload = token_data["payload"]
         signature = token_data["signature"]
 
-        # Verify signature
+        # Verify signature using constant-time comparison to prevent timing attacks
         payload_bytes = json.dumps(payload).encode('utf-8')
         expected_signature = hashlib.sha256(
             payload_bytes + settings.SECRET_KEY.encode('utf-8')
         ).hexdigest()
 
-        if signature != expected_signature:
+        if not hmac.compare_digest(signature, expected_signature):
             return None
 
         # Check expiration
@@ -185,13 +186,13 @@ def verify_password_reset_token(token: str) -> Optional[str]:
         if payload.get("purpose") != "password_reset":
             return None
 
-        # Verify signature
+        # Verify signature using constant-time comparison to prevent timing attacks
         payload_bytes = json.dumps(payload).encode('utf-8')
         expected_signature = hashlib.sha256(
             payload_bytes + settings.SECRET_KEY.encode('utf-8')
         ).hexdigest()
 
-        if signature != expected_signature:
+        if not hmac.compare_digest(signature, expected_signature):
             return None
 
         # Check expiration
@@ -278,13 +279,13 @@ def verify_email_verification_token(token: str) -> Optional[str]:
         if payload.get("purpose") != "email_verification":
             return None
 
-        # Verify signature
+        # Verify signature using constant-time comparison to prevent timing attacks
         payload_bytes = json.dumps(payload).encode('utf-8')
         expected_signature = hashlib.sha256(
             payload_bytes + settings.SECRET_KEY.encode('utf-8')
         ).hexdigest()
 
-        if signature != expected_signature:
+        if not hmac.compare_digest(signature, expected_signature):
             return None
 
         # Check expiration

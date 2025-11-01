@@ -61,10 +61,11 @@ async def register_user(
         user = await AuthService.create_user(db, user_data)
         return user
     except AuthenticationError as e:
+        # SECURITY: Don't reveal if email exists - generic error message
         logger.warning(f"Registration failed: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=str(e)
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Registration failed. Please check your information and try again."
         )
     except Exception as e:
         logger.error(f"Unexpected error during registration: {str(e)}")
@@ -439,11 +440,22 @@ async def confirm_password_reset(
         db.add(user)
         await db.commit()
 
-        logger.info(f"Password reset successful for {user.email}")
+        # SECURITY: Invalidate all existing sessions after password reset
+        # This prevents stolen sessions from being used after password change
+        from app.crud.session_async import session_async as session_crud
+        try:
+            deactivated_count = await session_crud.deactivate_all_user_sessions(
+                db,
+                user_id=str(user.id)
+            )
+            logger.info(f"Password reset successful for {user.email}, invalidated {deactivated_count} sessions")
+        except Exception as session_error:
+            # Log but don't fail password reset if session invalidation fails
+            logger.error(f"Failed to invalidate sessions after password reset: {str(session_error)}")
 
         return MessageResponse(
             success=True,
-            message="Password has been reset successfully. You can now log in with your new password."
+            message="Password has been reset successfully. All devices have been logged out for security. You can now log in with your new password."
         )
 
     except HTTPException:

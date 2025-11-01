@@ -66,32 +66,46 @@ class AuthService:
 
         Returns:
             Created user
+
+        Raises:
+            AuthenticationError: If user already exists or creation fails
         """
-        # Check if user already exists
-        result = await db.execute(select(User).where(User.email == user_data.email))
-        existing_user = result.scalar_one_or_none()
-        if existing_user:
-            raise AuthenticationError("User with this email already exists")
+        try:
+            # Check if user already exists
+            result = await db.execute(select(User).where(User.email == user_data.email))
+            existing_user = result.scalar_one_or_none()
+            if existing_user:
+                raise AuthenticationError("User with this email already exists")
 
-        # Create new user
-        hashed_password = get_password_hash(user_data.password)
+            # Create new user
+            hashed_password = get_password_hash(user_data.password)
 
-        # Create user object from model
-        user = User(
-            email=user_data.email,
-            password_hash=hashed_password,
-            first_name=user_data.first_name,
-            last_name=user_data.last_name,
-            phone_number=user_data.phone_number,
-            is_active=True,
-            is_superuser=False
-        )
+            # Create user object from model
+            user = User(
+                email=user_data.email,
+                password_hash=hashed_password,
+                first_name=user_data.first_name,
+                last_name=user_data.last_name,
+                phone_number=user_data.phone_number,
+                is_active=True,
+                is_superuser=False
+            )
 
-        db.add(user)
-        await db.commit()
-        await db.refresh(user)
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
 
-        return user
+            logger.info(f"User created successfully: {user.email}")
+            return user
+
+        except AuthenticationError:
+            # Re-raise authentication errors without rollback
+            raise
+        except Exception as e:
+            # Rollback on any database errors
+            await db.rollback()
+            logger.error(f"Error creating user: {str(e)}", exc_info=True)
+            raise AuthenticationError(f"Failed to create user: {str(e)}")
 
     @staticmethod
     def create_tokens(user: User) -> Token:
@@ -180,19 +194,30 @@ class AuthService:
             True if password was changed successfully
 
         Raises:
-            AuthenticationError: If current password is incorrect
+            AuthenticationError: If current password is incorrect or update fails
         """
-        result = await db.execute(select(User).where(User.id == user_id))
-        user = result.scalar_one_or_none()
-        if not user:
-            raise AuthenticationError("User not found")
+        try:
+            result = await db.execute(select(User).where(User.id == user_id))
+            user = result.scalar_one_or_none()
+            if not user:
+                raise AuthenticationError("User not found")
 
-        # Verify current password
-        if not verify_password(current_password, user.password_hash):
-            raise AuthenticationError("Current password is incorrect")
+            # Verify current password
+            if not verify_password(current_password, user.password_hash):
+                raise AuthenticationError("Current password is incorrect")
 
-        # Update password
-        user.password_hash = get_password_hash(new_password)
-        await db.commit()
+            # Update password
+            user.password_hash = get_password_hash(new_password)
+            await db.commit()
 
-        return True
+            logger.info(f"Password changed successfully for user {user_id}")
+            return True
+
+        except AuthenticationError:
+            # Re-raise authentication errors without rollback
+            raise
+        except Exception as e:
+            # Rollback on any database errors
+            await db.rollback()
+            logger.error(f"Error changing password for user {user_id}: {str(e)}", exc_info=True)
+            raise AuthenticationError(f"Failed to change password: {str(e)}")

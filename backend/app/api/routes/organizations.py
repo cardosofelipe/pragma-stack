@@ -62,7 +62,7 @@ async def get_my_organizations(
         # Add member count and role to each organization
         orgs_with_data = []
         for org in orgs:
-            role = organization_crud.get_user_role_in_org(
+            role = await organization_crud.get_user_role_in_org(
                 db,
                 user_id=current_user.id,
                 organization_id=org.id
