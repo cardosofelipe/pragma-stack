@@ -16,8 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
 import { useLogin } from '@/lib/api/hooks/useAuth';
-import { getGeneralError, getFieldErrors } from '@/lib/api/errors';
-import type { APIError } from '@/lib/api/errors';
+import { getGeneralError, getFieldErrors, isAPIErrorArray } from '@/lib/api/errors';
 import config from '@/config/app.config';
 
 // ============================================================================
@@ -101,22 +100,25 @@ export function LoginForm({
       // Success callback
       onSuccess?.();
     } catch (error) {
-      // Handle API errors
-      const errors = error as APIError[];
-
-      // Set general error message
-      const generalError = getGeneralError(errors);
-      if (generalError) {
-        setServerError(generalError);
-      }
-
-      // Set field-specific errors
-      const fieldErrors = getFieldErrors(errors);
-      Object.entries(fieldErrors).forEach(([field, message]) => {
-        if (field === 'email' || field === 'password') {
-          form.setError(field, { message });
+      // Handle API errors with type guard
+      if (isAPIErrorArray(error)) {
+        // Set general error message
+        const generalError = getGeneralError(error);
+        if (generalError) {
+          setServerError(generalError);
         }
-      });
+
+        // Set field-specific errors
+        const fieldErrors = getFieldErrors(error);
+        Object.entries(fieldErrors).forEach(([field, message]) => {
+          if (field === 'email' || field === 'password') {
+            form.setError(field, { message });
+          }
+        });
+      } else {
+        // Unexpected error format
+        setServerError('An unexpected error occurred. Please try again.');
+      }
     }
   };
 

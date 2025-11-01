@@ -1,13 +1,12 @@
 {
   "extends": "next/core-web-vitals",
-  "ignorePatterns": ["src/lib/api/generated/**"],
-  "overrides": [
-    {
-      "files": ["src/lib/api/generated/**/*"],
-      "rules": {
-        "@typescript-eslint/ban-ts-comment": "off",
-        "@typescript-eslint/no-explicit-any": "off"
-      }
-    }
+  "ignorePatterns": [
+    "node_modules",
+    ".next",
+    "out",
+    "build",
+    "dist",
+    "coverage",
+    "src/lib/api/generated"
   ]
 }

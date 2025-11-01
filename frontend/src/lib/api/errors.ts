@@ -172,3 +172,28 @@ export function getGeneralError(errors: APIError[]): string | undefined {
   const generalError = errors.find((error) => !error.field);
   return generalError ? generalError.message || getErrorMessage(generalError.code) : undefined;
 }
+
+/**
+ * Type guard to check if error is an APIError array
+ * Provides runtime type safety instead of type assertions
+ * @param error Unknown error object
+ * @returns true if error is APIError[]
+ */
+export function isAPIErrorArray(error: unknown): error is APIError[] {
+  if (!Array.isArray(error)) {
+    return false;
+  }
+
+  // Check if all elements match APIError structure
+  return error.every(
+    (e) =>
+      typeof e === 'object' &&
+      e !== null &&
+      'code' in e &&
+      'message' in e &&
+      typeof e.code === 'string' &&
+      typeof e.message === 'string' &&
+      // field is optional
+      (!('field' in e) || typeof e.field === 'string')
+  );
+}
