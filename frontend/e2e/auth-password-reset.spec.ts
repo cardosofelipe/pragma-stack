@@ -24,7 +24,8 @@ test.describe('Password Reset Request Flow', () => {
     await page.waitForTimeout(1000);
 
     // Should stay on password reset page (validation failed)
-    await expect(page).toHaveURL('/password-reset');
+    // URL might have query params, so use regex
+    await expect(page).toHaveURL(/\/password-reset/);
   });
 
   test('should show validation error for invalid email', async ({ page }) => {
@@ -51,14 +52,15 @@ test.describe('Password Reset Request Flow', () => {
   });
 
   test('should navigate back to login page', async ({ page }) => {
-    // Click back to login link
+    // Click back to login link - use Promise.all to wait for navigation
     const loginLink = page.getByRole('link', { name: 'Back to login' });
-    await loginLink.click();
 
-    // Wait for navigation
-    await page.waitForTimeout(1000);
+    await Promise.all([
+      page.waitForURL('/login', { timeout: 10000 }),
+      loginLink.click()
+    ]);
 
-    // Should navigate to login page
+    // Should be on login page
     await expect(page).toHaveURL('/login');
     await expect(page.locator('h2')).toContainText('Sign in to your account');
   });
@@ -191,10 +193,15 @@ test.describe('Password Reset Confirm Flow', () => {
     // Navigate without token to trigger error state
     await page.goto('/password-reset/confirm');
 
-    // Click request new reset link - use specific link selector
-    await page.getByRole('link', { name: 'Request new reset link' }).click();
+    // Click request new reset link - use Promise.all to wait for navigation
+    const resetLink = page.getByRole('link', { name: 'Request new reset link' });
 
-    // Should navigate to password reset request page
+    await Promise.all([
+      page.waitForURL('/password-reset', { timeout: 10000 }),
+      resetLink.click()
+    ]);
+
+    // Should be on password reset request page
     await expect(page).toHaveURL('/password-reset');
     await expect(page.locator('h2')).toContainText('Reset your password');
   });

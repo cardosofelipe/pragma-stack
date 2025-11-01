@@ -76,21 +76,29 @@ test.describe('Login Flow', () => {
   });
 
   test('should navigate to forgot password page', async ({ page }) => {
-    // Click forgot password link
-    await page.getByRole('link', { name: 'Forgot password?' }).click();
-    await page.waitForTimeout(1000);
+    // Click forgot password link - use Promise.all to wait for navigation
+    const forgotLink = page.getByRole('link', { name: 'Forgot password?' });
 
-    // Should navigate to password reset page
+    await Promise.all([
+      page.waitForURL('/password-reset', { timeout: 10000 }),
+      forgotLink.click()
+    ]);
+
+    // Should be on password reset page
     await expect(page).toHaveURL('/password-reset');
     await expect(page.locator('h2')).toContainText('Reset your password');
   });
 
   test('should navigate to register page', async ({ page }) => {
-    // Click sign up link
-    await page.getByRole('link', { name: 'Sign up' }).click();
-    await page.waitForTimeout(1000);
+    // Click sign up link - use Promise.all to wait for navigation
+    const signupLink = page.getByRole('link', { name: 'Sign up' });
 
-    // Should navigate to register page
+    await Promise.all([
+      page.waitForURL('/register', { timeout: 10000 }),
+      signupLink.click()
+    ]);
+
+    // Should be on register page
     await expect(page).toHaveURL('/register');
     await expect(page.locator('h2')).toContainText('Create your account');
   });
