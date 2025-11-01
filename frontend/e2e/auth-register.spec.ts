@@ -59,7 +59,7 @@ test.describe('Registration Flow', () => {
 
     // Submit form
     await page.locator('button[type="submit"]').click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(1500); // Increased for Firefox
 
     // Should stay on register page (validation failed)
     await expect(page).toHaveURL('/register');
@@ -74,7 +74,7 @@ test.describe('Registration Flow', () => {
 
     // Submit form
     await page.locator('button[type="submit"]').click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(1500); // Increased for Firefox
 
     // Should stay on register page (validation failed)
     await expect(page).toHaveURL('/register');
@@ -135,12 +135,14 @@ test.describe('Registration Flow', () => {
   test('should navigate to login page', async ({ page }) => {
     // Click login link - use more specific selector
     const loginLink = page.getByRole('link', { name: 'Sign in' });
-    await loginLink.click();
 
-    // Wait a moment for navigation
-    await page.waitForTimeout(1000);
+    // Use Promise.all to wait for navigation
+    await Promise.all([
+      page.waitForURL('/login', { timeout: 10000 }),
+      loginLink.click()
+    ]);
 
-    // Should navigate to login page
+    // Should be on login page
     await expect(page).toHaveURL('/login');
     await expect(page.locator('h2')).toContainText('Sign in to your account');
   });
