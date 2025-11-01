@@ -3,6 +3,7 @@ Utility functions for extracting and parsing device information from HTTP reques
 """
 import re
 from typing import Optional
+
 from fastapi import Request
 
 from app.schemas.sessions import DeviceInfo

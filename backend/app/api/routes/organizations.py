@@ -5,30 +5,28 @@ Organization endpoints for regular users.
 These endpoints allow users to view and manage organizations they belong to.
 """
 import logging
-from typing import Any, List, Optional
+from typing import Any, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user
-from app.api.dependencies.permissions import require_org_admin, require_org_membership, get_current_org_role
+from app.api.dependencies.permissions import require_org_admin, require_org_membership
 from app.core.database_async import get_async_db
+from app.core.exceptions import NotFoundError, ErrorCode
 from app.crud.organization_async import organization_async as organization_crud
 from app.models.user import User
-from app.models.user_organization import OrganizationRole
+from app.schemas.common import (
+    PaginationParams,
+    PaginatedResponse,
+    create_pagination_meta
+)
 from app.schemas.organizations import (
     OrganizationResponse,
     OrganizationMemberResponse,
     OrganizationUpdate
 )
-from app.schemas.common import (
-    PaginationParams,
-    PaginatedResponse,
-    MessageResponse,
-    create_pagination_meta
-)
-from app.core.exceptions import NotFoundError, AuthorizationError, ErrorCode
 
 logger = logging.getLogger(__name__)
 

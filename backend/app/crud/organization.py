@@ -1,21 +1,20 @@
 # app/crud/organization.py
-from typing import Optional, List, Dict, Any, Union
+import logging
+from typing import Optional, List, Dict, Any
 from uuid import UUID
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+
 from sqlalchemy import func, or_, and_
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.models.organization import Organization
-from app.models.user_organization import UserOrganization, OrganizationRole
 from app.models.user import User
+from app.models.user_organization import UserOrganization, OrganizationRole
 from app.schemas.organizations import (
     OrganizationCreate,
-    OrganizationUpdate,
-    UserOrganizationCreate,
-    UserOrganizationUpdate
+    OrganizationUpdate
 )
-import logging
 
 logger = logging.getLogger(__name__)
 

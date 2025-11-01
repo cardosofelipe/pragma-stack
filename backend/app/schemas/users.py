@@ -1,5 +1,4 @@
 # app/schemas/users.py
-import re
 from datetime import datetime
 from typing import Optional, Dict, Any
 from uuid import UUID

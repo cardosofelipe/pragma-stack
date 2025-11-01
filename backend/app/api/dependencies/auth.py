@@ -3,8 +3,8 @@ from typing import Optional
 from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.security.utils import get_authorization_scheme_param
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_token_data, TokenExpiredError, TokenInvalidError
 from app.core.database_async import get_async_db

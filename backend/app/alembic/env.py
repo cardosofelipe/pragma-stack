@@ -14,7 +14,6 @@ sys.path.append(str(app_dir.parent))
 
 # Import Core modules
 from app.core.config import settings
-from app.core.database import Base
 
 # Import all models to ensure they're registered with SQLAlchemy
 from app.models import *

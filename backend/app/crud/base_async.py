@@ -4,15 +4,15 @@ Async CRUD operations base class using SQLAlchemy 2.0 async patterns.
 
 Provides reusable create, read, update, and delete operations for all models.
 """
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union, Tuple
 import logging
 import uuid
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union, Tuple
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, OperationalError, DataError
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Load
 
 from app.core.database_async import Base

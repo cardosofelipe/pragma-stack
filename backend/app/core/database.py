@@ -2,11 +2,12 @@
 import logging
 from contextlib import contextmanager
 from typing import Generator
+
 from sqlalchemy import create_engine, text
+from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.dialects.postgresql import JSONB, UUID
 
 from app.core.config import settings
 

@@ -6,27 +6,21 @@ These endpoints require superuser privileges and provide CMS-like functionality
 for managing the application.
 """
 import logging
+from enum import Enum
 from typing import Any, List, Optional
 from uuid import UUID
-from enum import Enum
 
-from fastapi import APIRouter, Depends, Query, Body, status
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, Query, status
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.permissions import require_superuser
 from app.core.database_async import get_async_db
-from app.crud.user_async import user_async as user_crud
+from app.core.exceptions import NotFoundError, DuplicateError, AuthorizationError, ErrorCode
 from app.crud.organization_async import organization_async as organization_crud
+from app.crud.user_async import user_async as user_crud
 from app.models.user import User
 from app.models.user_organization import OrganizationRole
-from app.schemas.users import UserResponse, UserCreate, UserUpdate
-from app.schemas.organizations import (
-    OrganizationResponse,
-    OrganizationCreate,
-    OrganizationUpdate,
-    OrganizationMemberResponse
-)
 from app.schemas.common import (
     PaginationParams,
     PaginatedResponse,
@@ -34,7 +28,13 @@ from app.schemas.common import (
     SortParams,
     create_pagination_meta
 )
-from app.core.exceptions import NotFoundError, DuplicateError, AuthorizationError, ErrorCode
+from app.schemas.organizations import (
+    OrganizationResponse,
+    OrganizationCreate,
+    OrganizationUpdate,
+    OrganizationMemberResponse
+)
+from app.schemas.users import UserResponse, UserCreate, UserUpdate
 
 logger = logging.getLogger(__name__)
 

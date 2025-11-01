@@ -6,8 +6,8 @@ This service provides email sending functionality with a simple console/log-base
 placeholder that can be easily replaced with a real email provider (SendGrid, SES, etc.)
 """
 import logging
-from typing import List, Optional
 from abc import ABC, abstractmethod
+from typing import List, Optional
 
 from app.core.config import settings
 

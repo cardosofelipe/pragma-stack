@@ -3,6 +3,7 @@ Error schemas for standardized API error responses.
 """
 from enum import Enum
 from typing import List, Optional
+
 from pydantic import BaseModel, Field
 
 

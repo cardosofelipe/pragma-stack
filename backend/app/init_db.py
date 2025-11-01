@@ -1,11 +1,13 @@
 # app/init_db.py
 import logging
 from typing import Optional
+
 from sqlalchemy.orm import Session
+
 from app.core.config import settings
+from app.core.database import engine
 from app.crud.user import user as user_crud
 from app.schemas.users import UserCreate
-from app.core.database import engine
 
 logger = logging.getLogger(__name__)
 

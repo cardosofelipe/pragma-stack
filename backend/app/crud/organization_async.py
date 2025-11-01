@@ -1,20 +1,21 @@
 # app/crud/organization_async.py
 """Async CRUD operations for Organization model using SQLAlchemy 2.0 patterns."""
+import logging
 from typing import Optional, List, Dict, Any
 from uuid import UUID
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
+
 from sqlalchemy import func, or_, and_, select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base_async import CRUDBaseAsync
 from app.models.organization import Organization
-from app.models.user_organization import UserOrganization, OrganizationRole
 from app.models.user import User
+from app.models.user_organization import UserOrganization, OrganizationRole
 from app.schemas.organizations import (
     OrganizationCreate,
     OrganizationUpdate,
 )
-import logging
 
 logger = logging.getLogger(__name__)
 

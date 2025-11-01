@@ -9,14 +9,15 @@ These dependencies are optional and flexible:
 """
 from typing import Optional
 from uuid import UUID
+
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies.auth import get_current_user
 from app.core.database_async import get_async_db
+from app.crud.organization_async import organization_async as organization_crud
 from app.models.user import User
 from app.models.user_organization import OrganizationRole
-from app.api.dependencies.auth import get_current_user
-from app.crud.organization_async import organization_async as organization_crud
 
 
 def require_superuser(

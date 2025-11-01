@@ -2,10 +2,11 @@
 Custom exceptions and global exception handlers for the API.
 """
 import logging
-from typing import Optional, Union, List
+from typing import Optional, Union
+
 from fastapi import HTTPException, Request, status
-from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
 from app.schemas.errors import ErrorCode, ErrorDetail, ErrorResponse

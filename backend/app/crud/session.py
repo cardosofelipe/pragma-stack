@@ -1,12 +1,13 @@
 """
 CRUD operations for user sessions.
 """
+import logging
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from uuid import UUID
-from sqlalchemy.orm import Session
+
 from sqlalchemy import and_
-import logging
+from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.models.user_session import UserSession

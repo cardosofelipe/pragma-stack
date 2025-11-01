@@ -1,13 +1,15 @@
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union, Tuple
-from datetime import datetime, timezone
-from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError, OperationalError, DataError
-from sqlalchemy import func, asc, desc
-from app.core.database import Base
 import logging
 import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union, Tuple
+
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel
+from sqlalchemy import asc, desc
+from sqlalchemy.exc import IntegrityError, OperationalError, DataError
+from sqlalchemy.orm import Session
+
+from app.core.database import Base
 
 logger = logging.getLogger(__name__)
 

@@ -1,13 +1,15 @@
 # app/crud/user.py
+import logging
 from typing import Optional, Union, Dict, Any, List, Tuple
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+
 from sqlalchemy import or_, asc, desc
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
+from app.core.auth import get_password_hash
 from app.crud.base import CRUDBase
 from app.models.user import User
 from app.schemas.users import UserCreate, UserUpdate
-from app.core.auth import get_password_hash
-import logging
 
 logger = logging.getLogger(__name__)
 

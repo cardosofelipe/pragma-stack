@@ -1,16 +1,18 @@
 # app/crud/user_async.py
 """Async CRUD operations for User model using SQLAlchemy 2.0 patterns."""
+import logging
+from datetime import datetime, timezone
 from typing import Optional, Union, Dict, Any, List, Tuple
 from uuid import UUID
-from datetime import datetime, timezone
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError
+
 from sqlalchemy import or_, select, update
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.auth import get_password_hash_async
 from app.crud.base_async import CRUDBaseAsync
 from app.models.user import User
 from app.schemas.users import UserCreate, UserUpdate
-from app.core.auth import get_password_hash_async
-import logging
 
 logger = logging.getLogger(__name__)
 
