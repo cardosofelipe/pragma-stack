@@ -222,20 +222,22 @@ class TestUpdateCurrentUser:
         """Test that users cannot make themselves superuser."""
         headers = await get_auth_headers(client, async_test_user.email, "TestPassword123!")
 
-        # Note: is_superuser is not in UserUpdate schema, but the endpoint checks for it
-        # This tests that even if someone tries to send it, it's rejected
+        # Note: is_superuser is now in UserUpdate schema with explicit validation
+        # This tests that Pydantic rejects the attempt at the schema level
         response = await client.patch(
             "/api/v1/users/me",
             headers=headers,
             json={"first_name": "Test", "is_superuser": True}
         )
 
-        # Should succeed since is_superuser is not in schema and gets ignored by Pydantic
-        # The actual protection is at the database/service layer
-        assert response.status_code == status.HTTP_200_OK
+        # Pydantic validation should reject this at the schema level
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         data = response.json()
-        # Verify user is still not a superuser
-        assert data["is_superuser"] is False
+        assert data["success"] is False
+        assert "errors" in data
+        # Check that the error mentions is_superuser
+        error_fields = [err["field"] for err in data["errors"]]
+        assert "is_superuser" in error_fields
 
     @pytest.mark.asyncio
     async def test_update_profile_no_auth(self, client):

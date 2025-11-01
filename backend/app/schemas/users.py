@@ -38,6 +38,7 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
     preferences: Optional[Dict[str, Any]] = None
     is_active: Optional[bool] = None  # Changed default from True to None to avoid unintended updates
+    is_superuser: Optional[bool] = None  # Explicitly reject privilege escalation attempts
 
     @field_validator('phone_number')
     @classmethod
@@ -51,6 +52,14 @@ class UserUpdate(BaseModel):
         if v is None:
             return v
         return validate_password_strength(v)
+
+    @field_validator('is_superuser')
+    @classmethod
+    def prevent_superuser_modification(cls, v: Optional[bool]) -> Optional[bool]:
+        """Prevent users from modifying their superuser status via this schema."""
+        if v is not None:
+            raise ValueError("Cannot modify superuser status through user update")
+        return v
 
 
 class UserInDB(UserBase):

@@ -113,6 +113,26 @@ class TestUpdateCurrentUser:
                 )
 
     @pytest.mark.asyncio
+    async def test_update_current_user_cannot_make_superuser(self, client, user_token):
+        """Test that users cannot make themselves superuser (Pydantic validation)."""
+        response = await client.patch(
+            "/api/v1/users/me",
+            headers={"Authorization": f"Bearer {user_token}"},
+            json={"is_superuser": True}
+        )
+
+        # Pydantic validation should reject this at the schema level
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        data = response.json()
+        assert data["success"] is False
+        assert "errors" in data
+        # Check that the error mentions is_superuser
+        error_fields = [err["field"] for err in data["errors"]]
+        assert "is_superuser" in error_fields
+        error_messages = [err["message"] for err in data["errors"]]
+        assert any("superuser" in msg.lower() for msg in error_messages)
+
+    @pytest.mark.asyncio
     async def test_update_current_user_value_error(self, client, user_token):
         """Test ValueError handling during update (covers lines 165-166)."""
         from unittest.mock import patch
@@ -167,6 +187,18 @@ class TestUpdateUserById:
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    @pytest.mark.asyncio
+    async def test_update_user_by_id_non_superuser_cannot_change_superuser_status(self, client, async_test_user, user_token):
+        """Test non-superuser cannot modify superuser status (Pydantic validation)."""
+        response = await client.patch(
+            f"/api/v1/users/{async_test_user.id}",
+            headers={"Authorization": f"Bearer {user_token}"},
+            json={"is_superuser": True}
+        )
+
+        # Pydantic validation should reject this at the schema level
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     @pytest.mark.asyncio
     async def test_update_user_by_id_success(self, client, async_test_user, superuser_token):
