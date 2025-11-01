@@ -145,7 +145,7 @@ async def admin_create_user(
     except ValueError as e:
         logger.warning(f"Failed to create user: {str(e)}")
         raise NotFoundError(
-            detail=str(e),
+            message=str(e),
             error_code=ErrorCode.USER_ALREADY_EXISTS
         )
     except Exception as e:
@@ -169,7 +169,7 @@ async def admin_get_user(
     user = await user_crud.get(db, id=user_id)
     if not user:
         raise NotFoundError(
-            detail=f"User {user_id} not found",
+            message=f"User {user_id} not found",
             error_code=ErrorCode.USER_NOT_FOUND
         )
     return user
@@ -193,7 +193,7 @@ async def admin_update_user(
         user = await user_crud.get(db, id=user_id)
         if not user:
             raise NotFoundError(
-                detail=f"User {user_id} not found",
+                message=f"User {user_id} not found",
                 error_code=ErrorCode.USER_NOT_FOUND
             )
 
@@ -225,7 +225,7 @@ async def admin_delete_user(
         user = await user_crud.get(db, id=user_id)
         if not user:
             raise NotFoundError(
-                detail=f"User {user_id} not found",
+                message=f"User {user_id} not found",
                 error_code=ErrorCode.USER_NOT_FOUND
             )
 
@@ -269,7 +269,7 @@ async def admin_activate_user(
         user = await user_crud.get(db, id=user_id)
         if not user:
             raise NotFoundError(
-                detail=f"User {user_id} not found",
+                message=f"User {user_id} not found",
                 error_code=ErrorCode.USER_NOT_FOUND
             )
 
@@ -305,7 +305,7 @@ async def admin_deactivate_user(
         user = await user_crud.get(db, id=user_id)
         if not user:
             raise NotFoundError(
-                detail=f"User {user_id} not found",
+                message=f"User {user_id} not found",
                 error_code=ErrorCode.USER_NOT_FOUND
             )
 
@@ -491,7 +491,7 @@ async def admin_create_organization(
     except ValueError as e:
         logger.warning(f"Failed to create organization: {str(e)}")
         raise NotFoundError(
-            detail=str(e),
+            message=str(e),
             error_code=ErrorCode.ALREADY_EXISTS
         )
     except Exception as e:
@@ -515,7 +515,7 @@ async def admin_get_organization(
     org = await organization_crud.get(db, id=org_id)
     if not org:
         raise NotFoundError(
-            detail=f"Organization {org_id} not found",
+            message=f"Organization {org_id} not found",
             error_code=ErrorCode.NOT_FOUND
         )
 
@@ -551,7 +551,7 @@ async def admin_update_organization(
         org = await organization_crud.get(db, id=org_id)
         if not org:
             raise NotFoundError(
-                detail=f"Organization {org_id} not found",
+                message=f"Organization {org_id} not found",
                 error_code=ErrorCode.NOT_FOUND
             )
 
@@ -595,7 +595,7 @@ async def admin_delete_organization(
         org = await organization_crud.get(db, id=org_id)
         if not org:
             raise NotFoundError(
-                detail=f"Organization {org_id} not found",
+                message=f"Organization {org_id} not found",
                 error_code=ErrorCode.NOT_FOUND
             )
 
@@ -633,7 +633,7 @@ async def admin_list_organization_members(
         org = await organization_crud.get(db, id=org_id)
         if not org:
             raise NotFoundError(
-                detail=f"Organization {org_id} not found",
+                message=f"Organization {org_id} not found",
                 error_code=ErrorCode.NOT_FOUND
             )
 
@@ -688,14 +688,14 @@ async def admin_add_organization_member(
         org = await organization_crud.get(db, id=org_id)
         if not org:
             raise NotFoundError(
-                detail=f"Organization {org_id} not found",
+                message=f"Organization {org_id} not found",
                 error_code=ErrorCode.NOT_FOUND
             )
 
         user = await user_crud.get(db, id=request.user_id)
         if not user:
             raise NotFoundError(
-                detail=f"User {request.user_id} not found",
+                message=f"User {request.user_id} not found",
                 error_code=ErrorCode.USER_NOT_FOUND
             )
 
@@ -749,14 +749,14 @@ async def admin_remove_organization_member(
         org = await organization_crud.get(db, id=org_id)
         if not org:
             raise NotFoundError(
-                detail=f"Organization {org_id} not found",
+                message=f"Organization {org_id} not found",
                 error_code=ErrorCode.NOT_FOUND
             )
 
         user = await user_crud.get(db, id=user_id)
         if not user:
             raise NotFoundError(
-                detail=f"User {user_id} not found",
+                message=f"User {user_id} not found",
                 error_code=ErrorCode.USER_NOT_FOUND
             )
 
@@ -768,7 +768,7 @@ async def admin_remove_organization_member(
 
         if not success:
             raise NotFoundError(
-                detail="User is not a member of this organization",
+                message="User is not a member of this organization",
                 error_code=ErrorCode.NOT_FOUND
             )
 

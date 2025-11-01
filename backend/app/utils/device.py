@@ -68,6 +68,22 @@ def parse_device_name(user_agent: str) -> Optional[str]:
     elif 'windows phone' in user_agent_lower:
         return "Windows Phone"
 
+    # Tablets (check before desktop, as some tablets contain "android")
+    elif 'tablet' in user_agent_lower:
+        return "Tablet"
+
+    # Smart TVs (check before desktop OS patterns)
+    elif any(tv in user_agent_lower for tv in ['smart-tv', 'smarttv']):
+        return "Smart TV"
+
+    # Game consoles (check before desktop OS patterns, as Xbox contains "Windows")
+    elif 'playstation' in user_agent_lower:
+        return "PlayStation"
+    elif 'xbox' in user_agent_lower:
+        return "Xbox"
+    elif 'nintendo' in user_agent_lower:
+        return "Nintendo"
+
     # Desktop operating systems
     elif 'macintosh' in user_agent_lower or 'mac os x' in user_agent_lower:
         # Try to extract browser
@@ -81,22 +97,6 @@ def parse_device_name(user_agent: str) -> Optional[str]:
         return f"{browser} on Linux" if browser else "Linux"
     elif 'cros' in user_agent_lower:
         return "Chromebook"
-
-    # Tablets (not already caught)
-    elif 'tablet' in user_agent_lower:
-        return "Tablet"
-
-    # Smart TVs
-    elif any(tv in user_agent_lower for tv in ['smart-tv', 'smarttv', 'tv']):
-        return "Smart TV"
-
-    # Game consoles
-    elif 'playstation' in user_agent_lower:
-        return "PlayStation"
-    elif 'xbox' in user_agent_lower:
-        return "Xbox"
-    elif 'nintendo' in user_agent_lower:
-        return "Nintendo"
 
     # Fallback: just return browser name if detected
     browser = extract_browser(user_agent)

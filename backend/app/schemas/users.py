@@ -35,6 +35,7 @@ class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     phone_number: Optional[str] = None
+    password: Optional[str] = None
     preferences: Optional[Dict[str, Any]] = None
     is_active: Optional[bool] = None  # Changed default from True to None to avoid unintended updates
 
@@ -42,6 +43,14 @@ class UserUpdate(BaseModel):
     @classmethod
     def validate_phone(cls, v: Optional[str]) -> Optional[str]:
         return validate_phone_number(v)
+
+    @field_validator('password')
+    @classmethod
+    def password_strength(cls, v: Optional[str]) -> Optional[str]:
+        """Enterprise-grade password strength validation"""
+        if v is None:
+            return v
+        return validate_password_strength(v)
 
 
 class UserInDB(UserBase):
