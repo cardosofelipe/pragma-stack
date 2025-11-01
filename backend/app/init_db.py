@@ -26,7 +26,7 @@ async def init_db() -> Optional[User]:
     """
     # Use default values if not set in environment variables
     superuser_email = settings.FIRST_SUPERUSER_EMAIL or "admin@example.com"
-    superuser_password = settings.FIRST_SUPERUSER_PASSWORD or "admin123"
+    superuser_password = settings.FIRST_SUPERUSER_PASSWORD or "AdminPassword123!"
 
     if not settings.FIRST_SUPERUSER_EMAIL or not settings.FIRST_SUPERUSER_PASSWORD:
         logger.warning(
