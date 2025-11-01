@@ -1,10 +1,10 @@
 # app/api/routes/auth.py
 import logging
 import os
-from typing import Any
 from datetime import datetime, timezone
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status, Body, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -12,8 +12,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user
 from app.core.auth import TokenExpiredError, TokenInvalidError, decode_token
+from app.core.auth import get_password_hash
 from app.core.database_async import get_async_db
+from app.core.exceptions import (
+    AuthenticationError as AuthError,
+    DatabaseError,
+    ErrorCode
+)
+from app.crud.session_async import session_async as session_crud
+from app.crud.user_async import user_async as user_crud
 from app.models.user import User
+from app.schemas.common import MessageResponse
+from app.schemas.sessions import SessionCreate, LogoutRequest
 from app.schemas.users import (
     UserCreate,
     UserResponse,
@@ -23,15 +33,10 @@ from app.schemas.users import (
     PasswordResetRequest,
     PasswordResetConfirm
 )
-from app.schemas.common import MessageResponse
-from app.schemas.sessions import SessionCreate, LogoutRequest
 from app.services.auth_service import AuthService, AuthenticationError
 from app.services.email_service import email_service
-from app.utils.security import create_password_reset_token, verify_password_reset_token
 from app.utils.device import extract_device_info
-from app.crud.user_async import user_async as user_crud
-from app.crud.session_async import session_async as session_crud
-from app.core.auth import get_password_hash
+from app.utils.security import create_password_reset_token, verify_password_reset_token
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -68,10 +73,10 @@ async def register_user(
             detail="Registration failed. Please check your information and try again."
         )
     except Exception as e:
-        logger.error(f"Unexpected error during registration: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred. Please try again later."
+        logger.error(f"Unexpected error during registration: {str(e)}", exc_info=True)
+        raise DatabaseError(
+            message="An unexpected error occurred. Please try again later.",
+            error_code=ErrorCode.INTERNAL_ERROR
         )
 
 
@@ -97,10 +102,9 @@ async def login(
         # Explicitly check for None result and raise correct exception
         if user is None:
             logger.warning(f"Invalid login attempt for: {login_data.email}")
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password",
-                headers={"WWW-Authenticate": "Bearer"},
+            raise AuthError(
+                message="Invalid email or password",
+                error_code=ErrorCode.INVALID_CREDENTIALS
             )
 
         # User is authenticated, generate tokens
@@ -139,23 +143,22 @@ async def login(
 
         return tokens
 
-    except HTTPException:
-        # Re-raise HTTP exceptions without modification
-        raise
     except AuthenticationError as e:
         # Handle specific authentication errors like inactive accounts
         logger.warning(f"Authentication failed: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
-            headers={"WWW-Authenticate": "Bearer"},
+        raise AuthError(
+            message=str(e),
+            error_code=ErrorCode.INVALID_CREDENTIALS
         )
+    except AuthError:
+        # Re-raise custom auth exceptions without modification
+        raise
     except Exception as e:
         # Handle unexpected errors
-        logger.error(f"Unexpected error during login: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred. Please try again later."
+        logger.error(f"Unexpected error during login: {str(e)}", exc_info=True)
+        raise DatabaseError(
+            message="An unexpected error occurred. Please try again later.",
+            error_code=ErrorCode.INTERNAL_ERROR
         )
 
 
@@ -178,10 +181,9 @@ async def login_oauth(
         user = await AuthService.authenticate_user(db, form_data.username, form_data.password)
 
         if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password",
-                headers={"WWW-Authenticate": "Bearer"},
+            raise AuthError(
+                message="Invalid email or password",
+                error_code=ErrorCode.INVALID_CREDENTIALS
             )
 
         # Generate tokens
@@ -220,20 +222,20 @@ async def login_oauth(
             "refresh_token": tokens.refresh_token,
             "token_type": tokens.token_type
         }
-    except HTTPException:
-        raise
     except AuthenticationError as e:
         logger.warning(f"OAuth authentication failed: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(e),
-            headers={"WWW-Authenticate": "Bearer"},
+        raise AuthError(
+            message=str(e),
+            error_code=ErrorCode.INVALID_CREDENTIALS
         )
+    except AuthError:
+        # Re-raise custom auth exceptions without modification
+        raise
     except Exception as e:
-        logger.error(f"Unexpected error during OAuth login: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred. Please try again later."
+        logger.error(f"Unexpected error during OAuth login: {str(e)}", exc_info=True)
+        raise DatabaseError(
+            message="An unexpected error occurred. Please try again later.",
+            error_code=ErrorCode.INTERNAL_ERROR
         )
 
 
@@ -310,20 +312,6 @@ async def refresh_token(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred. Please try again later."
         )
-
-
-@router.get("/me", response_model=UserResponse, operation_id="get_current_user_info")
-@limiter.limit("60/minute")
-async def get_current_user_info(
-        request: Request,
-        current_user: User = Depends(get_current_user)
-) -> Any:
-    """
-    Get current user information.
-
-    Requires authentication.
-    """
-    return current_user
 
 
 @router.post(

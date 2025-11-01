@@ -4,7 +4,7 @@ Session management endpoints.
 Allows users to view and manage their active sessions across devices.
 """
 import logging
-from typing import Any, List
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
@@ -13,13 +13,13 @@ from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user
-from app.core.database_async import get_async_db
 from app.core.auth import decode_token
-from app.models.user import User
-from app.schemas.sessions import SessionResponse, SessionListResponse
-from app.schemas.common import MessageResponse
-from app.crud.session_async import session_async as session_crud
+from app.core.database_async import get_async_db
 from app.core.exceptions import NotFoundError, AuthorizationError, ErrorCode
+from app.crud.session_async import session_async as session_crud
+from app.models.user import User
+from app.schemas.common import MessageResponse
+from app.schemas.sessions import SessionResponse, SessionListResponse
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -217,23 +217,11 @@ async def cleanup_expired_sessions(
         Success message with count of sessions cleaned
     """
     try:
-        from datetime import datetime, timezone
-
-        # Get all sessions for user
-        all_sessions = await session_crud.get_user_sessions(
+        # Use optimized bulk DELETE instead of N individual deletes
+        deleted_count = await session_crud.cleanup_expired_for_user(
             db,
-            user_id=str(current_user.id),
-            active_only=False
+            user_id=str(current_user.id)
         )
-
-        # Delete expired and inactive sessions
-        deleted_count = 0
-        for s in all_sessions:
-            if not s.is_active and s.expires_at < datetime.now(timezone.utc):
-                await db.delete(s)
-                deleted_count += 1
-
-        await db.commit()
 
         logger.info(f"User {current_user.id} cleaned up {deleted_count} expired sessions")
 

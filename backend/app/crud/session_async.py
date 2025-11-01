@@ -1,13 +1,14 @@
 """
 Async CRUD operations for user sessions using SQLAlchemy 2.0 patterns.
 """
+import logging
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from uuid import UUID
-from sqlalchemy.ext.asyncio import AsyncSession
+
 from sqlalchemy import and_, select, update, delete, func
-from sqlalchemy.orm import selectinload, joinedload
-import logging
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.crud.base_async import CRUDBaseAsync
 from app.models.user_session import UserSession
@@ -333,6 +334,61 @@ class CRUDSessionAsync(CRUDBaseAsync[UserSession, SessionCreate, SessionUpdate])
         except Exception as e:
             await db.rollback()
             logger.error(f"Error cleaning up expired sessions: {str(e)}")
+            raise
+
+    async def cleanup_expired_for_user(
+        self,
+        db: AsyncSession,
+        *,
+        user_id: str
+    ) -> int:
+        """
+        Clean up expired and inactive sessions for a specific user.
+
+        Uses single bulk DELETE query for efficiency instead of N individual deletes.
+
+        Args:
+            db: Database session
+            user_id: User ID to cleanup sessions for
+
+        Returns:
+            Number of sessions deleted
+        """
+        try:
+            # Validate UUID
+            try:
+                uuid_obj = uuid.UUID(user_id)
+            except (ValueError, AttributeError):
+                logger.error(f"Invalid UUID format: {user_id}")
+                raise ValueError(f"Invalid user ID format: {user_id}")
+
+            now = datetime.now(timezone.utc)
+
+            # Use bulk DELETE with WHERE clause - single query
+            stmt = delete(UserSession).where(
+                and_(
+                    UserSession.user_id == uuid_obj,
+                    UserSession.is_active == False,
+                    UserSession.expires_at < now
+                )
+            )
+
+            result = await db.execute(stmt)
+            await db.commit()
+
+            count = result.rowcount
+
+            if count > 0:
+                logger.info(
+                    f"Cleaned up {count} expired sessions for user {user_id} using bulk DELETE"
+                )
+
+            return count
+        except Exception as e:
+            await db.rollback()
+            logger.error(
+                f"Error cleaning up expired sessions for user {user_id}: {str(e)}"
+            )
             raise
 
     async def get_user_session_count(self, db: AsyncSession, *, user_id: str) -> int:
