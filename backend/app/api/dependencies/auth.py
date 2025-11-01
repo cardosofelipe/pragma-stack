@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_token_data, TokenExpiredError, TokenInvalidError
-from app.core.database_async import get_async_db
+from app.core.database import get_db
 from app.models.user import User
 
 # OAuth2 configuration
@@ -15,7 +15,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 async def get_current_user(
-        db: AsyncSession = Depends(get_async_db),
+        db: AsyncSession = Depends(get_db),
         token: str = Depends(oauth2_scheme)
 ) -> User:
     """
@@ -139,7 +139,7 @@ async def get_optional_token(authorization: str = Header(None)) -> Optional[str]
 
 
 async def get_optional_current_user(
-        db: AsyncSession = Depends(get_async_db),
+        db: AsyncSession = Depends(get_db),
         token: Optional[str] = Depends(get_optional_token)
 ) -> Optional[User]:
     """

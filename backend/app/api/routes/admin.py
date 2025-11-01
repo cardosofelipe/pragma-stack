@@ -15,10 +15,10 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.permissions import require_superuser
-from app.core.database_async import get_async_db
+from app.core.database import get_db
 from app.core.exceptions import NotFoundError, DuplicateError, AuthorizationError, ErrorCode
-from app.crud.organization_async import organization_async as organization_crud
-from app.crud.user_async import user_async as user_crud
+from app.crud.organization import organization as organization_crud
+from app.crud.user import user as user_crud
 from app.models.user import User
 from app.models.user_organization import OrganizationRole
 from app.schemas.common import (
@@ -80,7 +80,7 @@ async def admin_list_users(
     is_superuser: Optional[bool] = Query(None, description="Filter by superuser status"),
     search: Optional[str] = Query(None, description="Search by email, name"),
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     List all users with comprehensive filtering and search.
@@ -131,7 +131,7 @@ async def admin_list_users(
 async def admin_create_user(
     user_in: UserCreate,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Create a new user with admin privileges.
@@ -163,7 +163,7 @@ async def admin_create_user(
 async def admin_get_user(
     user_id: UUID,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """Get detailed information about a specific user."""
     user = await user_crud.get(db, id=user_id)
@@ -186,7 +186,7 @@ async def admin_update_user(
     user_id: UUID,
     user_in: UserUpdate,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """Update user information with admin privileges."""
     try:
@@ -218,7 +218,7 @@ async def admin_update_user(
 async def admin_delete_user(
     user_id: UUID,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """Soft delete a user (sets deleted_at timestamp)."""
     try:
@@ -262,7 +262,7 @@ async def admin_delete_user(
 async def admin_activate_user(
     user_id: UUID,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """Activate a user account."""
     try:
@@ -298,7 +298,7 @@ async def admin_activate_user(
 async def admin_deactivate_user(
     user_id: UUID,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """Deactivate a user account."""
     try:
@@ -342,7 +342,7 @@ async def admin_deactivate_user(
 async def admin_bulk_user_action(
     bulk_action: BulkUserAction,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Perform bulk actions on multiple users using optimized bulk operations.
@@ -410,7 +410,7 @@ async def admin_list_organizations(
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     search: Optional[str] = Query(None, description="Search by name, slug, description"),
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """List all organizations with filtering and search."""
     try:
@@ -467,7 +467,7 @@ async def admin_list_organizations(
 async def admin_create_organization(
     org_in: OrganizationCreate,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """Create a new organization."""
     try:
@@ -509,7 +509,7 @@ async def admin_create_organization(
 async def admin_get_organization(
     org_id: UUID,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """Get detailed information about a specific organization."""
     org = await organization_crud.get(db, id=org_id)
@@ -544,7 +544,7 @@ async def admin_update_organization(
     org_id: UUID,
     org_in: OrganizationUpdate,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """Update organization information."""
     try:
@@ -588,7 +588,7 @@ async def admin_update_organization(
 async def admin_delete_organization(
     org_id: UUID,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """Delete an organization and all its relationships."""
     try:
@@ -626,7 +626,7 @@ async def admin_list_organization_members(
     pagination: PaginationParams = Depends(),
     is_active: Optional[bool] = Query(True, description="Filter by active status"),
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """List all members of an organization."""
     try:
@@ -681,7 +681,7 @@ async def admin_add_organization_member(
     org_id: UUID,
     request: AddMemberRequest,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """Add a user to an organization."""
     try:
@@ -742,7 +742,7 @@ async def admin_remove_organization_member(
     org_id: UUID,
     user_id: UUID,
     admin: User = Depends(require_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """Remove a user from an organization."""
     try:

@@ -6,8 +6,8 @@ This service runs periodically to remove old session records from the database.
 import logging
 from datetime import datetime, timezone
 
-from app.core.database_async import AsyncSessionLocal
-from app.crud.session_async import session_async as session_crud
+from app.core.database import SessionLocal
+from app.crud.session import session as session_crud
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ async def cleanup_expired_sessions(keep_days: int = 30) -> int:
     """
     logger.info("Starting session cleanup job...")
 
-    async with AsyncSessionLocal() as db:
+    async with SessionLocal() as db:
         try:
             # Use CRUD method to cleanup
             count = await session_crud.cleanup_expired(db, keep_days=keep_days)
@@ -50,7 +50,7 @@ async def get_session_statistics() -> dict:
     Returns:
         Dictionary with session stats
     """
-    async with AsyncSessionLocal() as db:
+    async with SessionLocal() as db:
         try:
             from app.models.user_session import UserSession
             from sqlalchemy import select, func

@@ -13,9 +13,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user
 from app.api.dependencies.permissions import require_org_admin, require_org_membership
-from app.core.database_async import get_async_db
+from app.core.database import get_db
 from app.core.exceptions import NotFoundError, ErrorCode
-from app.crud.organization_async import organization_async as organization_crud
+from app.crud.organization import organization as organization_crud
 from app.models.user import User
 from app.schemas.common import (
     PaginationParams,
@@ -43,7 +43,7 @@ router = APIRouter()
 async def get_my_organizations(
     is_active: bool = Query(True, description="Filter by active membership"),
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Get all organizations the current user belongs to.
@@ -93,7 +93,7 @@ async def get_my_organizations(
 async def get_organization(
     organization_id: UUID,
     current_user: User = Depends(require_org_membership),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Get details of a specific organization.
@@ -140,7 +140,7 @@ async def get_organization_members(
     pagination: PaginationParams = Depends(),
     is_active: bool = Query(True, description="Filter by active status"),
     current_user: User = Depends(require_org_membership),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Get all members of an organization.
@@ -183,7 +183,7 @@ async def update_organization(
     organization_id: UUID,
     org_in: OrganizationUpdate,
     current_user: User = Depends(require_org_admin),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Update organization details.

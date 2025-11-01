@@ -14,8 +14,8 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user
-from app.core.database_async import get_async_db
-from app.crud.organization_async import organization_async as organization_crud
+from app.core.database import get_db
+from app.crud.organization import organization as organization_crud
 from app.models.user import User
 from app.models.user_organization import OrganizationRole
 
@@ -78,7 +78,7 @@ class OrganizationPermission:
         self,
         organization_id: UUID,
         current_user: User = Depends(get_current_user),
-        db: AsyncSession = Depends(get_async_db)
+        db: AsyncSession = Depends(get_db)
     ) -> User:
         """
         Check if user has required role in the organization.
@@ -133,7 +133,7 @@ require_org_member = OrganizationPermission([
 async def get_current_org_role(
     organization_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Optional[OrganizationRole]:
     """
     Get the current user's role in an organization.
@@ -164,7 +164,7 @@ async def get_current_org_role(
 async def require_org_membership(
     organization_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> User:
     """
     Ensure user is a member of the organization (any role).

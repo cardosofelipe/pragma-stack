@@ -1,13 +1,14 @@
 """
-CRUD operations for user sessions.
+Async CRUD operations for user sessions using SQLAlchemy 2.0 patterns.
 """
 import logging
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from uuid import UUID
 
-from sqlalchemy import and_
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, select, update, delete, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.crud.base import CRUDBase
 from app.models.user_session import UserSession
@@ -17,9 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
-    """CRUD operations for user sessions."""
+    """Async CRUD operations for user sessions."""
 
-    def get_by_jti(self, db: Session, *, jti: str) -> Optional[UserSession]:
+    async def get_by_jti(self, db: AsyncSession, *, jti: str) -> Optional[UserSession]:
         """
         Get session by refresh token JTI.
 
@@ -31,14 +32,15 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
             UserSession if found, None otherwise
         """
         try:
-            return db.query(UserSession).filter(
-                UserSession.refresh_token_jti == jti
-            ).first()
+            result = await db.execute(
+                select(UserSession).where(UserSession.refresh_token_jti == jti)
+            )
+            return result.scalar_one_or_none()
         except Exception as e:
             logger.error(f"Error getting session by JTI {jti}: {str(e)}")
             raise
 
-    def get_active_by_jti(self, db: Session, *, jti: str) -> Optional[UserSession]:
+    async def get_active_by_jti(self, db: AsyncSession, *, jti: str) -> Optional[UserSession]:
         """
         Get active session by refresh token JTI.
 
@@ -50,30 +52,35 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
             Active UserSession if found, None otherwise
         """
         try:
-            return db.query(UserSession).filter(
-                and_(
-                    UserSession.refresh_token_jti == jti,
-                    UserSession.is_active == True
+            result = await db.execute(
+                select(UserSession).where(
+                    and_(
+                        UserSession.refresh_token_jti == jti,
+                        UserSession.is_active == True
+                    )
                 )
-            ).first()
+            )
+            return result.scalar_one_or_none()
         except Exception as e:
             logger.error(f"Error getting active session by JTI {jti}: {str(e)}")
             raise
 
-    def get_user_sessions(
+    async def get_user_sessions(
         self,
-        db: Session,
+        db: AsyncSession,
         *,
         user_id: str,
-        active_only: bool = True
+        active_only: bool = True,
+        with_user: bool = False
     ) -> List[UserSession]:
         """
-        Get all sessions for a user.
+        Get all sessions for a user with optional eager loading.
 
         Args:
             db: Database session
             user_id: User ID
             active_only: If True, return only active sessions
+            with_user: If True, eager load user relationship to prevent N+1
 
         Returns:
             List of UserSession objects
@@ -82,19 +89,25 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
             # Convert user_id string to UUID if needed
             user_uuid = UUID(user_id) if isinstance(user_id, str) else user_id
 
-            query = db.query(UserSession).filter(UserSession.user_id == user_uuid)
+            query = select(UserSession).where(UserSession.user_id == user_uuid)
+
+            # Add eager loading if requested to prevent N+1 queries
+            if with_user:
+                query = query.options(joinedload(UserSession.user))
 
             if active_only:
-                query = query.filter(UserSession.is_active == True)
+                query = query.where(UserSession.is_active == True)
 
-            return query.order_by(UserSession.last_used_at.desc()).all()
+            query = query.order_by(UserSession.last_used_at.desc())
+            result = await db.execute(query)
+            return list(result.scalars().all())
         except Exception as e:
             logger.error(f"Error getting sessions for user {user_id}: {str(e)}")
             raise
 
-    def create_session(
+    async def create_session(
         self,
-        db: Session,
+        db: AsyncSession,
         *,
         obj_in: SessionCreate
     ) -> UserSession:
@@ -126,8 +139,8 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
                 location_country=obj_in.location_country,
             )
             db.add(db_obj)
-            db.commit()
-            db.refresh(db_obj)
+            await db.commit()
+            await db.refresh(db_obj)
 
             logger.info(
                 f"Session created for user {obj_in.user_id} from {obj_in.device_name} "
@@ -136,11 +149,11 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
 
             return db_obj
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             logger.error(f"Error creating session: {str(e)}", exc_info=True)
             raise ValueError(f"Failed to create session: {str(e)}")
 
-    def deactivate(self, db: Session, *, session_id: str) -> Optional[UserSession]:
+    async def deactivate(self, db: AsyncSession, *, session_id: str) -> Optional[UserSession]:
         """
         Deactivate a session (logout from device).
 
@@ -152,15 +165,15 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
             Deactivated UserSession if found, None otherwise
         """
         try:
-            session = self.get(db, id=session_id)
+            session = await self.get(db, id=session_id)
             if not session:
                 logger.warning(f"Session {session_id} not found for deactivation")
                 return None
 
             session.is_active = False
             db.add(session)
-            db.commit()
-            db.refresh(session)
+            await db.commit()
+            await db.refresh(session)
 
             logger.info(
                 f"Session {session_id} deactivated for user {session.user_id} "
@@ -169,13 +182,13 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
 
             return session
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             logger.error(f"Error deactivating session {session_id}: {str(e)}")
             raise
 
-    def deactivate_all_user_sessions(
+    async def deactivate_all_user_sessions(
         self,
-        db: Session,
+        db: AsyncSession,
         *,
         user_id: str
     ) -> int:
@@ -193,26 +206,33 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
             # Convert user_id string to UUID if needed
             user_uuid = UUID(user_id) if isinstance(user_id, str) else user_id
 
-            count = db.query(UserSession).filter(
-                and_(
-                    UserSession.user_id == user_uuid,
-                    UserSession.is_active == True
+            stmt = (
+                update(UserSession)
+                .where(
+                    and_(
+                        UserSession.user_id == user_uuid,
+                        UserSession.is_active == True
+                    )
                 )
-            ).update({"is_active": False})
+                .values(is_active=False)
+            )
 
-            db.commit()
+            result = await db.execute(stmt)
+            await db.commit()
+
+            count = result.rowcount
 
             logger.info(f"Deactivated {count} sessions for user {user_id}")
 
             return count
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             logger.error(f"Error deactivating all sessions for user {user_id}: {str(e)}")
             raise
 
-    def update_last_used(
+    async def update_last_used(
         self,
-        db: Session,
+        db: AsyncSession,
         *,
         session: UserSession
     ) -> UserSession:
@@ -229,17 +249,17 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
         try:
             session.last_used_at = datetime.now(timezone.utc)
             db.add(session)
-            db.commit()
-            db.refresh(session)
+            await db.commit()
+            await db.refresh(session)
             return session
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             logger.error(f"Error updating last_used for session {session.id}: {str(e)}")
             raise
 
-    def update_refresh_token(
+    async def update_refresh_token(
         self,
-        db: Session,
+        db: AsyncSession,
         *,
         session: UserSession,
         new_jti: str,
@@ -264,21 +284,23 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
             session.expires_at = new_expires_at
             session.last_used_at = datetime.now(timezone.utc)
             db.add(session)
-            db.commit()
-            db.refresh(session)
+            await db.commit()
+            await db.refresh(session)
             return session
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             logger.error(f"Error updating refresh token for session {session.id}: {str(e)}")
             raise
 
-    def cleanup_expired(self, db: Session, *, keep_days: int = 30) -> int:
+    async def cleanup_expired(self, db: AsyncSession, *, keep_days: int = 30) -> int:
         """
-        Clean up expired sessions.
+        Clean up expired sessions using optimized bulk DELETE.
 
         Deletes sessions that are:
         - Expired AND inactive
         - Older than keep_days
+
+        Uses single DELETE query instead of N individual deletes for efficiency.
 
         Args:
             db: Database session
@@ -289,31 +311,87 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
         """
         try:
             cutoff_date = datetime.now(timezone.utc) - timedelta(days=keep_days)
+            now = datetime.now(timezone.utc)
 
-            # Delete sessions that are:
-            # 1. Expired (expires_at < now) AND inactive
-            # AND
-            # 2. Older than keep_days
-            count = db.query(UserSession).filter(
+            # Use bulk DELETE with WHERE clause - single query
+            stmt = delete(UserSession).where(
                 and_(
                     UserSession.is_active == False,
-                    UserSession.expires_at < datetime.now(timezone.utc),
+                    UserSession.expires_at < now,
                     UserSession.created_at < cutoff_date
                 )
-            ).delete()
+            )
 
-            db.commit()
+            result = await db.execute(stmt)
+            await db.commit()
+
+            count = result.rowcount
 
             if count > 0:
-                logger.info(f"Cleaned up {count} expired sessions")
+                logger.info(f"Cleaned up {count} expired sessions using bulk DELETE")
 
             return count
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             logger.error(f"Error cleaning up expired sessions: {str(e)}")
             raise
 
-    def get_user_session_count(self, db: Session, *, user_id: str) -> int:
+    async def cleanup_expired_for_user(
+        self,
+        db: AsyncSession,
+        *,
+        user_id: str
+    ) -> int:
+        """
+        Clean up expired and inactive sessions for a specific user.
+
+        Uses single bulk DELETE query for efficiency instead of N individual deletes.
+
+        Args:
+            db: Database session
+            user_id: User ID to cleanup sessions for
+
+        Returns:
+            Number of sessions deleted
+        """
+        try:
+            # Validate UUID
+            try:
+                uuid_obj = uuid.UUID(user_id)
+            except (ValueError, AttributeError):
+                logger.error(f"Invalid UUID format: {user_id}")
+                raise ValueError(f"Invalid user ID format: {user_id}")
+
+            now = datetime.now(timezone.utc)
+
+            # Use bulk DELETE with WHERE clause - single query
+            stmt = delete(UserSession).where(
+                and_(
+                    UserSession.user_id == uuid_obj,
+                    UserSession.is_active == False,
+                    UserSession.expires_at < now
+                )
+            )
+
+            result = await db.execute(stmt)
+            await db.commit()
+
+            count = result.rowcount
+
+            if count > 0:
+                logger.info(
+                    f"Cleaned up {count} expired sessions for user {user_id} using bulk DELETE"
+                )
+
+            return count
+        except Exception as e:
+            await db.rollback()
+            logger.error(
+                f"Error cleaning up expired sessions for user {user_id}: {str(e)}"
+            )
+            raise
+
+    async def get_user_session_count(self, db: AsyncSession, *, user_id: str) -> int:
         """
         Get count of active sessions for a user.
 
@@ -325,12 +403,18 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
             Number of active sessions
         """
         try:
-            return db.query(UserSession).filter(
-                and_(
-                    UserSession.user_id == user_id,
-                    UserSession.is_active == True
+            # Convert user_id string to UUID if needed
+            user_uuid = UUID(user_id) if isinstance(user_id, str) else user_id
+
+            result = await db.execute(
+                select(func.count(UserSession.id)).where(
+                    and_(
+                        UserSession.user_id == user_uuid,
+                        UserSession.is_active == True
+                    )
                 )
-            ).count()
+            )
+            return result.scalar_one()
         except Exception as e:
             logger.error(f"Error counting sessions for user {user_id}: {str(e)}")
             raise

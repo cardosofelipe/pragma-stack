@@ -11,13 +11,13 @@ from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user, get_current_superuser
-from app.core.database_async import get_async_db
+from app.core.database import get_db
 from app.core.exceptions import (
     NotFoundError,
     AuthorizationError,
     ErrorCode
 )
-from app.crud.user_async import user_async as user_crud
+from app.crud.user import user as user_crud
 from app.models.user import User
 from app.schemas.common import (
     PaginationParams,
@@ -58,7 +58,7 @@ async def list_users(
     is_active: Optional[bool] = Query(None, description="Filter by active status"),
     is_superuser: Optional[bool] = Query(None, description="Filter by superuser status"),
     current_user: User = Depends(get_current_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     List all users with pagination, filtering, and sorting.
@@ -138,7 +138,7 @@ def get_current_user_profile(
 async def update_current_user(
     user_update: UserUpdate,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Update current user's profile.
@@ -188,7 +188,7 @@ async def update_current_user(
 async def get_user_by_id(
     user_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Get user by ID.
@@ -236,7 +236,7 @@ async def update_user(
     user_id: UUID,
     user_update: UserUpdate,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Update user by ID.
@@ -304,7 +304,7 @@ async def change_current_user_password(
     request: Request,
     password_change: PasswordChange,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Change current user's password.
@@ -356,7 +356,7 @@ async def change_current_user_password(
 async def delete_user(
     user_id: UUID,
     current_user: User = Depends(get_current_superuser),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Delete user by ID (superuser only).

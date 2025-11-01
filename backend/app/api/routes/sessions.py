@@ -14,9 +14,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user
 from app.core.auth import decode_token
-from app.core.database_async import get_async_db
+from app.core.database import get_db
 from app.core.exceptions import NotFoundError, AuthorizationError, ErrorCode
-from app.crud.session_async import session_async as session_crud
+from app.crud.session import session as session_crud
 from app.models.user import User
 from app.schemas.common import MessageResponse
 from app.schemas.sessions import SessionResponse, SessionListResponse
@@ -45,7 +45,7 @@ limiter = Limiter(key_func=get_remote_address)
 async def list_my_sessions(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     List all active sessions for the current user.
@@ -129,7 +129,7 @@ async def revoke_session(
     request: Request,
     session_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Revoke a specific session by ID.
@@ -204,7 +204,7 @@ async def revoke_session(
 async def cleanup_expired_sessions(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Cleanup expired sessions for the current user.

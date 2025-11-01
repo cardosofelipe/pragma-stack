@@ -13,14 +13,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies.auth import get_current_user
 from app.core.auth import TokenExpiredError, TokenInvalidError, decode_token
 from app.core.auth import get_password_hash
-from app.core.database_async import get_async_db
+from app.core.database import get_db
 from app.core.exceptions import (
     AuthenticationError as AuthError,
     DatabaseError,
     ErrorCode
 )
-from app.crud.session_async import session_async as session_crud
-from app.crud.user_async import user_async as user_crud
+from app.crud.session import session as session_crud
+from app.crud.user import user as user_crud
 from app.models.user import User
 from app.schemas.common import MessageResponse
 from app.schemas.sessions import SessionCreate, LogoutRequest
@@ -54,7 +54,7 @@ RATE_MULTIPLIER = 100 if IS_TEST else 1
 async def register_user(
         request: Request,
         user_data: UserCreate,
-        db: AsyncSession = Depends(get_async_db)
+        db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Register a new user.
@@ -85,7 +85,7 @@ async def register_user(
 async def login(
         request: Request,
         login_data: LoginRequest,
-        db: AsyncSession = Depends(get_async_db)
+        db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Login with username and password.
@@ -167,7 +167,7 @@ async def login(
 async def login_oauth(
         request: Request,
         form_data: OAuth2PasswordRequestForm = Depends(),
-        db: AsyncSession = Depends(get_async_db)
+        db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     OAuth2-compatible login endpoint, used by the OpenAPI UI.
@@ -244,7 +244,7 @@ async def login_oauth(
 async def refresh_token(
         request: Request,
         refresh_data: RefreshTokenRequest,
-        db: AsyncSession = Depends(get_async_db)
+        db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Refresh access token using a refresh token.
@@ -333,7 +333,7 @@ async def refresh_token(
 async def request_password_reset(
     request: Request,
     reset_request: PasswordResetRequest,
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Request a password reset.
@@ -391,7 +391,7 @@ async def request_password_reset(
 async def confirm_password_reset(
     request: Request,
     reset_confirm: PasswordResetConfirm,
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Confirm password reset with token.
@@ -430,7 +430,7 @@ async def confirm_password_reset(
 
         # SECURITY: Invalidate all existing sessions after password reset
         # This prevents stolen sessions from being used after password change
-        from app.crud.session_async import session_async as session_crud
+        from app.crud.session import session as session_crud
         try:
             deactivated_count = await session_crud.deactivate_all_user_sessions(
                 db,
@@ -478,7 +478,7 @@ async def logout(
     request: Request,
     logout_request: LogoutRequest,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Logout from current device by deactivating the session.
@@ -566,7 +566,7 @@ async def logout(
 async def logout_all(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_async_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Logout from all devices by deactivating all user sessions.

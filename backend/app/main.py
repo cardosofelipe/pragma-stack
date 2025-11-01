@@ -13,7 +13,7 @@ from slowapi.util import get_remote_address
 
 from app.api.main import api_router
 from app.core.config import settings
-from app.core.database_async import check_database_health
+from app.core.database import check_database_health
 from app.core.exceptions import (
     APIException,
     api_exception_handler,
