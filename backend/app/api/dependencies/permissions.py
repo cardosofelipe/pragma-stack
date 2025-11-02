@@ -41,22 +41,6 @@ def require_superuser(
     return current_user
 
 
-def require_active_user(
-    current_user: User = Depends(get_current_user)
-) -> User:
-    """
-    Dependency to ensure the current user is active.
-
-    Use this for endpoints that require an active account.
-    """
-    if not current_user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Inactive account"
-        )
-    return current_user
-
-
 class OrganizationPermission:
     """
     Factory for organization-based permission checking.
@@ -128,37 +112,6 @@ require_org_member = OrganizationPermission([
     OrganizationRole.ADMIN,
     OrganizationRole.MEMBER
 ])
-
-
-async def get_current_org_role(
-    organization_id: UUID,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-) -> Optional[OrganizationRole]:
-    """
-    Get the current user's role in an organization.
-
-    This is a non-blocking dependency that returns the role or None.
-    Use this when you want to check permissions conditionally.
-
-    Example:
-        @router.get("/organizations/{org_id}/items")
-        async def list_items(
-            org_id: UUID,
-            role: OrganizationRole = Depends(get_current_org_role)
-        ):
-            if role in [OrganizationRole.OWNER, OrganizationRole.ADMIN]:
-                # Show admin features
-                ...
-    """
-    if current_user.is_superuser:
-        return OrganizationRole.OWNER
-
-    return await organization_crud.get_user_role_in_org(
-        db,
-        user_id=current_user.id,
-        organization_id=organization_id
-    )
 
 
 async def require_org_membership(

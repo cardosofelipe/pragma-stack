@@ -205,10 +205,14 @@ def decode_token(token: str, verify_type: Optional[str] = None) -> TokenPayload:
         token_algorithm = header.get("alg", "").upper()
 
         # Reject weak or unexpected algorithms
-        if token_algorithm == "NONE":
+        # NOTE: These are defensive checks that provide defense-in-depth.
+        # The python-jose library rejects these tokens BEFORE we reach here,
+        # but we keep these checks in case the library changes or is misconfigured.
+        # Coverage: Marked as pragma since library catches first (see tests/core/test_auth_security.py)
+        if token_algorithm == "NONE":  # pragma: no cover
             raise TokenInvalidError("Algorithm 'none' is not allowed")
 
-        if token_algorithm != settings.ALGORITHM.upper():
+        if token_algorithm != settings.ALGORITHM.upper():  # pragma: no cover
             raise TokenInvalidError(f"Invalid algorithm: {token_algorithm}")
 
         # Check required claims before Pydantic validation

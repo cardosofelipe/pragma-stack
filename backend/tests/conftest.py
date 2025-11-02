@@ -219,3 +219,41 @@ async def async_test_superuser(async_test_db):
         await session.commit()
         await session.refresh(user)
         return user
+
+
+@pytest_asyncio.fixture
+async def user_token(client, async_test_user):
+    """
+    Create an access token for the test user.
+
+    Returns the access token string that can be used in Authorization headers.
+    """
+    response = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": async_test_user.email,
+            "password": "TestPassword123!",
+        },
+    )
+    assert response.status_code == 200, f"Login failed: {response.text}"
+    tokens = response.json()
+    return tokens["access_token"]
+
+
+@pytest_asyncio.fixture
+async def superuser_token(client, async_test_superuser):
+    """
+    Create an access token for the test superuser.
+
+    Returns the access token string that can be used in Authorization headers.
+    """
+    response = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": async_test_superuser.email,
+            "password": "SuperPassword123!",
+        },
+    )
+    assert response.status_code == 200, f"Login failed: {response.text}"
+    tokens = response.json()
+    return tokens["access_token"]
