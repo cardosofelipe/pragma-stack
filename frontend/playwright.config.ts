@@ -20,7 +20,9 @@ export default defineConfig({
   /* Limit workers to prevent test interference */
   workers: process.env.CI ? 1 : 12,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: process.env.CI ? 'github' : 'list',
+  /* Suppress console output unless VERBOSE=true */
+  quiet: process.env.VERBOSE !== 'true',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */

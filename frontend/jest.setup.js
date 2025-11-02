@@ -87,6 +87,20 @@ global.sessionStorage = {
   key: jest.fn(),
 };
 
+// Suppress console logs during tests (unless VERBOSE=true)
+const VERBOSE = process.env.VERBOSE === 'true';
+
+if (!VERBOSE) {
+  global.console = {
+    ...console,
+    log: jest.fn(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+}
+
 // Reset storage mocks before each test
 beforeEach(() => {
   // Don't use clearAllMocks - it breaks the mocks
