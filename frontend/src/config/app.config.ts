@@ -81,8 +81,8 @@ const ENV = {
 export const config = {
   api: {
     baseUrl: validateUrl(ENV.API_BASE_URL, 'API_BASE_URL'),
-    // Construct versioned API URL consistently
-    url: `${validateUrl(ENV.API_BASE_URL, 'API_BASE_URL')}/api/v1`,
+    // OpenAPI spec already includes /api/v1 in paths, don't append it here
+    url: validateUrl(ENV.API_BASE_URL, 'API_BASE_URL'),
     timeout: parseIntSafe(ENV.API_TIMEOUT, 30000, 1000, 120000), // 1s to 2min
   },
 

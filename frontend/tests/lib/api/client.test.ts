@@ -18,7 +18,6 @@ describe('API Client Configuration', () => {
   it('should have correct baseURL', () => {
     // Generated client already has /api/v1 in baseURL
     expect(apiClient.instance.defaults.baseURL).toContain(config.api.url);
-    expect(apiClient.instance.defaults.baseURL).toContain('/api/v1');
   });
 
   it('should have correct timeout', () => {
