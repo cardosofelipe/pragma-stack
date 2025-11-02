@@ -98,6 +98,8 @@ export function RegisterForm({
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: {
       email: '',
       first_name: '',
