@@ -21,9 +21,4 @@ const nextConfig: NextConfig = {
     // Note: swcMinify is default in Next.js 15
 };
 
-// Enable bundle analyzer when ANALYZE=true
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-    enabled: process.env.ANALYZE === 'true',
-});
-
-export default withBundleAnalyzer(nextConfig);
+export default nextConfig;

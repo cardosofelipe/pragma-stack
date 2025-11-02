@@ -5,9 +5,11 @@ import { lazy, Suspense, useState } from 'react';
 import { ThemeProvider } from '@/components/theme';
 import { AuthInitializer } from '@/components/auth';
 
-// Lazy load devtools - only in development, never in production
+// Lazy load devtools - only in local development (not in Docker), never in production
+// Set NEXT_PUBLIC_ENABLE_DEVTOOLS=true in .env.local to enable
 const ReactQueryDevtools =
-  process.env.NODE_ENV === 'development'
+  process.env.NODE_ENV === 'development' &&
+  process.env.NEXT_PUBLIC_ENABLE_DEVTOOLS === 'true'
     ? lazy(() =>
         import('@tanstack/react-query-devtools').then((mod) => ({
           default: mod.ReactQueryDevtools,

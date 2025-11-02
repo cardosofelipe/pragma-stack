@@ -6,30 +6,17 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/authStore';
 import { useMe } from '@/lib/api/hooks/useAuth';
+import { AuthLoadingSkeleton } from '@/components/layout';
 import config from '@/config/app.config';
 
 interface AuthGuardProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
   fallback?: React.ReactNode;
-}
-
-/**
- * Loading spinner component
- */
-function LoadingSpinner() {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="flex flex-col items-center space-y-4">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-primary"></div>
-        <p className="text-sm text-muted-foreground">Loading...</p>
-      </div>
-    </div>
-  );
 }
 
 /**
@@ -65,11 +52,32 @@ export function AuthGuard({ children, requireAdmin = false, fallback }: AuthGuar
   const pathname = usePathname();
   const { isAuthenticated, isLoading: authLoading, user } = useAuthStore();
 
+  // Delayed loading state - only show skeleton after 150ms to avoid flicker on fast loads
+  const [showLoading, setShowLoading] = useState(false);
+
   // Fetch user data if authenticated but user not loaded
   const { isLoading: userLoading } = useMe();
 
   // Determine overall loading state
   const isLoading = authLoading || (isAuthenticated && !user && userLoading);
+
+  // Delayed loading effect - wait 150ms before showing skeleton
+  useEffect(() => {
+    if (!isLoading) {
+      // Reset immediately when loading completes
+      setShowLoading(false);
+      return;
+    }
+
+    // Set a timer to show loading skeleton after 150ms
+    const timer = setTimeout(() => {
+      if (isLoading) {
+        setShowLoading(true);
+      }
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   useEffect(() => {
     // If not loading and not authenticated, redirect to login
@@ -94,9 +102,14 @@ export function AuthGuard({ children, requireAdmin = false, fallback }: AuthGuar
     }
   }, [requireAdmin, isAuthenticated, user, router]);
 
-  // Show loading state
+  // Show loading skeleton only after delay (prevents flicker on fast loads)
+  if (isLoading && showLoading) {
+    return fallback ? <>{fallback}</> : <AuthLoadingSkeleton />;
+  }
+
+  // Show nothing while loading but before delay threshold (prevents flicker)
   if (isLoading) {
-    return fallback ? <>{fallback}</> : <LoadingSpinner />;
+    return null;
   }
 
   // Show nothing if redirecting
