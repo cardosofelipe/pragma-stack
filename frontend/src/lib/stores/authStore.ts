@@ -31,6 +31,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   tokenExpiresAt: number | null; // Unix timestamp
+  _hasHydrated: boolean; // Internal flag for persist middleware
 
   // Actions
   setAuth: (user: User, accessToken: string, refreshToken: string, expiresIn?: number) => Promise<void>;
@@ -39,6 +40,7 @@ interface AuthState {
   clearAuth: () => Promise<void>;
   loadAuthFromStorage: () => Promise<void>;
   isTokenExpired: () => boolean;
+  setHasHydrated: (hasHydrated: boolean) => void; // Internal method for persist
 }
 
 /**
@@ -125,6 +127,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false, // No longer needed - persist handles hydration
       tokenExpiresAt: null,
+      _hasHydrated: false,
 
   // Set complete auth state (user + tokens)
   setAuth: async (user, accessToken, refreshToken, expiresIn) => {
@@ -223,6 +226,11 @@ export const useAuthStore = create<AuthState>()(
         if (!tokenExpiresAt) return true;
         return Date.now() >= tokenExpiresAt;
       },
+
+      // Internal method for persist middleware
+      setHasHydrated: (hasHydrated) => {
+        set({ _hasHydrated: hasHydrated });
+      },
     }),
     {
       name: 'auth_store', // Storage key
@@ -237,6 +245,10 @@ export const useAuthStore = create<AuthState>()(
         return (state, error) => {
           if (error) {
             console.error('Failed to rehydrate auth store:', error);
+          }
+          // Mark store as hydrated to prevent rendering issues
+          if (state) {
+            state.setHasHydrated(true);
           }
         };
       },

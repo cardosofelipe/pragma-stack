@@ -63,10 +63,15 @@ function LoadingSpinner() {
 export function AuthGuard({ children, requireAdmin = false, fallback }: AuthGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, isLoading: authLoading, user } = useAuthStore();
+  const { isAuthenticated, isLoading: authLoading, user, _hasHydrated } = useAuthStore();
 
   // Fetch user data if authenticated but user not loaded
   const { isLoading: userLoading } = useMe();
+
+  // Wait for store to hydrate from localStorage to prevent hook order issues
+  if (!_hasHydrated) {
+    return fallback ? <>{fallback}</> : <LoadingSpinner />;
+  }
 
   // Determine overall loading state
   const isLoading = authLoading || (isAuthenticated && !user && userLoading);
