@@ -1,5 +1,6 @@
 [run]
 source = app
+concurrency = thread,greenlet
 omit =
     # Migration files - these are generated code and shouldn't be tested
     app/alembic/versions/*
@@ -60,6 +61,10 @@ exclude_lines =
 
     # Pass statements (often in abstract base classes or placeholders)
     pass
+
+    # Skip test environment checks (production-only code)
+    if os\.getenv\("IS_TEST".*\) == "True":
+    if os\.getenv\("IS_TEST".*\) != "True":
 
 [html]
 directory = htmlcov
