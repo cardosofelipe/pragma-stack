@@ -324,6 +324,100 @@ describe('ThemeProvider', () => {
       expect(mockAddEventListener).toHaveBeenCalledWith('change', expect.any(Function));
     });
 
+    it('updates resolved theme when system preference changes', async () => {
+      let changeHandler: (() => void) | null = null;
+      const mockMediaQueryList = {
+        matches: false, // Initially light
+        media: '(prefers-color-scheme: dark)',
+        addEventListener: jest.fn((event: string, handler: () => void) => {
+          if (event === 'change') {
+            changeHandler = handler;
+          }
+        }),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      };
+
+      mockMatchMedia.mockImplementation(() => mockMediaQueryList);
+
+      render(
+        <ThemeProvider>
+          <TestComponent />
+        </ThemeProvider>
+      );
+
+      // Set to system theme
+      const systemButton = screen.getByRole('button', { name: 'Set System' });
+      await act(async () => {
+        systemButton.click();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('current-theme')).toHaveTextContent('system');
+        expect(screen.getByTestId('resolved-theme')).toHaveTextContent('light');
+      });
+
+      // Simulate system preference change to dark
+      mockMediaQueryList.matches = true;
+
+      await act(async () => {
+        if (changeHandler) {
+          changeHandler();
+        }
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('resolved-theme')).toHaveTextContent('dark');
+        expect(document.documentElement.classList.contains('dark')).toBe(true);
+      });
+    });
+
+    it('does not update when system preference changes but theme is not system', async () => {
+      let changeHandler: (() => void) | null = null;
+      const mockMediaQueryList = {
+        matches: false,
+        media: '(prefers-color-scheme: dark)',
+        addEventListener: jest.fn((event: string, handler: () => void) => {
+          if (event === 'change') {
+            changeHandler = handler;
+          }
+        }),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      };
+
+      mockMatchMedia.mockImplementation(() => mockMediaQueryList);
+
+      render(
+        <ThemeProvider>
+          <TestComponent />
+        </ThemeProvider>
+      );
+
+      // Set to explicit light theme
+      const lightButton = screen.getByRole('button', { name: 'Set Light' });
+      await act(async () => {
+        lightButton.click();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('resolved-theme')).toHaveTextContent('light');
+      });
+
+      // Simulate system preference change to dark (should not affect explicit theme)
+      mockMediaQueryList.matches = true;
+
+      await act(async () => {
+        if (changeHandler) {
+          changeHandler();
+        }
+      });
+
+      // Should still be light because theme is set to 'light', not 'system'
+      expect(screen.getByTestId('resolved-theme')).toHaveTextContent('light');
+      expect(document.documentElement.classList.contains('light')).toBe(true);
+    });
+
     it('cleans up event listener on unmount', () => {
       const mockRemoveEventListener = jest.fn();
 

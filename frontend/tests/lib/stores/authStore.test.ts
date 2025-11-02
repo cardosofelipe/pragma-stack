@@ -411,6 +411,21 @@ describe('Auth Store', () => {
       expect(useAuthStore.getState().isLoading).toBe(false);
     });
 
+    it('should ignore invalid tokens from storage', async () => {
+      const invalidTokens = {
+        accessToken: 'invalid-token', // Not in JWT format
+        refreshToken: 'valid.refresh.token',
+      };
+      (storage.getTokens as jest.Mock).mockResolvedValue(invalidTokens);
+
+      await useAuthStore.getState().loadAuthFromStorage();
+
+      // Should not set auth state with invalid tokens
+      expect(useAuthStore.getState().isAuthenticated).toBe(false);
+      expect(useAuthStore.getState().accessToken).toBeNull();
+      expect(useAuthStore.getState().isLoading).toBe(false);
+    });
+
     it('should handle storage errors gracefully', async () => {
       (storage.getTokens as jest.Mock).mockRejectedValue(new Error('Storage error'));
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -439,12 +454,42 @@ describe('Auth Store', () => {
       expect(useAuthStore.getState().isAuthenticated).toBe(true);
     });
 
-    it('should not throw on error', async () => {
+    it('should not throw on error and log error', async () => {
       (storage.getTokens as jest.Mock).mockRejectedValue(new Error('Init error'));
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const { initializeAuth } = await import('@/lib/stores/authStore');
       await expect(initializeAuth()).resolves.not.toThrow();
+
+      // Verify error was logged by loadAuthFromStorage (which initializeAuth calls)
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Failed to load auth from storage:',
+        expect.any(Error)
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
+  });
+
+  describe('Storage error handling', () => {
+    it('should handle saveTokens failure in setAuth', async () => {
+      const mockUser = createMockUser();
+      (storage.saveTokens as jest.Mock).mockRejectedValue(new Error('Storage error'));
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      await expect(
+        useAuthStore.getState().setAuth(
+          mockUser,
+          'valid.access.token',
+          'valid.refresh.token'
+        )
+      ).rejects.toThrow('Storage error');
+
+      // Verify error was logged before throwing
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Failed to save auth state:',
+        expect.any(Error)
+      );
 
       consoleErrorSpy.mockRestore();
     });

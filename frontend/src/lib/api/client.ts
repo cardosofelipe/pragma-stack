@@ -26,7 +26,10 @@ let refreshPromise: Promise<string> | null = null;
 /**
  * Auth store accessor
  * Dynamically imported to avoid circular dependencies
+ *
+ * Note: Tested via E2E tests when interceptors are invoked
  */
+/* istanbul ignore next */
 const getAuthStore = async () => {
   const { useAuthStore } = await import('@/lib/stores/authStore');
   return useAuthStore.getState();
