@@ -3,7 +3,7 @@
  * Security-critical: Route protection and access control
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 
@@ -64,6 +64,7 @@ const createWrapper = () => {
 describe('AuthGuard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
     // Reset to default unauthenticated state
     mockAuthState = {
       isAuthenticated: false,
@@ -76,8 +77,32 @@ describe('AuthGuard', () => {
     };
   });
 
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
   describe('Loading States', () => {
-    it('shows loading spinner when auth is loading', () => {
+    it('shows nothing initially when auth is loading (before 150ms)', () => {
+      mockAuthState = {
+        isAuthenticated: false,
+        isLoading: true,
+        user: null,
+      };
+
+      const { container } = render(
+        <AuthGuard>
+          <div>Protected Content</div>
+        </AuthGuard>,
+        { wrapper: createWrapper() }
+      );
+
+      // Before 150ms delay, component returns null (empty)
+      expect(container.firstChild).toBeNull();
+      expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
+    });
+
+    it('shows skeleton after 150ms when auth is loading', () => {
       mockAuthState = {
         isAuthenticated: false,
         isLoading: true,
@@ -91,11 +116,17 @@ describe('AuthGuard', () => {
         { wrapper: createWrapper() }
       );
 
-      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+      // Fast-forward past the 150ms delay
+      act(() => {
+        jest.advanceTimersByTime(150);
+      });
+
+      // Skeleton should be visible (check for skeleton structure)
+      expect(screen.getByRole('banner')).toBeInTheDocument(); // Header skeleton
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
 
-    it('shows loading spinner when user data is loading', () => {
+    it('shows skeleton after 150ms when user data is loading', () => {
       mockAuthState = {
         isAuthenticated: true,
         isLoading: false,
@@ -113,10 +144,16 @@ describe('AuthGuard', () => {
         { wrapper: createWrapper() }
       );
 
-      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+      // Fast-forward past the 150ms delay
+      act(() => {
+        jest.advanceTimersByTime(150);
+      });
+
+      // Skeleton should be visible
+      expect(screen.getByRole('banner')).toBeInTheDocument(); // Header skeleton
     });
 
-    it('shows custom fallback when provided', () => {
+    it('shows custom fallback after 150ms when provided', () => {
       mockAuthState = {
         isAuthenticated: false,
         isLoading: true,
@@ -130,9 +167,14 @@ describe('AuthGuard', () => {
         { wrapper: createWrapper() }
       );
 
+      // Fast-forward past the 150ms delay
+      act(() => {
+        jest.advanceTimersByTime(150);
+      });
+
       expect(screen.getByText('Please wait...')).toBeInTheDocument();
-      // Default spinner should not be shown
-      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      // Default skeleton should not be shown
+      expect(screen.queryByRole('banner')).not.toBeInTheDocument();
     });
   });
 
@@ -296,7 +338,7 @@ describe('AuthGuard', () => {
   });
 
   describe('Integration with useMe', () => {
-    it('shows loading while useMe fetches user data', () => {
+    it('shows skeleton after 150ms while useMe fetches user data', () => {
       mockAuthState = {
         isAuthenticated: true,
         isLoading: false,
@@ -314,7 +356,13 @@ describe('AuthGuard', () => {
         { wrapper: createWrapper() }
       );
 
-      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+      // Fast-forward past the 150ms delay
+      act(() => {
+        jest.advanceTimersByTime(150);
+      });
+
+      // Skeleton should be visible
+      expect(screen.getByRole('banner')).toBeInTheDocument(); // Header skeleton
     });
 
     it('renders children after useMe completes', () => {
