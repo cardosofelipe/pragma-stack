@@ -216,12 +216,8 @@ async def login_oauth(
         except Exception as session_err:
             logger.error(f"Failed to create session for {user.email}: {str(session_err)}", exc_info=True)
 
-        # Format response for OAuth compatibility
-        return {
-            "access_token": tokens.access_token,
-            "refresh_token": tokens.refresh_token,
-            "token_type": tokens.token_type
-        }
+        # Return full token response with user data
+        return tokens
     except AuthenticationError as e:
         logger.warning(f"OAuth authentication failed: {str(e)}")
         raise AuthError(
