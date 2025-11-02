@@ -642,3 +642,54 @@ class TestUtilityMethods:
         async with AsyncTestingSessionLocal() as session:
             user = await user_crud.get(session, id=str(async_test_user.id))
             assert user_crud.is_superuser(user) is False
+
+
+class TestUserExceptionHandlers:
+    """
+    Test exception handlers in user CRUD methods.
+    Covers lines: 30-32, 205-208, 257-260
+    """
+
+    @pytest.mark.asyncio
+    async def test_get_by_email_database_error(self, async_test_db):
+        """Test get_by_email handles database errors (covers lines 30-32)."""
+        from unittest.mock import patch
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'execute', side_effect=Exception("Database query failed")):
+                with pytest.raises(Exception, match="Database query failed"):
+                    await user_crud.get_by_email(session, email="test@example.com")
+
+    @pytest.mark.asyncio
+    async def test_bulk_update_status_database_error(self, async_test_db, async_test_user):
+        """Test bulk_update_status handles database errors (covers lines 205-208)."""
+        from unittest.mock import patch, AsyncMock
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            # Mock execute to fail
+            with patch.object(session, 'execute', side_effect=Exception("Bulk update failed")):
+                with patch.object(session, 'rollback', new_callable=AsyncMock):
+                    with pytest.raises(Exception, match="Bulk update failed"):
+                        await user_crud.bulk_update_status(
+                            session,
+                            user_ids=[async_test_user.id],
+                            is_active=False
+                        )
+
+    @pytest.mark.asyncio
+    async def test_bulk_soft_delete_database_error(self, async_test_db, async_test_user):
+        """Test bulk_soft_delete handles database errors (covers lines 257-260)."""
+        from unittest.mock import patch, AsyncMock
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            # Mock execute to fail
+            with patch.object(session, 'execute', side_effect=Exception("Bulk delete failed")):
+                with patch.object(session, 'rollback', new_callable=AsyncMock):
+                    with pytest.raises(Exception, match="Bulk delete failed"):
+                        await user_crud.bulk_soft_delete(
+                            session,
+                            user_ids=[async_test_user.id]
+                        )

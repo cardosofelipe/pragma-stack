@@ -461,3 +461,97 @@ class TestSessionsAdditionalCases:
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert data["success"] is True
+
+
+class TestSessionExceptionHandlers:
+    """
+    Test exception handlers in session routes.
+    Covers lines: 77, 104-106, 181-183, 233-236
+    """
+
+    @pytest.mark.asyncio
+    async def test_list_sessions_with_invalid_token_in_header(self, client, user_token):
+        """Test list_sessions handles token decode errors gracefully (covers line 77)."""
+        # The token decode happens after successful auth, so we need to mock it
+        from unittest.mock import patch
+
+        # Patch decode_token to raise an exception
+        with patch('app.api.routes.sessions.decode_token', side_effect=Exception("Token decode error")):
+            response = await client.get(
+                "/api/v1/sessions/me",
+                headers={"Authorization": f"Bearer {user_token}"}
+            )
+
+            # Should still succeed (exception is caught and ignored in try/except at line 77)
+            assert response.status_code == status.HTTP_200_OK
+
+    @pytest.mark.asyncio
+    async def test_list_sessions_database_error(self, client, user_token):
+        """Test list_sessions handles database errors (covers lines 104-106)."""
+        from unittest.mock import patch
+        from app.crud import session as session_module
+
+        with patch.object(session_module.session, 'get_user_sessions', side_effect=Exception("Database error")):
+            response = await client.get(
+                "/api/v1/sessions/me",
+                headers={"Authorization": f"Bearer {user_token}"}
+            )
+
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+            data = response.json()
+            # The global exception handler wraps it in errors array
+            assert data["errors"][0]["message"] == "Failed to retrieve sessions"
+
+    @pytest.mark.asyncio
+    async def test_revoke_session_database_error(self, client, user_token, async_test_db, async_test_user):
+        """Test revoke_session handles database errors (covers lines 181-183)."""
+        from unittest.mock import patch
+        from uuid import uuid4
+        from app.crud import session as session_module
+
+        # First create a session to revoke
+        from app.crud.session import session as session_crud
+        from app.schemas.sessions import SessionCreate
+        from datetime import datetime, timedelta, timezone
+
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as db:
+            session_in = SessionCreate(
+                user_id=async_test_user.id,
+                refresh_token_jti=str(uuid4()),
+                device_name="Test Device",
+                ip_address="192.168.1.1",
+                user_agent="Mozilla/5.0",
+                last_used_at=datetime.now(timezone.utc),
+                expires_at=datetime.now(timezone.utc) + timedelta(days=60)
+            )
+            user_session = await session_crud.create_session(db, obj_in=session_in)
+            session_id = user_session.id
+
+        # Mock the deactivate method to raise an exception
+        with patch.object(session_module.session, 'deactivate', side_effect=Exception("Database connection lost")):
+            response = await client.delete(
+                f"/api/v1/sessions/{session_id}",
+                headers={"Authorization": f"Bearer {user_token}"}
+            )
+
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+            data = response.json()
+            assert data["errors"][0]["message"] == "Failed to revoke session"
+
+    @pytest.mark.asyncio
+    async def test_cleanup_expired_sessions_database_error(self, client, user_token):
+        """Test cleanup_expired_sessions handles database errors (covers lines 233-236)."""
+        from unittest.mock import patch
+        from app.crud import session as session_module
+
+        with patch.object(session_module.session, 'cleanup_expired_for_user', side_effect=Exception("Cleanup failed")):
+            response = await client.delete(
+                "/api/v1/sessions/me/expired",
+                headers={"Authorization": f"Bearer {user_token}"}
+            )
+
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+            data = response.json()
+            assert data["errors"][0]["message"] == "Failed to cleanup sessions"

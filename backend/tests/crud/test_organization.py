@@ -6,6 +6,7 @@ import pytest
 from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from unittest.mock import patch, AsyncMock, MagicMock
 
 from app.crud.organization import organization as organization_crud
 from app.models.organization import Organization
@@ -942,3 +943,193 @@ class TestIsUserOrgAdmin:
             )
 
             assert is_admin is False
+
+
+class TestOrganizationExceptionHandlers:
+    """
+    Test exception handlers in organization CRUD methods.
+    Uses mocks to trigger database errors and verify proper error handling.
+    Covers lines: 33-35, 57-62, 114-116, 130-132, 207-209, 258-260, 291-294, 326-329, 385-387, 409-411, 466-468, 491-493
+    """
+
+    @pytest.mark.asyncio
+    async def test_get_by_slug_database_error(self, async_test_db):
+        """Test get_by_slug handles database errors (covers lines 33-35)."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'execute', side_effect=Exception("Database connection lost")):
+                with pytest.raises(Exception, match="Database connection lost"):
+                    await organization_crud.get_by_slug(session, slug="test-slug")
+
+    @pytest.mark.asyncio
+    async def test_create_integrity_error_non_slug(self, async_test_db):
+        """Test create with non-slug IntegrityError (covers lines 56-57)."""
+        from sqlalchemy.exc import IntegrityError
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            async def mock_commit():
+                error = IntegrityError("statement", {}, Exception("foreign key constraint failed"))
+                error.orig = Exception("foreign key constraint failed")
+                raise error
+
+            with patch.object(session, 'commit', side_effect=mock_commit):
+                with patch.object(session, 'rollback', new_callable=AsyncMock):
+                    org_in = OrganizationCreate(name="Test", slug="test")
+                    with pytest.raises(ValueError, match="Database integrity error"):
+                        await organization_crud.create(session, obj_in=org_in)
+
+    @pytest.mark.asyncio
+    async def test_create_unexpected_error(self, async_test_db):
+        """Test create with unexpected exception (covers lines 58-62)."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'commit', side_effect=RuntimeError("Unexpected error")):
+                with patch.object(session, 'rollback', new_callable=AsyncMock):
+                    org_in = OrganizationCreate(name="Test", slug="test")
+                    with pytest.raises(RuntimeError, match="Unexpected error"):
+                        await organization_crud.create(session, obj_in=org_in)
+
+    @pytest.mark.asyncio
+    async def test_get_multi_with_filters_database_error(self, async_test_db):
+        """Test get_multi_with_filters handles database errors (covers lines 114-116)."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'execute', side_effect=Exception("Query timeout")):
+                with pytest.raises(Exception, match="Query timeout"):
+                    await organization_crud.get_multi_with_filters(session)
+
+    @pytest.mark.asyncio
+    async def test_get_member_count_database_error(self, async_test_db):
+        """Test get_member_count handles database errors (covers lines 130-132)."""
+        from uuid import uuid4
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'execute', side_effect=Exception("Count query failed")):
+                with pytest.raises(Exception, match="Count query failed"):
+                    await organization_crud.get_member_count(session, organization_id=uuid4())
+
+    @pytest.mark.asyncio
+    async def test_get_multi_with_member_counts_database_error(self, async_test_db):
+        """Test get_multi_with_member_counts handles database errors (covers lines 207-209)."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'execute', side_effect=Exception("Complex query failed")):
+                with pytest.raises(Exception, match="Complex query failed"):
+                    await organization_crud.get_multi_with_member_counts(session)
+
+    @pytest.mark.asyncio
+    async def test_add_user_integrity_error(self, async_test_db, async_test_user):
+        """Test add_user with IntegrityError (covers lines 258-260)."""
+        from sqlalchemy.exc import IntegrityError
+        from unittest.mock import MagicMock
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            # First create org
+            org = Organization(name="Test Org", slug="test-org")
+            session.add(org)
+            await session.commit()
+            org_id = org.id
+
+        async with AsyncTestingSessionLocal() as session:
+            async def mock_commit():
+                raise IntegrityError("statement", {}, Exception("constraint failed"))
+
+            # Mock execute to return None (no existing relationship)
+            async def mock_execute(*args, **kwargs):
+                result = MagicMock()
+                result.scalar_one_or_none = MagicMock(return_value=None)
+                return result
+
+            with patch.object(session, 'execute', side_effect=mock_execute):
+                with patch.object(session, 'commit', side_effect=mock_commit):
+                    with patch.object(session, 'rollback', new_callable=AsyncMock):
+                        with pytest.raises(ValueError, match="Failed to add user to organization"):
+                            await organization_crud.add_user(
+                                session,
+                                organization_id=org_id,
+                                user_id=async_test_user.id
+                            )
+
+    @pytest.mark.asyncio
+    async def test_remove_user_database_error(self, async_test_db, async_test_user):
+        """Test remove_user handles database errors (covers lines 291-294)."""
+        from uuid import uuid4
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'execute', side_effect=Exception("Delete failed")):
+                with pytest.raises(Exception, match="Delete failed"):
+                    await organization_crud.remove_user(
+                        session,
+                        organization_id=uuid4(),
+                        user_id=async_test_user.id
+                    )
+
+    @pytest.mark.asyncio
+    async def test_update_user_role_database_error(self, async_test_db, async_test_user):
+        """Test update_user_role handles database errors (covers lines 326-329)."""
+        from uuid import uuid4
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'execute', side_effect=Exception("Update failed")):
+                with pytest.raises(Exception, match="Update failed"):
+                    await organization_crud.update_user_role(
+                        session,
+                        organization_id=uuid4(),
+                        user_id=async_test_user.id,
+                        role=OrganizationRole.ADMIN
+                    )
+
+    @pytest.mark.asyncio
+    async def test_get_organization_members_database_error(self, async_test_db):
+        """Test get_organization_members handles database errors (covers lines 385-387)."""
+        from uuid import uuid4
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'execute', side_effect=Exception("Members query failed")):
+                with pytest.raises(Exception, match="Members query failed"):
+                    await organization_crud.get_organization_members(session, organization_id=uuid4())
+
+    @pytest.mark.asyncio
+    async def test_get_user_organizations_database_error(self, async_test_db, async_test_user):
+        """Test get_user_organizations handles database errors (covers lines 409-411)."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'execute', side_effect=Exception("User orgs query failed")):
+                with pytest.raises(Exception, match="User orgs query failed"):
+                    await organization_crud.get_user_organizations(session, user_id=async_test_user.id)
+
+    @pytest.mark.asyncio
+    async def test_get_user_organizations_with_details_database_error(self, async_test_db, async_test_user):
+        """Test get_user_organizations_with_details handles database errors (covers lines 466-468)."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'execute', side_effect=Exception("Details query failed")):
+                with pytest.raises(Exception, match="Details query failed"):
+                    await organization_crud.get_user_organizations_with_details(session, user_id=async_test_user.id)
+
+    @pytest.mark.asyncio
+    async def test_get_user_role_in_org_database_error(self, async_test_db, async_test_user):
+        """Test get_user_role_in_org handles database errors (covers lines 491-493)."""
+        from uuid import uuid4
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            with patch.object(session, 'execute', side_effect=Exception("Role query failed")):
+                with pytest.raises(Exception, match="Role query failed"):
+                    await organization_crud.get_user_role_in_org(
+                        session,
+                        user_id=async_test_user.id,
+                        organization_id=uuid4()
+                    )
