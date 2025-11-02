@@ -23,16 +23,21 @@ test.describe('Registration Flow', () => {
   });
 
   test('should show validation errors for empty form', async ({ page }) => {
-    // Click submit without filling form
+    // Wait for React hydration to complete
+    await page.waitForLoadState('networkidle');
+
+    // Interact with email field to ensure form is interactive
+    const emailInput = page.locator('input[name="email"]');
+    await emailInput.focus();
+    await emailInput.blur();
+
+    // Submit empty form
     await page.locator('button[type="submit"]').click();
-    await page.waitForTimeout(500);
 
-    // Check for error messages
-    const errors = page.locator('.text-destructive');
-    await expect(errors.first()).toBeVisible({ timeout: 5000 });
-
-    // Verify specific errors exist (at least one)
-    await expect(page.locator('#email-error, #first_name-error, #password-error').first()).toBeVisible();
+    // Wait for validation errors - Firefox may be slower
+    await expect(page.locator('#email-error')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#first_name-error')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#password-error')).toBeVisible({ timeout: 10000 });
   });
 
   test('should show validation error for invalid email', async ({ page }) => {
@@ -63,7 +68,8 @@ test.describe('Registration Flow', () => {
     await page.waitForTimeout(1500); // Increased for Firefox
 
     // Should stay on register page (validation failed)
-    await expect(page).toHaveURL('/register');
+    // URL might have query params, so use regex
+    await expect(page).toHaveURL(/\/register/);
   });
 
   test('should show validation error for weak password', async ({ page }) => {
@@ -78,7 +84,8 @@ test.describe('Registration Flow', () => {
     await page.waitForTimeout(1500); // Increased for Firefox
 
     // Should stay on register page (validation failed)
-    await expect(page).toHaveURL('/register');
+    // URL might have query params, so use regex
+    await expect(page).toHaveURL(/\/register/);
   });
 
   test('should show validation error for mismatched passwords', async ({ page }) => {

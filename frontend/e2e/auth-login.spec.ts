@@ -21,17 +21,22 @@ test.describe('Login Flow', () => {
   });
 
   test('should show validation errors for empty form', async ({ page }) => {
-    // Click submit without filling form
+    // Wait for React hydration to complete
+    await page.waitForLoadState('networkidle');
+
+    // Interact with email field to ensure form is interactive
+    const emailInput = page.locator('input[name="email"]');
+    await emailInput.focus();
+    await emailInput.blur();
+
+    // Submit empty form
     await page.locator('button[type="submit"]').click();
 
-    // Wait for validation errors to appear
-    await page.waitForTimeout(500); // Give time for validation to run
+    // Wait for validation errors - Firefox may be slower
+    await expect(page.locator('#email-error')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#password-error')).toBeVisible({ timeout: 10000 });
 
-    // Check for error messages using the text-destructive class
-    const errors = page.locator('.text-destructive');
-    await expect(errors.first()).toBeVisible({ timeout: 5000 });
-
-    // Verify specific error messages
+    // Verify error messages
     await expect(page.locator('#email-error')).toContainText('Email is required');
     await expect(page.locator('#password-error')).toContainText('Password');
   });
