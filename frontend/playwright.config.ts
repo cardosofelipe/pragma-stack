@@ -17,8 +17,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI and locally to handle flaky tests */
   retries: process.env.CI ? 2 : 1,
-  /* Limit workers to prevent test interference */
-  workers: process.env.CI ? 1 : 12,
+  /* Limit workers to prevent test interference and Next dev server overload */
+  workers: process.env.CI ? 1 : 8,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI ? 'github' : 'list',
   /* Suppress console output unless VERBOSE=true */
@@ -31,6 +31,8 @@ export default defineConfig({
     trace: 'on-first-retry',
     /* Screenshot on failure */
     screenshot: 'only-on-failure',
+    /* Record video for failed tests to diagnose flakiness */
+    video: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */

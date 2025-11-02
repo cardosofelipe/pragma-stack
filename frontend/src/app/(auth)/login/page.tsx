@@ -1,5 +1,3 @@
-'use client';
-
 import dynamic from 'next/dynamic';
 
 // Code-split LoginForm - heavy with react-hook-form + validation

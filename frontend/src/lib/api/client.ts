@@ -95,17 +95,18 @@ async function refreshAccessToken(): Promise<string> {
         console.error('[API Client] Token refresh failed:', error);
       }
 
-      // Clear auth and redirect to login
+      // Clear auth state
       const authStore = await getAuthStore();
       await authStore.clearAuth();
 
-      // Redirect to login if we're in browser
+      // Only redirect to login when not already on an auth route
       if (typeof window !== 'undefined') {
         const currentPath = window.location.pathname;
-        const returnUrl = currentPath !== '/login' && currentPath !== '/register'
-          ? `?returnUrl=${encodeURIComponent(currentPath)}`
-          : '';
-        window.location.href = `/login${returnUrl}`;
+        const onAuthRoute = currentPath === '/login' || currentPath === '/register' || currentPath.startsWith('/password-reset');
+        if (!onAuthRoute) {
+          const returnUrl = currentPath ? `?returnUrl=${encodeURIComponent(currentPath)}` : '';
+          window.location.href = `/login${returnUrl}`;
+        }
       }
 
       throw error;
@@ -129,8 +130,12 @@ client.instance.interceptors.request.use(
     const authStore = await getAuthStore();
     const { accessToken } = authStore;
 
-    // Add Authorization header if token exists
-    if (accessToken && requestConfig.headers) {
+    // Do not attach Authorization header for auth endpoints
+    const url = requestConfig.url || '';
+    const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh') || url.includes('/auth/password') || url.includes('/password');
+
+    // Add Authorization header if token exists and not hitting auth endpoints
+    if (accessToken && requestConfig.headers && !isAuthEndpoint) {
       requestConfig.headers.Authorization = `Bearer ${accessToken}`;
     }
 
@@ -170,10 +175,24 @@ client.instance.interceptors.response.use(
 
     // Handle 401 Unauthorized - Token expired
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+      const url = originalRequest.url || '';
+      const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/password') || url.includes('/password');
+
+      // If the 401 is from auth endpoints, do not attempt refresh
+      if (isAuthEndpoint) {
+        return Promise.reject(error);
+      }
+
       // If refresh endpoint itself fails with 401, clear auth and reject
-      if (originalRequest.url?.includes('/auth/refresh')) {
+      if (url.includes('/auth/refresh')) {
         const authStore = await getAuthStore();
         await authStore.clearAuth();
+        return Promise.reject(error);
+      }
+
+      // Ensure we have a refresh token before attempting refresh
+      const authStore = await getAuthStore();
+      if (!authStore.refreshToken) {
         return Promise.reject(error);
       }
 

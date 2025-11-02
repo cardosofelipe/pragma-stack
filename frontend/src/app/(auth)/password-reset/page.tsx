@@ -3,8 +3,6 @@
  * Users enter their email to receive reset instructions
  */
 
-'use client';
-
 import dynamic from 'next/dynamic';
 
 // Code-split PasswordResetRequestForm

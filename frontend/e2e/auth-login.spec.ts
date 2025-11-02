@@ -1,9 +1,79 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Login Flow', () => {
-  test.beforeEach(async ({ page }) => {
+  test.describe.configure({ mode: 'serial' });
+
+  // Collect browser console logs per test for debugging
+  let consoleLogs: string[] = [];
+
+  test.beforeEach(async ({ page, context }) => {
+    consoleLogs = [];
+
+    // Capture console logs
+    page.on('console', (msg) => {
+      try {
+        consoleLogs.push(`[${msg.type()}] ${msg.text()}`);
+      } catch {
+        // ignore
+      }
+    });
+
+    // Ensure clean state across parallel workers
+    await context.clearCookies();
+    await page.addInitScript(() => {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch {}
+    });
+
     // Navigate to login page before each test
     await page.goto('/login');
+  });
+
+  test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status !== 'passed') {
+      // Attach current URL
+      await testInfo.attach('page-url.txt', {
+        body: page.url(),
+        contentType: 'text/plain',
+      });
+
+      // Attach skeleton count to see if page stuck on loading state
+      try {
+        const skeletonCount = await page.locator('.animate-pulse').count();
+        await testInfo.attach('skeleton-count.txt', {
+          body: String(skeletonCount),
+          contentType: 'text/plain',
+        });
+      } catch {}
+
+      // Attach full DOM snapshot
+      try {
+        const html = await page.content();
+        await testInfo.attach('dom.html', {
+          body: html,
+          contentType: 'text/html',
+        });
+      } catch {}
+
+      // Attach full page screenshot
+      try {
+        const img = await page.screenshot({ fullPage: true });
+        await testInfo.attach('screenshot.png', {
+          body: img,
+          contentType: 'image/png',
+        });
+      } catch {}
+
+      // Attach console logs
+      try {
+        await testInfo.attach('console.log', {
+          body: consoleLogs.join('\n'),
+          contentType: 'text/plain',
+        });
+      } catch {}
+    }
   });
 
   test('should display login form', async ({ page }) => {
