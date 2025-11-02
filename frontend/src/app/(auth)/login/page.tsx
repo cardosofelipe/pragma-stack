@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 
 // Code-split LoginForm - heavy with react-hook-form + validation
 const LoginForm = dynamic(
+  /* istanbul ignore next - Next.js dynamic import, tested via component */
   () => import('@/components/auth/LoginForm').then((mod) => ({ default: mod.LoginForm })),
   {
     loading: () => (

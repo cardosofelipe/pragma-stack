@@ -3,8 +3,10 @@
  * Theme, notifications, and other preferences
  */
 
-import type { Metadata } from 'next';
+/* istanbul ignore next - Next.js type import for metadata */
+import type { Metadata} from 'next';
 
+/* istanbul ignore next - Next.js metadata, not executable code */
 export const metadata: Metadata = {
   title: 'Preferences',
 };

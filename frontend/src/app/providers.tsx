@@ -7,6 +7,7 @@ import { AuthInitializer } from '@/components/auth';
 
 // Lazy load devtools - only in local development (not in Docker), never in production
 // Set NEXT_PUBLIC_ENABLE_DEVTOOLS=true in .env.local to enable
+/* istanbul ignore next - Dev-only devtools, not tested in production */
 const ReactQueryDevtools =
   process.env.NODE_ENV === 'development' &&
   process.env.NEXT_PUBLIC_ENABLE_DEVTOOLS === 'true'

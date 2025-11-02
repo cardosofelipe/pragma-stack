@@ -13,6 +13,7 @@ import Link from 'next/link';
 
 // Code-split PasswordResetConfirmForm (319 lines)
 const PasswordResetConfirmForm = dynamic(
+  /* istanbul ignore next - Next.js dynamic import, tested via component */
   () => import('@/components/auth/PasswordResetConfirmForm').then((mod) => ({ default: mod.PasswordResetConfirmForm })),
   {
     loading: () => (

@@ -3,8 +3,10 @@
  * User profile management - edit name, email, phone, preferences
  */
 
+/* istanbul ignore next - Next.js type import for metadata */
 import type { Metadata } from 'next';
 
+/* istanbul ignore next - Next.js metadata, not executable code */
 export const metadata: Metadata = {
   title: 'Profile Settings',
 };

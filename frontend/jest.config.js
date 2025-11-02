@@ -25,7 +25,10 @@ const customJestConfig = {
     '!src/lib/api/hooks/**', // React Query hooks - tested in E2E (require API mocking)
     '!src/**/*.old.{js,jsx,ts,tsx}', // Old implementation files
     '!src/components/ui/**', // shadcn/ui components - third-party, no need to test
-    '!src/app/**', // Next.js app directory - layout/page files (test in E2E)
+    '!src/app/**/layout.{js,jsx,ts,tsx}', // Layout files - complex Next.js-specific behavior (test in E2E)
+    '!src/app/dev/**', // Dev pages - development tools, not production code
+    '!src/app/**/error.{js,jsx,ts,tsx}', // Error boundaries - tested in E2E
+    '!src/app/**/loading.{js,jsx,ts,tsx}', // Loading states - tested in E2E
     '!src/**/index.{js,jsx,ts,tsx}', // Re-export index files - no logic to test
     '!src/lib/utils/cn.ts', // Simple utility function from shadcn
     '!src/middleware.ts', // middleware.ts - no logic to test

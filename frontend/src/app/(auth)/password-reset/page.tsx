@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 
 // Code-split PasswordResetRequestForm
 const PasswordResetRequestForm = dynamic(
+  /* istanbul ignore next - Next.js dynamic import, tested via component */
   () => import('@/components/auth/PasswordResetRequestForm').then((mod) => ({
     default: mod.PasswordResetRequestForm
   })),

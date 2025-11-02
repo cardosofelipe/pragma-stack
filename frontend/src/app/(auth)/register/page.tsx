@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 
 // Code-split RegisterForm (313 lines)
 const RegisterForm = dynamic(
+  /* istanbul ignore next - Next.js dynamic import, tested via component */
   () => import('@/components/auth/RegisterForm').then((mod) => ({ default: mod.RegisterForm })),
   {
     loading: () => (
