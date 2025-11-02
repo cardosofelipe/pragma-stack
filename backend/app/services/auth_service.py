@@ -14,6 +14,7 @@ from app.core.auth import (
     TokenExpiredError,
     TokenInvalidError
 )
+from app.core.config import settings
 from app.core.exceptions import AuthenticationError
 from app.models.user import User
 from app.schemas.users import Token, UserCreate, UserResponse
@@ -140,7 +141,7 @@ class AuthService:
             access_token=access_token,
             refresh_token=refresh_token,
             user=user_response,
-            expires_in=900  # 15 minutes in seconds (matching ACCESS_TOKEN_EXPIRE_MINUTES)
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60  # Convert minutes to seconds
         )
 
     @staticmethod

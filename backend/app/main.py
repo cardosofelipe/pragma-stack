@@ -113,6 +113,34 @@ app.add_middleware(
 )
 
 
+# Add request size limit middleware
+@app.middleware("http")
+async def limit_request_size(request: Request, call_next):
+    """
+    Limit request body size to prevent DoS attacks via large payloads.
+
+    Max size: 10MB for file uploads and large payloads.
+    """
+    MAX_REQUEST_SIZE = 10 * 1024 * 1024  # 10MB in bytes
+
+    content_length = request.headers.get("content-length")
+    if content_length and int(content_length) > MAX_REQUEST_SIZE:
+        return JSONResponse(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            content={
+                "success": False,
+                "errors": [{
+                    "code": "REQUEST_TOO_LARGE",
+                    "message": f"Request body too large. Maximum size is {MAX_REQUEST_SIZE // (1024 * 1024)}MB",
+                    "field": None
+                }]
+            }
+        )
+
+    response = await call_next(request)
+    return response
+
+
 # Add security headers middleware
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
@@ -286,48 +314,3 @@ async def health_check() -> JSONResponse:
 
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
-
-
-@app.on_event("startup")
-async def startup_event():
-    """
-    Application startup event.
-
-    Sets up background jobs and scheduled tasks.
-    """
-    import os
-
-    # Skip scheduler in test environment
-    if os.getenv("IS_TEST", "False") == "True":
-        logger.info("Test environment detected - skipping scheduler")
-        return
-
-    from app.services.session_cleanup import cleanup_expired_sessions
-
-    # Schedule session cleanup job
-    # Runs daily at 2:00 AM server time
-    scheduler.add_job(
-        cleanup_expired_sessions,
-        'cron',
-        hour=2,
-        minute=0,
-        id='cleanup_expired_sessions',
-        replace_existing=True
-    )
-
-    scheduler.start()
-    logger.info("Scheduled jobs started: session cleanup (daily at 2 AM)")
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """
-    Application shutdown event.
-
-    Cleans up resources and stops background jobs.
-    """
-    import os
-
-    if os.getenv("IS_TEST", "False") != "True":
-        scheduler.shutdown()
-        logger.info("Scheduled jobs stopped")

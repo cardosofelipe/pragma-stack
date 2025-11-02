@@ -49,6 +49,55 @@ IS_TEST = os.getenv("IS_TEST", "False") == "True"
 RATE_MULTIPLIER = 100 if IS_TEST else 1
 
 
+async def _create_login_session(
+    db: AsyncSession,
+    request: Request,
+    user: User,
+    tokens: Token,
+    login_type: str = "login"
+) -> None:
+    """
+    Create a session record for successful login.
+
+    This is a best-effort operation - login succeeds even if session creation fails.
+
+    Args:
+        db: Database session
+        request: FastAPI request object for device info extraction
+        user: Authenticated user
+        tokens: Token object containing refresh token with JTI
+        login_type: Type of login for logging ("login" or "oauth")
+    """
+    try:
+        device_info = extract_device_info(request)
+
+        # Decode refresh token to get JTI and expiration
+        refresh_payload = decode_token(tokens.refresh_token, verify_type="refresh")
+
+        session_data = SessionCreate(
+            user_id=user.id,
+            refresh_token_jti=refresh_payload.jti,
+            device_name=device_info.device_name or "API Client",
+            device_id=device_info.device_id,
+            ip_address=device_info.ip_address,
+            user_agent=device_info.user_agent,
+            last_used_at=datetime.now(timezone.utc),
+            expires_at=datetime.fromtimestamp(refresh_payload.exp, tz=timezone.utc),
+            location_city=device_info.location_city,
+            location_country=device_info.location_country,
+        )
+
+        await session_crud.create_session(db, obj_in=session_data)
+
+        logger.info(
+            f"{login_type.capitalize()} successful: {user.email} from {device_info.device_name} "
+            f"(IP: {device_info.ip_address})"
+        )
+    except Exception as session_err:
+        # Log but don't fail login if session creation fails
+        logger.error(f"Failed to create session for {user.email}: {str(session_err)}", exc_info=True)
+
+
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED, operation_id="register")
 @limiter.limit(f"{5 * RATE_MULTIPLIER}/minute")
 async def register_user(
@@ -110,36 +159,8 @@ async def login(
         # User is authenticated, generate tokens
         tokens = AuthService.create_tokens(user)
 
-        # Extract device information and create session record
-        # Session creation is best-effort - we don't fail login if it fails
-        try:
-            device_info = extract_device_info(request)
-
-            # Decode refresh token to get JTI and expiration
-            refresh_payload = decode_token(tokens.refresh_token, verify_type="refresh")
-
-            session_data = SessionCreate(
-                user_id=user.id,
-                refresh_token_jti=refresh_payload.jti,
-                device_name=device_info.device_name,
-                device_id=device_info.device_id,
-                ip_address=device_info.ip_address,
-                user_agent=device_info.user_agent,
-                last_used_at=datetime.now(timezone.utc),
-                expires_at=datetime.fromtimestamp(refresh_payload.exp, tz=timezone.utc),
-                location_city=device_info.location_city,
-                location_country=device_info.location_country,
-            )
-
-            await session_crud.create_session(db, obj_in=session_data)
-
-            logger.info(
-                f"User login successful: {user.email} from {device_info.device_name} "
-                f"(IP: {device_info.ip_address})"
-            )
-        except Exception as session_err:
-            # Log but don't fail login if session creation fails
-            logger.error(f"Failed to create session for {user.email}: {str(session_err)}", exc_info=True)
+        # Create session record (best-effort, doesn't fail login)
+        await _create_login_session(db, request, user, tokens, login_type="login")
 
         return tokens
 
@@ -189,32 +210,8 @@ async def login_oauth(
         # Generate tokens
         tokens = AuthService.create_tokens(user)
 
-        # Extract device information and create session record
-        # Session creation is best-effort - we don't fail login if it fails
-        try:
-            device_info = extract_device_info(request)
-
-            # Decode refresh token to get JTI and expiration
-            refresh_payload = decode_token(tokens.refresh_token, verify_type="refresh")
-
-            session_data = SessionCreate(
-                user_id=user.id,
-                refresh_token_jti=refresh_payload.jti,
-                device_name=device_info.device_name or "API Client",
-                device_id=device_info.device_id,
-                ip_address=device_info.ip_address,
-                user_agent=device_info.user_agent,
-                last_used_at=datetime.now(timezone.utc),
-                expires_at=datetime.fromtimestamp(refresh_payload.exp, tz=timezone.utc),
-                location_city=device_info.location_city,
-                location_country=device_info.location_country,
-            )
-
-            await session_crud.create_session(db, obj_in=session_data)
-
-            logger.info(f"OAuth login successful: {user.email} from {device_info.device_name}")
-        except Exception as session_err:
-            logger.error(f"Failed to create session for {user.email}: {str(session_err)}", exc_info=True)
+        # Create session record (best-effort, doesn't fail login)
+        await _create_login_session(db, request, user, tokens, login_type="oauth")
 
         # Return full token response with user data
         return tokens

@@ -77,7 +77,7 @@ def create_async_production_engine() -> AsyncEngine:
     if "postgresql" in async_url:
         engine_config["connect_args"] = {
             "server_settings": {
-                "application_name": "eventspace",
+                "application_name": settings.PROJECT_NAME,
                 "timezone": "UTC",
             },
             # asyncpg-specific settings
