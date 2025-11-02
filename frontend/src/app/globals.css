@@ -183,3 +183,27 @@ html {
 html.dark {
   color-scheme: dark;
 }
+
+/* Cursor pointer for all clickable elements */
+button,
+[role="button"],
+[type="button"],
+[type="submit"],
+[type="reset"],
+a,
+label[for],
+select,
+[tabindex]:not([tabindex="-1"]) {
+  cursor: pointer;
+}
+
+/* Exception: disabled elements should not have pointer cursor */
+button:disabled,
+[role="button"][aria-disabled="true"],
+[type="button"]:disabled,
+[type="submit"]:disabled,
+[type="reset"]:disabled,
+a[aria-disabled="true"],
+select:disabled {
+  cursor: not-allowed;
+}
