@@ -19,8 +19,10 @@ import config from '@/config/app.config';
 /**
  * Token refresh state management (singleton pattern)
  * Prevents race conditions when multiple requests fail with 401 simultaneously
+ *
+ * The refreshPromise acts as both the lock and the shared promise.
+ * If it exists, a refresh is in progress - all concurrent requests wait for the same promise.
  */
-let isRefreshing = false;
 let refreshPromise: Promise<string> | null = null;
 
 /**
@@ -46,11 +48,12 @@ const getAuthStore = async () => {
 /* istanbul ignore next */
 async function refreshAccessToken(): Promise<string> {
   // Singleton pattern: reuse in-flight refresh request
-  if (isRefreshing && refreshPromise) {
+  // If a refresh is already in progress, return the existing promise
+  if (refreshPromise) {
     return refreshPromise;
   }
 
-  isRefreshing = true;
+  // Create and store the refresh promise immediately to prevent race conditions
   refreshPromise = (async () => {
     try {
       const authStore = await getAuthStore();
@@ -107,7 +110,7 @@ async function refreshAccessToken(): Promise<string> {
 
       throw error;
     } finally {
-      isRefreshing = false;
+      // Clear the promise so future 401s will trigger a new refresh
       refreshPromise = null;
     }
   })();

@@ -79,7 +79,9 @@ export default function FormsPage() {
     setSubmitSuccess(false);
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log('Login form data:', data);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Login form data:', data);
+    }
     setIsSubmitting(false);
     setSubmitSuccess(true);
   };
@@ -89,7 +91,9 @@ export default function FormsPage() {
     setSubmitSuccess(false);
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    console.log('Contact form data:', data);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Contact form data:', data);
+    }
     setIsSubmitting(false);
     setSubmitSuccess(true);
   };

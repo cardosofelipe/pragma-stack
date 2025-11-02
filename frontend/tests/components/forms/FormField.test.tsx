@@ -246,7 +246,6 @@ describe('FormField', () => {
         render(
           <FormField
             label="Email"
-            // @ts-expect-error - Testing missing name
             name={undefined}
           />
         );
