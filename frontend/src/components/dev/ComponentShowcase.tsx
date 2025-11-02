@@ -9,11 +9,10 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import {
-  Moon, Sun, Mail, User,
+  Mail, User,
   Settings, LogOut, Shield, AlertCircle, Info,
-  Trash2, ArrowLeft
+  Trash2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -73,41 +72,10 @@ import { Example, ExampleGrid, ExampleSection } from './Example';
  * Component showcase
  */
 export function ComponentShowcase() {
-  const [isDark, setIsDark] = useState(false);
   const [checked, setChecked] = useState(false);
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    document.documentElement.classList.toggle('dark');
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-4">
-            <Link href="/dev">
-              <Button variant="ghost" size="icon" aria-label="Back to hub">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-xl font-bold">Component Showcase</h1>
-              <p className="text-sm text-muted-foreground">All shadcn/ui components with code</p>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-          >
-            {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </Button>
-        </div>
-      </header>
-
+    <div className="bg-background">
       {/* Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-12">

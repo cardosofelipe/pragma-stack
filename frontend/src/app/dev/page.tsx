@@ -70,45 +70,45 @@ const documentationLinks = [
   {
     title: 'Quick Start',
     description: '5-minute crash course',
-    href: '/docs/design-system/00-quick-start',
+    href: '/dev/docs/design-system/00-quick-start',
   },
   {
     title: 'Complete Documentation',
     description: 'Full design system guide',
-    href: '/docs/design-system/README',
+    href: '/dev/docs',
   },
   {
     title: 'AI Guidelines',
     description: 'Rules for AI code generation',
-    href: '/docs/design-system/08-ai-guidelines',
+    href: '/dev/docs/design-system/08-ai-guidelines',
   },
   {
     title: 'Quick Reference',
     description: 'Cheat sheet for lookups',
-    href: '/docs/design-system/99-reference',
+    href: '/dev/docs/design-system/99-reference',
   },
 ];
 
 export default function DesignSystemHub() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 py-8">
-          <div className="space-y-4">
+    <div className="bg-background">
+      {/* Hero Section */}
+      <section className="border-b bg-gradient-to-b from-background to-muted/20 py-12">
+        <div className="container mx-auto px-4">
+          <div className="space-y-4 max-w-3xl">
             <div className="flex items-center gap-2">
               <Sparkles className="h-8 w-8 text-primary" />
               <h1 className="text-4xl font-bold tracking-tight">
                 Design System Hub
               </h1>
             </div>
-            <p className="text-lg text-muted-foreground max-w-2xl">
-              Interactive demonstrations, live examples, and copy-paste code for
+            <p className="text-lg text-muted-foreground">
+              Interactive demonstrations, live examples, and comprehensive documentation for
               the FastNext design system. Built with shadcn/ui + Tailwind CSS 4.
             </p>
           </div>
         </div>
-      </header>
+      </section>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-12">
@@ -276,32 +276,6 @@ export default function DesignSystemHub() {
           </section>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="mt-16 border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>
-            FastNext Design System • Built with{' '}
-            <a
-              href="https://ui.shadcn.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium hover:text-foreground"
-            >
-              shadcn/ui
-            </a>
-            {' + '}
-            <a
-              href="https://tailwindcss.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium hover:text-foreground"
-            >
-              Tailwind CSS 4
-            </a>
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

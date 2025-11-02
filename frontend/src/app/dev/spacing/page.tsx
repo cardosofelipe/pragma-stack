@@ -5,6 +5,7 @@
  */
 
 import type { Metadata } from 'next';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { ArrowLeft, Ruler } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,8 +17,22 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Example, ExampleSection } from '@/components/dev/Example';
-import { BeforeAfter } from '@/components/dev/BeforeAfter';
+
+// Code-split heavy dev components
+const Example = dynamic(
+  () => import('@/components/dev/Example').then((mod) => ({ default: mod.Example })),
+  { loading: () => <div className="animate-pulse h-32 bg-muted rounded" /> }
+);
+
+const ExampleSection = dynamic(
+  () => import('@/components/dev/Example').then((mod) => ({ default: mod.ExampleSection })),
+  { loading: () => <div className="animate-pulse h-24 bg-muted rounded" /> }
+);
+
+const BeforeAfter = dynamic(
+  () => import('@/components/dev/BeforeAfter').then((mod) => ({ default: mod.BeforeAfter })),
+  { loading: () => <div className="animate-pulse h-48 bg-muted rounded" /> }
+);
 
 export const metadata: Metadata = {
   title: 'Spacing Patterns | Dev',
@@ -507,7 +522,7 @@ export default function SpacingPage() {
           <p className="text-sm text-muted-foreground">
             Learn more:{' '}
             <Link
-              href="/docs/design-system/04-spacing-philosophy"
+              href="/dev/docs/design-system/04-spacing-philosophy"
               className="font-medium hover:text-foreground"
             >
               Spacing Philosophy Documentation

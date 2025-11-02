@@ -23,12 +23,10 @@ let mockAuthState: {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: any;
-  _hasHydrated: boolean;
 } = {
   isAuthenticated: false,
   isLoading: false,
   user: null,
-  _hasHydrated: true, // In tests, assume store is always hydrated
 };
 
 jest.mock('@/lib/stores/authStore', () => ({
@@ -71,7 +69,6 @@ describe('AuthGuard', () => {
       isAuthenticated: false,
       isLoading: false,
       user: null,
-      _hasHydrated: true, // In tests, assume store is always hydrated
     };
     mockMeState = {
       isLoading: false,
@@ -85,7 +82,6 @@ describe('AuthGuard', () => {
         isAuthenticated: false,
         isLoading: true,
         user: null,
-        _hasHydrated: true,
       };
 
       render(
@@ -104,7 +100,6 @@ describe('AuthGuard', () => {
         isAuthenticated: true,
         isLoading: false,
         user: null,
-        _hasHydrated: true,
       };
       mockMeState = {
         isLoading: true,
@@ -126,7 +121,6 @@ describe('AuthGuard', () => {
         isAuthenticated: false,
         isLoading: true,
         user: null,
-        _hasHydrated: true,
       };
 
       render(
@@ -148,7 +142,6 @@ describe('AuthGuard', () => {
         isAuthenticated: false,
         isLoading: false,
         user: null,
-        _hasHydrated: true,
       };
 
       render(
@@ -179,7 +172,6 @@ describe('AuthGuard', () => {
           created_at: '2024-01-01',
           updated_at: '2024-01-01',
         },
-        _hasHydrated: true,
       };
 
       render(
@@ -205,11 +197,10 @@ describe('AuthGuard', () => {
           first_name: 'Admin',
           last_name: 'User',
           is_active: true,
-          is_superuser: true, // Admin user must have is_superuser: true
+          is_superuser: true,
           created_at: '2024-01-01',
           updated_at: '2024-01-01',
         },
-        _hasHydrated: true,
       };
 
       render(
@@ -228,7 +219,7 @@ describe('AuthGuard', () => {
         isAuthenticated: true,
         isLoading: false,
         user: {
-        id: '1',
+          id: '1',
           email: 'user@example.com',
           first_name: 'Regular',
           last_name: 'User',
@@ -237,7 +228,6 @@ describe('AuthGuard', () => {
           created_at: '2024-01-01',
           updated_at: '2024-01-01',
         },
-        _hasHydrated: true,
       };
 
       render(
@@ -259,7 +249,7 @@ describe('AuthGuard', () => {
         isAuthenticated: true,
         isLoading: false,
         user: {
-        id: '1',
+          id: '1',
           email: 'user@example.com',
           first_name: 'Regular',
           last_name: 'User',
@@ -268,7 +258,6 @@ describe('AuthGuard', () => {
           created_at: '2024-01-01',
           updated_at: '2024-01-01',
         },
-        _hasHydrated: true,
       };
 
       render(
@@ -289,7 +278,6 @@ describe('AuthGuard', () => {
         isAuthenticated: false,
         isLoading: false,
         user: null,
-        _hasHydrated: true,
       };
 
       render(
@@ -313,7 +301,6 @@ describe('AuthGuard', () => {
         isAuthenticated: true,
         isLoading: false,
         user: null,
-        _hasHydrated: true,
       };
       mockMeState = {
         isLoading: true,
@@ -335,7 +322,7 @@ describe('AuthGuard', () => {
         isAuthenticated: true,
         isLoading: false,
         user: {
-        id: '1',
+          id: '1',
           email: 'user@example.com',
           first_name: 'Test',
           last_name: 'User',
@@ -344,7 +331,6 @@ describe('AuthGuard', () => {
           created_at: '2024-01-01',
           updated_at: '2024-01-01',
         },
-        _hasHydrated: true,
       };
       mockMeState = {
         isLoading: false,

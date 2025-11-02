@@ -509,7 +509,7 @@ export default function LayoutsPage() {
           <p className="text-sm text-muted-foreground">
             Learn more:{' '}
             <Link
-              href="/docs/design-system/03-layouts"
+              href="/dev/docs/design-system/03-layouts"
               className="font-medium hover:text-foreground"
             >
               Layout Documentation

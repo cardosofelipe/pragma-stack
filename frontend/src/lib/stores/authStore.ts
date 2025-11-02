@@ -1,10 +1,9 @@
 /**
  * Authentication Store - Zustand with secure token storage
- * Implements proper state management with validation and automatic persistence
+ * Implements proper state management with validation
  */
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { saveTokens, getTokens, clearTokens } from '@/lib/auth/storage';
 
 /**
@@ -31,7 +30,6 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   tokenExpiresAt: number | null; // Unix timestamp
-  _hasHydrated: boolean; // Internal flag for persist middleware
 
   // Actions
   setAuth: (user: User, accessToken: string, refreshToken: string, expiresIn?: number) => Promise<void>;
@@ -40,7 +38,6 @@ interface AuthState {
   clearAuth: () => Promise<void>;
   loadAuthFromStorage: () => Promise<void>;
   isTokenExpired: () => boolean;
-  setHasHydrated: (hasHydrated: boolean) => void; // Internal method for persist
 }
 
 /**
@@ -71,63 +68,14 @@ function calculateExpiry(expiresIn?: number): number {
   return Date.now() + seconds * 1000;
 }
 
-/**
- * Custom storage adapter for Zustand persist
- * Uses our encrypted token storage functions
- */
-const authStorage = {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getItem: async (_name: string): Promise<string | null> => {
-    try {
-      const tokens = await getTokens();
-      if (!tokens) return null;
-
-      // Return the tokens as a JSON string that persist middleware expects
-      return JSON.stringify({
-        state: {
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
-          isAuthenticated: !!(tokens.accessToken && tokens.refreshToken),
-        },
-      });
-    } catch (error) {
-      console.error('Failed to load auth from storage:', error);
-      return null;
-    }
-  },
-  setItem: async (_name: string, value: string): Promise<void> => {
-    try {
-      const parsed = JSON.parse(value);
-      const { accessToken, refreshToken } = parsed.state;
-
-      if (accessToken && refreshToken) {
-        await saveTokens({ accessToken, refreshToken });
-      }
-    } catch (error) {
-      console.error('Failed to save auth to storage:', error);
-    }
-  },
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  removeItem: async (_name: string): Promise<void> => {
-    try {
-      await clearTokens();
-    } catch (error) {
-      console.error('Failed to clear auth from storage:', error);
-    }
-  },
-};
-
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      // Initial state
-      user: null,
-      accessToken: null,
-      refreshToken: null,
-      isAuthenticated: false,
-      isLoading: false, // No longer needed - persist handles hydration
-      tokenExpiresAt: null,
-      _hasHydrated: false,
+export const useAuthStore = create<AuthState>((set, get) => ({
+  // Initial state
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+  isAuthenticated: false,
+  isLoading: true, // Start as loading to check stored tokens
+  tokenExpiresAt: null,
 
   // Set complete auth state (user + tokens)
   setAuth: async (user, accessToken, refreshToken, expiresIn) => {
@@ -210,58 +158,50 @@ export const useAuthStore = create<AuthState>()(
     });
   },
 
-      /**
-       * @deprecated No longer needed with persist middleware
-       * The persist middleware automatically hydrates tokens on store initialization
-       * Kept for backward compatibility but does nothing
-       */
-      loadAuthFromStorage: async () => {
-        // No-op: persist middleware handles this automatically
-        console.warn('loadAuthFromStorage() is deprecated and no longer necessary');
-      },
+  // Load auth from storage on app start
+  loadAuthFromStorage: async () => {
+    try {
+      const tokens = await getTokens();
 
-      // Check if current token is expired
-      isTokenExpired: () => {
-        const { tokenExpiresAt } = get();
-        if (!tokenExpiresAt) return true;
-        return Date.now() >= tokenExpiresAt;
-      },
-
-      // Internal method for persist middleware
-      setHasHydrated: (hasHydrated) => {
-        set({ _hasHydrated: hasHydrated });
-      },
-    }),
-    {
-      name: 'auth_store', // Storage key
-      storage: createJSONStorage(() => authStorage),
-      partialize: (state) => ({
-        // Only persist tokens and auth status, not user or computed values
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
-        isAuthenticated: state.isAuthenticated,
-      }),
-      onRehydrateStorage: () => {
-        return (state, error) => {
-          if (error) {
-            console.error('Failed to rehydrate auth store:', error);
-          }
-          // Mark store as hydrated to prevent rendering issues
-          if (state) {
-            state.setHasHydrated(true);
-          }
-        };
-      },
+      if (tokens?.accessToken && tokens?.refreshToken) {
+        // Validate token format
+        if (isValidToken(tokens.accessToken) && isValidToken(tokens.refreshToken)) {
+          set({
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+            isAuthenticated: true,
+            isLoading: false,
+            // User will be loaded separately via API call
+          });
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load auth from storage:', error);
     }
-  )
-);
+
+    // No valid tokens found
+    set({ isLoading: false });
+  },
+
+  // Check if current token is expired
+  isTokenExpired: () => {
+    const { tokenExpiresAt } = get();
+    if (!tokenExpiresAt) return true;
+    return Date.now() >= tokenExpiresAt;
+  },
+}));
 
 /**
- * @deprecated No longer needed with persist middleware
- * The persist middleware automatically hydrates the store on initialization
- * Kept for backward compatibility but does nothing
+ * Initialize auth store from storage
+ * Call this on app startup
+ * Errors are logged but don't throw to prevent app crashes
  */
 export async function initializeAuth(): Promise<void> {
-  // No-op: persist middleware handles initialization automatically
-  console.warn('initializeAuth() is deprecated and no longer necessary');
+  try {
+    await useAuthStore.getState().loadAuthFromStorage();
+  } catch (error) {
+    // Log error but don't throw - app should continue even if auth init fails
+    console.error('Failed to initialize auth:', error);
+  }
 }

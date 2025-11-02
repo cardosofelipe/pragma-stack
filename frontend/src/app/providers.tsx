@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState } from 'react';
 import { ThemeProvider } from '@/components/theme';
+import { AuthInitializer } from '@/components/auth';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -26,7 +27,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        {/* AuthInitializer removed - Zustand persist middleware handles auto-hydration */}
+        <AuthInitializer />
         {children}
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>

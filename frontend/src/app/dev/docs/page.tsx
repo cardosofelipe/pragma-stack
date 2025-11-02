@@ -1,7 +1,7 @@
 /**
  * Documentation Hub
  * Central hub for all design system documentation
- * Access: /docs
+ * Access: /dev/docs
  */
 
 import Link from 'next/link';
@@ -22,14 +22,14 @@ const gettingStartedDocs: DocItem[] = [
   {
     title: 'Quick Start',
     description: '5-minute crash course to get up and running with the design system',
-    href: '/docs/design-system/00-quick-start',
+    href: '/dev/docs/design-system/00-quick-start',
     icon: <Sparkles className="h-5 w-5" />,
     badge: 'Start Here',
   },
   {
     title: 'README',
     description: 'Complete overview and learning paths for the design system',
-    href: '/docs/design-system/README',
+    href: '/dev/docs/design-system/README',
     icon: <BookOpen className="h-5 w-5" />,
   },
 ];
@@ -38,43 +38,43 @@ const coreConceptsDocs: DocItem[] = [
   {
     title: 'Foundations',
     description: 'Colors (OKLCH), typography, spacing, and shadows',
-    href: '/docs/design-system/01-foundations',
+    href: '/dev/docs/design-system/01-foundations',
     icon: <Palette className="h-5 w-5" />,
   },
   {
     title: 'Components',
     description: 'shadcn/ui component library guide and usage patterns',
-    href: '/docs/design-system/02-components',
+    href: '/dev/docs/design-system/02-components',
     icon: <Code2 className="h-5 w-5" />,
   },
   {
     title: 'Layouts',
     description: 'Layout patterns with Grid vs Flex decision trees',
-    href: '/docs/design-system/03-layouts',
+    href: '/dev/docs/design-system/03-layouts',
     icon: <Layout className="h-5 w-5" />,
   },
   {
     title: 'Spacing Philosophy',
     description: 'Parent-controlled spacing strategy and best practices',
-    href: '/docs/design-system/04-spacing-philosophy',
+    href: '/dev/docs/design-system/04-spacing-philosophy',
     icon: <FileCode className="h-5 w-5" />,
   },
   {
     title: 'Component Creation',
     description: 'When to create vs compose components',
-    href: '/docs/design-system/05-component-creation',
+    href: '/dev/docs/design-system/05-component-creation',
     icon: <Code2 className="h-5 w-5" />,
   },
   {
     title: 'Forms',
     description: 'Form patterns with react-hook-form and Zod validation',
-    href: '/docs/design-system/06-forms',
+    href: '/dev/docs/design-system/06-forms',
     icon: <FileCode className="h-5 w-5" />,
   },
   {
     title: 'Accessibility',
     description: 'WCAG AA compliance, keyboard navigation, and screen readers',
-    href: '/docs/design-system/07-accessibility',
+    href: '/dev/docs/design-system/07-accessibility',
     icon: <Accessibility className="h-5 w-5" />,
   },
 ];
@@ -83,39 +83,21 @@ const referencesDocs: DocItem[] = [
   {
     title: 'AI Guidelines',
     description: 'Rules and best practices for AI code generation',
-    href: '/docs/design-system/08-ai-guidelines',
+    href: '/dev/docs/design-system/08-ai-guidelines',
     icon: <Lightbulb className="h-5 w-5" />,
     badge: 'AI',
   },
   {
     title: 'Quick Reference',
     description: 'Cheat sheet for quick lookups and common patterns',
-    href: '/docs/design-system/99-reference',
+    href: '/dev/docs/design-system/99-reference',
     icon: <Search className="h-5 w-5" />,
   },
 ];
 
 export default function DocsHub() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <BookOpen className="h-6 w-6 text-primary" />
-            <div>
-              <h1 className="text-lg font-semibold">FastNext Documentation</h1>
-              <p className="text-xs text-muted-foreground">Design System & Component Library</p>
-            </div>
-          </div>
-          <Link href="/dev">
-            <Button variant="outline" size="sm">
-              Interactive Demos
-            </Button>
-          </Link>
-        </div>
-      </header>
-
+    <div className="bg-background">
       {/* Hero Section */}
       <section className="border-b bg-gradient-to-b from-background to-muted/20 py-16">
         <div className="container mx-auto px-4">
@@ -128,19 +110,19 @@ export default function DocsHub() {
               accessible, and maintainable user interfaces with the FastNext design system.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              <Link href="/docs/design-system/00-quick-start">
+              <Link href="/dev/docs/design-system/00-quick-start">
                 <Button size="lg" className="gap-2">
                   <Sparkles className="h-4 w-4" />
                   Get Started
                 </Button>
               </Link>
-              <Link href="/docs/design-system/README">
+              <Link href="/dev/docs/design-system/README">
                 <Button variant="outline" size="lg" className="gap-2">
                   <BookOpen className="h-4 w-4" />
                   Full Documentation
                 </Button>
               </Link>
-              <Link href="/dev">
+              <Link href="/dev/components">
                 <Button variant="outline" size="lg" className="gap-2">
                   <Code2 className="h-4 w-4" />
                   View Examples
@@ -269,35 +251,6 @@ export default function DocsHub() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="mt-16 border-t py-8">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-6xl">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground mb-1">
-                  FastNext Design System
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Built with shadcn/ui, Tailwind CSS, and OKLCH colors
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <Link href="/dev">
-                  <Button variant="ghost" size="sm">
-                    Interactive Demos
-                  </Button>
-                </Link>
-                <Link href="/docs/design-system/00-quick-start">
-                  <Button variant="ghost" size="sm">
-                    Quick Start
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

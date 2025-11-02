@@ -574,7 +574,7 @@ const { register, handleSubmit, formState: { errors } } = useForm({
           <p className="text-sm text-muted-foreground">
             Learn more:{' '}
             <Link
-              href="/docs/design-system/06-forms"
+              href="/dev/docs/design-system/06-forms"
               className="font-medium hover:text-foreground"
             >
               Forms Documentation
