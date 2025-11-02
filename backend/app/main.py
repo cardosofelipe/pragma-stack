@@ -1,4 +1,6 @@
 import logging
+import os
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Dict, Any
 
@@ -29,11 +31,54 @@ logger = logging.getLogger(__name__)
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Application lifespan context manager.
+
+    Handles startup and shutdown events for the application.
+    Sets up background jobs and scheduled tasks on startup,
+    cleans up resources on shutdown.
+    """
+    # Startup
+    logger.info("Application starting up...")
+
+    # Skip scheduler in test environment
+    if os.getenv("IS_TEST", "False") != "True":
+        from app.services.session_cleanup import cleanup_expired_sessions
+
+        # Schedule session cleanup job
+        # Runs daily at 2:00 AM server time
+        scheduler.add_job(
+            cleanup_expired_sessions,
+            'cron',
+            hour=2,
+            minute=0,
+            id='cleanup_expired_sessions',
+            replace_existing=True
+        )
+
+        scheduler.start()
+        logger.info("Scheduled jobs started: session cleanup (daily at 2 AM)")
+    else:
+        logger.info("Test environment detected - skipping scheduler")
+
+    yield
+
+    # Shutdown
+    logger.info("Application shutting down...")
+    if os.getenv("IS_TEST", "False") != "True":
+        scheduler.shutdown()
+        logger.info("Scheduled jobs stopped")
+
+
 logger.info(f"Starting app!!!")
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    lifespan=lifespan
 )
 
 # Add rate limiter state to app

@@ -14,15 +14,11 @@ from app.core.auth import (
     TokenExpiredError,
     TokenInvalidError
 )
+from app.core.exceptions import AuthenticationError
 from app.models.user import User
 from app.schemas.users import Token, UserCreate, UserResponse
 
 logger = logging.getLogger(__name__)
-
-
-class AuthenticationError(Exception):
-    """Exception raised for authentication errors"""
-    pass
 
 
 class AuthService:
@@ -144,7 +140,7 @@ class AuthService:
             access_token=access_token,
             refresh_token=refresh_token,
             user=user_response,
-            expires_in=86400  # 24 hours in seconds (matching ACCESS_TOKEN_EXPIRE_MINUTES)
+            expires_in=900  # 15 minutes in seconds (matching ACCESS_TOKEN_EXPIRE_MINUTES)
         )
 
     @staticmethod

@@ -143,17 +143,8 @@ async def update_current_user(
     """
     Update current user's profile.
 
-    Users cannot elevate their own permissions (is_superuser).
+    Users cannot elevate their own permissions (protected by UserUpdate schema validator).
     """
-    # Prevent users from making themselves superuser
-    # NOTE: Pydantic validator will reject is_superuser != None, but this provides defense in depth
-    if getattr(user_update, 'is_superuser', None) is not None:
-        logger.warning(f"User {current_user.id} attempted to modify is_superuser field")
-        raise AuthorizationError(
-            message="Cannot modify superuser status",
-            error_code=ErrorCode.INSUFFICIENT_PERMISSIONS
-        )
-
     try:
         updated_user = await user_crud.update(
             db,
@@ -243,7 +234,7 @@ async def update_user(
     Update user by ID.
 
     Users can update their own profile. Superusers can update any profile.
-    Regular users cannot modify is_superuser field.
+    Superuser field modification is prevented by UserUpdate schema validator.
     """
     # Check permissions
     is_own_profile = str(user_id) == str(current_user.id)
@@ -263,15 +254,6 @@ async def update_user(
         raise NotFoundError(
             message=f"User with id {user_id} not found",
             error_code=ErrorCode.USER_NOT_FOUND
-        )
-
-    # Prevent non-superusers from modifying superuser status
-    # NOTE: Pydantic validator will reject is_superuser != None, but this provides defense in depth
-    if getattr(user_update, 'is_superuser', None) is not None and not current_user.is_superuser:
-        logger.warning(f"User {current_user.id} attempted to modify is_superuser field")
-        raise AuthorizationError(
-            message="Cannot modify superuser status",
-            error_code=ErrorCode.INSUFFICIENT_PERMISSIONS
         )
 
     try:
