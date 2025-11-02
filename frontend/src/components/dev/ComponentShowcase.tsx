@@ -1,6 +1,9 @@
+/* istanbul ignore file */
+
 /**
  * Component Showcase
  * Comprehensive display of all design system components
+ * This file is excluded from coverage as it's a demo/showcase page
  */
 
 'use client';
