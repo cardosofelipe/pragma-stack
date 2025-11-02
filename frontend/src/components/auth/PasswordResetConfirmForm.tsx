@@ -223,7 +223,7 @@ export function PasswordResetConfirmForm({
           {/* Password Strength Indicator */}
           {watchPassword && (
             <div className="space-y-2" id="password-requirements">
-              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all ${
                     passwordStrength.strength === 100
