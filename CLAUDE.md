@@ -86,10 +86,10 @@ alembic upgrade head
 
 #### Testing
 
-**CRITICAL: Coverage Tracking Issue**
-- Pytest-cov has coverage recording issues with FastAPI routes when using xdist parallel execution
-- Tests pass successfully but coverage data isn't collected for some route files
-- See `backend/docs/COVERAGE_REPORT.md` for detailed analysis
+**Test Coverage: 97%** (743 tests, all passing)
+- Comprehensive test suite with security-focused testing
+- Includes tests for JWT algorithm attacks (CVE-2015-9235), session hijacking, and privilege escalation
+- 84 missing lines are justified (defensive code, error handlers, production-only code)
 
 ```bash
 # Run all tests (uses pytest-xdist for parallel execution)
@@ -107,8 +107,6 @@ IS_TEST=True pytest tests/api/test_auth.py::TestLogin::test_login_success -v
 # Run with HTML coverage report
 IS_TEST=True pytest --cov=app --cov-report=html -n 0
 open htmlcov/index.html
-
-# Coverage target: 90%+ (currently 79%)
 ```
 
 #### Running Locally
@@ -159,7 +157,7 @@ npx playwright test auth-login.spec.ts  # Run specific file
 - Use ID-based selectors for validation errors (e.g., `#email-error`)
 - Error IDs use dashes not underscores (`#new-password-error`)
 - Target `.border-destructive[role="alert"]` to avoid Next.js route announcer conflicts
-- Use 4 workers max to prevent test interference (`workers: 4` in `playwright.config.ts`)
+- Uses 12 workers in non-CI mode (`workers: 12` in `playwright.config.ts`)
 - URL assertions should use regex to handle query params: `/\/auth\/login/`
 
 ### Docker
@@ -180,8 +178,8 @@ docker-compose build frontend
 
 ### Authentication Flow
 1. **Login**: `POST /api/v1/auth/login` returns access + refresh tokens
-   - Access token: 1 day expiry (JWT)
-   - Refresh token: 60 days expiry (JWT with JTI stored in DB)
+   - Access token: 15 minutes expiry (JWT)
+   - Refresh token: 7 days expiry (JWT with JTI stored in DB)
    - Session tracking with device info (IP, user agent, device ID)
 
 2. **Token Refresh**: `POST /api/v1/auth/refresh` validates refresh token JTI
@@ -190,10 +188,10 @@ docker-compose build frontend
    - Updates session `last_used_at`
 
 3. **Authorization**: FastAPI dependencies in `api/dependencies/auth.py`
-   - `get_current_user`: Validates access token, returns User or None
-   - `require_auth`: Requires valid access token
-   - `optional_auth`: Accepts both authenticated and anonymous users
-   - `require_superuser`: Requires superuser flag
+   - `get_current_user`: Validates access token, returns User (raises 401 if invalid)
+   - `get_current_active_user`: Requires valid access token + active account
+   - `get_optional_current_user`: Accepts both authenticated and anonymous users (returns User or None)
+   - `get_current_superuser`: Requires superuser flag
 
 ### Database Pattern: Async SQLAlchemy
 - **Engine**: Created in `core/database.py` with connection pooling
@@ -206,7 +204,7 @@ docker-compose build frontend
 - **Zustand stores**: `lib/stores/` (authStore, etc.)
 - **TanStack Query**: API data fetching/caching
 - **Auto-generated client**: `lib/api/generated/` from OpenAPI spec
-  - Generate with: `npm run generate-api` (runs `scripts/generate-api-client.sh`)
+  - Generate with: `npm run generate:api` (runs `scripts/generate-api-client.sh`)
 
 ### Session Management Architecture
 **Database-backed session tracking** (not just JWT):
@@ -411,7 +409,7 @@ Automatically applied via middleware in `main.py`:
 6. **Generate frontend client**:
    ```bash
    cd frontend
-   npm run generate-api
+   npm run generate:api
    ```
 
 ### Adding a New React Component
@@ -454,32 +452,85 @@ Automatically applied via middleware in `main.py`:
 - ✅ E2E test suite (86 tests, 100% pass rate, zero flaky tests)
 
 ### Test Coverage
-- **Backend**: 79% overall (target: 90%+)
-  - User CRUD: 90%
+- **Backend**: 97% overall (743 tests, all passing) ✅
+  - Comprehensive security testing (JWT attacks, session hijacking, privilege escalation)
+  - User CRUD: 100% ✅
   - Session CRUD: 100% ✅
-  - Auth routes: 79%
-  - Admin routes: 46% (coverage tracking issue)
-  - See `backend/docs/COVERAGE_REPORT.md` for details
+  - Auth routes: 99% ✅
+  - Organization routes: 100% ✅
+  - Permissions: 100% ✅
+  - 84 missing lines justified (defensive code, error handlers, production-only code)
 
-- **Frontend E2E**: 86 tests across 4 files
+- **Frontend E2E**: 86 tests across 4 files (100% pass rate, zero flaky tests) ✅
   - auth-login.spec.ts
   - auth-register.spec.ts
   - auth-password-reset.spec.ts
   - navigation.spec.ts
 
-### Known Issues
+## Email Service Integration
 
-1. **Pytest-cov coverage tracking issue**:
-   - Tests pass but coverage not recorded for some route files
-   - Suspected: xdist parallel execution interferes with coverage collection
-   - Workaround: Run with `-n 0` for accurate coverage
-   - Investigation needed: HTML coverage report, source vs trace mode
+The project includes a **placeholder email service** (`backend/app/services/email_service.py`) designed for easy integration with production email providers.
 
-2. **Dead code in users.py** (lines 150-154, 270-275):
-   - Checks for `is_superuser` in `UserUpdate` schema
-   - Field doesn't exist in schema, so code is unreachable
-   - Marked with `# pragma: no cover`
-   - Consider: Remove code or add field to schema
+### Current Implementation
+
+**Console Backend (Default)**:
+- Logs email content to console/logs instead of sending
+- Safe for development and testing
+- No external dependencies required
+
+### Production Integration
+
+To enable email functionality, implement one of these approaches:
+
+**Option 1: SMTP Integration** (Recommended for most use cases)
+```python
+# In app/services/email_service.py, complete the SMTPEmailBackend implementation
+from aiosmtplib import SMTP
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+# Add environment variables to .env:
+# SMTP_HOST=smtp.gmail.com
+# SMTP_PORT=587
+# SMTP_USERNAME=your-email@gmail.com
+# SMTP_PASSWORD=your-app-password
+```
+
+**Option 2: Third-Party Service** (SendGrid, AWS SES, Mailgun, etc.)
+```python
+# Create a new backend class, e.g., SendGridEmailBackend
+class SendGridEmailBackend(EmailBackend):
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.client = sendgrid.SendGridAPIClient(api_key)
+
+    async def send_email(self, to, subject, html_content, text_content=None):
+        # Implement SendGrid sending logic
+        pass
+
+# Update global instance in email_service.py:
+# email_service = EmailService(SendGridEmailBackend(settings.SENDGRID_API_KEY))
+```
+
+**Option 3: External Microservice**
+- Use a dedicated email microservice via HTTP API
+- Implement `HTTPEmailBackend` that makes async HTTP requests
+
+### Email Templates Included
+
+The service includes pre-built templates for:
+- **Password Reset**: `send_password_reset_email()` - 1 hour expiry
+- **Email Verification**: `send_email_verification()` - 24 hour expiry
+
+Both include responsive HTML and plain text versions.
+
+### Integration Points
+
+Email sending is called from:
+- `app/api/routes/auth.py` - Password reset flow (placeholder comments)
+- Registration flow - Ready for email verification integration
+
+**Note**: Current auth routes have placeholder comments where email functionality should be integrated. Search for "TODO: Send email" in the codebase.
 
 ## API Documentation
 
@@ -519,6 +570,20 @@ alembic upgrade head        # Re-apply
 
 ## Additional Documentation
 
-- `backend/docs/COVERAGE_REPORT.md`: Detailed coverage analysis and roadmap to 95%
-- `backend/docs/ASYNC_MIGRATION_GUIDE.md`: Guide for async SQLAlchemy patterns
+- `backend/docs/ARCHITECTURE.md`: System architecture and design patterns
+- `backend/docs/CODING_STANDARDS.md`: Code quality standards and best practices
+- `backend/docs/COMMON_PITFALLS.md`: Common mistakes and how to avoid them
+- `backend/docs/FEATURE_EXAMPLE.md`: Step-by-step feature implementation guide
 - `frontend/e2e/README.md`: E2E testing setup and guidelines
+- **`frontend/docs/design-system/`**: Comprehensive design system documentation
+  - `README.md`: Hub with learning paths (start here)
+  - `00-quick-start.md`: 5-minute crash course
+  - `01-foundations.md`: Colors (OKLCH), typography, spacing, shadows
+  - `02-components.md`: shadcn/ui component library guide
+  - `03-layouts.md`: Layout patterns (Grid vs Flex decision trees)
+  - `04-spacing-philosophy.md`: Parent-controlled spacing strategy
+  - `05-component-creation.md`: When to create vs compose components
+  - `06-forms.md`: Form patterns with react-hook-form + Zod
+  - `07-accessibility.md`: WCAG AA compliance, keyboard navigation, screen readers
+  - `08-ai-guidelines.md`: **AI code generation rules (read this!)**
+  - `99-reference.md`: Quick reference cheat sheet (bookmark this)
