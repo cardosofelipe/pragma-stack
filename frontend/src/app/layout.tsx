@@ -6,11 +6,15 @@ import { Providers } from "./providers";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap", // Prevent font from blocking render
+  preload: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap", // Prevent font from blocking render
+  preload: false, // Only preload primary font
 });
 
 export const metadata: Metadata = {

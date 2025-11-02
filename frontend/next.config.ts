@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
         ignoreDuringBuilds: false,
         dirs: ['src'],
     },
+    // Production optimizations
+    reactStrictMode: true,
+    // Note: swcMinify is default in Next.js 15
 };
 
-export default nextConfig;
+// Enable bundle analyzer when ANALYZE=true
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+    enabled: process.env.ANALYZE === 'true',
+});
+
+export default withBundleAnalyzer(nextConfig);

@@ -1,6 +1,20 @@
 'use client';
 
-import { LoginForm } from '@/components/auth/LoginForm';
+import dynamic from 'next/dynamic';
+
+// Code-split LoginForm - heavy with react-hook-form + validation
+const LoginForm = dynamic(
+  () => import('@/components/auth/LoginForm').then((mod) => ({ default: mod.LoginForm })),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="animate-pulse h-10 bg-muted rounded" />
+        <div className="animate-pulse h-10 bg-muted rounded" />
+        <div className="animate-pulse h-10 bg-primary/20 rounded" />
+      </div>
+    ),
+  }
+);
 
 export default function LoginPage() {
   return (
