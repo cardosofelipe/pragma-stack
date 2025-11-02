@@ -15,7 +15,7 @@ import {
   register,
   logout,
   logoutAll,
-  getCurrentUserInfo,
+  getCurrentUserProfile,
   requestPasswordReset,
   confirmPasswordReset,
   changeCurrentUserPassword,
@@ -55,7 +55,7 @@ export function useMe() {
   const query = useQuery({
     queryKey: authKeys.me,
     queryFn: async (): Promise<User> => {
-      const response = await getCurrentUserInfo({
+      const response = await getCurrentUserProfile({
         throwOnError: true,
       });
       return response.data as User;

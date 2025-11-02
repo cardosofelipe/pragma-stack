@@ -15,7 +15,7 @@ from app.core.auth import (
     TokenInvalidError
 )
 from app.models.user import User
-from app.schemas.users import Token, UserCreate
+from app.schemas.users import Token, UserCreate, UserResponse
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +118,7 @@ class AuthService:
             user: User to create tokens for
 
         Returns:
-            Token object with access and refresh tokens
+            Token object with access and refresh tokens and user info
         """
         # Generate claims
         claims = {
@@ -137,9 +137,14 @@ class AuthService:
             subject=str(user.id)
         )
 
+        # Convert User model to UserResponse schema
+        user_response = UserResponse.model_validate(user)
+
         return Token(
             access_token=access_token,
-            refresh_token=refresh_token
+            refresh_token=refresh_token,
+            user=user_response,
+            expires_in=86400  # 24 hours in seconds (matching ACCESS_TOKEN_EXPIRE_MINUTES)
         )
 
     @staticmethod

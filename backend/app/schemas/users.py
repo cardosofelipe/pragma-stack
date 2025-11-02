@@ -86,6 +86,8 @@ class Token(BaseModel):
     access_token: str
     refresh_token: Optional[str] = None
     token_type: str = "bearer"
+    user: "UserResponse"  # Forward reference since UserResponse is defined above
+    expires_in: Optional[int] = None  # Token expiration in seconds
 
 
 class TokenPayload(BaseModel):
