@@ -28,6 +28,7 @@ const customJestConfig = {
     '!src/app/**', // Next.js app directory - layout/page files (test in E2E)
     '!src/**/index.{js,jsx,ts,tsx}', // Re-export index files - no logic to test
     '!src/lib/utils/cn.ts', // Simple utility function from shadcn
+    '!src/middleware.ts', // middleware.ts - no logic to test
   ],
   coverageThreshold: {
     global: {
