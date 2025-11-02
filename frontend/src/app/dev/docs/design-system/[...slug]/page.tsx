@@ -9,6 +9,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { MarkdownContent } from '@/components/docs/MarkdownContent';
+import { DevBreadcrumbs } from '@/components/dev/DevBreadcrumbs';
 
 interface DocPageProps {
   params: Promise<{ slug: string[] }>;
@@ -56,10 +57,23 @@ export default async function DocPage({ params }: DocPageProps) {
     notFound();
   }
 
+  // Extract title from first heading or use filename
+  const title = doc.content.match(/^#\s+(.+)$/m)?.[1] || slug[slug.length - 1];
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mx-auto max-w-4xl">
-        <MarkdownContent content={doc.content} />
+    <div className="bg-background">
+      {/* Breadcrumbs */}
+      <DevBreadcrumbs
+        items={[
+          { label: 'Documentation', href: '/dev/docs' },
+          { label: title }
+        ]}
+      />
+
+      <div className="container mx-auto px-4 py-12">
+        <div className="mx-auto max-w-4xl">
+          <MarkdownContent content={doc.content} />
+        </div>
       </div>
     </div>
   );

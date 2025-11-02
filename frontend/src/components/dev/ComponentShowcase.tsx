@@ -67,6 +67,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Example, ExampleGrid, ExampleSection } from './Example';
+import { DevBreadcrumbs } from './DevBreadcrumbs';
 
 /**
  * Component showcase
@@ -76,8 +77,11 @@ export function ComponentShowcase() {
 
   return (
     <div className="bg-background">
+      {/* Breadcrumbs */}
+      <DevBreadcrumbs items={[{ label: 'Components' }]} />
+
       {/* Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-12">
         <div className="space-y-12">
           {/* Colors */}
           <ExampleSection

@@ -9,6 +9,7 @@ import { BookOpen, Sparkles, Layout, Palette, Code2, FileCode, Accessibility, Li
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { DevBreadcrumbs } from '@/components/dev/DevBreadcrumbs';
 
 interface DocItem {
   title: string;
@@ -98,8 +99,11 @@ const referencesDocs: DocItem[] = [
 export default function DocsHub() {
   return (
     <div className="bg-background">
+      {/* Breadcrumbs */}
+      <DevBreadcrumbs items={[{ label: 'Documentation' }]} />
+
       {/* Hero Section */}
-      <section className="border-b bg-gradient-to-b from-background to-muted/20 py-16">
+      <section className="border-b bg-gradient-to-b from-background to-muted/20 py-12">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-4xl font-bold tracking-tight mb-4">

@@ -11,8 +11,9 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DevBreadcrumbs } from '@/components/dev/DevBreadcrumbs';
 import {
   Card,
   CardContent,
@@ -94,26 +95,12 @@ export default function FormsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center gap-4 px-4">
-          <Link href="/dev">
-            <Button variant="ghost" size="icon" aria-label="Back to hub">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-xl font-bold">Form Patterns</h1>
-            <p className="text-sm text-muted-foreground">
-              react-hook-form + Zod validation examples
-            </p>
-          </div>
-        </div>
-      </header>
+    <div className="bg-background">
+      {/* Breadcrumbs */}
+      <DevBreadcrumbs items={[{ label: 'Forms' }]} />
 
       {/* Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-12">
         <div className="space-y-12">
           {/* Introduction */}
           <div className="max-w-3xl space-y-4">
