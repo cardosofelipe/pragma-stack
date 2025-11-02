@@ -386,41 +386,67 @@ describe('Auth Store', () => {
     });
   });
 
-  describe('loadAuthFromStorage (deprecated)', () => {
-    it('should log deprecation warning', async () => {
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+  describe('loadAuthFromStorage', () => {
+    it('should load valid tokens from storage', async () => {
+      const mockTokens = {
+        accessToken: 'valid.access.token',
+        refreshToken: 'valid.refresh.token',
+      };
+      (storage.getTokens as jest.Mock).mockResolvedValue(mockTokens);
 
       await useAuthStore.getState().loadAuthFromStorage();
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'loadAuthFromStorage() is deprecated and no longer necessary'
-      );
+      expect(useAuthStore.getState().accessToken).toBe(mockTokens.accessToken);
+      expect(useAuthStore.getState().refreshToken).toBe(mockTokens.refreshToken);
+      expect(useAuthStore.getState().isAuthenticated).toBe(true);
+      expect(useAuthStore.getState().isLoading).toBe(false);
+    });
 
-      consoleWarnSpy.mockRestore();
+    it('should set isLoading to false when no tokens found', async () => {
+      (storage.getTokens as jest.Mock).mockResolvedValue(null);
+
+      await useAuthStore.getState().loadAuthFromStorage();
+
+      expect(useAuthStore.getState().isAuthenticated).toBe(false);
+      expect(useAuthStore.getState().isLoading).toBe(false);
+    });
+
+    it('should handle storage errors gracefully', async () => {
+      (storage.getTokens as jest.Mock).mockRejectedValue(new Error('Storage error'));
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      await useAuthStore.getState().loadAuthFromStorage();
+
+      expect(useAuthStore.getState().isLoading).toBe(false);
+      expect(consoleErrorSpy).toHaveBeenCalled();
+
+      consoleErrorSpy.mockRestore();
     });
   });
 
-  describe('initializeAuth (deprecated)', () => {
-    it('should log deprecation warning', async () => {
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+  describe('initializeAuth', () => {
+    it('should call loadAuthFromStorage', async () => {
+      const mockTokens = {
+        accessToken: 'valid.access.token',
+        refreshToken: 'valid.refresh.token',
+      };
+      (storage.getTokens as jest.Mock).mockResolvedValue(mockTokens);
 
       const { initializeAuth } = await import('@/lib/stores/authStore');
       await initializeAuth();
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'initializeAuth() is deprecated and no longer necessary'
-      );
-
-      consoleWarnSpy.mockRestore();
+      expect(storage.getTokens).toHaveBeenCalled();
+      expect(useAuthStore.getState().isAuthenticated).toBe(true);
     });
 
-    it('should not throw', async () => {
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    it('should not throw on error', async () => {
+      (storage.getTokens as jest.Mock).mockRejectedValue(new Error('Init error'));
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       const { initializeAuth } = await import('@/lib/stores/authStore');
       await expect(initializeAuth()).resolves.not.toThrow();
 
-      consoleWarnSpy.mockRestore();
+      consoleErrorSpy.mockRestore();
     });
   });
 });
