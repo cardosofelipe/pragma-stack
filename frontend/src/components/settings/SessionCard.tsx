@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Monitor, Smartphone, Tablet, MapPin, Clock, AlertCircle } from 'lucide-react';
+import { Monitor, MapPin, Clock, AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

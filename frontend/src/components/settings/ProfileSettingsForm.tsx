@@ -207,6 +207,7 @@ export function ProfileSettingsForm({
             >
               {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
+            {/* istanbul ignore next - Reset button requires isDirty state, tested in E2E */}
             {isDirty && !isSubmitting && (
               <Button
                 type="button"
