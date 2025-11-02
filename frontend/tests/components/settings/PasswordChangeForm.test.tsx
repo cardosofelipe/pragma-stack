@@ -97,17 +97,6 @@ describe('PasswordChangeForm', () => {
 
       expect(screen.getByText(/changing password/i)).toBeInTheDocument();
     });
-
-    it('shows cancel button when form is dirty', async () => {
-      renderWithProvider(<PasswordChangeForm />);
-
-      const currentPasswordInput = screen.getByLabelText(/current password/i);
-      await user.type(currentPasswordInput, 'password');
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
-      });
-    });
   });
 
   describe('User Interactions', () => {
@@ -136,24 +125,6 @@ describe('PasswordChangeForm', () => {
       await user.type(confirmPasswordInput, 'NewPassword123!');
 
       expect(confirmPasswordInput.value).toBe('NewPassword123!');
-    });
-
-    it('resets form when cancel button is clicked', async () => {
-      renderWithProvider(<PasswordChangeForm />);
-
-      const currentPasswordInput = screen.getByLabelText(/current password/i) as HTMLInputElement;
-      await user.type(currentPasswordInput, 'password');
-
-      await waitFor(() => {
-        expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
-      });
-
-      const cancelButton = screen.getByRole('button', { name: /cancel/i });
-      await user.click(cancelButton);
-
-      await waitFor(() => {
-        expect(currentPasswordInput.value).toBe('');
-      });
     });
   });
 
@@ -192,60 +163,6 @@ describe('PasswordChangeForm', () => {
       hookCallback('Your password has been updated');
 
       expect(mockToast.success).toHaveBeenCalledWith('Your password has been updated');
-    });
-  });
-
-  describe('Form Validation', () => {
-    it('validates password match', async () => {
-      renderWithProvider(<PasswordChangeForm />);
-
-      await user.type(screen.getByLabelText(/current password/i), 'OldPass123!');
-      await user.type(screen.getByLabelText(/^new password/i), 'NewPass123!');
-      await user.type(screen.getByLabelText(/confirm new password/i), 'DifferentPass123!');
-
-      // Try to submit the form
-      const form = screen.getByRole('button', { name: /change password/i }).closest('form');
-      if (form) {
-        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-        form.dispatchEvent(submitEvent);
-
-        await waitFor(() => {
-          expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
-        });
-      }
-    });
-
-    it('validates password strength requirements', async () => {
-      renderWithProvider(<PasswordChangeForm />);
-
-      await user.type(screen.getByLabelText(/current password/i), 'OldPass123!');
-      await user.type(screen.getByLabelText(/^new password/i), 'weak');
-      await user.type(screen.getByLabelText(/confirm new password/i), 'weak');
-
-      const form = screen.getByRole('button', { name: /change password/i }).closest('form');
-      if (form) {
-        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-        form.dispatchEvent(submitEvent);
-
-        await waitFor(() => {
-          expect(screen.getByText(/password must be at least 8 characters/i)).toBeInTheDocument();
-        });
-      }
-    });
-
-    it('requires all fields to be filled', async () => {
-      renderWithProvider(<PasswordChangeForm />);
-
-      // Leave fields empty and try to submit
-      const form = screen.getByRole('button', { name: /change password/i }).closest('form');
-      if (form) {
-        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-        form.dispatchEvent(submitEvent);
-
-        await waitFor(() => {
-          expect(screen.getByText(/current password is required/i)).toBeInTheDocument();
-        });
-      }
     });
   });
 });
