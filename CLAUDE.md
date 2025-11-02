@@ -86,10 +86,10 @@ alembic upgrade head
 
 #### Testing
 
-**Test Coverage: 97%** (743 tests, all passing)
-- Comprehensive test suite with security-focused testing
-- Includes tests for JWT algorithm attacks (CVE-2015-9235), session hijacking, and privilege escalation
-- 84 missing lines are justified (defensive code, error handlers, production-only code)
+**Test Coverage: High (comprehensive test suite)**
+- Security-focused testing with JWT algorithm attack prevention (CVE-2015-9235)
+- Session hijacking and privilege escalation tests included
+- Missing lines justified as defensive code, error handlers, and production-only code
 
 ```bash
 # Run all tests (uses pytest-xdist for parallel execution)
