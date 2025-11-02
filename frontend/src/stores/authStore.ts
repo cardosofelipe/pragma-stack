@@ -6,14 +6,20 @@
 import { create } from 'zustand';
 import { saveTokens, getTokens, clearTokens } from '@/lib/auth/storage';
 
-// User type - will be replaced with generated types in Phase 2
+/**
+ * User type matching backend UserResponse
+ * Aligns with generated API types from OpenAPI spec
+ */
 export interface User {
   id: string;
   email: string;
-  full_name?: string;
+  first_name: string;
+  last_name?: string | null;
+  phone_number?: string | null;
   is_active: boolean;
   is_superuser: boolean;
-  organization_id?: string;
+  created_at: string;
+  updated_at?: string | null;
 }
 
 interface AuthState {
