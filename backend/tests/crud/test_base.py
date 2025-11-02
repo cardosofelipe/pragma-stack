@@ -833,3 +833,131 @@ class TestCRUDBasePaginationValidation:
                 sort_order="asc"
             )
             assert isinstance(users, list)
+
+
+class TestCRUDBaseModelsWithoutSoftDelete:
+    """
+    Test soft_delete and restore on models without deleted_at column.
+    Covers lines 342-343, 383-384 - error handling for unsupported models.
+    """
+
+    @pytest.mark.asyncio
+    async def test_soft_delete_model_without_deleted_at(self, async_test_db, async_test_user):
+        """Test soft_delete on Organization model (no deleted_at) raises ValueError (covers lines 342-343)."""
+        test_engine, SessionLocal = async_test_db
+
+        # Create an organization (which doesn't have deleted_at)
+        from app.models.organization import Organization
+        from app.crud.organization import organization as org_crud
+
+        async with SessionLocal() as session:
+            org = Organization(name="Test Org", slug="test-org")
+            session.add(org)
+            await session.commit()
+            org_id = org.id
+
+        # Try to soft delete organization (should fail)
+        async with SessionLocal() as session:
+            with pytest.raises(ValueError, match="does not have a deleted_at column"):
+                await org_crud.soft_delete(session, id=str(org_id))
+
+    @pytest.mark.asyncio
+    async def test_restore_model_without_deleted_at(self, async_test_db):
+        """Test restore on Organization model (no deleted_at) raises ValueError (covers lines 383-384)."""
+        test_engine, SessionLocal = async_test_db
+
+        # Create an organization (which doesn't have deleted_at)
+        from app.models.organization import Organization
+        from app.crud.organization import organization as org_crud
+
+        async with SessionLocal() as session:
+            org = Organization(name="Restore Test", slug="restore-test")
+            session.add(org)
+            await session.commit()
+            org_id = org.id
+
+        # Try to restore organization (should fail)
+        async with SessionLocal() as session:
+            with pytest.raises(ValueError, match="does not have a deleted_at column"):
+                await org_crud.restore(session, id=str(org_id))
+
+
+class TestCRUDBaseEagerLoadingWithRealOptions:
+    """
+    Test eager loading with actual SQLAlchemy load options.
+    Covers lines 77-78, 119-120 - options loop execution.
+    """
+
+    @pytest.mark.asyncio
+    async def test_get_with_real_eager_loading_options(self, async_test_db, async_test_user):
+        """Test get() with actual eager loading options (covers lines 77-78)."""
+        from datetime import datetime, timedelta, timezone
+        test_engine, SessionLocal = async_test_db
+
+        # Create a session for the user
+        from app.models.user_session import UserSession
+        from app.crud.session import session as session_crud
+
+        async with SessionLocal() as session:
+            user_session = UserSession(
+                user_id=async_test_user.id,
+                refresh_token_jti="test_jti_eager",
+                device_id="test-device",
+                ip_address="192.168.1.1",
+                user_agent="Test Agent",
+                last_used_at=datetime.now(timezone.utc),
+                expires_at=datetime.now(timezone.utc) + timedelta(days=60)
+            )
+            session.add(user_session)
+            await session.commit()
+            session_id = user_session.id
+
+        # Get session with eager loading of user relationship
+        async with SessionLocal() as session:
+            result = await session_crud.get(
+                session,
+                id=str(session_id),
+                options=[joinedload(UserSession.user)]  # Real option, not empty list
+            )
+            assert result is not None
+            assert result.id == session_id
+            # User should be loaded (accessing it won't cause additional query)
+            assert result.user.email == async_test_user.email
+
+    @pytest.mark.asyncio
+    async def test_get_multi_with_real_eager_loading_options(self, async_test_db, async_test_user):
+        """Test get_multi() with actual eager loading options (covers lines 119-120)."""
+        from datetime import datetime, timedelta, timezone
+        test_engine, SessionLocal = async_test_db
+
+        # Create multiple sessions for the user
+        from app.models.user_session import UserSession
+        from app.crud.session import session as session_crud
+
+        async with SessionLocal() as session:
+            for i in range(3):
+                user_session = UserSession(
+                    user_id=async_test_user.id,
+                    refresh_token_jti=f"jti_eager_{i}",
+                    device_id=f"device-{i}",
+                    ip_address=f"192.168.1.{i}",
+                    user_agent=f"Agent {i}",
+                    last_used_at=datetime.now(timezone.utc),
+                    expires_at=datetime.now(timezone.utc) + timedelta(days=60)
+                )
+                session.add(user_session)
+            await session.commit()
+
+        # Get sessions with eager loading
+        async with SessionLocal() as session:
+            results = await session_crud.get_multi(
+                session,
+                skip=0,
+                limit=10,
+                options=[joinedload(UserSession.user)]  # Real option, not empty list
+            )
+            assert len(results) >= 3
+            # Verify we can access user without additional queries
+            for result in results:
+                if result.user_id == async_test_user.id:
+                    assert result.user.email == async_test_user.email

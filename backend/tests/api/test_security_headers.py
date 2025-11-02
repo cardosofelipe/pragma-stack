@@ -72,3 +72,82 @@ class TestSecurityHeaders:
         assert "X-Frame-Options" in response.headers
         assert "X-Content-Type-Options" in response.headers
         assert "X-XSS-Protection" in response.headers
+
+    def test_hsts_in_production(self):
+        """Test that HSTS header is set in production (covers line 95)"""
+        with patch("app.core.config.settings.ENVIRONMENT", "production"):
+            with patch("app.core.database.get_db") as mock_get_db:
+                async def mock_session_generator():
+                    from unittest.mock import MagicMock, AsyncMock
+                    mock_session = MagicMock()
+                    mock_session.execute = AsyncMock(return_value=None)
+                    mock_session.close = AsyncMock(return_value=None)
+                    yield mock_session
+
+                mock_get_db.side_effect = lambda: mock_session_generator()
+
+                # Need to reimport app to pick up the new settings
+                from importlib import reload
+                import app.main
+                reload(app.main)
+                test_client = TestClient(app.main.app)
+
+                response = test_client.get("/health")
+                assert "Strict-Transport-Security" in response.headers
+                assert "max-age=31536000" in response.headers["Strict-Transport-Security"]
+
+    def test_csp_strict_mode(self):
+        """Test CSP strict mode (covers line 121)"""
+        with patch("app.core.config.settings.CSP_MODE", "strict"):
+            with patch("app.core.database.get_db") as mock_get_db:
+                async def mock_session_generator():
+                    from unittest.mock import MagicMock, AsyncMock
+                    mock_session = MagicMock()
+                    mock_session.execute = AsyncMock(return_value=None)
+                    mock_session.close = AsyncMock(return_value=None)
+                    yield mock_session
+
+                mock_get_db.side_effect = lambda: mock_session_generator()
+
+                from importlib import reload
+                import app.main
+                reload(app.main)
+                test_client = TestClient(app.main.app)
+
+                response = test_client.get("/health")
+                csp = response.headers.get("Content-Security-Policy", "")
+                # Strict mode should only allow 'self'
+                assert "script-src 'self'" in csp
+                assert "style-src 'self'" in csp
+                assert "cdn.jsdelivr.net" not in csp  # No external CDNs in strict mode
+
+    def test_csp_docs_endpoint(self, client):
+        """Test CSP on /docs endpoint allows Swagger resources (covers line 110)"""
+        response = client.get("/docs")
+        csp = response.headers.get("Content-Security-Policy", "")
+        # Docs endpoint should allow Swagger UI resources
+        assert "cdn.jsdelivr.net" in csp
+        assert "fastapi.tiangolo.com" in csp
+
+
+class TestRootEndpoint:
+    """Tests for the root endpoint"""
+
+    def test_root_endpoint(self):
+        """Test root endpoint returns HTML (covers line 174)"""
+        with patch("app.core.database.get_db") as mock_get_db:
+            async def mock_session_generator():
+                from unittest.mock import MagicMock, AsyncMock
+                mock_session = MagicMock()
+                mock_session.execute = AsyncMock(return_value=None)
+                mock_session.close = AsyncMock(return_value=None)
+                yield mock_session
+
+            mock_get_db.side_effect = lambda: mock_session_generator()
+            test_client = TestClient(app)
+
+            response = test_client.get("/")
+            assert response.status_code == 200
+            assert "text/html" in response.headers["content-type"]
+            assert "Welcome to app API" in response.text
+            assert "/docs" in response.text

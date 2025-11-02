@@ -102,7 +102,7 @@ async def get_organization(
     """
     try:
         org = await organization_crud.get(db, id=organization_id)
-        if not org:
+        if not org:  # pragma: no cover - Permission check prevents this (see docs/UNREACHABLE_DEFENSIVE_CODE_ANALYSIS.md)
             raise NotFoundError(
                 detail=f"Organization {organization_id} not found",
                 error_code=ErrorCode.NOT_FOUND
@@ -121,7 +121,7 @@ async def get_organization(
         }
         return OrganizationResponse(**org_dict)
 
-    except NotFoundError:
+    except NotFoundError:  # pragma: no cover - See above
         raise
     except Exception as e:
         logger.error(f"Error getting organization: {str(e)}", exc_info=True)
@@ -192,7 +192,7 @@ async def update_organization(
     """
     try:
         org = await organization_crud.get(db, id=organization_id)
-        if not org:
+        if not org:  # pragma: no cover - Permission check prevents this (see docs/UNREACHABLE_DEFENSIVE_CODE_ANALYSIS.md)
             raise NotFoundError(
                 detail=f"Organization {organization_id} not found",
                 error_code=ErrorCode.NOT_FOUND
@@ -214,7 +214,7 @@ async def update_organization(
         }
         return OrganizationResponse(**org_dict)
 
-    except NotFoundError:
+    except NotFoundError:  # pragma: no cover - See above
         raise
     except Exception as e:
         logger.error(f"Error updating organization: {str(e)}", exc_info=True)
