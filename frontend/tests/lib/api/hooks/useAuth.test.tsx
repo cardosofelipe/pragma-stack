@@ -25,7 +25,7 @@ let mockAuthState: {
   refreshToken: null,
 };
 
-jest.mock('@/stores/authStore', () => ({
+jest.mock('@/lib/stores/authStore', () => ({
   useAuthStore: (selector?: (state: any) => any) => {
     if (selector) {
       return selector(mockAuthState);

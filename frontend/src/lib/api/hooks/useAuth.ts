@@ -20,8 +20,8 @@ import {
   confirmPasswordReset,
   changeCurrentUserPassword,
 } from '../client';
-import { useAuthStore } from '@/stores/authStore';
-import type { User } from '@/stores/authStore';
+import { useAuthStore } from '@/lib/stores/authStore';
+import type { User } from '@/lib/stores/authStore';
 import { parseAPIError, getGeneralError } from '../errors';
 import { isTokenWithUser } from '../types';
 import config from '@/config/app.config';

@@ -7,7 +7,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore } from '@/lib/stores/authStore';
 
 /**
  * AuthInitializer - Initializes auth state from encrypted storage on mount

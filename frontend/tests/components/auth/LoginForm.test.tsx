@@ -40,7 +40,7 @@ jest.mock('next/navigation', () => ({
 }));
 
 // Mock auth store
-jest.mock('@/stores/authStore', () => ({
+jest.mock('@/lib/stores/authStore', () => ({
   useAuthStore: () => ({
     isAuthenticated: false,
     setAuth: jest.fn(),

@@ -29,7 +29,7 @@ let mockAuthState: {
   user: null,
 };
 
-jest.mock('@/stores/authStore', () => ({
+jest.mock('@/lib/stores/authStore', () => ({
   useAuthStore: () => mockAuthState,
 }));
 

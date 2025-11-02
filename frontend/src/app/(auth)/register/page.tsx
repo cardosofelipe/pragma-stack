@@ -1,6 +1,20 @@
 'use client';
 
-import { RegisterForm } from '@/components/auth/RegisterForm';
+import dynamic from 'next/dynamic';
+
+// Code-split RegisterForm (313 lines)
+const RegisterForm = dynamic(
+  () => import('@/components/auth/RegisterForm').then((mod) => ({ default: mod.RegisterForm })),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="animate-pulse h-10 bg-muted rounded" />
+        <div className="animate-pulse h-10 bg-muted rounded" />
+        <div className="animate-pulse h-10 bg-muted rounded" />
+      </div>
+    ),
+  }
+);
 
 export default function RegisterPage() {
   return (

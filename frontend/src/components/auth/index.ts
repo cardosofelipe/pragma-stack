@@ -1,8 +1,5 @@
 // Authentication components
 
-// Initialization
-export { AuthInitializer } from './AuthInitializer';
-
 // Route protection
 export { AuthGuard } from './AuthGuard';
 

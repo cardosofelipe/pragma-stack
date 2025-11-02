@@ -6,13 +6,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Header } from '@/components/layout/Header';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore } from '@/lib/stores/authStore';
 import { useLogout } from '@/lib/api/hooks/useAuth';
 import { usePathname } from 'next/navigation';
-import type { User } from '@/stores/authStore';
+import type { User } from '@/lib/stores/authStore';
 
 // Mock dependencies
-jest.mock('@/stores/authStore', () => ({
+jest.mock('@/lib/stores/authStore', () => ({
   useAuthStore: jest.fn(),
 }));
 

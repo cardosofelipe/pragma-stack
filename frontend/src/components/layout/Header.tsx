@@ -8,7 +8,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore } from '@/lib/stores/authStore';
 import { useLogout } from '@/lib/api/hooks/useAuth';
 import {
   DropdownMenu,

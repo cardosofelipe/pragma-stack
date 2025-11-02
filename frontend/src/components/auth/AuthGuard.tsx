@@ -8,7 +8,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore } from '@/lib/stores/authStore';
 import { useMe } from '@/lib/api/hooks/useAuth';
 import config from '@/config/app.config';
 

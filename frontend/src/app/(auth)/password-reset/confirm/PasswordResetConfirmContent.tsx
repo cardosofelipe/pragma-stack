@@ -7,9 +7,22 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
-import { PasswordResetConfirmForm } from '@/components/auth/PasswordResetConfirmForm';
+import dynamic from 'next/dynamic';
 import { Alert } from '@/components/ui/alert';
 import Link from 'next/link';
+
+// Code-split PasswordResetConfirmForm (319 lines)
+const PasswordResetConfirmForm = dynamic(
+  () => import('@/components/auth/PasswordResetConfirmForm').then((mod) => ({ default: mod.PasswordResetConfirmForm })),
+  {
+    loading: () => (
+      <div className="space-y-4">
+        <div className="animate-pulse h-10 bg-muted rounded" />
+        <div className="animate-pulse h-10 bg-muted rounded" />
+      </div>
+    ),
+  }
+);
 
 export default function PasswordResetConfirmContent() {
   const searchParams = useSearchParams();

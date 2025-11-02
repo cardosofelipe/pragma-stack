@@ -5,10 +5,10 @@
 
 import { render, waitFor } from '@testing-library/react';
 import { AuthInitializer } from '@/components/auth/AuthInitializer';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore } from '@/lib/stores/authStore';
 
 // Mock the auth store
-jest.mock('@/stores/authStore', () => ({
+jest.mock('@/lib/stores/authStore', () => ({
   useAuthStore: jest.fn(),
 }));
 

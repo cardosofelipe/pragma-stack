@@ -28,7 +28,7 @@ let refreshPromise: Promise<string> | null = null;
  * Dynamically imported to avoid circular dependencies
  */
 const getAuthStore = async () => {
-  const { useAuthStore } = await import('@/stores/authStore');
+  const { useAuthStore } = await import('@/lib/stores/authStore');
   return useAuthStore.getState();
 };
 
