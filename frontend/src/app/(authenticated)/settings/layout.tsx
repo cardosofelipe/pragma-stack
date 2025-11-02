@@ -54,10 +54,10 @@ export default function SettingsLayout({
     <div className="container mx-auto px-4 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-3xl font-bold text-foreground">
           Settings
         </h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-muted-foreground">
           Manage your account settings and preferences
         </p>
       </div>
@@ -79,7 +79,7 @@ export default function SettingsLayout({
         </TabsList>
 
         {/* Tab Content */}
-        <div className="rounded-lg border bg-white dark:bg-gray-900 p-6">
+        <div className="rounded-lg border bg-card text-card-foreground p-6">
           {children}
         </div>
       </Tabs>

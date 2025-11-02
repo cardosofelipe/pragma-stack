@@ -12,10 +12,10 @@ export const metadata: Metadata = {
 export default function PasswordSettingsPage() {
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+      <h2 className="text-2xl font-semibold text-foreground mb-4">
         Password Settings
       </h2>
-      <p className="text-gray-600 dark:text-gray-400">
+      <p className="text-muted-foreground">
         Change your password (Coming in Task 3.3)
       </p>
     </div>

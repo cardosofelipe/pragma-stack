@@ -12,10 +12,10 @@ export const metadata: Metadata = {
 export default function ProfileSettingsPage() {
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+      <h2 className="text-2xl font-semibold text-foreground mb-4">
         Profile Settings
       </h2>
-      <p className="text-gray-600 dark:text-gray-400">
+      <p className="text-muted-foreground">
         Manage your profile information (Coming in Task 3.2)
       </p>
     </div>

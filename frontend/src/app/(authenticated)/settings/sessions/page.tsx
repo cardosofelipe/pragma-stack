@@ -12,10 +12,10 @@ export const metadata: Metadata = {
 export default function SessionsPage() {
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
+      <h2 className="text-2xl font-semibold text-foreground mb-4">
         Active Sessions
       </h2>
-      <p className="text-gray-600 dark:text-gray-400">
+      <p className="text-muted-foreground">
         Manage your active sessions (Coming in Task 3.4)
       </p>
     </div>

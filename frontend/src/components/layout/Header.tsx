@@ -57,8 +57,8 @@ function NavLink({
       className={cn(
         'px-3 py-2 rounded-md text-sm font-medium transition-colors',
         isActive
-          ? 'bg-gray-900 text-white dark:bg-gray-700'
-          : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+          ? 'bg-primary text-primary-foreground'
+          : 'text-foreground/80 hover:bg-accent hover:text-accent-foreground'
       )}
     >
       {children}
@@ -75,12 +75,12 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white dark:bg-gray-900">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center px-4">
         {/* Logo */}
         <div className="flex items-center space-x-8">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
+            <span className="text-xl font-bold text-foreground">
               FastNext
             </span>
           </Link>
