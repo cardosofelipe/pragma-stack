@@ -2,11 +2,29 @@
  * Tests for auth store
  */
 
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore, type User } from '@/stores/authStore';
 import * as storage from '@/lib/auth/storage';
 
 // Mock storage module
 jest.mock('@/lib/auth/storage');
+
+/**
+ * Helper to create mock user object with all required fields
+ */
+function createMockUser(overrides: Partial<User> = {}): User {
+  return {
+    id: 'user-123',
+    email: 'test@example.com',
+    first_name: 'Test',
+    last_name: 'User',
+    phone_number: null,
+    is_active: true,
+    is_superuser: false,
+    created_at: new Date().toISOString(),
+    updated_at: null,
+    ...overrides,
+  };
+}
 
 describe('Auth Store', () => {
   beforeEach(() => {
@@ -30,12 +48,7 @@ describe('Auth Store', () => {
 
   describe('User validation', () => {
     it('should reject empty string user ID', async () => {
-      const invalidUser = {
-        id: '',
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const invalidUser = createMockUser({ id: '' });
 
       await expect(
         useAuthStore.getState().setAuth(
@@ -47,12 +60,7 @@ describe('Auth Store', () => {
     });
 
     it('should reject whitespace-only user ID', async () => {
-      const invalidUser = {
-        id: '   ',
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const invalidUser = createMockUser({ id: '   ' });
 
       await expect(
         useAuthStore.getState().setAuth(
@@ -64,12 +72,7 @@ describe('Auth Store', () => {
     });
 
     it('should reject empty string email', async () => {
-      const invalidUser = {
-        id: 'user-123',
-        email: '',
-        is_active: true,
-        is_superuser: false,
-      };
+      const invalidUser = createMockUser({ email: '' });
 
       await expect(
         useAuthStore.getState().setAuth(
@@ -81,12 +84,7 @@ describe('Auth Store', () => {
     });
 
     it('should reject non-string user ID', async () => {
-      const invalidUser = {
-        id: 123,
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const invalidUser = createMockUser({ id: 123 as any });
 
       await expect(
         useAuthStore.getState().setAuth(
@@ -98,12 +96,7 @@ describe('Auth Store', () => {
     });
 
     it('should accept valid user', async () => {
-      const validUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const validUser = createMockUser();
 
       (storage.saveTokens as jest.Mock).mockResolvedValue(undefined);
 
@@ -123,12 +116,7 @@ describe('Auth Store', () => {
 
   describe('Token validation', () => {
     it('should reject invalid JWT format (not 3 parts)', async () => {
-      const validUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const validUser = createMockUser();
 
       await expect(
         useAuthStore.getState().setAuth(
@@ -140,12 +128,7 @@ describe('Auth Store', () => {
     });
 
     it('should reject JWT with empty parts', async () => {
-      const validUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const validUser = createMockUser();
 
       await expect(
         useAuthStore.getState().setAuth(
@@ -157,12 +140,7 @@ describe('Auth Store', () => {
     });
 
     it('should accept valid JWT format', async () => {
-      const validUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const validUser = createMockUser();
 
       (storage.saveTokens as jest.Mock).mockResolvedValue(undefined);
 
@@ -178,12 +156,7 @@ describe('Auth Store', () => {
 
   describe('Token expiry calculation', () => {
     it('should reject negative expiresIn', async () => {
-      const validUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const validUser = createMockUser();
 
       (storage.saveTokens as jest.Mock).mockResolvedValue(undefined);
 
@@ -204,12 +177,7 @@ describe('Auth Store', () => {
     });
 
     it('should reject zero expiresIn', async () => {
-      const validUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const validUser = createMockUser();
 
       (storage.saveTokens as jest.Mock).mockResolvedValue(undefined);
 
@@ -228,12 +196,7 @@ describe('Auth Store', () => {
     });
 
     it('should reject excessively large expiresIn', async () => {
-      const validUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const validUser = createMockUser();
 
       (storage.saveTokens as jest.Mock).mockResolvedValue(undefined);
 
@@ -252,12 +215,7 @@ describe('Auth Store', () => {
     });
 
     it('should accept valid expiresIn', async () => {
-      const validUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const validUser = createMockUser();
 
       (storage.saveTokens as jest.Mock).mockResolvedValue(undefined);
 
@@ -304,12 +262,7 @@ describe('Auth Store', () => {
       (storage.clearTokens as jest.Mock).mockResolvedValue(undefined);
 
       // First set auth
-      const validUser = {
-        id: 'user-123',
-        email: 'test@example.com',
-        is_active: true,
-        is_superuser: false,
-      };
+      const validUser = createMockUser();
 
       await useAuthStore.getState().setAuth(
         validUser,
@@ -346,7 +299,7 @@ describe('Auth Store', () => {
     it('should update tokens while preserving user state', async () => {
       // First set initial auth with user
       await useAuthStore.getState().setAuth(
-        { id: 'user-1', email: 'test@example.com', is_active: true, is_superuser: false },
+        createMockUser({ id: 'user-1' }),
         'old.access.token',
         'old.refresh.token'
       );
@@ -392,7 +345,7 @@ describe('Auth Store', () => {
     it('should update user while preserving auth state', async () => {
       // First set initial auth
       await useAuthStore.getState().setAuth(
-        { id: 'user-1', email: 'test@example.com', is_active: true, is_superuser: false },
+        createMockUser({ id: 'user-1' }),
         'valid.access.token',
         'valid.refresh.token'
       );
@@ -400,7 +353,7 @@ describe('Auth Store', () => {
       const oldToken = useAuthStore.getState().accessToken;
 
       // Update just the user
-      const newUser = { id: 'user-1', email: 'updated@example.com', is_active: true, is_superuser: true };
+      const newUser = createMockUser({ id: 'user-1', email: 'updated@example.com', is_superuser: true });
       useAuthStore.getState().setUser(newUser);
 
       const state = useAuthStore.getState();
@@ -416,19 +369,19 @@ describe('Auth Store', () => {
 
     it('should reject user with empty id', () => {
       expect(() => {
-        useAuthStore.getState().setUser({ id: '', email: 'test@example.com', is_active: true, is_superuser: false });
+        useAuthStore.getState().setUser(createMockUser({ id: '' }));
       }).toThrow('Invalid user object');
     });
 
     it('should reject user with whitespace-only id', () => {
       expect(() => {
-        useAuthStore.getState().setUser({ id: '   ', email: 'test@example.com', is_active: true, is_superuser: false });
+        useAuthStore.getState().setUser(createMockUser({ id: '   ' }));
       }).toThrow('Invalid user object');
     });
 
     it('should reject user with non-string email', () => {
       expect(() => {
-        useAuthStore.getState().setUser({ id: 'user-1', email: 123 as any, is_active: true, is_superuser: false });
+        useAuthStore.getState().setUser(createMockUser({ id: 'user-1', email: 123 as any }));
       }).toThrow('Invalid user object');
     });
   });
