@@ -6,7 +6,7 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Grid3x3, LayoutDashboard } from 'lucide-react';
+import { ArrowLeft, Grid3x3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -508,14 +508,12 @@ export default function LayoutsPage() {
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground">
             Learn more:{' '}
-            <a
-              href="/docs/design-system/03-layouts.md"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/docs/design-system/03-layouts"
               className="font-medium hover:text-foreground"
             >
               Layout Documentation
-            </a>
+            </Link>
           </p>
         </div>
       </footer>

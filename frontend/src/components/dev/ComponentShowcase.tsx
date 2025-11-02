@@ -13,7 +13,7 @@ import Link from 'next/link';
 import {
   Moon, Sun, Mail, User,
   Settings, LogOut, Shield, AlertCircle, Info,
-  CheckCircle2, AlertTriangle, Trash2, ArrowLeft
+  Trash2, ArrowLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {

@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -30,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Example, ExampleSection } from '@/components/dev/Example';
@@ -441,7 +439,7 @@ const { register, handleSubmit, formState: { errors } } = useForm({
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
-                    <span>Add <code className="text-xs">role="alert"</code> to error messages</span>
+                    <span>Add <code className="text-xs">role=&quot;alert&quot;</code> to error messages</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
@@ -575,14 +573,12 @@ const { register, handleSubmit, formState: { errors } } = useForm({
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground">
             Learn more:{' '}
-            <a
-              href="/docs/design-system/06-forms.md"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/docs/design-system/06-forms"
               className="font-medium hover:text-foreground"
             >
               Forms Documentation
-            </a>
+            </Link>
           </p>
         </div>
       </footer>

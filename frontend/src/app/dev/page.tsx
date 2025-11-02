@@ -70,22 +70,22 @@ const documentationLinks = [
   {
     title: 'Quick Start',
     description: '5-minute crash course',
-    href: '/docs/design-system/00-quick-start.md',
+    href: '/docs/design-system/00-quick-start',
   },
   {
     title: 'Complete Documentation',
     description: 'Full design system guide',
-    href: '/docs/design-system/README.md',
+    href: '/docs/design-system/README',
   },
   {
     title: 'AI Guidelines',
     description: 'Rules for AI code generation',
-    href: '/docs/design-system/08-ai-guidelines.md',
+    href: '/docs/design-system/08-ai-guidelines',
   },
   {
     title: 'Quick Reference',
     description: 'Cheat sheet for lookups',
-    href: '/docs/design-system/99-reference.md',
+    href: '/docs/design-system/99-reference',
   },
 ];
 
@@ -190,11 +190,9 @@ export default function DesignSystemHub() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {documentationLinks.map((link) => (
-                <a
+                <Link
                   key={link.href}
                   href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="group"
                 >
                   <Card className="h-full transition-all hover:border-primary/50 hover:bg-accent/50">
@@ -207,7 +205,7 @@ export default function DesignSystemHub() {
                       </CardDescription>
                     </CardHeader>
                   </Card>
-                </a>
+                </Link>
               ))}
             </div>
           </section>

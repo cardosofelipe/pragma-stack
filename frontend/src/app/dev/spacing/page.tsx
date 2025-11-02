@@ -374,7 +374,7 @@ export default function SpacingPage() {
                     <ul className="ml-6 space-y-1 text-sm text-muted-foreground list-disc">
                       <li>Exception case (one child needs different spacing)</li>
                       <li>Negative margin for overlap effects</li>
-                      <li>Can't modify parent (external component)</li>
+                      <li>Cannot modify parent (external component)</li>
                     </ul>
                     <div className="rounded-lg border bg-muted/30 p-3 font-mono text-xs">
                       mt-8 {/* exception */}
@@ -506,14 +506,12 @@ export default function SpacingPage() {
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground">
             Learn more:{' '}
-            <a
-              href="/docs/design-system/04-spacing-philosophy.md"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/docs/design-system/04-spacing-philosophy"
               className="font-medium hover:text-foreground"
             >
               Spacing Philosophy Documentation
-            </a>
+            </Link>
           </p>
         </div>
       </footer>

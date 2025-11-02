@@ -8,7 +8,6 @@
 
 'use client';
 
-import { useState } from 'react';
 import { Code2, Eye } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -49,7 +48,6 @@ export function Example({
   centered = false,
   tags,
 }: ExampleProps) {
-  const [showCode, setShowCode] = useState(false);
 
   // Compact variant - no card wrapper
   if (variant === 'compact') {
