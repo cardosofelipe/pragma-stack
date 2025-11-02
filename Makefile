@@ -1,4 +1,4 @@
-.PHONY: dev prod down clean
+.PHONY: dev prod down clean clean-slate
 
 VERSION ?= latest
 REGISTRY := gitea.pragmazest.com/cardosofelipe/app
@@ -19,6 +19,10 @@ deploy:
 
 clean:
 	docker compose down -
+
+# WARNING! THIS REMOVES CONTAINERS AND VOLUMES AS WELL - DO NOT USE THIS UNLESS YOU WANT TO START OVER WITH DATA AND ALL
+clean-slate:
+	docker compose down -v
 
 push-images:
 	docker build -t $(REGISTRY)/backend:$(VERSION) ./backend
