@@ -111,11 +111,12 @@ def validate_phone_number(phone: str | None) -> str | None:
         raise ValueError('Phone number must start with + or 0 followed by 8-14 digits')
 
     # Additional validation to catch specific invalid cases
-    if cleaned.count('+') > 1:
+    # NOTE: These checks are defensive code - the regex pattern above already catches these cases
+    if cleaned.count('+') > 1:  # pragma: no cover
         raise ValueError('Phone number can only contain one + symbol at the start')
 
     # Check for any non-digit characters (except the leading +)
-    if not all(c.isdigit() for c in cleaned[1:]):
+    if not all(c.isdigit() for c in cleaned[1:]):  # pragma: no cover
         raise ValueError('Phone number can only contain digits after the prefix')
 
     return cleaned

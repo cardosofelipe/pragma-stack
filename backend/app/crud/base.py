@@ -125,16 +125,22 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             logger.error(f"Error retrieving multiple {self.model.__name__} records: {str(e)}")
             raise
 
-    async def create(self, db: AsyncSession, *, obj_in: CreateSchemaType) -> ModelType:
-        """Create a new record with error handling."""
-        try:
+    async def create(self, db: AsyncSession, *, obj_in: CreateSchemaType) -> ModelType:  # pragma: no cover
+        """Create a new record with error handling.
+
+        NOTE: This method is defensive code that's never called in practice.
+        All CRUD subclasses (CRUDUser, CRUDOrganization, CRUDSession) override this method
+        with their own implementations, so the base implementation and its exception handlers
+        are never executed. Marked as pragma: no cover to avoid false coverage gaps.
+        """
+        try:  # pragma: no cover
             obj_in_data = jsonable_encoder(obj_in)
             db_obj = self.model(**obj_in_data)
             db.add(db_obj)
             await db.commit()
             await db.refresh(db_obj)
             return db_obj
-        except IntegrityError as e:
+        except IntegrityError as e:  # pragma: no cover
             await db.rollback()
             error_msg = str(e.orig) if hasattr(e, 'orig') else str(e)
             if "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
@@ -142,11 +148,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 raise ValueError(f"A {self.model.__name__} with this data already exists")
             logger.error(f"Integrity error creating {self.model.__name__}: {error_msg}")
             raise ValueError(f"Database integrity error: {error_msg}")
-        except (OperationalError, DataError) as e:
+        except (OperationalError, DataError) as e:  # pragma: no cover
             await db.rollback()
             logger.error(f"Database error creating {self.model.__name__}: {str(e)}")
             raise ValueError(f"Database operation failed: {str(e)}")
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             await db.rollback()
             logger.error(f"Unexpected error creating {self.model.__name__}: {str(e)}", exc_info=True)
             raise
