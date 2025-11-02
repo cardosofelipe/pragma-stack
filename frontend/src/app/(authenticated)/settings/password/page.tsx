@@ -1,25 +1,25 @@
 /**
  * Password Settings Page
- * Change password functionality
+ * Secure password change functionality for authenticated users
  */
 
-/* istanbul ignore next - Next.js type import for metadata */
-import type { Metadata } from 'next';
+'use client';
 
-/* istanbul ignore next - Next.js metadata, not executable code */
-export const metadata: Metadata = {
-  title: 'Password Settings',
-};
+import { PasswordChangeForm } from '@/components/settings';
 
 export default function PasswordSettingsPage() {
   return (
-    <div>
-      <h2 className="text-2xl font-semibold text-foreground mb-4">
-        Password Settings
-      </h2>
-      <p className="text-muted-foreground">
-        Change your password (Coming in Task 3.3)
-      </p>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-foreground">
+          Password Settings
+        </h2>
+        <p className="text-muted-foreground mt-1">
+          Change your password to keep your account secure
+        </p>
+      </div>
+
+      <PasswordChangeForm />
     </div>
   );
 }

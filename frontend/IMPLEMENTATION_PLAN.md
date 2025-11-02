@@ -1356,20 +1356,258 @@ if (process.env.NODE_ENV === 'development') {
 
 ---
 
-## Phase 4: User Profile & Settings
+## Phase 4: User Profile & Settings ⚙️
+
+**Status:** IN PROGRESS ⚙️
+**Started:** November 2, 2025
+**Duration:** Estimated 2-3 days
+**Prerequisites:** Phase 3 complete ✅
+
+**Summary:**
+Implement complete user settings functionality including profile management, password changes, and session management. Build upon existing authenticated layout with tabbed navigation. All features fully tested with maintained 98.63%+ coverage.
+
+**Available SDK Functions:**
+- `getCurrentUserProfile` - GET /users/me
+- `updateCurrentUser` - PATCH /users/me
+- `changeCurrentUserPassword` - POST /users/me/password
+- `listMySessions` - GET /sessions/me
+- `revokeSession` - DELETE /sessions/{id}
+
+**Existing Infrastructure:**
+- ✅ Settings layout with tabbed navigation (`/settings/layout.tsx`)
+- ✅ Placeholder pages for profile, password, sessions, preferences
+- ✅ `usePasswordChange` hook already exists
+- ✅ `useCurrentUser` hook already exists
+- ✅ FormField and useFormError shared components available
+
+### Task 4.1: User Profile Management (Priority 1)
 
 **Status:** TODO 📋
-**Duration:** 3-4 days
-**Prerequisites:** Phase 3 complete (optimization work)
+**Estimated Duration:** 4-6 hours
+**Complexity:** Medium
+**Risk:** Low
 
-**Detailed tasks will be added here after Phase 2 is complete.**
+**Implementation:**
 
-**High-level Overview:**
-- Authenticated layout with navigation
-- User profile management
-- Password change
-- Session management UI
-- User preferences (optional)
+**Step 1: Create `useUpdateProfile` hook** (`src/lib/api/hooks/useUser.ts`)
+```typescript
+export function useUpdateProfile(onSuccess?: () => void) {
+  const setUser = useAuthStore((state) => state.setUser);
+
+  return useMutation({
+    mutationFn: (data: UpdateCurrentUserData) =>
+      updateCurrentUser({ body: data, throwOnError: true }),
+    onSuccess: (response) => {
+      setUser(response.data);
+      if (onSuccess) onSuccess();
+    },
+  });
+}
+```
+
+**Step 2: Create `ProfileSettingsForm` component** (`src/components/settings/ProfileSettingsForm.tsx`)
+- Fields: first_name, last_name, email (read-only with info tooltip)
+- Validation: Zod schema matching backend rules
+- Loading states, error handling
+- Success toast on update
+- Pre-populate with current user data
+
+**Step 3: Update profile page** (`src/app/(authenticated)/settings/profile/page.tsx`)
+- Import and render ProfileSettingsForm
+- Handle auth guard (authenticated users only)
+
+**Testing:**
+- [ ] Unit test useUpdateProfile hook
+- [ ] Unit test ProfileSettingsForm component (validation, submission, errors)
+- [ ] E2E test profile update flow
+
+**Files to Create:**
+- `src/lib/api/hooks/useUser.ts` - User management hooks
+- `src/components/settings/ProfileSettingsForm.tsx` - Profile form
+- `tests/lib/api/hooks/useUser.test.tsx` - Hook tests
+- `tests/components/settings/ProfileSettingsForm.test.tsx` - Component tests
+
+**Files to Modify:**
+- `src/app/(authenticated)/settings/profile/page.tsx` - Replace placeholder
+
+### Task 4.2: Password Change (Priority 1)
+
+**Status:** TODO 📋
+**Estimated Duration:** 2-3 hours
+**Complexity:** Low (hook already exists)
+**Risk:** Low
+
+**Implementation:**
+
+**Step 1: Create `PasswordChangeForm` component** (`src/components/settings/PasswordChangeForm.tsx`)
+- Fields: current_password, new_password, confirm_password
+- Validation: Password strength requirements
+- Success toast + clear form
+- Error handling for wrong current password
+
+**Step 2: Update password page** (`src/app/(authenticated)/settings/password/page.tsx`)
+- Import and render PasswordChangeForm
+- Use existing `usePasswordChange` hook
+
+**Testing:**
+- [ ] Unit test PasswordChangeForm component
+- [ ] E2E test password change flow
+
+**Files to Create:**
+- `src/components/settings/PasswordChangeForm.tsx` - Password form
+- `tests/components/settings/PasswordChangeForm.test.tsx` - Component tests
+
+**Files to Modify:**
+- `src/app/(authenticated)/settings/password/page.tsx` - Replace placeholder
+
+### Task 4.3: Session Management (Priority 1)
+
+**Status:** TODO 📋
+**Estimated Duration:** 5-7 hours
+**Complexity:** Medium-High
+**Risk:** Low
+
+**Implementation:**
+
+**Step 1: Create session hooks** (`src/lib/api/hooks/useSession.ts`)
+```typescript
+export function useListSessions() {
+  return useQuery({
+    queryKey: ['sessions', 'me'],
+    queryFn: () => listMySessions({ throwOnError: true }),
+  });
+}
+
+export function useRevokeSession(onSuccess?: () => void) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (sessionId: string) =>
+      revokeSession({ path: { session_id: sessionId }, throwOnError: true }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions', 'me'] });
+      if (onSuccess) onSuccess();
+    },
+  });
+}
+```
+
+**Step 2: Create `SessionCard` component** (`src/components/settings/SessionCard.tsx`)
+- Display: device info, IP, location, last used timestamp
+- "Current Session" badge
+- Revoke button (disabled for current session)
+- Confirmation dialog before revoke
+
+**Step 3: Create `SessionsManager` component** (`src/components/settings/SessionsManager.tsx`)
+- List all active sessions
+- Render SessionCard for each
+- Loading skeleton
+- Empty state (no other sessions)
+- "Revoke All Other Sessions" button
+
+**Step 4: Update sessions page** (`src/app/(authenticated)/settings/sessions/page.tsx`)
+- Import and render SessionsManager
+
+**Testing:**
+- [ ] Unit test useListSessions hook
+- [ ] Unit test useRevokeSession hook
+- [ ] Unit test SessionCard component
+- [ ] Unit test SessionsManager component
+- [ ] E2E test session revocation flow
+
+**Files to Create:**
+- `src/lib/api/hooks/useSession.ts` - Session hooks
+- `src/components/settings/SessionCard.tsx` - Session display
+- `src/components/settings/SessionsManager.tsx` - Sessions list
+- `tests/lib/api/hooks/useSession.test.tsx` - Hook tests
+- `tests/components/settings/SessionCard.test.tsx` - Component tests
+- `tests/components/settings/SessionsManager.test.tsx` - Component tests
+- `e2e/settings-sessions.spec.ts` - E2E tests
+
+**Files to Modify:**
+- `src/app/(authenticated)/settings/sessions/page.tsx` - Replace placeholder
+
+### Task 4.4: Preferences (Optional - Deferred)
+
+**Status:** DEFERRED ⏸️
+**Reason:** Not critical for MVP, theme already working
+
+**Future Implementation:**
+- Theme preference (already working via ThemeProvider)
+- Email notification preferences
+- Timezone selection
+- Language selection
+
+**Current State:**
+- Placeholder page exists
+- Can be implemented in future phase if needed
+
+### Task 4.5: Testing & Quality Assurance (Priority 1)
+
+**Status:** TODO 📋
+**Estimated Duration:** 3-4 hours
+**Complexity:** Medium
+**Risk:** Low
+
+**Requirements:**
+- [ ] All unit tests passing (target: 450+ tests)
+- [ ] All E2E tests passing (target: 100+ tests)
+- [ ] Coverage maintained at 98.63%+
+- [ ] TypeScript: 0 errors
+- [ ] ESLint: 0 warnings
+- [ ] Build: PASSING
+- [ ] Manual testing of all settings flows
+
+**Test Coverage Targets:**
+- ProfileSettingsForm: 100% coverage
+- PasswordChangeForm: 100% coverage
+- SessionsManager: 100% coverage
+- SessionCard: 100% coverage
+- All hooks: 100% coverage
+
+**E2E Test Scenarios:**
+1. Update profile (first name, last name)
+2. Change password (success and error cases)
+3. View active sessions
+4. Revoke a session
+5. Navigation between settings tabs
+
+### Success Criteria
+
+**Task 4.1 Complete When:**
+- [ ] useUpdateProfile hook implemented and tested
+- [ ] ProfileSettingsForm component complete with validation
+- [ ] Profile page functional (view + edit)
+- [ ] Unit tests passing
+- [ ] User can update first_name and last_name
+
+**Task 4.2 Complete When:**
+- [ ] PasswordChangeForm component complete
+- [ ] Password page functional
+- [ ] Unit tests passing
+- [ ] User can change password successfully
+- [ ] Error handling for wrong current password
+
+**Task 4.3 Complete When:**
+- [ ] useListSessions and useRevokeSession hooks implemented
+- [ ] SessionsManager component displays all sessions
+- [ ] Session revocation works correctly
+- [ ] Unit and E2E tests passing
+- [ ] Current session cannot be revoked
+
+**Phase 4 Complete When:**
+- [ ] All tasks 4.1, 4.2, 4.3, 4.5 complete
+- [ ] Tests: 450+ passing (100%)
+- [ ] E2E: 100+ passing (100%)
+- [ ] Coverage: ≥98.63%
+- [ ] TypeScript: 0 errors
+- [ ] ESLint: 0 warnings
+- [ ] Build: PASSING
+- [ ] All settings features functional
+- [ ] Documentation updated
+- [ ] Ready for Phase 5 (Admin Dashboard)
+
+**Final Verdict:** Phase 4 provides complete user settings experience, building on Phase 3's solid foundation
 
 ---
 

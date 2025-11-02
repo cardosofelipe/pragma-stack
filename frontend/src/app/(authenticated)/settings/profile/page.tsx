@@ -1,25 +1,25 @@
 /**
  * Profile Settings Page
- * User profile management - edit name, email, phone, preferences
+ * User profile management - edit name, email, and other profile information
  */
 
-/* istanbul ignore next - Next.js type import for metadata */
-import type { Metadata } from 'next';
+'use client';
 
-/* istanbul ignore next - Next.js metadata, not executable code */
-export const metadata: Metadata = {
-  title: 'Profile Settings',
-};
+import { ProfileSettingsForm } from '@/components/settings';
 
 export default function ProfileSettingsPage() {
   return (
-    <div>
-      <h2 className="text-2xl font-semibold text-foreground mb-4">
-        Profile Settings
-      </h2>
-      <p className="text-muted-foreground">
-        Manage your profile information (Coming in Task 3.2)
-      </p>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-foreground">
+          Profile Settings
+        </h2>
+        <p className="text-muted-foreground mt-1">
+          Manage your profile information
+        </p>
+      </div>
+
+      <ProfileSettingsForm />
     </div>
   );
 }

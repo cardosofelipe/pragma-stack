@@ -1,26 +1,56 @@
 /**
  * Tests for Sessions Page
- * Smoke tests for placeholder page
+ * Smoke tests for page rendering
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import SessionsPage from '@/app/(authenticated)/settings/sessions/page';
 
+// Mock the API client
+jest.mock('@/lib/api/client', () => ({
+  ...jest.requireActual('@/lib/api/client'),
+  listMySessions: jest.fn(() =>
+    Promise.resolve({
+      data: {
+        sessions: [],
+        total: 0,
+      },
+    })
+  ),
+}));
+
 describe('SessionsPage', () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+  const renderWithProvider = (component: React.ReactElement) => {
+    return render(
+      <QueryClientProvider client={queryClient}>
+        {component}
+      </QueryClientProvider>
+    );
+  };
+
   it('renders without crashing', () => {
-    render(<SessionsPage />);
-    expect(screen.getByText('Active Sessions')).toBeInTheDocument();
+    renderWithProvider(<SessionsPage />);
+    // Check for the main heading
+    expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
   });
 
   it('renders heading', () => {
-    render(<SessionsPage />);
-
+    renderWithProvider(<SessionsPage />);
+    // The heading text
     expect(screen.getByRole('heading', { name: /active sessions/i })).toBeInTheDocument();
   });
 
-  it('shows placeholder text', () => {
-    render(<SessionsPage />);
-
-    expect(screen.getByText(/manage your active sessions/i)).toBeInTheDocument();
+  it('shows description text', () => {
+    renderWithProvider(<SessionsPage />);
+    // Description under the heading
+    expect(screen.getByText(/view and manage devices/i)).toBeInTheDocument();
   });
 });

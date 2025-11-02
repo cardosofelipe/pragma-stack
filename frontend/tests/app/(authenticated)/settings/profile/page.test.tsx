@@ -1,26 +1,66 @@
 /**
  * Tests for Profile Settings Page
- * Smoke tests for placeholder page
+ * Smoke tests for page rendering
  */
 
 import { render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProfileSettingsPage from '@/app/(authenticated)/settings/profile/page';
+import { useAuthStore } from '@/lib/stores/authStore';
+
+// Mock authStore
+jest.mock('@/lib/stores/authStore');
+const mockUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
 
 describe('ProfileSettingsPage', () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+  const mockUser = {
+    id: '1',
+    email: 'test@example.com',
+    first_name: 'Test',
+    last_name: 'User',
+    is_active: true,
+    is_superuser: false,
+    created_at: '2024-01-01T00:00:00Z',
+  };
+
+  beforeEach(() => {
+    // Mock useAuthStore to return user data
+    mockUseAuthStore.mockImplementation((selector: unknown) => {
+      if (typeof selector === 'function') {
+        const mockState = { user: mockUser };
+        return selector(mockState);
+      }
+      return mockUser;
+    });
+  });
+
+  const renderWithProvider = (component: React.ReactElement) => {
+    return render(
+      <QueryClientProvider client={queryClient}>
+        {component}
+      </QueryClientProvider>
+    );
+  };
+
   it('renders without crashing', () => {
-    render(<ProfileSettingsPage />);
+    renderWithProvider(<ProfileSettingsPage />);
     expect(screen.getByText('Profile Settings')).toBeInTheDocument();
   });
 
   it('renders heading', () => {
-    render(<ProfileSettingsPage />);
-
+    renderWithProvider(<ProfileSettingsPage />);
     expect(screen.getByRole('heading', { name: /profile settings/i })).toBeInTheDocument();
   });
 
-  it('shows placeholder text', () => {
-    render(<ProfileSettingsPage />);
-
+  it('shows description text', () => {
+    renderWithProvider(<ProfileSettingsPage />);
     expect(screen.getByText(/manage your profile information/i)).toBeInTheDocument();
   });
 });
