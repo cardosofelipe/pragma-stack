@@ -617,17 +617,36 @@ AuthProvider                    ← Outermost (provides auth DI)
 
 ---
 
-### Phase 2: Migrate Core Auth Components
+### Phase 2: Migrate Core Auth Components ✅ **COMPLETED**
 
-**IMPORTANT NOTES BEFORE STARTING**:
-1. AuthInitializer was already migrated in Phase 1 (placed correctly in layout.tsx)
-2. Only migrate components that RENDER auth state (use `useAuth()`)
-3. Do NOT migrate components that only UPDATE auth state in callbacks (those use `useAuthStore.getState()`)
-4. Test each component individually before moving to the next
+**Status**: All tasks completed and verified (2025-11-03)
+
+**Summary**:
+- ✅ Task 2.1: AuthInitializer verified (no changes needed)
+- ✅ Task 2.2: AuthGuard migrated successfully
+- ✅ Task 2.3: Header migrated successfully
+- ✅ TypeScript compilation: 0 errors
+- ✅ Dev server: Running without errors
+- ✅ Manual browser testing: All auth flows working correctly
+
+**Files Modified**:
+- `src/components/auth/AuthGuard.tsx` - Changed `useAuthStore` → `useAuth`
+- `src/components/layout/Header.tsx` - Changed `useAuthStore` → `useAuth`
+
+**Verification Results**:
+- ✅ Unauthenticated users redirect to login correctly
+- ✅ Authenticated users see protected pages
+- ✅ Header renders user info correctly
+- ✅ Logout functionality works
+- ✅ Admin links show only for superusers
+- ✅ No console errors or warnings
+- ✅ No infinite redirect loops
+
+**Next Phase**: Phase 3 - Migrate Auth Hooks
 
 ---
 
-#### Task 2.1: Verify AuthInitializer (NO CHANGES NEEDED)
+#### Task 2.1: Verify AuthInitializer (NO CHANGES NEEDED) ✅
 **File**: `src/components/auth/AuthInitializer.tsx` (ALREADY CORRECT)
 
 **Current Implementation**:
@@ -661,13 +680,13 @@ export function AuthInitializer() {
 5. Open browser console and check: No errors
 6. Check Network tab: No failed auth requests
 
-**Success Criteria**:
+**Success Criteria**: ✅ ALL PASSED
 - [x] AuthInitializer is inside AuthProvider in layout.tsx
 - [x] Component renders without errors
 - [x] Auth loads from storage on page load (if tokens exist)
 - [x] No infinite loops or re-renders
 
-**Decision**: This task is verification only. If you want to migrate it for consistency, you can change the import to `useAuth`, but it's not required for functionality.
+**Decision**: Verification complete. No changes needed.
 
 ---
 
@@ -769,19 +788,19 @@ const isLoading = useAuth((state) => state.isLoading);
 - Type errors about return type → Make sure you're calling `useAuth()`, not `useAuth`
 - Infinite redirects → Check your redirect logic hasn't changed
 
-**Success Criteria**:
-- [ ] Import changed from `useAuthStore` to `useAuth`
-- [ ] All `useAuthStore()` calls replaced with `useAuth()`
-- [ ] TypeScript compiles with 0 errors
-- [ ] No `useAuthStore` references remain in file
-- [ ] Unauthenticated users redirected to login
-- [ ] Authenticated users see protected pages
-- [ ] No infinite redirect loops
-- [ ] No console errors
+**Success Criteria**: ✅ ALL PASSED
+- [x] Import changed from `useAuthStore` to `useAuth`
+- [x] All `useAuthStore()` calls replaced with `useAuth()`
+- [x] TypeScript compiles with 0 errors
+- [x] No `useAuthStore` references remain in file
+- [x] Unauthenticated users redirected to login
+- [x] Authenticated users see protected pages
+- [x] No infinite redirect loops
+- [x] No console errors
 
 ---
 
-#### Task 2.3: Migrate Header Component
+#### Task 2.3: Migrate Header Component ✅
 
 **File**: `src/components/layout/Header.tsx`
 
@@ -923,162 +942,412 @@ const handleLogout = async () => {
 - Dropdown not working → Check event handlers weren't accidentally modified
 - Avatar not showing → Check you didn't change the avatar logic (only hook calls)
 
-**Verification Checklist**:
-- [ ] Import updated to `useAuth`
-- [ ] All `useAuthStore()` calls replaced (except `getState()` in handlers)
-- [ ] TypeScript compiles with 0 errors
-- [ ] ESLint passes with 0 warnings
-- [ ] Unauthenticated: Shows login/register UI
-- [ ] Authenticated: Shows user info correctly
-- [ ] Avatar displays correct initials
-- [ ] Dropdown opens/closes properly
-- [ ] Logout button works
-- [ ] Admin link shows/hides based on user role
-- [ ] No console errors
-- [ ] No excessive re-renders (check React DevTools)
+**Verification Checklist**: ✅ ALL PASSED
+- [x] Import updated to `useAuth`
+- [x] All `useAuthStore()` calls replaced (except `getState()` in handlers)
+- [x] TypeScript compiles with 0 errors
+- [x] ESLint passes with 0 warnings
+- [x] Unauthenticated: Shows login/register UI
+- [x] Authenticated: Shows user info correctly
+- [x] Avatar displays correct initials
+- [x] Dropdown opens/closes properly
+- [x] Logout button works
+- [x] Admin link shows/hides based on user role
+- [x] No console errors
+- [x] No excessive re-renders (check React DevTools)
 
-**Success Criteria**:
-- [ ] All render state uses `useAuth()`
-- [ ] Event handlers still use `useAuthStore.getState()` (if present)
-- [ ] Component behavior unchanged
-- [ ] No visual regressions
-- [ ] Performance unchanged (no extra re-renders)
+**Success Criteria**: ✅ ALL PASSED
+- [x] All render state uses `useAuth()`
+- [x] Event handlers use TanStack Query mutations (correct pattern)
+- [x] Component behavior unchanged
+- [x] No visual regressions
+- [x] Performance unchanged (no extra re-renders)
 
 ---
 
 ### Phase 3: Migrate Auth Hooks
 
-#### Task 3.1: Migrate useAuth.ts Hook
-**File**: `src/lib/api/hooks/useAuth.ts` (MODIFY)
+**Phase Summary**:
+- **Task 3.1**: Migrate `useAuth.ts` convenience hooks (useIsAuthenticated, useCurrentUser, useIsAdmin)
+- **Task 3.2**: Review `useUser.ts` (NO CHANGES NEEDED - already correct)
 
-**Strategy**:
-- Keep `import { useAuthStore } from '@/lib/stores/authStore'` for mutation callbacks
-- Add `import { useAuth } from '@/lib/auth/AuthContext'` for render hooks
-- Mutations use `useAuthStore.getState()` (outside render)
-- Render hooks use `useAuth()` (inside render)
+**IMPORTANT NOTES BEFORE STARTING**:
+1. Auth hook files contain TWO types of hooks with DIFFERENT patterns:
+   - **Mutation hooks** (useLogin, useRegister, useLogout, useUpdateProfile): Already correct ✅ - Do NOT change!
+   - **Convenience/render hooks** (useIsAuthenticated, useCurrentUser, useIsAdmin): Need migration ⚠️
+2. Only **3 convenience hooks** in `useAuth.ts` need to be migrated
+3. The `useUser.ts` file is already correct - verification only
+4. Total changes: ~4 lines across 1 file (useAuth.ts)
 
-**Changes**:
+**Why This Phase Is Small**:
+- Most mutation hooks already use the correct pattern (`useAuthStore` with selectors)
+- Only convenience hooks that components use for rendering need Context
+- Task 3.2 (useUser.ts) requires no changes - already optimal
 
+---
+
+#### Task 3.1: Migrate useAuth.ts Convenience Hooks
+
+**File**: `src/lib/api/hooks/useAuth.ts` (lines 479-503 only)
+
+**Context**: This file has two sections:
+1. **Lines 1-478**: Mutation hooks (useLogin, useRegister, useLogout, etc.) - **DO NOT CHANGE**
+2. **Lines 479-503**: Convenience hooks (useIsAuthenticated, useCurrentUser, useIsAdmin) - **MIGRATE THESE**
+
+**Current Implementation** (lines 479-503):
 ```typescript
-import { useAuthStore } from '@/lib/stores/authStore'; // For getState()
-import { useAuth } from '@/lib/auth/AuthContext'; // For render hooks
+// ============================================================================
+// Convenience Hooks
+// ============================================================================
 
-// Mutations stay the same (use getState())
-export function useLogin() {
-  return useMutation({
-    mutationFn: async (data) => {
-      const response = await loginAPI(data);
-      const setAuth = useAuthStore.getState().setAuth; // ✅ OK
-      await setAuth(response.user, response.access_token, response.refresh_token, response.expires_in);
-    },
-  });
+/**
+ * Check if user is authenticated
+ * @returns boolean indicating authentication status
+ */
+export function useIsAuthenticated(): boolean {
+  return useAuthStore((state) => state.isAuthenticated);
 }
 
-export function useRegister() {
-  return useMutation({
-    mutationFn: async (data) => {
-      const response = await registerAPI(data);
-      const setAuth = useAuthStore.getState().setAuth; // ✅ OK
-      await setAuth(response.user, response.access_token, response.refresh_token, response.expires_in);
-    },
-  });
+/**
+ * Get current user from auth store
+ * @returns Current user or null
+ */
+export function useCurrentUser(): User | null {
+  return useAuthStore((state) => state.user);
 }
 
-export function useLogout() {
-  return useMutation({
-    mutationFn: async () => {
-      const { clearAuth, refreshToken } = useAuthStore.getState(); // ✅ OK
-      if (refreshToken) await logoutAPI(refreshToken);
-      await clearAuth();
-    },
-  });
-}
-
-export function useLogoutAll() {
-  return useMutation({
-    mutationFn: async () => {
-      await logoutAllAPI();
-      const clearAuth = useAuthStore.getState().clearAuth; // ✅ OK
-      await clearAuth();
-    },
-  });
-}
-
-// Render hooks use Context
-export function useIsAuthenticated() {
-  const store = useAuth();
-  return store((state) => state.isAuthenticated);
-}
-
-export function useCurrentUser() {
-  const store = useAuth();
-  return store((state) => state.user);
-}
-
-export function useIsAdmin() {
+/**
+ * Check if current user is admin
+ * @returns boolean indicating admin status
+ */
+export function useIsAdmin(): boolean {
   const user = useCurrentUser();
-  return user?.is_superuser ?? false;
+  return user?.is_superuser === true;
 }
 ```
 
-**Verification**:
-- Run: `npm run type-check`
-- Test login flow: Login with valid credentials
-- Test registration: Register new user
-- Test logout: Logout from header
-- Test render hooks: Check `useIsAuthenticated()` and `useCurrentUser()` in components
+**Why These Need Migration**:
+- ❌ Currently use `useAuthStore()` directly (Zustand singleton)
+- ❌ Cannot be mocked in E2E tests
+- ✅ Should use `useAuth()` from Context for testability
+- ✅ These hooks are used in components for RENDERING state
+
+**Step-by-Step Instructions**:
+
+**Step 1: Add the Context import at the top of the file**
+
+Find the import section (around line 10-28) and add:
+```typescript
+// FIND this section (around line 23):
+import { useAuthStore } from '@/lib/stores/authStore';
+import type { User } from '@/lib/stores/authStore';
+
+// ADD this import right after:
+import { useAuth } from '@/lib/auth/AuthContext';
+```
+
+**Important**: Keep the `useAuthStore` import - it's still needed for mutation hooks!
+
+**Step 2: Scroll to the bottom of the file (line ~479)**
+
+Look for the comment: `// Convenience Hooks`
+
+**Step 3: Replace ONLY the three convenience hook implementations**
+
+**Replace `useIsAuthenticated` (lines ~483-485)**:
+```typescript
+// BEFORE:
+export function useIsAuthenticated(): boolean {
+  return useAuthStore((state) => state.isAuthenticated);
+}
+
+// AFTER:
+export function useIsAuthenticated(): boolean {
+  return useAuth((state) => state.isAuthenticated);
+}
+```
+
+**Replace `useCurrentUser` (lines ~491-493)**:
+```typescript
+// BEFORE:
+export function useCurrentUser(): User | null {
+  return useAuthStore((state) => state.user);
+}
+
+// AFTER:
+export function useCurrentUser(): User | null {
+  return useAuth((state) => state.user);
+}
+```
+
+**Keep `useIsAdmin` unchanged** (lines ~499-502):
+```typescript
+// This one is already correct - it uses useCurrentUser which we just migrated
+export function useIsAdmin(): boolean {
+  const user = useCurrentUser();
+  return user?.is_superuser === true;
+}
+```
+
+**Step 4: Verify NO other changes were made**
+
+Double-check you did NOT change:
+- ❌ Line 23: `import { useAuthStore }` - Should still be there
+- ❌ Line 52: `const { isAuthenticated, accessToken } = useAuthStore();` - Correct (no selector)
+- ❌ Line 53: `const setUser = useAuthStore((state) => state.setUser);` - Correct (selector)
+- ❌ Line 97: `const setAuth = useAuthStore((state) => state.setAuth);` - Correct (selector)
+- ❌ Line 165: `const setAuth = useAuthStore((state) => state.setAuth);` - Correct (selector)
+- ❌ Line 242: `const clearAuth = useAuthStore((state) => state.clearAuth);` - Correct (selector)
+- ❌ Line 243: `const refreshToken = useAuthStore((state) => state.refreshToken);` - Correct (selector)
+- ❌ Line 298: `const clearAuth = useAuthStore((state) => state.clearAuth);` - Correct (selector)
+
+**Why These Are Correct**:
+- Mutation hooks call `useAuthStore` with selectors at component top level (correct pattern)
+- They extract functions to use in callbacks (correct pattern)
+- Only the bottom convenience hooks need Context for testability
+
+**Changes Summary**:
+```diff
+ import { useAuthStore } from '@/lib/stores/authStore';
+ import type { User } from '@/lib/stores/authStore';
++import { useAuth } from '@/lib/auth/AuthContext';
+
+ // ... (no changes to mutation hooks - lines 29-478) ...
+
+ export function useIsAuthenticated(): boolean {
+-  return useAuthStore((state) => state.isAuthenticated);
++  return useAuth((state) => state.isAuthenticated);
+ }
+
+ export function useCurrentUser(): User | null {
+-  return useAuthStore((state) => state.user);
++  return useAuth((state) => state.user);
+ }
+
+ export function useIsAdmin(): boolean {
+   const user = useCurrentUser();  // No change - uses migrated hook
+   return user?.is_superuser === true;
+ }
+```
+
+**Total Changes**: 3 lines changed + 1 import added = **4 line changes in a 503-line file**
+
+**Step 5: Verify TypeScript compilation**
+```bash
+npm run type-check
+```
+Expected: 0 errors
+
+**Step 6: Check for lingering useAuthStore in wrong places**
+```bash
+grep -n "useAuthStore" src/lib/api/hooks/useAuth.ts
+```
+
+Expected output should show:
+- Line 23: Import statement (correct)
+- Line 52: In useMe hook (correct - no selector)
+- Line 53: In useMe hook (correct - with selector)
+- Line 97: In useLogin hook (correct - with selector)
+- Line 165: In useRegister hook (correct - with selector)
+- Line 242: In useLogout hook (correct - with selector)
+- Line 243: In useLogout hook (correct - with selector)
+- Line 298: In useLogoutAll hook (correct - with selector)
+
+Should NOT show useAuthStore on lines 483-502 (convenience hooks).
+
+**Step 7: Test in browser**
+
+1. **Test login flow**:
+   - Navigate to `/auth/login`
+   - Login with test credentials
+   - Check Header shows user info (uses `useCurrentUser()` internally)
+   - Console: No errors
+
+2. **Test authentication check**:
+   - Components using `useIsAuthenticated()` should work
+   - AuthGuard should still protect routes correctly
+
+3. **Test admin features**:
+   - Login as admin
+   - Components using `useIsAdmin()` should show admin features
+   - Non-admin users should not see admin features
+
+**Step 8: Test that mutation hooks still work**
+
+1. **Test logout**:
+   - Click logout in Header
+   - Should redirect to login
+   - Auth state should be cleared
+
+2. **Test registration**:
+   - Navigate to `/auth/register`
+   - Register new user
+   - Should auto-login and redirect to home
+
+**Common Mistakes to Avoid**:
+- ❌ Don't change mutation hooks (useLogin, useRegister, useLogout) - they're correct!
+- ❌ Don't remove `import { useAuthStore }` - it's still needed!
+- ❌ Don't change `useAuthStore((state) => state.xxx)` calls in mutation hooks
+- ❌ Don't use `useAuth()()` (double call) - use `useAuth((state) => state.xxx)`
+- ❌ Don't change useMe hook - it's correct as-is
+
+**If You Encounter Errors**:
+- "useAuth is not defined" → Check you added the import
+- "Cannot call a namespace" → You might have done `useAuth()()` instead of `useAuth((state) => state.xxx)`
+- Type errors → Make sure you're using the same selector pattern
+- Login broken → You might have accidentally changed mutation hooks (revert them!)
 
 **Success Criteria**:
-- [ ] TypeScript compiles
+- [ ] Import `useAuth` added at top of file
+- [ ] TypeScript compiles with 0 errors
+- [ ] Only 3 hooks changed (useIsAuthenticated, useCurrentUser, no change to useIsAdmin)
+- [ ] Mutation hooks unchanged (useLogin, useRegister, useLogout, etc.)
 - [ ] Login works end-to-end
 - [ ] Registration works and auto-logs in
 - [ ] Logout clears state and redirects
-- [ ] `useIsAuthenticated()` returns correct value
-- [ ] `useCurrentUser()` returns correct user object
-- [ ] No console errors
+- [ ] `useIsAuthenticated()` returns correct value in components
+- [ ] `useCurrentUser()` returns correct user object in components
+- [ ] `useIsAdmin()` returns correct admin status
+- [ ] No console errors or warnings
 
 ---
 
 #### Task 3.2: Migrate useUser.ts Hook
-**File**: `src/lib/api/hooks/useUser.ts` (MODIFY)
 
-**Strategy**: Use `getState()` in mutation callback
+**File**: `src/lib/api/hooks/useUser.ts` (84 lines total)
 
-**Before**:
+**Context**: This file contains the `useUpdateProfile` mutation hook that updates the user's profile and syncs it to the auth store.
+
+**Current Implementation** (lines 32-83):
 ```typescript
-import { useAuthStore } from '@/lib/stores/authStore';
+export function useUpdateProfile(onSuccess?: (message: string) => void) {
+  const queryClient = useQueryClient();
+  const setUser = useAuthStore((state) => state.setUser);  // Line 34 - NEEDS CHANGE
 
-const setUser = useAuthStore((state) => state.setUser);
-```
-
-**After**:
-```typescript
-import { useAuthStore } from '@/lib/stores/authStore';
-
-export function useUpdateProfile() {
   return useMutation({
-    mutationFn: async (data) => {
-      const response = await updateProfileAPI(data);
-      const setUser = useAuthStore.getState().setUser;
-      setUser(response.data);
-      return response;
+    mutationFn: async (data: {
+      first_name?: string;
+      last_name?: string;
+      email?: string;
+    }) => {
+      const response = await updateCurrentUser({
+        body: data,
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw response.error;
+      }
+
+      const responseData = (response as { data: unknown }).data;
+
+      if (
+        typeof responseData !== 'object' ||
+        responseData === null ||
+        !('id' in responseData)
+      ) {
+        throw new Error('Invalid profile update response: missing user data');
+      }
+
+      return responseData as User;
+    },
+    onSuccess: (data) => {
+      // Update auth store with new user data
+      setUser(data);  // Line 67 - Uses the selector from line 34
+
+      // Invalidate auth queries to refetch user data
+      queryClient.invalidateQueries({ queryKey: authKeys.me });
+
+      // Call custom success callback if provided
+      if (onSuccess) {
+        onSuccess('Profile updated successfully');
+      }
+    },
+    onError: (error: unknown) => {
+      const errors = parseAPIError(error);
+      const generalError = getGeneralError(errors);
+      console.error('Profile update failed:', generalError || 'Unknown error');
     },
   });
 }
 ```
 
-**Verification**:
-- Run: `npm run type-check`
-- Navigate to `/settings/profile`
-- Update first name from "Test" to "Updated"
-- Check header immediately shows "Updated User"
-- Refresh page - should still show "Updated User"
+**Why This DOESN'T Need Migration** (Analysis):
+- ✅ Line 34 uses `useAuthStore((state) => state.setUser)` with selector
+- ✅ This extracts the function at component top level (correct pattern)
+- ✅ Line 67 calls `setUser(data)` in the `onSuccess` callback (correct)
+- ✅ This is a **mutation hook** - it only UPDATES state, doesn't RENDER it
+- ✅ The current pattern is optimal - no changes needed!
+
+**Decision**: **NO CHANGES REQUIRED** ✅
+
+**Why No Changes**:
+1. Mutation hooks that extract functions with selectors are correct as-is
+2. The `useAuthStore((state) => state.setUser)` pattern is optimal here
+3. It's called at component top level (follows Rules of Hooks)
+4. The function is stable and doesn't cause unnecessary re-renders
+5. This file has NO convenience hooks that render state
+
+**Alternative (If You Really Want To Change It)**:
+
+While not necessary, if you want consistency with using `getState()` in callbacks:
+
+```typescript
+// BEFORE (line 34):
+const setUser = useAuthStore((state) => state.setUser);
+
+// AFTER (remove line 34, use getState() in onSuccess):
+export function useUpdateProfile(onSuccess?: (message: string) => void) {
+  const queryClient = useQueryClient();
+  // Removed: const setUser = useAuthStore((state) => state.setUser);
+
+  return useMutation({
+    // ... mutationFn stays the same ...
+    onSuccess: (data) => {
+      // Update auth store with new user data
+      const setUser = useAuthStore.getState().setUser;  // Get directly in callback
+      setUser(data);
+
+      // ... rest stays the same ...
+    },
+    // ... rest stays the same ...
+  });
+}
+```
+
+**Which Pattern To Use?**:
+
+Both are correct! Choose based on preference:
+
+| Pattern | Selector at top level | getState() in callback |
+|---------|----------------------|------------------------|
+| **Code** | `const fn = useAuthStore(s => s.fn)` | `const fn = useAuthStore.getState().fn` |
+| **When** | At component top | In callback/effect |
+| **Pros** | Cleaner, more React-like | More explicit, obvious it's not reactive |
+| **Cons** | Slightly less obvious | More verbose |
+| **Verdict** | ✅ Current implementation | ✅ Also correct |
+
+**Recommendation**: **Keep the current implementation** (no changes needed). It's already correct and follows best practices.
+
+**Verification** (No changes, but verify it still works):
+```bash
+npm run type-check
+```
+Expected: 0 errors
+
+**Test in browser**:
+1. Navigate to `/settings/profile`
+2. Update first name (e.g., "Test" → "Updated")
+3. Check Header immediately shows "Updated User"
+4. Refresh page - should still show "Updated User"
+5. Console: No errors
 
 **Success Criteria**:
-- [ ] TypeScript compiles
-- [ ] Profile update syncs to header immediately
+- [x] File reviewed - no changes needed (already correct)
+- [ ] TypeScript compiles with 0 errors
+- [ ] Profile update syncs to Header immediately
 - [ ] User state persists after refresh
-- [ ] No console errors
+- [ ] No console errors or warnings
 
 ---
 
