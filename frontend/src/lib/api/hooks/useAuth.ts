@@ -22,6 +22,7 @@ import {
 } from '../client';
 import { useAuthStore } from '@/lib/stores/authStore';
 import type { User } from '@/lib/stores/authStore';
+import { useAuth } from '@/lib/auth/AuthContext';
 import { parseAPIError, getGeneralError } from '../errors';
 import { isTokenWithUser } from '../types';
 import config from '@/config/app.config';
@@ -481,7 +482,7 @@ export function usePasswordChange(onSuccess?: (message: string) => void) {
  * @returns boolean indicating authentication status
  */
 export function useIsAuthenticated(): boolean {
-  return useAuthStore((state) => state.isAuthenticated);
+  return useAuth((state) => state.isAuthenticated);
 }
 
 /**
@@ -489,7 +490,7 @@ export function useIsAuthenticated(): boolean {
  * @returns Current user or null
  */
 export function useCurrentUser(): User | null {
-  return useAuthStore((state) => state.user);
+  return useAuth((state) => state.user);
 }
 
 /**

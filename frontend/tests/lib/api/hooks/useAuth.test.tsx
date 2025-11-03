@@ -11,28 +11,29 @@ import {
   useCurrentUser,
   useIsAdmin,
 } from '@/lib/api/hooks/useAuth';
+import { AuthProvider } from '@/lib/auth/AuthContext';
 
-// Mock auth store
-let mockAuthState: {
-  isAuthenticated: boolean;
-  user: any;
-  accessToken: string | null;
-  refreshToken: string | null;
-} = {
+// Mock auth state (Context-injected)
+let mockAuthState: any = {
   isAuthenticated: false,
   user: null,
   accessToken: null,
   refreshToken: null,
+  isLoading: false,
+  tokenExpiresAt: null,
+  // Action stubs (unused in these tests)
+  setAuth: jest.fn(),
+  setTokens: jest.fn(),
+  setUser: jest.fn(),
+  clearAuth: jest.fn(),
+  loadAuthFromStorage: jest.fn(),
+  isTokenExpired: jest.fn(() => false),
 };
 
-jest.mock('@/lib/stores/authStore', () => ({
-  useAuthStore: (selector?: (state: any) => any) => {
-    if (selector) {
-      return selector(mockAuthState);
-    }
-    return mockAuthState;
-  },
-}));
+// Mock store hook compatible with AuthContext (Zustand-like hook)
+const mockStoreHook = ((selector?: (state: any) => any) => {
+  return selector ? selector(mockAuthState) : mockAuthState;
+}) as any;
 
 // Mock router
 jest.mock('next/navigation', () => ({
@@ -51,7 +52,9 @@ const createWrapper = () => {
 
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <AuthProvider store={mockStoreHook}>
+        {children}
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

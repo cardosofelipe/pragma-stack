@@ -6,11 +6,39 @@
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProfileSettingsPage from '@/app/(authenticated)/settings/profile/page';
+import { AuthProvider } from '@/lib/auth/AuthContext';
 import { useAuthStore } from '@/lib/stores/authStore';
 
 // Mock authStore
 jest.mock('@/lib/stores/authStore');
 const mockUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
+
+// Mock store hook for AuthProvider
+const mockStoreHook = ((selector?: (state: any) => any) => {
+  const state = {
+    isAuthenticated: true,
+    user: {
+      id: '1',
+      email: 'test@example.com',
+      first_name: 'Test',
+      last_name: 'User',
+      is_active: true,
+      is_superuser: false,
+      created_at: '2024-01-01T00:00:00Z',
+    },
+    accessToken: 'token',
+    refreshToken: 'refresh',
+    isLoading: false,
+    tokenExpiresAt: null,
+    setAuth: jest.fn(),
+    setTokens: jest.fn(),
+    setUser: jest.fn(),
+    clearAuth: jest.fn(),
+    loadAuthFromStorage: jest.fn(),
+    isTokenExpired: jest.fn(() => false),
+  };
+  return selector ? selector(state) : state;
+}) as any;
 
 describe('ProfileSettingsPage', () => {
   const queryClient = new QueryClient({
@@ -44,7 +72,9 @@ describe('ProfileSettingsPage', () => {
   const renderWithProvider = (component: React.ReactElement) => {
     return render(
       <QueryClientProvider client={queryClient}>
-        {component}
+        <AuthProvider store={mockStoreHook}>
+          {component}
+        </AuthProvider>
       </QueryClientProvider>
     );
   };
