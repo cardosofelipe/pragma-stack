@@ -117,30 +117,46 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
     }
   });
 
-  // Navigate to home first to set up auth state
-  await page.goto('/');
-
-  // Inject auth state directly into Zustand store
-  await page.evaluate((mockUser) => {
-    // Mock encrypted token storage
-    localStorage.setItem('auth_tokens', 'mock-encrypted-token');
-    localStorage.setItem('auth_storage_method', 'localStorage');
-
-    // Find and inject into the auth store
-    // Zustand stores are available on window in dev mode
-    const stores = Object.keys(window).filter(key => key.includes('Store'));
-
-    // Try to find useAuthStore
-    const authStore = (window as any).useAuthStore;
-    if (authStore && authStore.getState) {
-      authStore.setState({
+  // Inject mock auth store BEFORE navigation
+  // This must happen before the page loads to ensure AuthProvider picks it up
+  await page.addInitScript((mockUser) => {
+    // Create a mock Zustand hook that returns our mocked auth state
+    const mockAuthStore: any = (selector?: any) => {
+      const state = {
         user: mockUser,
         accessToken: 'mock-access-token',
         refreshToken: 'mock-refresh-token',
         isAuthenticated: true,
         isLoading: false,
         tokenExpiresAt: Date.now() + 900000, // 15 minutes from now
-      });
-    }
+        // Mock action functions
+        setAuth: async () => {},
+        setTokens: async () => {},
+        setUser: () => {},
+        clearAuth: async () => {},
+        loadAuthFromStorage: async () => {},
+        isTokenExpired: () => false,
+      };
+      return selector ? selector(state) : state;
+    };
+
+    // Add getState method for non-React contexts (API client, etc.)
+    mockAuthStore.getState = () => ({
+      user: mockUser,
+      accessToken: 'mock-access-token',
+      refreshToken: 'mock-refresh-token',
+      isAuthenticated: true,
+      isLoading: false,
+      tokenExpiresAt: Date.now() + 900000,
+      setAuth: async () => {},
+      setTokens: async () => {},
+      setUser: () => {},
+      clearAuth: async () => {},
+      loadAuthFromStorage: async () => {},
+      isTokenExpired: () => false,
+    });
+
+    // Inject into window for AuthProvider to pick up
+    (window as any).__TEST_AUTH_STORE__ = mockAuthStore;
   }, MOCK_USER);
 }

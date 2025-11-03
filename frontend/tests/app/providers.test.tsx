@@ -13,10 +13,6 @@ jest.mock('@/components/theme', () => ({
   ),
 }));
 
-jest.mock('@/components/auth', () => ({
-  AuthInitializer: () => <div data-testid="auth-initializer" />,
-}));
-
 // Mock TanStack Query
 jest.mock('@tanstack/react-query', () => ({
   QueryClient: jest.fn().mockImplementation(() => ({})),
@@ -54,16 +50,6 @@ describe('Providers', () => {
     );
 
     expect(screen.getByTestId('query-provider')).toBeInTheDocument();
-  });
-
-  it('renders AuthInitializer', () => {
-    render(
-      <Providers>
-        <div>Test Content</div>
-      </Providers>
-    );
-
-    expect(screen.getByTestId('auth-initializer')).toBeInTheDocument();
   });
 
   it('renders children', () => {

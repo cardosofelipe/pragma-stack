@@ -7,11 +7,19 @@ import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProfileSettingsPage from '@/app/(authenticated)/settings/profile/page';
 import { AuthProvider } from '@/lib/auth/AuthContext';
-import { useAuthStore } from '@/lib/stores/authStore';
 
-// Mock authStore
-jest.mock('@/lib/stores/authStore');
-const mockUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
+// Mock API hooks
+jest.mock('@/lib/api/hooks/useAuth', () => ({
+  useCurrentUser: jest.fn(),
+}));
+
+jest.mock('@/lib/api/hooks/useUser', () => ({
+  useUpdateProfile: jest.fn(),
+}));
+
+// Import mocked hooks
+import { useCurrentUser } from '@/lib/api/hooks/useAuth';
+import { useUpdateProfile } from '@/lib/api/hooks/useUser';
 
 // Mock store hook for AuthProvider
 const mockStoreHook = ((selector?: (state: any) => any) => {
@@ -58,14 +66,18 @@ describe('ProfileSettingsPage', () => {
     created_at: '2024-01-01T00:00:00Z',
   };
 
+  const mockUpdateProfile = jest.fn();
+
   beforeEach(() => {
-    // Mock useAuthStore to return user data
-    mockUseAuthStore.mockImplementation((selector: unknown) => {
-      if (typeof selector === 'function') {
-        const mockState = { user: mockUser };
-        return selector(mockState);
-      }
-      return mockUser;
+    jest.clearAllMocks();
+
+    // Mock useCurrentUser to return test user
+    (useCurrentUser as jest.Mock).mockReturnValue(mockUser);
+
+    // Mock useUpdateProfile to return mutation handlers
+    (useUpdateProfile as jest.Mock).mockReturnValue({
+      mutateAsync: mockUpdateProfile,
+      isPending: false,
     });
   });
 

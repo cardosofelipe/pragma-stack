@@ -20,31 +20,31 @@ test.describe('Profile Settings', () => {
     // Check page title
     await expect(page.locator('h2')).toContainText('Profile');
 
-    // Check form fields exist
-    await expect(page.locator('input[name="first_name"]')).toBeVisible();
-    await expect(page.locator('input[name="last_name"]')).toBeVisible();
-    await expect(page.locator('input[name="email"]')).toBeVisible();
+    // Check form fields exist (using ID selectors which are guaranteed by FormField)
+    await expect(page.locator('#first_name')).toBeVisible();
+    await expect(page.locator('#last_name')).toBeVisible();
+    await expect(page.locator('#email')).toBeVisible();
   });
 
   test('should pre-populate form with current user data', async ({ page }) => {
     // Wait for form to load
-    await page.waitForSelector('input[name="first_name"]');
+    await page.waitForSelector('#first_name');
 
     // Check that fields are populated
-    const firstName = await page.locator('input[name="first_name"]').inputValue();
-    const email = await page.locator('input[name="email"]').inputValue();
+    const firstName = await page.locator('#first_name').inputValue();
+    const email = await page.locator('#email').inputValue();
 
     expect(firstName).toBeTruthy();
     expect(email).toBeTruthy();
   });
 
   test('should have email field disabled', async ({ page }) => {
-    const emailInput = page.locator('input[name="email"]');
+    const emailInput = page.locator('#email');
     await expect(emailInput).toBeDisabled();
   });
 
   test('should show submit button disabled when form is pristine', async ({ page }) => {
-    await page.waitForSelector('input[name="first_name"]');
+    await page.waitForSelector('#first_name');
 
     // Submit button should be disabled initially
     const submitButton = page.locator('button[type="submit"]');
@@ -52,10 +52,17 @@ test.describe('Profile Settings', () => {
   });
 
   test('should enable submit button when first name is modified', async ({ page }) => {
-    await page.waitForSelector('input[name="first_name"]');
+    await page.waitForSelector('#first_name');
+
+    // Wait for form to be populated with user data
+    await page.waitForFunction(() => {
+      const input = document.querySelector('#first_name') as HTMLInputElement;
+      return input && input.value !== '';
+    }, { timeout: 5000 });
 
     // Modify first name
-    const firstNameInput = page.locator('input[name="first_name"]');
+    const firstNameInput = page.locator('#first_name');
+    await firstNameInput.clear();
     await firstNameInput.fill('TestUser');
 
     // Submit button should be enabled
@@ -64,10 +71,17 @@ test.describe('Profile Settings', () => {
   });
 
   test('should show reset button when form is dirty', async ({ page }) => {
-    await page.waitForSelector('input[name="first_name"]');
+    await page.waitForSelector('#first_name');
+
+    // Wait for form to be populated with user data
+    await page.waitForFunction(() => {
+      const input = document.querySelector('#first_name') as HTMLInputElement;
+      return input && input.value !== '';
+    }, { timeout: 5000 });
 
     // Modify first name
-    const firstNameInput = page.locator('input[name="first_name"]');
+    const firstNameInput = page.locator('#first_name');
+    await firstNameInput.clear();
     await firstNameInput.fill('TestUser');
 
     // Reset button should appear
@@ -76,13 +90,20 @@ test.describe('Profile Settings', () => {
   });
 
   test('should reset form when reset button is clicked', async ({ page }) => {
-    await page.waitForSelector('input[name="first_name"]');
+    await page.waitForSelector('#first_name');
+
+    // Wait for form to be populated with user data
+    await page.waitForFunction(() => {
+      const input = document.querySelector('#first_name') as HTMLInputElement;
+      return input && input.value !== '';
+    }, { timeout: 5000 });
 
     // Get original value
-    const firstNameInput = page.locator('input[name="first_name"]');
+    const firstNameInput = page.locator('#first_name');
     const originalValue = await firstNameInput.inputValue();
 
     // Modify first name
+    await firstNameInput.clear();
     await firstNameInput.fill('TestUser');
     await expect(firstNameInput).toHaveValue('TestUser');
 
@@ -95,10 +116,10 @@ test.describe('Profile Settings', () => {
   });
 
   test('should show validation error for empty first name', async ({ page }) => {
-    await page.waitForSelector('input[name="first_name"]');
+    await page.waitForSelector('#first_name');
 
     // Clear first name
-    const firstNameInput = page.locator('input[name="first_name"]');
+    const firstNameInput = page.locator('#first_name');
     await firstNameInput.fill('');
 
     // Tab away to trigger validation
@@ -115,7 +136,7 @@ test.describe('Profile Settings', () => {
   });
 
   test('should display profile information card title', async ({ page }) => {
-    await expect(page.locator('text=Profile Information')).toBeVisible();
+    await expect(page.getByText('Profile Information', { exact: true })).toBeVisible();
   });
 
   test('should show description about email being read-only', async ({ page }) => {
