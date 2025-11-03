@@ -463,7 +463,242 @@ interface UIStore {
 
 ## 6. Authentication Architecture
 
-### 6.1 Token Management Strategy
+### 6.1 Context-Based Dependency Injection Pattern
+
+**Architecture Overview:**
+
+This project uses a **hybrid authentication pattern** combining Zustand for state management and React Context for dependency injection. This provides the best of both worlds:
+
+```
+Component → useAuth() hook → AuthContext → Zustand Store → Storage Layer → Crypto (AES-GCM)
+                                  ↓
+                          Injectable for tests
+                                  ↓
+                Production: Real store | Tests: Mock store
+```
+
+**Why This Pattern?**
+
+✅ **Benefits:**
+- **Testable**: E2E tests can inject mock stores without backend
+- **Performant**: Zustand handles state efficiently, Context is just a thin wrapper
+- **Type-safe**: Full TypeScript inference throughout
+- **Maintainable**: Clear separation (Context = DI, Zustand = state)
+- **Extensible**: Easy to add auth events, middleware, logging
+- **React-idiomatic**: Follows React best practices
+
+**Key Design Principles:**
+1. **Thin Context Layer**: Context only provides dependency injection, no business logic
+2. **Zustand for State**: All state management stays in Zustand (no duplicated state)
+3. **Backward Compatible**: Internal refactor only, no API changes
+4. **Type Safe**: Context interface exactly matches Zustand store interface
+5. **Performance**: Context value is stable (no unnecessary re-renders)
+
+### 6.2 Implementation Components
+
+#### AuthContext Provider (`src/lib/auth/AuthContext.tsx`)
+
+**Purpose**: Wraps Zustand store in React Context for dependency injection
+
+```typescript
+// Accepts optional store prop for testing
+<AuthProvider store={mockStore}>  // Unit tests
+  <App />
+</AuthProvider>
+
+// Or checks window global for E2E tests
+window.__TEST_AUTH_STORE__ = mockStoreHook;
+
+// Or uses production singleton (default)
+<AuthProvider>
+  <App />
+</AuthProvider>
+```
+
+**Implementation Details:**
+- Stores Zustand hook function (not state) in Context
+- Priority: explicit prop → E2E test store → production singleton
+- Type-safe window global extension for E2E injection
+- Calls hook internally (follows React Rules of Hooks)
+
+#### useAuth Hook (Polymorphic)
+
+**Supports two usage patterns:**
+
+```typescript
+// Pattern 1: Full state access (simple)
+const { user, isAuthenticated } = useAuth();
+
+// Pattern 2: Selector (optimized for performance)
+const user = useAuth(state => state.user);
+```
+
+**Why Polymorphic?**
+- Simple pattern for most use cases
+- Optimized pattern available when needed
+- Type-safe with function overloads
+- No performance overhead
+
+**Critical Implementation Detail:**
+```typescript
+export function useAuth(): AuthState;
+export function useAuth<T>(selector: (state: AuthState) => T): T;
+export function useAuth<T>(selector?: (state: AuthState) => T): AuthState | T {
+  const storeHook = useContext(AuthContext);
+  if (!storeHook) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  // CRITICAL: Call the hook internally (follows React Rules of Hooks)
+  return selector ? storeHook(selector) : storeHook();
+}
+```
+
+**Do NOT** return the hook function itself - this violates React Rules of Hooks!
+
+### 6.3 Usage Patterns
+
+#### For Components (Rendering Auth State)
+
+**Use `useAuth()` from Context:**
+
+```typescript
+import { useAuth } from '@/lib/stores';
+
+function MyComponent() {
+  // Full state access
+  const { user, isAuthenticated } = useAuth();
+
+  // Or with selector for optimization
+  const user = useAuth(state => state.user);
+
+  if (!isAuthenticated) {
+    return <LoginPrompt />;
+  }
+
+  return <div>Hello, {user?.first_name}!</div>;
+}
+```
+
+**Why?**
+- Component re-renders when auth state changes
+- Type-safe access to all state properties
+- Clean, idiomatic React code
+
+#### For Mutation Callbacks (Updating Auth State)
+
+**Use `useAuthStore.getState()` directly:**
+
+```typescript
+import { useAuthStore } from '@/lib/stores/authStore';
+
+export function useLogin() {
+  return useMutation({
+    mutationFn: async (data) => {
+      const response = await loginAPI(data);
+
+      // Access store directly in callback (outside render)
+      const setAuth = useAuthStore.getState().setAuth;
+      await setAuth(response.user, response.token);
+    },
+  });
+}
+```
+
+**Why?**
+- Event handlers run outside React render cycle
+- Don't need to re-render when state changes
+- Using `getState()` directly is cleaner
+- Avoids unnecessary hook rules complexity
+
+#### Admin-Only Features
+
+```typescript
+import { useAuth } from '@/lib/stores';
+
+function AdminPanel() {
+  const user = useAuth(state => state.user);
+  const isAdmin = user?.is_superuser ?? false;
+
+  if (!isAdmin) {
+    return <AccessDenied />;
+  }
+
+  return <AdminDashboard />;
+}
+```
+
+### 6.4 Testing Integration
+
+#### Unit Tests (Jest)
+
+```typescript
+import { useAuth } from '@/lib/stores';
+
+jest.mock('@/lib/stores', () => ({
+  useAuth: jest.fn(),
+}));
+
+test('renders user name', () => {
+  (useAuth as jest.Mock).mockReturnValue({
+    user: { first_name: 'John', last_name: 'Doe' },
+    isAuthenticated: true,
+  });
+
+  render(<MyComponent />);
+  expect(screen.getByText('John Doe')).toBeInTheDocument();
+});
+```
+
+#### E2E Tests (Playwright)
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test.describe('Protected Pages', () => {
+  test.beforeEach(async ({ page }) => {
+    // Inject mock store before navigation
+    await page.addInitScript(() => {
+      (window as any).__TEST_AUTH_STORE__ = () => ({
+        user: { id: '1', email: 'test@example.com', first_name: 'Test', last_name: 'User' },
+        accessToken: 'mock-token',
+        refreshToken: 'mock-refresh',
+        isAuthenticated: true,
+        isLoading: false,
+        tokenExpiresAt: Date.now() + 900000,
+      });
+    });
+  });
+
+  test('should display user profile', async ({ page }) => {
+    await page.goto('/settings/profile');
+
+    // No redirect to login - authenticated via mock
+    await expect(page).toHaveURL('/settings/profile');
+    await expect(page.locator('input[name="email"]')).toHaveValue('test@example.com');
+  });
+});
+```
+
+### 6.5 Provider Tree Structure
+
+**Correct Order** (Critical for Functionality):
+
+```typescript
+// src/app/layout.tsx
+<AuthProvider>           {/* 1. Provides auth DI layer */}
+  <AuthInitializer />    {/* 2. Loads auth from storage (needs AuthProvider) */}
+  <Providers>            {/* 3. Other providers (Theme, Query) */}
+    {children}
+  </Providers>
+</AuthProvider>
+```
+
+**Why This Order?**
+- AuthProvider must wrap AuthInitializer (AuthInitializer uses auth state)
+- AuthProvider should wrap all app providers (auth available everywhere)
+- Keep provider tree shallow for performance
+
+### 6.6 Token Management Strategy
 
 **Two-Token System:**
 - **Access Token**: Short-lived (15 min), stored in memory/sessionStorage
