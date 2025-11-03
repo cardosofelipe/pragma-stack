@@ -8,7 +8,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuthStore } from '@/lib/stores/authStore';
+import { useAuth } from '@/lib/stores';
 import { useLogout } from '@/lib/api/hooks/useAuth';
 import {
   DropdownMenu,
@@ -67,7 +67,7 @@ function NavLink({
 }
 
 export function Header() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
   const handleLogout = () => {

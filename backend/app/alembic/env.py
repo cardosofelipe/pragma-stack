@@ -2,8 +2,9 @@ import sys
 from logging.config import fileConfig
 from pathlib import Path
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool, text, create_engine
+from sqlalchemy.engine.url import make_url
+from sqlalchemy.exc import OperationalError
 
 from alembic import context
 
@@ -33,6 +34,51 @@ target_metadata = Base.metadata
 
 # Override the SQLAlchemy URL with the one from settings
 config.set_main_option("sqlalchemy.url", settings.database_url)
+
+
+def ensure_database_exists(db_url: str) -> None:
+    """
+    Ensure the target PostgreSQL database exists.
+    If connection to the target DB fails because it doesn't exist, connect to the
+    default 'postgres' database and create it. Safe to call multiple times.
+    """
+    try:
+        # First, try connecting to the target database
+        test_engine = create_engine(db_url, poolclass=pool.NullPool)
+        with test_engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        test_engine.dispose()
+        return
+    except OperationalError:
+        # Likely the database does not exist; proceed to create it
+        pass
+
+    url = make_url(db_url)
+    # Only handle PostgreSQL here
+    if url.get_backend_name() != "postgresql":
+        return
+
+    target_db = url.database
+    if not target_db:
+        return
+
+    # Build admin URL pointing to the default 'postgres' database
+    admin_url = url.set(database="postgres")
+
+    # CREATE DATABASE cannot run inside a transaction
+    admin_engine = create_engine(str(admin_url), isolation_level="AUTOCOMMIT", poolclass=pool.NullPool)
+    try:
+        with admin_engine.connect() as conn:
+            exists = conn.execute(
+                text("SELECT 1 FROM pg_database WHERE datname = :dbname"),
+                {"dbname": target_db},
+            ).scalar()
+            if not exists:
+                # Quote the database name safely
+                dbname_quoted = '"' + target_db.replace('"', '""') + '"'
+                conn.execute(text(f"CREATE DATABASE {dbname_quoted}"))
+    finally:
+        admin_engine.dispose()
 
 
 def run_migrations_offline() -> None:
@@ -66,6 +112,9 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    # Ensure the target database exists (handles first-run cases)
+    ensure_database_exists(settings.database_url)
+
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",

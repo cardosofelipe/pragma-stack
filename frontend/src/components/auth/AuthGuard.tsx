@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuthStore } from '@/lib/stores/authStore';
+import { useAuth } from '@/lib/stores';
 import { useMe } from '@/lib/api/hooks/useAuth';
 import { AuthLoadingSkeleton } from '@/components/layout';
 import config from '@/config/app.config';
@@ -50,7 +50,7 @@ interface AuthGuardProps {
 export function AuthGuard({ children, requireAdmin = false, fallback }: AuthGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, isLoading: authLoading, user } = useAuthStore();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
 
   // Delayed loading state - only show skeleton after 150ms to avoid flicker on fast loads
   const [showLoading, setShowLoading] = useState(false);
