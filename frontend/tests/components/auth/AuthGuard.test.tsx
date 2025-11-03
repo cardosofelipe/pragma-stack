@@ -18,7 +18,7 @@ jest.mock('next/navigation', () => ({
   usePathname: () => mockPathname,
 }));
 
-// Mock auth store
+// Mock auth state via Context
 let mockAuthState: {
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -29,8 +29,9 @@ let mockAuthState: {
   user: null,
 };
 
-jest.mock('@/lib/stores/authStore', () => ({
-  useAuthStore: () => mockAuthState,
+jest.mock('@/lib/auth/AuthContext', () => ({
+  useAuth: () => mockAuthState,
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 // Mock useMe hook

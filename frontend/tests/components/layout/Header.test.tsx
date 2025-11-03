@@ -6,14 +6,15 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Header } from '@/components/layout/Header';
-import { useAuthStore } from '@/lib/stores/authStore';
+import { useAuth } from '@/lib/auth/AuthContext';
 import { useLogout } from '@/lib/api/hooks/useAuth';
 import { usePathname } from 'next/navigation';
 import type { User } from '@/lib/stores/authStore';
 
 // Mock dependencies
-jest.mock('@/lib/stores/authStore', () => ({
-  useAuthStore: jest.fn(),
+jest.mock('@/lib/auth/AuthContext', () => ({
+  useAuth: jest.fn(),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 jest.mock('@/lib/api/hooks/useAuth', () => ({
@@ -60,7 +61,7 @@ describe('Header', () => {
 
   describe('Rendering', () => {
     it('renders header with logo', () => {
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser(),
       });
 
@@ -70,7 +71,7 @@ describe('Header', () => {
     });
 
     it('renders theme toggle', () => {
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser(),
       });
 
@@ -80,7 +81,7 @@ describe('Header', () => {
     });
 
     it('renders user avatar with initials', () => {
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser({
           first_name: 'John',
           last_name: 'Doe',
@@ -93,7 +94,7 @@ describe('Header', () => {
     });
 
     it('renders user avatar with single initial when no last name', () => {
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser({
           first_name: 'John',
           last_name: null,
@@ -106,7 +107,7 @@ describe('Header', () => {
     });
 
     it('renders default initial when no first name', () => {
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser({
           first_name: '',
         }),
@@ -120,7 +121,7 @@ describe('Header', () => {
 
   describe('Navigation Links', () => {
     it('renders home link', () => {
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser(),
       });
 
@@ -131,7 +132,7 @@ describe('Header', () => {
     });
 
     it('renders admin link for superusers', () => {
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser({ is_superuser: true }),
       });
 
@@ -142,7 +143,7 @@ describe('Header', () => {
     });
 
     it('does not render admin link for regular users', () => {
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser({ is_superuser: false }),
       });
 
@@ -158,7 +159,7 @@ describe('Header', () => {
 
     it('highlights active navigation link', () => {
       (usePathname as jest.Mock).mockReturnValue('/admin');
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser({ is_superuser: true }),
       });
 
@@ -173,7 +174,7 @@ describe('Header', () => {
     it('opens dropdown when avatar is clicked', async () => {
       const user = userEvent.setup();
 
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser({
           first_name: 'John',
           last_name: 'Doe',
@@ -195,7 +196,7 @@ describe('Header', () => {
     it('displays user info in dropdown', async () => {
       const user = userEvent.setup();
 
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser({
           first_name: 'John',
           last_name: 'Doe',
@@ -217,7 +218,7 @@ describe('Header', () => {
     it('includes profile link in dropdown', async () => {
       const user = userEvent.setup();
 
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser(),
       });
 
@@ -233,7 +234,7 @@ describe('Header', () => {
     it('includes settings link in dropdown', async () => {
       const user = userEvent.setup();
 
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser(),
       });
 
@@ -249,7 +250,7 @@ describe('Header', () => {
     it('includes admin panel link for superusers', async () => {
       const user = userEvent.setup();
 
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser({ is_superuser: true }),
       });
 
@@ -265,7 +266,7 @@ describe('Header', () => {
     it('does not include admin panel link for regular users', async () => {
       const user = userEvent.setup();
 
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser({ is_superuser: false }),
       });
 
@@ -284,7 +285,7 @@ describe('Header', () => {
     it('calls logout when logout button is clicked', async () => {
       const user = userEvent.setup();
 
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser(),
       });
 
@@ -307,7 +308,7 @@ describe('Header', () => {
         isPending: true,
       });
 
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser(),
       });
 
@@ -329,7 +330,7 @@ describe('Header', () => {
         isPending: true,
       });
 
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser(),
       });
 
