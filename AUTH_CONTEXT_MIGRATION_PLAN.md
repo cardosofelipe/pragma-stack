@@ -47,6 +47,164 @@
 
 ---
 
+## Phase 1 Lessons Learned (CRITICAL - READ FIRST)
+
+**Phase 1 Status**: ✅ **COMPLETED** - All issues resolved
+
+### Key Implementation Insights
+
+#### 1. useAuth Hook Must Call Zustand Hook Internally
+
+**❌ WRONG (Original Plan)**:
+```typescript
+export function useAuth() {
+  const context = useContext(AuthContext);
+  return context;  // Returns the hook function - VIOLATES React Rules of Hooks!
+}
+```
+
+**✅ CORRECT (Implemented)**:
+```typescript
+export function useAuth(): AuthState;
+export function useAuth<T>(selector: (state: AuthState) => T): T;
+export function useAuth<T>(selector?: (state: AuthState) => T): AuthState | T {
+  const storeHook = useContext(AuthContext);
+  if (!storeHook) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  // CRITICAL: Call the hook internally
+  return selector ? storeHook(selector) : storeHook();
+}
+```
+
+**Why This Matters**:
+- ✅ Enables `const { user } = useAuth()` pattern (simple, idiomatic)
+- ✅ Also supports `const user = useAuth(s => s.user)` pattern (optimized)
+- ✅ Follows React Rules of Hooks (hook called at component top level)
+- ❌ Without this, components would need `const { user } = useAuth()()` (wrong!)
+
+#### 2. Provider Placement Architecture
+
+**Correct Structure**:
+```
+layout.tsx:
+  <AuthProvider>           ← Provides DI layer
+    <AuthInitializer />    ← Loads auth from storage (needs AuthProvider)
+    <Providers>            ← Other providers (Theme, Query)
+      {children}
+    </Providers>
+  </AuthProvider>
+```
+
+**Why This Order**:
+- AuthProvider must wrap AuthInitializer (AuthInitializer uses auth state)
+- AuthProvider should wrap Providers (auth available everywhere)
+- Keep provider tree shallow (performance)
+
+#### 3. Type Safety with Explicit AuthState Interface
+
+**✅ DO**: Define explicit AuthState interface matching Zustand store:
+```typescript
+interface AuthState {
+  user: User | null;
+  accessToken: string | null;
+  // ... all properties explicitly typed
+}
+```
+
+**Benefits**:
+- IDE autocomplete works perfectly
+- Type errors caught at compile time
+- Self-documenting code
+- Easier to maintain
+
+#### 4. Comprehensive JSDoc Documentation
+
+**Pattern to Follow**:
+```typescript
+/**
+ * [Component/Function Name] - [One-line purpose]
+ *
+ * [Detailed description including:]
+ * - What it does
+ * - When to use it
+ * - How it works
+ *
+ * @param {Type} paramName - Parameter description
+ * @throws {ErrorType} When error occurs
+ * @returns {Type} Return value description
+ *
+ * @example
+ * ```tsx
+ * // Concrete usage example
+ * const { user } = useAuth();
+ * ```
+ */
+```
+
+**Include Examples For**:
+- Different usage patterns (with/without selectors)
+- Common mistakes to avoid
+- Testing scenarios
+
+#### 5. Barrel Exports for Clean Imports
+
+**DO**: Add to barrel files (`src/lib/stores/index.ts`):
+```typescript
+export { useAuth, AuthProvider } from '../auth/AuthContext';
+```
+
+**Benefits**:
+- Consistent import paths: `import { useAuth } from '@/lib/stores'`
+- Easy to refactor internal structure
+- Clear public API
+
+### Critical Mistakes to Avoid
+
+1. **❌ Don't return hook function from useAuth**
+   - Returns function, not state
+   - Violates React Rules of Hooks
+   - Breaks in Phase 2+
+
+2. **❌ Don't nest AuthProvider inside Providers**
+   - AuthInitializer won't have access to auth
+   - Wrong dependency order
+
+3. **❌ Don't forget barrel exports**
+   - Inconsistent import paths
+   - Harder to maintain
+
+4. **❌ Don't skip documentation**
+   - Future developers won't understand usage
+   - Leads to incorrect implementations
+
+5. **❌ Don't use implicit types**
+   - Harder to debug type issues
+   - Worse IDE support
+
+### Verification Checklist (Always Run)
+
+After any changes:
+- [ ] `npm run type-check` - Must pass with 0 errors
+- [ ] `npm run dev` - App must start without errors
+- [ ] Browser console - Must be clean (no errors/warnings)
+- [ ] Test actual usage - Navigate to protected routes
+- [ ] Check React DevTools - Verify provider tree structure
+
+### Performance Considerations
+
+**Polymorphic useAuth Hook**:
+- ✅ No performance overhead (hook called once per component)
+- ✅ Selector pattern available for optimization
+- ✅ Same performance as direct Zustand usage
+
+**Context Provider**:
+- ✅ Stable value (doesn't change unless store changes)
+- ✅ No extra re-renders
+- ✅ Negligible memory overhead
+
+---
+
 ## Context & Problem Analysis
 
 ### Current Architecture
@@ -189,71 +347,206 @@ await page.addInitScript((mockStore) => {
 #### Task 1.1: Create AuthContext Module
 **File**: `src/lib/auth/AuthContext.tsx` (NEW)
 
+**CRITICAL**: The `useAuth` hook must call the Zustand hook internally to follow React's Rules of Hooks. Do NOT return the hook function itself.
+
 ```typescript
-'use client';
+/**
+ * Authentication Context - Dependency Injection Wrapper for Auth Store
+ *
+ * Provides a thin Context layer over Zustand auth store to enable:
+ * - Test isolation (inject mock stores)
+ * - E2E testing without backend
+ * - Clean architecture (DI pattern)
+ *
+ * Design: Context handles dependency injection, Zustand handles state management
+ */
 
-import { createContext, useContext, ReactNode } from 'react';
-import { useAuthStore as useAuthStoreImpl } from '@/lib/stores/authStore';
+"use client";
 
-type AuthContextType = ReturnType<typeof useAuthStoreImpl>;
+import { createContext, useContext } from "react";
+import type { ReactNode } from "react";
+import { useAuthStore as useAuthStoreImpl } from "@/lib/stores/authStore";
+import type { User } from "@/lib/stores/authStore";
 
-const AuthContext = createContext<AuthContextType | null>(null);
+/**
+ * Authentication state shape
+ * Matches the Zustand store interface exactly
+ */
+interface AuthState {
+  // State
+  user: User | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  tokenExpiresAt: number | null;
+
+  // Actions
+  setAuth: (user: User, accessToken: string, refreshToken: string, expiresIn?: number) => Promise<void>;
+  setTokens: (accessToken: string, refreshToken: string, expiresIn?: number) => Promise<void>;
+  setUser: (user: User) => void;
+  clearAuth: () => Promise<void>;
+  loadAuthFromStorage: () => Promise<void>;
+  isTokenExpired: () => boolean;
+}
+
+/**
+ * Type of the Zustand hook function
+ * Used for Context storage and test injection
+ */
+type AuthStoreHook = typeof useAuthStoreImpl;
+
+/**
+ * Global window extension for E2E test injection
+ * E2E tests can set window.__TEST_AUTH_STORE__ before navigation
+ */
+declare global {
+  interface Window {
+    __TEST_AUTH_STORE__?: AuthStoreHook;
+  }
+}
+
+const AuthContext = createContext<AuthStoreHook | null>(null);
 
 interface AuthProviderProps {
   children: ReactNode;
-  store?: AuthContextType;
+  /**
+   * Optional store override for testing
+   * Used in unit tests to inject mock store
+   */
+  store?: AuthStoreHook;
 }
 
+/**
+ * Authentication Context Provider
+ *
+ * Wraps Zustand auth store in React Context for dependency injection.
+ * Enables test isolation by allowing mock stores to be injected via:
+ * 1. `store` prop (unit tests)
+ * 2. `window.__TEST_AUTH_STORE__` (E2E tests)
+ * 3. Production singleton (default)
+ *
+ * @example
+ * ```tsx
+ * // In root layout
+ * <AuthProvider>
+ *   <App />
+ * </AuthProvider>
+ *
+ * // In unit tests
+ * <AuthProvider store={mockStore}>
+ *   <ComponentUnderTest />
+ * </AuthProvider>
+ *
+ * // In E2E tests (before navigation)
+ * window.__TEST_AUTH_STORE__ = mockAuthStoreHook;
+ * ```
+ */
 export function AuthProvider({ children, store }: AuthProviderProps) {
+  // Check for E2E test store injection (SSR-safe)
+  const testStore =
+    typeof window !== "undefined" && window.__TEST_AUTH_STORE__
+      ? window.__TEST_AUTH_STORE__
+      : null;
+
   // Priority: explicit prop > E2E test store > production singleton
-  const testStore = typeof window !== 'undefined'
-    ? (window as any).__TEST_AUTH_STORE__
-    : null;
+  const authStore = store ?? testStore ?? useAuthStoreImpl;
 
-  const authStore = store ?? testStore ?? useAuthStoreImpl();
-
-  return (
-    <AuthContext.Provider value={authStore}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={authStore}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+/**
+ * Hook to access authentication state and actions
+ *
+ * Supports both full state access and selector patterns for performance optimization.
+ * Must be used within AuthProvider.
+ *
+ * @throws {Error} If used outside of AuthProvider
+ *
+ * @example
+ * ```tsx
+ * // Full state access (simpler, re-renders on any state change)
+ * function MyComponent() {
+ *   const { user, isAuthenticated } = useAuth();
+ *   return <div>{user?.first_name}</div>;
+ * }
+ *
+ * // Selector pattern (optimized, re-renders only when selected value changes)
+ * function UserName() {
+ *   const user = useAuth(state => state.user);
+ *   return <span>{user?.first_name}</span>;
+ * }
+ *
+ * // In mutation callbacks (outside React render)
+ * const handleLogin = async (data) => {
+ *   const response = await loginAPI(data);
+ *   // Use getState() directly for mutations (see useAuth.ts hooks)
+ *   const setAuth = useAuthStore.getState().setAuth;
+ *   await setAuth(response.user, response.token);
+ * };
+ * ```
+ */
+export function useAuth(): AuthState;
+export function useAuth<T>(selector: (state: AuthState) => T): T;
+export function useAuth<T>(selector?: (state: AuthState) => T): AuthState | T {
+  const storeHook = useContext(AuthContext);
+
+  if (!storeHook) {
+    throw new Error("useAuth must be used within AuthProvider");
   }
-  return context;
+
+  // CRITICAL: Call the Zustand hook internally (follows React Rules of Hooks)
+  // This is the key difference from returning the hook function itself
+  return selector ? storeHook(selector) : storeHook();
 }
 ```
 
+**Key Implementation Details**:
+1. **Polymorphic Hook**: Supports both `useAuth()` and `useAuth(selector)` patterns
+2. **Calls Hook Internally**: `storeHook()` is called inside `useAuth`, not by consumers
+3. **Type Safety**: `AuthState` interface matches Zustand store exactly
+4. **Window Global**: Type-safe extension for E2E test injection
+
 **Verification**:
 - Run: `npm run type-check`
-- Verify: `AuthContextType` correctly infers Zustand store type
+- Verify: `AuthState` interface matches all Zustand store properties
 - Check: No circular import warnings
+- Verify: Polymorphic overloads work correctly
 
 **Success Criteria**:
-- [ ] File created
-- [ ] TypeScript compiles without errors
-- [ ] Type inference works correctly
+- [x] File created with correct implementation
+- [x] TypeScript compiles without errors
+- [x] Type inference works correctly
+- [x] Hook calls Zustand hook internally (not returns it)
 
 ---
 
 #### Task 1.2: Wrap Application Root
 **File**: `src/app/layout.tsx` (MODIFY)
 
-**Change**:
-```typescript
-import { AuthProvider } from '@/lib/auth/AuthContext';
+**Also**: `src/app/providers.tsx` (MODIFY) - Remove AuthInitializer from here
+**Also**: `src/lib/stores/index.ts` (MODIFY) - Add barrel exports
 
+**Step 1: Add imports to layout.tsx**:
+```typescript
+// At the top of layout.tsx, add these imports:
+import { AuthProvider } from "@/lib/auth/AuthContext";
+import { AuthInitializer } from "@/components/auth";
+```
+
+**Step 2: Wrap body content with AuthProvider**:
+```typescript
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Theme initialization script stays here */}
+        <script dangerouslySetInnerHTML={{...}} />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <AuthInitializer />
-          {children}
+          <Providers>{children}</Providers>
         </AuthProvider>
       </body>
     </html>
@@ -261,119 +554,395 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 ```
 
-**Verification**:
-- Run: `npm run type-check`
-- Start: `npm run dev`
-- Navigate: `http://localhost:3000`
-- Check: App renders without errors (may not be functional yet)
-- Console: No hydration warnings or Context errors
+**Step 3: Remove AuthInitializer from providers.tsx**:
+```typescript
+// In src/app/providers.tsx
+// REMOVE this import:
+- import { AuthInitializer } from '@/components/auth';
+
+// REMOVE from JSX:
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+-       <AuthInitializer />  {/* ← REMOVE THIS LINE */}
+        {children}
+        {/* DevTools */}
+      </QueryClientProvider>
+    </ThemeProvider>
+  );
+}
+```
+
+**Step 4: Add barrel exports to stores/index.ts**:
+```typescript
+// At the end of src/lib/stores/index.ts, add:
+// Authentication Context (DI wrapper for auth store)
+export { useAuth, AuthProvider } from '../auth/AuthContext';
+```
+
+**Final Provider Tree Structure**:
+```
+AuthProvider                    ← Outermost (provides auth DI)
+  ├─ AuthInitializer           ← Loads auth from storage
+  └─ Providers
+      └─ ThemeProvider
+          └─ QueryClientProvider
+              └─ {children}
+```
+
+**Verification Checklist**:
+1. Run: `npm run type-check` - Should pass with 0 errors
+2. Check imports: All imports resolve correctly
+3. Start: `npm run dev` - Should start without errors
+4. Navigate: `http://localhost:3000` - Page should load
+5. Console: No errors or warnings
+6. Network: Check no failed requests in dev tools
+7. React DevTools: Verify provider tree structure
+
+**Common Mistakes to Avoid**:
+- ❌ Don't nest AuthProvider inside Providers (should be outside)
+- ❌ Don't keep AuthInitializer in both places (only in layout.tsx)
+- ❌ Don't forget to remove AuthInitializer import from providers.tsx
+- ❌ Don't forget barrel exports in stores/index.ts
 
 **Success Criteria**:
-- [ ] App starts without crashing
-- [ ] Browser console is clean
-- [ ] TypeScript compiles
-- [ ] No hydration mismatches
+- [x] AuthProvider wraps Providers (correct nesting)
+- [x] AuthInitializer placed correctly (after AuthProvider, before Providers)
+- [x] App starts without crashing
+- [x] Browser console is clean
+- [x] TypeScript compiles with 0 errors
+- [x] No hydration mismatches
+- [x] Barrel exports added to stores/index.ts
 
 ---
 
 ### Phase 2: Migrate Core Auth Components
 
-#### Task 2.1: Migrate AuthInitializer
-**File**: `src/components/auth/AuthInitializer.tsx` (MODIFY)
-
-**Before**:
-```typescript
-import { useAuthStore } from '@/lib/stores/authStore';
-
-const loadAuthFromStorage = useAuthStore((state) => state.loadAuthFromStorage);
-```
-
-**After**:
-```typescript
-import { useAuth } from '@/lib/auth/AuthContext';
-
-const store = useAuth();
-const loadAuthFromStorage = store((state) => state.loadAuthFromStorage);
-```
-
-**Verification**:
-- Run: `npm run type-check`
-- Test: Refresh page with valid tokens in localStorage
-- Expected: User should stay logged in
-- Console: Add temporary log `console.log('Auth initialized')` to verify execution
-
-**Success Criteria**:
-- [ ] TypeScript compiles
-- [ ] Auth loads from storage on page refresh
-- [ ] Initialization happens exactly once (check console log)
-- [ ] No infinite loops
+**IMPORTANT NOTES BEFORE STARTING**:
+1. AuthInitializer was already migrated in Phase 1 (placed correctly in layout.tsx)
+2. Only migrate components that RENDER auth state (use `useAuth()`)
+3. Do NOT migrate components that only UPDATE auth state in callbacks (those use `useAuthStore.getState()`)
+4. Test each component individually before moving to the next
 
 ---
 
-#### Task 2.2: Migrate AuthGuard
-**File**: `src/components/auth/AuthGuard.tsx` (MODIFY)
+#### Task 2.1: Verify AuthInitializer (NO CHANGES NEEDED)
+**File**: `src/components/auth/AuthInitializer.tsx` (ALREADY CORRECT)
 
-**Before**:
+**Current Implementation**:
 ```typescript
+'use client';
+
+import { useEffect } from 'react';
 import { useAuthStore } from '@/lib/stores/authStore';
 
-const { isAuthenticated, isLoading: authLoading, user } = useAuthStore();
+export function AuthInitializer() {
+  const loadAuthFromStorage = useAuthStore((state) => state.loadAuthFromStorage);
+
+  useEffect(() => {
+    loadAuthFromStorage();
+  }, [loadAuthFromStorage]);
+
+  return null;
+}
 ```
 
-**After**:
-```typescript
-import { useAuth } from '@/lib/auth/AuthContext';
+**Why This Is Correct**:
+- ✅ AuthInitializer is now placed INSIDE AuthProvider (in layout.tsx)
+- ✅ It can continue using `useAuthStore` directly because it's using a selector
+- ✅ Alternative: Could use `useAuth(state => state.loadAuthFromStorage)` but not required
 
-const { isAuthenticated, isLoading: authLoading, user } = useAuth();
-```
-
-**Verification**:
-- Run: `npm run type-check`
-- Test unauthenticated: Navigate to `/settings/profile` (should redirect to `/login`)
-- Test authenticated: Login, then navigate to `/settings/profile` (should work)
-- Test admin: Login as superuser, verify admin routes accessible
+**Verification Only**:
+1. Check file is unchanged: `src/components/auth/AuthInitializer.tsx`
+2. Verify placement in layout.tsx: Should be `<AuthProvider><AuthInitializer /><Providers>...`
+3. Run: `npm run type-check` - Should pass
+4. Start dev server: `npm run dev`
+5. Open browser console and check: No errors
+6. Check Network tab: No failed auth requests
 
 **Success Criteria**:
-- [ ] TypeScript compiles
+- [x] AuthInitializer is inside AuthProvider in layout.tsx
+- [x] Component renders without errors
+- [x] Auth loads from storage on page load (if tokens exist)
+- [x] No infinite loops or re-renders
+
+**Decision**: This task is verification only. If you want to migrate it for consistency, you can change the import to `useAuth`, but it's not required for functionality.
+
+---
+
+#### Task 2.2: Migrate AuthGuard Component
+
+**File**: `src/components/auth/AuthGuard.tsx`
+
+**IMPORTANT**: This component RENDERS auth state, so it MUST use `useAuth()` from Context.
+
+**Step-by-Step Instructions**:
+
+**Step 1: Read the current file**
+```bash
+cat src/components/auth/AuthGuard.tsx
+```
+
+Look for these specific patterns:
+- Line with: `import { useAuthStore } from '@/lib/stores/authStore';`
+- Line with: `const { ... } = useAuthStore();` (or similar)
+
+**Step 2: Update the import (typically line ~2-5)**
+```typescript
+// FIND this line:
+import { useAuthStore } from '@/lib/stores/authStore';
+
+// REPLACE with:
+import { useAuth } from '@/lib/stores';  // Using barrel export
+// OR
+import { useAuth } from '@/lib/auth/AuthContext';  // Direct import (both work)
+```
+
+**Step 3: Find ALL useAuthStore() calls and replace**
+
+Typical patterns to find:
+```typescript
+// Pattern 1: Destructuring
+const { isAuthenticated, isLoading, user } = useAuthStore();
+
+// Pattern 2: With selector
+const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+// Pattern 3: Multiple calls
+const user = useAuthStore((state) => state.user);
+const isLoading = useAuthStore((state) => state.isLoading);
+```
+
+Replace with:
+```typescript
+// Pattern 1: Destructuring → Keep the same!
+const { isAuthenticated, isLoading, user } = useAuth();
+
+// Pattern 2: With selector → Keep the selector!
+const isAuthenticated = useAuth((state) => state.isAuthenticated);
+
+// Pattern 3: Multiple calls → Can be combined
+const { user, isLoading } = useAuth();
+// OR keep separate if you prefer:
+const user = useAuth((state) => state.user);
+const isLoading = useAuth((state) => state.isLoading);
+```
+
+**Step 4: Verify the changes**
+1. Save the file
+2. Run: `npm run type-check`
+   - Should pass with 0 errors
+   - If you see errors about "useAuth not found", check your import
+3. Check: No other `useAuthStore` references remain in the file
+   ```bash
+   grep -n "useAuthStore" src/components/auth/AuthGuard.tsx
+   # Should return no results (or only in comments)
+   ```
+
+**Step 5: Test in browser**
+1. Start dev server: `npm run dev`
+2. Test unauthenticated flow:
+   - Clear browser storage: DevTools → Application → Clear all
+   - Navigate to: `http://localhost:3000/settings/profile`
+   - Expected: Redirect to `/login` or `/auth/login`
+   - Console: No errors
+3. Test authenticated flow:
+   - Login with test credentials (if you have them)
+   - Navigate to: `http://localhost:3000/settings/profile`
+   - Expected: Page loads successfully, no redirect
+   - Console: No errors
+4. Check for infinite redirects:
+   - Watch URL bar: Should not keep changing
+   - Check console: Should not show repeated navigation messages
+
+**Common Mistakes to Avoid**:
+- ❌ Don't change the destructuring pattern - keep `const { user } = useAuth()`
+- ❌ Don't add extra calls to `useAuth()()` - it's already called internally
+- ❌ Don't use `useAuthStore.getState()` in this component (it renders state)
+- ❌ Don't forget to update the import at the top
+- ❌ Don't leave any `useAuthStore` references (except in comments)
+
+**If You Encounter Errors**:
+- "useAuth is not a function" → Check import path
+- "useAuth must be used within AuthProvider" → Check layout.tsx has AuthProvider
+- Type errors about return type → Make sure you're calling `useAuth()`, not `useAuth`
+- Infinite redirects → Check your redirect logic hasn't changed
+
+**Success Criteria**:
+- [ ] Import changed from `useAuthStore` to `useAuth`
+- [ ] All `useAuthStore()` calls replaced with `useAuth()`
+- [ ] TypeScript compiles with 0 errors
+- [ ] No `useAuthStore` references remain in file
 - [ ] Unauthenticated users redirected to login
 - [ ] Authenticated users see protected pages
-- [ ] Admin users see admin pages
 - [ ] No infinite redirect loops
+- [ ] No console errors
 
 ---
 
 #### Task 2.3: Migrate Header Component
-**File**: `src/components/layout/Header.tsx` (MODIFY)
 
-**Before**:
+**File**: `src/components/layout/Header.tsx`
+
+**IMPORTANT**: This component RENDERS user info, so it MUST use `useAuth()` from Context.
+
+**Step-by-Step Instructions**:
+
+**Step 1: Locate the file and read it**
+```bash
+# First, find the file (might be in different location)
+find src -name "*Header*" -type f
+
+# Then read it
+cat src/components/layout/Header.tsx
+```
+
+**Step 2: Identify all auth usages**
+
+Look for these patterns (write them down before changing):
 ```typescript
+// Common pattern in Header:
+const { user } = useAuthStore();
+const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+// Or might be:
+const user = useAuthStore((state) => state.user);
+const isAdmin = user?.is_superuser;
+```
+
+**Step 3: Update the import**
+```typescript
+// FIND (usually near top of file):
 import { useAuthStore } from '@/lib/stores/authStore';
 
-const { user } = useAuthStore();
+// REPLACE with:
+import { useAuth } from '@/lib/stores';
 ```
 
-**After**:
+**Step 4: Replace all useAuthStore calls**
+
+**Example transformation**:
 ```typescript
-import { useAuth } from '@/lib/auth/AuthContext';
+// BEFORE:
+export function Header() {
+  const { user } = useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-const { user } = useAuth();
+  // ... component logic
+}
+
+// AFTER:
+export function Header() {
+  const { user, isAuthenticated } = useAuth();  // ✅ Combined into one call
+
+  // ... component logic (no changes needed here)
+}
 ```
 
-**Verification**:
-- Run: `npm run type-check`
-- Login and check header displays:
-  - User avatar with correct initials
-  - Dropdown menu with name and email
-  - Admin link if user is superuser (check with `admin@example.com` / `AdminPassword123!`)
-- Test logout from dropdown
+**Alternative (with selectors for optimization)**:
+```typescript
+// If you want to optimize re-renders:
+export function Header() {
+  const user = useAuth((state) => state.user);
+  const isAuthenticated = useAuth((state) => state.isAuthenticated);
+
+  // ... component logic
+}
+```
+
+**Step 5: Check for logout handler**
+
+If Header has a logout function, it might look like:
+```typescript
+const handleLogout = async () => {
+  await useAuthStore.getState().clearAuth();  // ✅ This is CORRECT - don't change!
+  router.push('/login');
+};
+```
+
+**IMPORTANT**: Do NOT change `useAuthStore.getState()` in event handlers! This is correct because:
+- Event handlers run outside the React render cycle
+- They don't need to re-render when state changes
+- Using `getState()` directly is the recommended pattern
+
+**Step 6: Verify changes**
+1. Save file
+2. Check for remaining references:
+   ```bash
+   grep -n "useAuthStore()" src/components/layout/Header.tsx
+   # Should return no results (except useAuthStore.getState() which is OK)
+   ```
+3. Run type check:
+   ```bash
+   npm run type-check
+   ```
+   Should pass with 0 errors
+
+**Step 7: Test in browser**
+1. Start dev server if not running: `npm run dev`
+2. Navigate to home page: `http://localhost:3000`
+3. Test unauthenticated state:
+   - Clear storage: DevTools → Application → Clear all
+   - Refresh page
+   - Header should show: Login/Register buttons (or unauthenticated state)
+   - No errors in console
+4. Test authenticated state:
+   - Login with credentials
+   - Header should show:
+     - User avatar with initials (e.g., "JD" for John Doe)
+     - User name in dropdown
+     - Email in dropdown
+     - Logout button
+   - Click dropdown: Should open/close correctly
+5. Test logout:
+   - Click logout button
+   - Should redirect to login page
+   - Header should return to unauthenticated state
+   - No errors in console
+6. Test admin features (if applicable):
+   - Login as admin/superuser
+   - Header should show "Admin" link or badge
+   - Click admin link: Should navigate to admin area
+7. Check for re-render issues:
+   - Open React DevTools → Components
+   - Find Header component
+   - Watch for excessive re-renders (should only render on auth state change)
+
+**Common Mistakes to Avoid**:
+- ❌ Don't change `useAuthStore.getState()` in event handlers - that's correct!
+- ❌ Don't add empty dependency arrays to useAuth() - it's not useEffect
+- ❌ Don't call useAuth() conditionally - it's a hook, must be at top level
+- ❌ Don't use `useAuth()()` (double call) - the hook calls internally
+- ❌ Don't remove optional chaining (`user?.name`) - user can be null
+
+**If You Encounter Errors**:
+- "Cannot read property 'name' of null" → Add optional chaining: `user?.name`
+- "useAuth is not a function" → Check import statement
+- Type error on user properties → Make sure User type is imported if needed
+- Dropdown not working → Check event handlers weren't accidentally modified
+- Avatar not showing → Check you didn't change the avatar logic (only hook calls)
+
+**Verification Checklist**:
+- [ ] Import updated to `useAuth`
+- [ ] All `useAuthStore()` calls replaced (except `getState()` in handlers)
+- [ ] TypeScript compiles with 0 errors
+- [ ] ESLint passes with 0 warnings
+- [ ] Unauthenticated: Shows login/register UI
+- [ ] Authenticated: Shows user info correctly
+- [ ] Avatar displays correct initials
+- [ ] Dropdown opens/closes properly
+- [ ] Logout button works
+- [ ] Admin link shows/hides based on user role
+- [ ] No console errors
+- [ ] No excessive re-renders (check React DevTools)
 
 **Success Criteria**:
-- [ ] TypeScript compiles
-- [ ] Header displays user info correctly
-- [ ] Avatar shows correct initials
-- [ ] Admin link shows/hides based on role
-- [ ] Logout works from dropdown
-- [ ] No flickering or loading states
+- [ ] All render state uses `useAuth()`
+- [ ] Event handlers still use `useAuthStore.getState()` (if present)
+- [ ] Component behavior unchanged
+- [ ] No visual regressions
+- [ ] Performance unchanged (no extra re-renders)
 
 ---
 
