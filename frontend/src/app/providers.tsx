@@ -3,7 +3,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lazy, Suspense, useState } from 'react';
 import { ThemeProvider } from '@/components/theme';
-import { AuthInitializer } from '@/components/auth';
 
 // Lazy load devtools - only in local development (not in Docker), never in production
 // Set NEXT_PUBLIC_ENABLE_DEVTOOLS=true in .env.local to enable
@@ -39,7 +38,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <AuthInitializer />
         {children}
         {ReactQueryDevtools && (
           <Suspense fallback={null}>
