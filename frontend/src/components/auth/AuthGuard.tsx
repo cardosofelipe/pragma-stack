@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/stores';
+import { useAuth } from '@/lib/auth/AuthContext';
 import { useMe } from '@/lib/api/hooks/useAuth';
 import { AuthLoadingSkeleton } from '@/components/layout';
 import config from '@/config/app.config';

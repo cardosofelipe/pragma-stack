@@ -28,11 +28,20 @@ let refreshPromise: Promise<string> | null = null;
 /**
  * Auth store accessor
  * Dynamically imported to avoid circular dependencies
+ * Checks for E2E test store injection before using production store
  *
  * Note: Tested via E2E tests when interceptors are invoked
  */
 /* istanbul ignore next */
 const getAuthStore = async () => {
+  // Check for E2E test store injection (same pattern as AuthProvider)
+  if (typeof window !== 'undefined' && (window as any).__TEST_AUTH_STORE__) {
+    const testStore = (window as any).__TEST_AUTH_STORE__;
+    // Test store must have getState() method for non-React contexts
+    return testStore.getState();
+  }
+
+  // Production: use real Zustand store
   const { useAuthStore } = await import('@/lib/stores/authStore');
   return useAuthStore.getState();
 };
