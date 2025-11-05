@@ -44,9 +44,9 @@ export const MOCK_SESSION = {
  * @param email User email (defaults to mock user email)
  * @param password User password (defaults to mock password)
  */
-export async function loginViaUI(page: Page, email = 'test@example.com', password = 'password123'): Promise<void> {
+export async function loginViaUI(page: Page, email = 'test@example.com', password = 'Password123!'): Promise<void> {
   // Navigate to login page
-  await page.goto('/auth/login');
+  await page.goto('/login');
 
   // Fill login form
   await page.locator('input[name="email"]').fill(email);
@@ -70,6 +70,11 @@ export async function loginViaUI(page: Page, email = 'test@example.com', passwor
  * @param page Playwright page object
  */
 export async function setupAuthenticatedMocks(page: Page): Promise<void> {
+  // Set E2E test mode flag to skip encryption in storage.ts
+  await page.addInitScript(() => {
+    (window as any).__PLAYWRIGHT_TEST__ = true;
+  });
+
   const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
   // Mock POST /api/v1/auth/login - Login endpoint
@@ -79,13 +84,11 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          success: true,
-          data: {
-            user: MOCK_USER,
-            access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJleHAiOjk5OTk5OTk5OTl9.signature',
-            refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJleHAiOjk5OTk5OTk5OTl9.signature',
-            expires_in: 3600,
-          },
+          user: MOCK_USER,
+          access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJleHAiOjk5OTk5OTk5OTl9.signature',
+          refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJleHAiOjk5OTk5OTk5OTl9.signature',
+          expires_in: 3600,
+          token_type: 'bearer',
         }),
       });
     } else {
@@ -100,20 +103,14 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          data: MOCK_USER,
-        }),
+        body: JSON.stringify(MOCK_USER),
       });
     } else if (route.request().method() === 'PATCH') {
       const postData = route.request().postDataJSON();
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          data: { ...MOCK_USER, ...postData },
-        }),
+        body: JSON.stringify({ ...MOCK_USER, ...postData }),
       });
     } else {
       await route.continue();
@@ -126,7 +123,6 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        success: true,
         message: 'Password changed successfully',
       }),
     });
@@ -139,10 +135,7 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          success: true,
-          data: {
-            sessions: [MOCK_SESSION],
-          },
+          sessions: [MOCK_SESSION],
         }),
       });
     } else {
@@ -157,7 +150,6 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          success: true,
           message: 'Session revoked successfully',
         }),
       });

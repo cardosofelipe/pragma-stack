@@ -1,24 +1,37 @@
 /**
  * E2E Tests for Profile Settings Page
- *
- * DELETED: All profile settings tests were failing due to auth state issues after
- * architecture simplification. These tests will be rebuilt in Phase 3 with a
- * pragmatic approach combining actual login flow and direct auth store injection.
- *
- * Tests to rebuild:
- * - Display profile form with user data
- * - Update first name
- * - Update last name
- * - Update email (with verification flow)
- * - Validation errors
- * - Successfully save changes
+ * Tests user profile management functionality
  */
 
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { setupAuthenticatedMocks, loginViaUI, MOCK_USER } from './helpers/auth';
 
 test.describe('Profile Settings', () => {
-  test.skip('Placeholder - tests will be rebuilt in Phase 3', async () => {
-    // Tests deleted during nuclear refactor Phase 2
-    // Will be rebuilt with pragmatic auth approach
+  test.beforeEach(async ({ page }) => {
+    // Set up API mocks
+    await setupAuthenticatedMocks(page);
+
+    // Login via UI to establish authenticated session
+    await loginViaUI(page);
+
+    // Navigate to profile page
+    await page.goto('/settings/profile');
+
+    // Wait for page to render
+    await page.waitForTimeout(1000);
+  });
+
+  test('should display profile form with user data', async ({ page }) => {
+    // Check page title
+    await expect(page.locator('h2')).toContainText('Profile Settings');
+
+    // Wait for form to be populated with user data (use label-based selectors)
+    const firstNameInput = page.getByLabel(/first name/i);
+    await firstNameInput.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Verify form fields are populated with mock user data
+    await expect(firstNameInput).toHaveValue(MOCK_USER.first_name);
+    await expect(page.getByLabel(/last name/i)).toHaveValue(MOCK_USER.last_name);
+    await expect(page.getByLabel(/email/i)).toHaveValue(MOCK_USER.email);
   });
 });

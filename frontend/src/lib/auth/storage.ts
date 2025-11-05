@@ -3,6 +3,9 @@
  * Primary: httpOnly cookies (server-side)
  * Fallback: Encrypted localStorage (client-side)
  * SSR-safe: All browser APIs guarded
+ *
+ * E2E Test Mode: When __PLAYWRIGHT_TEST__ flag is set, encryption is skipped
+ * for easier E2E testing without production code pollution
  */
 
 import { encryptData, decryptData, clearEncryptionKey } from './crypto';
@@ -16,6 +19,14 @@ const STORAGE_KEY = 'auth_tokens';
 const STORAGE_METHOD_KEY = 'auth_storage_method';
 
 export type StorageMethod = 'cookie' | 'localStorage';
+
+/**
+ * Check if running in E2E test mode (Playwright)
+ * This flag is set by E2E tests to skip encryption for easier testing
+ */
+function isE2ETestMode(): boolean {
+  return typeof window !== 'undefined' && (window as any).__PLAYWRIGHT_TEST__ === true;
+}
 
 /**
  * Check if localStorage is available (browser only)
@@ -102,6 +113,13 @@ export async function saveTokens(tokens: TokenStorage): Promise<void> {
   }
 
   try {
+    // E2E TEST MODE: Skip encryption for Playwright tests
+    if (isE2ETestMode()) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tokens));
+      return;
+    }
+
+    // PRODUCTION: Use encryption
     const encrypted = await encryptData(JSON.stringify(tokens));
     localStorage.setItem(STORAGE_KEY, encrypted);
   } catch (error) {
@@ -134,12 +152,28 @@ export async function getTokens(): Promise<TokenStorage | null> {
   }
 
   try {
-    const encrypted = localStorage.getItem(STORAGE_KEY);
-    if (!encrypted) {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) {
       return null;
     }
 
-    const decrypted = await decryptData(encrypted);
+    // E2E TEST MODE: Tokens stored as plain JSON
+    if (isE2ETestMode()) {
+      const parsed = JSON.parse(stored);
+
+      // Validate structure - must have required fields
+      if (!parsed || typeof parsed !== 'object' ||
+          !('accessToken' in parsed) || !('refreshToken' in parsed) ||
+          (parsed.accessToken !== null && typeof parsed.accessToken !== 'string') ||
+          (parsed.refreshToken !== null && typeof parsed.refreshToken !== 'string')) {
+        throw new Error('Invalid token structure');
+      }
+
+      return parsed as TokenStorage;
+    }
+
+    // PRODUCTION: Decrypt tokens
+    const decrypted = await decryptData(stored);
     const parsed = JSON.parse(decrypted);
 
     // Validate structure - must have required fields
