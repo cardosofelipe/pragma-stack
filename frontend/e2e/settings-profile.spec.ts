@@ -34,4 +34,16 @@ test.describe('Profile Settings', () => {
     await expect(page.getByLabel(/last name/i)).toHaveValue(MOCK_USER.last_name);
     await expect(page.getByLabel(/email/i)).toHaveValue(MOCK_USER.email);
   });
+
+  test('should show email as read-only', async ({ page }) => {
+    // Wait for form to load
+    const emailInput = page.getByLabel(/email/i);
+    await emailInput.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Verify email field is disabled or read-only
+    const isDisabled = await emailInput.isDisabled();
+    const isReadOnly = await emailInput.getAttribute('readonly');
+
+    expect(isDisabled || isReadOnly !== null).toBeTruthy();
+  });
 });

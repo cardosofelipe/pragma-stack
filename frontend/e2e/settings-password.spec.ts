@@ -1,24 +1,60 @@
 /**
  * E2E Tests for Password Change Page
- *
- * DELETED: All password change tests were failing due to auth state issues after
- * architecture simplification. These tests will be rebuilt in Phase 3 with a
- * pragmatic approach combining actual login flow and direct auth store injection.
- *
- * Tests to rebuild:
- * - Display password change form
- * - Show password strength requirements
- * - Validation for weak passwords
- * - Validation for mismatched passwords
- * - Password input types
- * - Successfully change password
+ * Tests password change functionality
  */
 
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { setupAuthenticatedMocks, loginViaUI } from './helpers/auth';
 
 test.describe('Password Change', () => {
-  test.skip('Placeholder - tests will be rebuilt in Phase 3', async () => {
-    // Tests deleted during nuclear refactor Phase 2
-    // Will be rebuilt with pragmatic auth approach
+  test.beforeEach(async ({ page }) => {
+    // Set up API mocks
+    await setupAuthenticatedMocks(page);
+
+    // Login via UI to establish authenticated session
+    await loginViaUI(page);
+
+    // Navigate to password page
+    await page.goto('/settings/password');
+
+    // Wait for page to render
+    await page.waitForTimeout(1000);
+  });
+
+  test('should display password change form', async ({ page }) => {
+    // Check page title
+    await expect(page.locator('h2')).toContainText('Password');
+
+    // Wait for form to be visible
+    const currentPasswordInput = page.getByLabel(/current password/i);
+    await currentPasswordInput.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Verify all password fields are present
+    await expect(currentPasswordInput).toBeVisible();
+    await expect(page.getByLabel(/^new password/i)).toBeVisible();
+    await expect(page.getByLabel(/confirm.*password/i)).toBeVisible();
+
+    // Verify submit button is present
+    await expect(page.getByRole('button', { name: /change password/i })).toBeVisible();
+  });
+
+  test('should have all password fields as password type', async ({ page }) => {
+    // Wait for form to load
+    const currentPasswordInput = page.getByLabel(/current password/i);
+    await currentPasswordInput.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Verify all password fields have type="password"
+    await expect(currentPasswordInput).toHaveAttribute('type', 'password');
+    await expect(page.getByLabel(/^new password/i)).toHaveAttribute('type', 'password');
+    await expect(page.getByLabel(/confirm.*password/i)).toHaveAttribute('type', 'password');
+  });
+
+  test('should have submit button disabled initially', async ({ page }) => {
+    // Wait for form to load
+    const submitButton = page.getByRole('button', { name: /change password/i });
+    await submitButton.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Verify button is disabled when form is empty/untouched
+    await expect(submitButton).toBeDisabled();
   });
 });
