@@ -36,6 +36,21 @@ export const MOCK_SESSION = {
 };
 
 /**
+ * Mock superuser data for E2E testing
+ */
+export const MOCK_SUPERUSER = {
+  id: '00000000-0000-0000-0000-000000000003',
+  email: 'admin@example.com',
+  first_name: 'Admin',
+  last_name: 'User',
+  phone_number: null,
+  is_active: true,
+  is_superuser: true,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
+/**
  * Authenticate user via REAL login flow
  * Tests actual user behavior: fill form → submit → API call → store tokens → redirect
  * Requires setupAuthenticatedMocks() to be called first
@@ -163,4 +178,130 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
    * We inject authentication by calling setAuth() directly in the page context.
    * This tests the actual production code path including encryption.
    */
+}
+
+/**
+ * Set up API mocking for superuser E2E tests
+ * Similar to setupAuthenticatedMocks but returns MOCK_SUPERUSER instead
+ * Also mocks admin endpoints for stats display
+ *
+ * @param page Playwright page object
+ */
+export async function setupSuperuserMocks(page: Page): Promise<void> {
+  // Set E2E test mode flag
+  await page.addInitScript(() => {
+    (window as any).__PLAYWRIGHT_TEST__ = true;
+  });
+
+  const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+  // Mock POST /api/v1/auth/login - Login endpoint (returns superuser)
+  await page.route(`${baseURL}/api/v1/auth/login`, async (route: Route) => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          user: MOCK_SUPERUSER,
+          access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDMiLCJleHAiOjk5OTk5OTk5OTl9.signature',
+          refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDQiLCJleHAiOjk5OTk5OTk5OTl9.signature',
+          expires_in: 3600,
+          token_type: 'bearer',
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock GET /api/v1/users/me - Get current user (superuser)
+  await page.route(`${baseURL}/api/v1/users/me`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(MOCK_SUPERUSER),
+      });
+    } else if (route.request().method() === 'PATCH') {
+      const postData = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ...MOCK_SUPERUSER, ...postData }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock GET /api/v1/admin/users - Get all users (admin endpoint)
+  await page.route(`${baseURL}/api/v1/admin/users*`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          data: [MOCK_USER, MOCK_SUPERUSER],
+          pagination: {
+            total: 2,
+            page: 1,
+            page_size: 50,
+            total_pages: 1,
+          },
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock GET /api/v1/admin/organizations - Get all organizations (admin endpoint)
+  await page.route(`${baseURL}/api/v1/admin/organizations*`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          data: [],
+          pagination: {
+            total: 0,
+            page: 1,
+            page_size: 50,
+            total_pages: 0,
+          },
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock sessions endpoints (same as regular user)
+  await page.route(`${baseURL}/api/v1/sessions**`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          sessions: [MOCK_SESSION],
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  await page.route(`${baseURL}/api/v1/sessions/*`, async (route: Route) => {
+    if (route.request().method() === 'DELETE') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          message: 'Session revoked successfully',
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
 }

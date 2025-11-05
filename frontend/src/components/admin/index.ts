@@ -1,4 +1,6 @@
 // Admin-specific components
-// Examples: UserTable, OrganizationForm, StatisticsCard, etc.
 
-export {};
+export { AdminSidebar } from './AdminSidebar';
+export { Breadcrumbs } from './Breadcrumbs';
+export { StatCard } from './StatCard';
+export { DashboardStats } from './DashboardStats';
