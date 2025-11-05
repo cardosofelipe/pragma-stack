@@ -1,26 +1,29 @@
 /**
  * Tests for Preferences Page
- * Smoke tests for placeholder page
+ * Verifies rendering of preferences placeholder
  */
 
 import { render, screen } from '@testing-library/react';
 import PreferencesPage from '@/app/(authenticated)/settings/preferences/page';
 
 describe('PreferencesPage', () => {
-  it('renders without crashing', () => {
+  it('renders page title', () => {
     render(<PreferencesPage />);
+
     expect(screen.getByText('Preferences')).toBeInTheDocument();
   });
 
-  it('renders heading', () => {
+  it('renders placeholder message', () => {
     render(<PreferencesPage />);
 
-    expect(screen.getByRole('heading', { name: /^preferences$/i })).toBeInTheDocument();
+    expect(
+      screen.getByText(/Configure your preferences/)
+    ).toBeInTheDocument();
   });
 
-  it('shows placeholder text', () => {
+  it('mentions Task 3.5', () => {
     render(<PreferencesPage />);
 
-    expect(screen.getByText(/configure your preferences/i)).toBeInTheDocument();
+    expect(screen.getByText(/Task 3.5/)).toBeInTheDocument();
   });
 });
