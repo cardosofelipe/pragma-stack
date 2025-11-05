@@ -41,19 +41,9 @@ interface AuthState {
 
 /**
  * Type of the Zustand hook function
- * Used for Context storage and test injection
+ * Used for Context storage and test injection via props
  */
 type AuthStoreHook = typeof useAuthStoreImpl;
-
-/**
- * Global window extension for E2E test injection
- * E2E tests can set window.__TEST_AUTH_STORE__ before navigation
- */
-declare global {
-  interface Window {
-    __TEST_AUTH_STORE__?: AuthStoreHook;
-  }
-}
 
 const AuthContext = createContext<AuthStoreHook | null>(null);
 
@@ -70,36 +60,25 @@ interface AuthProviderProps {
  * Authentication Context Provider
  *
  * Wraps Zustand auth store in React Context for dependency injection.
- * Enables test isolation by allowing mock stores to be injected via:
- * 1. `store` prop (unit tests)
- * 2. `window.__TEST_AUTH_STORE__` (E2E tests)
- * 3. Production singleton (default)
+ * Enables test isolation by allowing mock stores to be injected via the `store` prop.
  *
  * @example
  * ```tsx
- * // In root layout
+ * // In production (root layout)
  * <AuthProvider>
  *   <App />
  * </AuthProvider>
  *
- * // In unit tests
+ * // In unit tests (with mock store)
  * <AuthProvider store={mockStore}>
  *   <ComponentUnderTest />
  * </AuthProvider>
- *
- * // In E2E tests (before navigation)
- * window.__TEST_AUTH_STORE__ = mockAuthStoreHook;
  * ```
  */
 export function AuthProvider({ children, store }: AuthProviderProps) {
-  // Check for E2E test store injection (SSR-safe)
-  const testStore =
-    typeof window !== "undefined" && window.__TEST_AUTH_STORE__
-      ? window.__TEST_AUTH_STORE__
-      : null;
-
-  // Priority: explicit prop > E2E test store > production singleton
-  const authStore = store ?? testStore ?? useAuthStoreImpl;
+  // Use provided store for unit tests, otherwise use production singleton
+  // E2E tests use the real auth store with mocked API routes
+  const authStore = store ?? useAuthStoreImpl;
 
   return <AuthContext.Provider value={authStore}>{children}</AuthContext.Provider>;
 }

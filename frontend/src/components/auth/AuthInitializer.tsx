@@ -35,12 +35,8 @@ export function AuthInitializer() {
   const loadAuthFromStorage = useAuth((state) => state.loadAuthFromStorage);
 
   useEffect(() => {
-    // Skip loading from storage in E2E tests - test store is already injected
-    if (typeof window !== 'undefined' && (window as any).__E2E_TEST__) {
-      return;
-    }
-
     // Load auth state from encrypted storage on mount
+    // E2E tests use the real flow with mocked API responses
     loadAuthFromStorage();
   }, [loadAuthFromStorage]);
 
