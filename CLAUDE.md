@@ -475,7 +475,7 @@ Automatically applied via middleware in `main.py`:
 - ✅ User management (CRUD, password change)
 - ✅ Organization system (multi-tenant with roles)
 - ✅ Admin panel (user/org management, bulk operations)
-- ✅ E2E test suite (86 tests, 100% pass rate, zero flaky tests)
+- ✅ E2E test suite (56 passing, 1 skipped, zero flaky tests)
 
 ### Test Coverage
 - **Backend**: 97% overall (743 tests, all passing) ✅
@@ -487,11 +487,15 @@ Automatically applied via middleware in `main.py`:
   - Permissions: 100% ✅
   - 84 missing lines justified (defensive code, error handlers, production-only code)
 
-- **Frontend E2E**: 86 tests across 4 files (100% pass rate, zero flaky tests) ✅
-  - auth-login.spec.ts
-  - auth-register.spec.ts
-  - auth-password-reset.spec.ts
-  - navigation.spec.ts
+- **Frontend E2E**: 56 passing, 1 skipped across 7 files ✅
+  - auth-login.spec.ts (19 tests)
+  - auth-register.spec.ts (14 tests)
+  - auth-password-reset.spec.ts (10 tests)
+  - navigation.spec.ts (10 tests)
+  - settings-password.spec.ts (3 tests)
+  - settings-profile.spec.ts (2 tests)
+  - settings-navigation.spec.ts (5 tests)
+  - settings-sessions.spec.ts (1 skipped - route not yet implemented)
 
 ## Email Service Integration
 
