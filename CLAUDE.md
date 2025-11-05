@@ -206,6 +206,32 @@ docker-compose build frontend
 - **Auto-generated client**: `lib/api/generated/` from OpenAPI spec
   - Generate with: `npm run generate:api` (runs `scripts/generate-api-client.sh`)
 
+### 🔴 CRITICAL: Auth Store Dependency Injection Pattern
+
+**ALWAYS use `useAuth()` from `AuthContext`, NEVER import `useAuthStore` directly!**
+
+```typescript
+// ❌ WRONG - Bypasses dependency injection
+import { useAuthStore } from '@/lib/stores/authStore';
+const { user, isAuthenticated } = useAuthStore();
+
+// ✅ CORRECT - Uses dependency injection
+import { useAuth } from '@/lib/auth/AuthContext';
+const { user, isAuthenticated } = useAuth();
+```
+
+**Why This Matters:**
+- E2E tests inject mock stores via `window.__TEST_AUTH_STORE__`
+- Unit tests inject via `<AuthProvider store={mockStore}>`
+- Direct `useAuthStore` imports bypass this injection → **tests fail**
+- ESLint will catch violations (added Nov 2025)
+
+**Exceptions:**
+1. `AuthContext.tsx` - DI boundary, legitimately needs real store
+2. `client.ts` - Non-React context, uses dynamic import + `__TEST_AUTH_STORE__` check
+
+**See**: `frontend/docs/ARCHITECTURE_FIX_REPORT.md` for full details.
+
 ### Session Management Architecture
 **Database-backed session tracking** (not just JWT):
 - Each refresh token has a corresponding `UserSession` record
@@ -570,10 +596,14 @@ alembic upgrade head        # Re-apply
 
 ## Additional Documentation
 
+### Backend Documentation
 - `backend/docs/ARCHITECTURE.md`: System architecture and design patterns
 - `backend/docs/CODING_STANDARDS.md`: Code quality standards and best practices
 - `backend/docs/COMMON_PITFALLS.md`: Common mistakes and how to avoid them
 - `backend/docs/FEATURE_EXAMPLE.md`: Step-by-step feature implementation guide
+
+### Frontend Documentation
+- **`frontend/docs/ARCHITECTURE_FIX_REPORT.md`**: ⭐ Critical DI pattern fixes (READ THIS!)
 - `frontend/e2e/README.md`: E2E testing setup and guidelines
 - **`frontend/docs/design-system/`**: Comprehensive design system documentation
   - `README.md`: Hub with learning paths (start here)

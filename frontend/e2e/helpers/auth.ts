@@ -36,6 +36,33 @@ export const MOCK_SESSION = {
 };
 
 /**
+ * Authenticate user via REAL login flow
+ * Tests actual user behavior: fill form → submit → API call → store tokens → redirect
+ * Requires setupAuthenticatedMocks() to be called first
+ *
+ * @param page Playwright page object
+ * @param email User email (defaults to mock user email)
+ * @param password User password (defaults to mock password)
+ */
+export async function loginViaUI(page: Page, email = 'test@example.com', password = 'password123'): Promise<void> {
+  // Navigate to login page
+  await page.goto('/auth/login');
+
+  // Fill login form
+  await page.locator('input[name="email"]').fill(email);
+  await page.locator('input[name="password"]').fill(password);
+
+  // Submit and wait for navigation to home
+  await Promise.all([
+    page.waitForURL('/', { timeout: 10000 }),
+    page.locator('button[type="submit"]').click(),
+  ]);
+
+  // Wait for auth to settle
+  await page.waitForTimeout(500);
+}
+
+/**
  * Set up API mocking for authenticated E2E tests
  * Intercepts backend API calls and returns mock data
  * Routes persist across client-side navigation
@@ -44,6 +71,27 @@ export const MOCK_SESSION = {
  */
 export async function setupAuthenticatedMocks(page: Page): Promise<void> {
   const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+  // Mock POST /api/v1/auth/login - Login endpoint
+  await page.route(`${baseURL}/api/v1/auth/login`, async (route: Route) => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          data: {
+            user: MOCK_USER,
+            access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJleHAiOjk5OTk5OTk5OTl9.signature',
+            refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJleHAiOjk5OTk5OTk5OTl9.signature',
+            expires_in: 3600,
+          },
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
 
   // Mock GET /api/v1/users/me - Get current user
   // Mock PATCH /api/v1/users/me - Update user profile
@@ -118,48 +166,9 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
     }
   });
 
-  // Inject mock auth store that persists across navigation
-  // This creates a mock Zustand store accessible via window.__TEST_AUTH_STORE__
-  // CRITICAL: Must be set BEFORE React renders to be picked up by AuthProvider
-  await page.addInitScript((mockUser) => {
-    // Create a stable state object that persists
-    const authState = {
-      user: mockUser,
-      accessToken: 'mock.access.token', // Valid JWT format (3 parts)
-      refreshToken: 'mock.refresh.token',
-      isAuthenticated: true,
-      isLoading: false,
-      tokenExpiresAt: Date.now() + 900000,
-      setAuth: async () => {},
-      setTokens: async () => {},
-      setUser: () => {},
-      clearAuth: async () => {},
-      loadAuthFromStorage: async () => {
-        // No-op in tests - state is already set
-      },
-      isTokenExpired: () => false,
-    };
-
-    // Mock Zustand hook - must support both selector and no-selector calls
-    const mockAuthStore: any = (selector?: any) => {
-      // If selector provided, call it with the state
-      if (selector && typeof selector === 'function') {
-        return selector(authState);
-      }
-      // Otherwise return the full state
-      return authState;
-    };
-
-    // Add getState method that Zustand stores have
-    mockAuthStore.getState = () => authState;
-
-    // Add subscribe method (required by Zustand)
-    mockAuthStore.subscribe = () => () => {}; // Returns unsubscribe function
-
-    // Make it globally available for AuthProvider
-    (window as any).__TEST_AUTH_STORE__ = mockAuthStore;
-
-    // Also set a flag to indicate we're in a test environment
-    (window as any).__E2E_TEST__ = true;
-  }, MOCK_USER);
+  /**
+   * E2E tests now use the REAL auth store with mocked API routes.
+   * We inject authentication by calling setAuth() directly in the page context.
+   * This tests the actual production code path including encryption.
+   */
 }
