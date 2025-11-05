@@ -25,7 +25,7 @@ export type StorageMethod = 'cookie' | 'localStorage';
  * This flag is set by E2E tests to skip encryption for easier testing
  */
 function isE2ETestMode(): boolean {
-  return typeof window !== 'undefined' && (window as any).__PLAYWRIGHT_TEST__ === true;
+  return typeof window !== 'undefined' && (window as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ === true;
 }
 
 /**
