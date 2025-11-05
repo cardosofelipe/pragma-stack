@@ -5,6 +5,7 @@
 
 import { render, waitFor } from '@testing-library/react';
 import { AuthInitializer } from '@/components/auth/AuthInitializer';
+import { AuthProvider } from '@/lib/auth/AuthContext';
 import { useAuthStore } from '@/lib/stores/authStore';
 
 // Mock the auth store
@@ -28,13 +29,21 @@ describe('AuthInitializer', () => {
 
   describe('Initialization', () => {
     it('renders nothing (null)', () => {
-      const { container } = render(<AuthInitializer />);
+      const { container } = render(
+        <AuthProvider>
+          <AuthInitializer />
+        </AuthProvider>
+      );
 
       expect(container.firstChild).toBeNull();
     });
 
     it('calls loadAuthFromStorage on mount', async () => {
-      render(<AuthInitializer />);
+      render(
+        <AuthProvider>
+          <AuthInitializer />
+        </AuthProvider>
+      );
 
       await waitFor(() => {
         expect(mockLoadAuthFromStorage).toHaveBeenCalledTimes(1);
@@ -42,14 +51,22 @@ describe('AuthInitializer', () => {
     });
 
     it('does not call loadAuthFromStorage again on re-render', async () => {
-      const { rerender } = render(<AuthInitializer />);
+      const { rerender } = render(
+        <AuthProvider>
+          <AuthInitializer />
+        </AuthProvider>
+      );
 
       await waitFor(() => {
         expect(mockLoadAuthFromStorage).toHaveBeenCalledTimes(1);
       });
 
       // Force re-render
-      rerender(<AuthInitializer />);
+      rerender(
+        <AuthProvider>
+          <AuthInitializer />
+        </AuthProvider>
+      );
 
       // Should still only be called once (useEffect dependencies prevent re-call)
       expect(mockLoadAuthFromStorage).toHaveBeenCalledTimes(1);

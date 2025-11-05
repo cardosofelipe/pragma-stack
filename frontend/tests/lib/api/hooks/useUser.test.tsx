@@ -7,6 +7,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useUpdateProfile } from '@/lib/api/hooks/useUser';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { AuthProvider } from '@/lib/auth/AuthContext';
 import * as apiClient from '@/lib/api/client';
 
 // Mock dependencies
@@ -32,7 +33,9 @@ describe('useUser hooks', () => {
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <AuthProvider>
+        {children}
+      </AuthProvider>
     </QueryClientProvider>
   );
 

@@ -11,9 +11,15 @@ test.describe('Profile Settings', () => {
     // Set up API mocks for authenticated user
     await setupAuthenticatedMocks(page);
 
+    // Delay to ensure auth store injection completes before navigation
+    await page.waitForTimeout(200);
+
     // Navigate to profile settings
     await page.goto('/settings/profile');
     await expect(page).toHaveURL('/settings/profile');
+
+    // Wait for page to fully load with auth context
+    await page.waitForSelector('h2:has-text("Profile")', { timeout: 10000 });
   });
 
   test('should display profile settings page', async ({ page }) => {
@@ -79,14 +85,15 @@ test.describe('Profile Settings', () => {
       return input && input.value !== '';
     }, { timeout: 5000 });
 
-    // Modify first name
+    // Modify first name and blur to trigger dirty state
     const firstNameInput = page.locator('#first_name');
     await firstNameInput.clear();
     await firstNameInput.fill('TestUser');
+    await firstNameInput.blur();
 
-    // Reset button should appear
+    // Reset button should appear when form is dirty
     const resetButton = page.locator('button[type="button"]:has-text("Reset")');
-    await expect(resetButton).toBeVisible();
+    await expect(resetButton).toBeVisible({ timeout: 3000 });
   });
 
   test('should reset form when reset button is clicked', async ({ page }) => {
@@ -102,9 +109,10 @@ test.describe('Profile Settings', () => {
     const firstNameInput = page.locator('#first_name');
     const originalValue = await firstNameInput.inputValue();
 
-    // Modify first name
+    // Modify first name and blur to trigger dirty state
     await firstNameInput.clear();
     await firstNameInput.fill('TestUser');
+    await firstNameInput.blur();
     await expect(firstNameInput).toHaveValue('TestUser');
 
     // Click reset

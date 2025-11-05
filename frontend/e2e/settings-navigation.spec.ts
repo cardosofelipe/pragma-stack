@@ -11,9 +11,15 @@ test.describe('Settings Navigation', () => {
     // Set up API mocks for authenticated user
     await setupAuthenticatedMocks(page);
 
+    // Delay to ensure auth store injection completes before navigation
+    await page.waitForTimeout(200);
+
     // Navigate to settings
     await page.goto('/settings/profile');
     await expect(page).toHaveURL('/settings/profile');
+
+    // Wait for page to fully load with auth context
+    await page.waitForSelector('h2:has-text("Profile")', { timeout: 10000 });
   });
 
   test('should display settings tabs', async ({ page }) => {
@@ -48,7 +54,7 @@ test.describe('Settings Navigation', () => {
     ]);
 
     await expect(page).toHaveURL('/settings/password');
-    await expect(page.locator('h2')).toContainText(/Change Password/i);
+    await expect(page.locator('h2')).toContainText(/Password Settings/i);
   });
 
   test('should navigate from Profile to Sessions', async ({ page }) => {
@@ -95,7 +101,7 @@ test.describe('Settings Navigation', () => {
     ]);
 
     await expect(page).toHaveURL('/settings/password');
-    await expect(page.locator('h2')).toContainText(/Change Password/i);
+    await expect(page.locator('h2')).toContainText(/Password Settings/i);
   });
 
   test('should maintain layout when navigating between tabs', async ({ page }) => {

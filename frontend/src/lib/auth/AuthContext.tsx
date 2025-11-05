@@ -13,6 +13,7 @@
 
 import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
+// eslint-disable-next-line no-restricted-imports -- This is the DI boundary, needs real store for production
 import { useAuthStore as useAuthStoreImpl } from "@/lib/stores/authStore";
 import type { User } from "@/lib/stores/authStore";
 

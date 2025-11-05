@@ -17,8 +17,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI and locally to handle flaky tests */
   retries: process.env.CI ? 2 : 1,
-  /* Limit workers to prevent test interference and Next dev server overload */
-  workers: process.env.CI ? 1 : 8,
+  /* Use 1 worker to prevent test interference (parallel execution causes auth mock conflicts) */
+  workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI ? 'github' : 'list',
   /* Suppress console output unless VERBOSE=true */

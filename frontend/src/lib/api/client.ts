@@ -35,13 +35,16 @@ let refreshPromise: Promise<string> | null = null;
 /* istanbul ignore next */
 const getAuthStore = async () => {
   // Check for E2E test store injection (same pattern as AuthProvider)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (typeof window !== 'undefined' && (window as any).__TEST_AUTH_STORE__) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const testStore = (window as any).__TEST_AUTH_STORE__;
     // Test store must have getState() method for non-React contexts
     return testStore.getState();
   }
 
   // Production: use real Zustand store
+  // Note: Dynamic import is acceptable here (non-React context, checks __TEST_AUTH_STORE__ first)
   const { useAuthStore } = await import('@/lib/stores/authStore');
   return useAuthStore.getState();
 };

@@ -11,9 +11,15 @@ test.describe('Sessions Management', () => {
     // Set up API mocks for authenticated user
     await setupAuthenticatedMocks(page);
 
+    // Delay to ensure auth store injection completes before navigation
+    await page.waitForTimeout(200);
+
     // Navigate to sessions settings
     await page.goto('/settings/sessions');
     await expect(page).toHaveURL('/settings/sessions');
+
+    // Wait for page to fully load with auth context
+    await page.waitForSelector('h2', { timeout: 10000 });
   });
 
   test('should display sessions management page', async ({ page }) => {
@@ -132,9 +138,15 @@ test.describe('Sessions Management - Revocation', () => {
     // Set up API mocks for authenticated user
     await setupAuthenticatedMocks(page);
 
+    // Delay to ensure auth store injection completes before navigation
+    await page.waitForTimeout(200);
+
     // Navigate to sessions settings
     await page.goto('/settings/sessions');
     await expect(page).toHaveURL('/settings/sessions');
+
+    // Wait for page to fully load with auth context
+    await page.waitForSelector('h2', { timeout: 10000 });
   });
 
   test('should show confirmation dialog before individual revocation', async ({ page }) => {

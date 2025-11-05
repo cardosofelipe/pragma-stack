@@ -20,7 +20,6 @@ import {
   confirmPasswordReset,
   changeCurrentUserPassword,
 } from '../client';
-import { useAuthStore } from '@/lib/stores/authStore';
 import type { User } from '@/lib/stores/authStore';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { parseAPIError, getGeneralError } from '../errors';
@@ -50,8 +49,8 @@ export const authKeys = {
  * @returns React Query result with user data
  */
 export function useMe() {
-  const { isAuthenticated, accessToken } = useAuthStore();
-  const setUser = useAuthStore((state) => state.setUser);
+  const { isAuthenticated, accessToken } = useAuth();
+  const setUser = useAuth((state) => state.setUser);
 
   const query = useQuery({
     queryKey: authKeys.me,
@@ -95,7 +94,7 @@ export function useMe() {
 export function useLogin(onSuccess?: () => void) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const setAuth = useAuth((state) => state.setAuth);
 
   return useMutation({
     mutationFn: async (credentials: { email: string; password: string }) => {
@@ -163,7 +162,7 @@ export function useLogin(onSuccess?: () => void) {
 export function useRegister(onSuccess?: () => void) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const setAuth = useAuth((state) => state.setAuth);
 
   return useMutation({
     mutationFn: async (data: {
@@ -240,8 +239,8 @@ export function useRegister(onSuccess?: () => void) {
 export function useLogout() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const clearAuth = useAuthStore((state) => state.clearAuth);
-  const refreshToken = useAuthStore((state) => state.refreshToken);
+  const clearAuth = useAuth((state) => state.clearAuth);
+  const refreshToken = useAuth((state) => state.refreshToken);
 
   return useMutation({
     mutationFn: async () => {
@@ -296,7 +295,7 @@ export function useLogout() {
 export function useLogoutAll() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const clearAuth = useAuthStore((state) => state.clearAuth);
+  const clearAuth = useAuth((state) => state.clearAuth);
 
   return useMutation({
     mutationFn: async () => {

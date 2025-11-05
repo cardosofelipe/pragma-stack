@@ -38,6 +38,7 @@ export const MOCK_SESSION = {
 /**
  * Set up API mocking for authenticated E2E tests
  * Intercepts backend API calls and returns mock data
+ * Routes persist across client-side navigation
  *
  * @param page Playwright page object
  */
@@ -45,20 +46,18 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
   const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
   // Mock GET /api/v1/users/me - Get current user
-  await page.route(`${baseURL}/api/v1/users/me`, async (route: Route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        success: true,
-        data: MOCK_USER,
-      }),
-    });
-  });
-
   // Mock PATCH /api/v1/users/me - Update user profile
   await page.route(`${baseURL}/api/v1/users/me`, async (route: Route) => {
-    if (route.request().method() === 'PATCH') {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          data: MOCK_USER,
+        }),
+      });
+    } else if (route.request().method() === 'PATCH') {
       const postData = route.request().postDataJSON();
       await route.fulfill({
         status: 200,
@@ -93,7 +92,9 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
         contentType: 'application/json',
         body: JSON.stringify({
           success: true,
-          data: [MOCK_SESSION],
+          data: {
+            sessions: [MOCK_SESSION],
+          },
         }),
       });
     } else {
@@ -117,34 +118,15 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
     }
   });
 
-  // Inject mock auth store BEFORE navigation
-  // This must happen before the page loads to ensure AuthProvider picks it up
+  // Inject mock auth store that persists across navigation
+  // This creates a mock Zustand store accessible via window.__TEST_AUTH_STORE__
+  // CRITICAL: Must be set BEFORE React renders to be picked up by AuthProvider
   await page.addInitScript((mockUser) => {
-    // Create a mock Zustand hook that returns our mocked auth state
-    const mockAuthStore: any = (selector?: any) => {
-      const state = {
-        user: mockUser,
-        accessToken: 'mock-access-token',
-        refreshToken: 'mock-refresh-token',
-        isAuthenticated: true,
-        isLoading: false,
-        tokenExpiresAt: Date.now() + 900000, // 15 minutes from now
-        // Mock action functions
-        setAuth: async () => {},
-        setTokens: async () => {},
-        setUser: () => {},
-        clearAuth: async () => {},
-        loadAuthFromStorage: async () => {},
-        isTokenExpired: () => false,
-      };
-      return selector ? selector(state) : state;
-    };
-
-    // Add getState method for non-React contexts (API client, etc.)
-    mockAuthStore.getState = () => ({
+    // Create a stable state object that persists
+    const authState = {
       user: mockUser,
-      accessToken: 'mock-access-token',
-      refreshToken: 'mock-refresh-token',
+      accessToken: 'mock.access.token', // Valid JWT format (3 parts)
+      refreshToken: 'mock.refresh.token',
       isAuthenticated: true,
       isLoading: false,
       tokenExpiresAt: Date.now() + 900000,
@@ -152,11 +134,32 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
       setTokens: async () => {},
       setUser: () => {},
       clearAuth: async () => {},
-      loadAuthFromStorage: async () => {},
+      loadAuthFromStorage: async () => {
+        // No-op in tests - state is already set
+      },
       isTokenExpired: () => false,
-    });
+    };
 
-    // Inject into window for AuthProvider to pick up
+    // Mock Zustand hook - must support both selector and no-selector calls
+    const mockAuthStore: any = (selector?: any) => {
+      // If selector provided, call it with the state
+      if (selector && typeof selector === 'function') {
+        return selector(authState);
+      }
+      // Otherwise return the full state
+      return authState;
+    };
+
+    // Add getState method that Zustand stores have
+    mockAuthStore.getState = () => authState;
+
+    // Add subscribe method (required by Zustand)
+    mockAuthStore.subscribe = () => () => {}; // Returns unsubscribe function
+
+    // Make it globally available for AuthProvider
     (window as any).__TEST_AUTH_STORE__ = mockAuthStore;
+
+    // Also set a flag to indicate we're in a test environment
+    (window as any).__E2E_TEST__ = true;
   }, MOCK_USER);
 }

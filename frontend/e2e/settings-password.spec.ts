@@ -11,9 +11,15 @@ test.describe('Password Change', () => {
     // Set up API mocks for authenticated user
     await setupAuthenticatedMocks(page);
 
+    // Delay to ensure auth store injection completes before navigation
+    await page.waitForTimeout(200);
+
     // Navigate to password settings
     await page.goto('/settings/password');
     await expect(page).toHaveURL('/settings/password');
+
+    // Wait for page to fully load with auth context
+    await page.waitForSelector('h2', { timeout: 10000 });
   });
 
   test('should display password change page', async ({ page }) => {
@@ -53,28 +59,27 @@ test.describe('Password Change', () => {
   test('should show cancel button when form is dirty', async ({ page }) => {
     await page.waitForSelector('#current_password');
 
-    // Fill current password
-    await page.locator('#current_password').fill('Admin123!');
+    // Fill current password and blur to trigger dirty state
+    const currentPasswordInput = page.locator('#current_password');
+    await currentPasswordInput.fill('Admin123!');
+    await currentPasswordInput.blur();
 
-    // Wait for form state to update
-    await page.waitForTimeout(100);
-
-    // Cancel button should appear
+    // Cancel button should appear when form is dirty
     const cancelButton = page.locator('button[type="button"]:has-text("Cancel")');
-    await expect(cancelButton).toBeVisible();
+    await expect(cancelButton).toBeVisible({ timeout: 3000 });
   });
 
   test('should clear form when cancel button is clicked', async ({ page }) => {
     await page.waitForSelector('#current_password');
 
-    // Fill fields
-    await page.locator('#current_password').fill('Admin123!');
+    // Fill fields and blur to trigger dirty state
+    const currentPasswordInput = page.locator('#current_password');
+    await currentPasswordInput.fill('Admin123!');
+    await currentPasswordInput.blur();
+
     await page.locator('#new_password').fill('NewAdmin123!');
 
-    // Wait for form state to update
-    await page.waitForTimeout(100);
-
-    // Click cancel
+    // Click cancel button
     const cancelButton = page.locator('button[type="button"]:has-text("Cancel")');
     await cancelButton.click();
 

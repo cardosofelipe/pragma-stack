@@ -9,7 +9,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { updateCurrentUser } from '../client';
-import { useAuthStore } from '@/lib/stores/authStore';
+import { useAuth } from '@/lib/auth/AuthContext';
 import type { User } from '@/lib/stores/authStore';
 import { parseAPIError, getGeneralError } from '../errors';
 import { authKeys } from './useAuth';
@@ -31,7 +31,7 @@ import { authKeys } from './useAuth';
  */
 export function useUpdateProfile(onSuccess?: (message: string) => void) {
   const queryClient = useQueryClient();
-  const setUser = useAuthStore((state) => state.setUser);
+  const setUser = useAuth((state) => state.setUser);
 
   return useMutation({
     mutationFn: async (data: {
