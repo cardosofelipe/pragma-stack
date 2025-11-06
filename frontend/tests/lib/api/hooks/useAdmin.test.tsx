@@ -19,6 +19,7 @@ import {
 import {
   adminListUsers,
   adminListOrganizations,
+  adminListSessions,
   adminCreateUser,
   adminUpdateUser,
   adminDeleteUser,
@@ -34,6 +35,7 @@ jest.mock('@/lib/auth/AuthContext');
 
 const mockAdminListUsers = adminListUsers as jest.MockedFunction<typeof adminListUsers>;
 const mockAdminListOrganizations = adminListOrganizations as jest.MockedFunction<typeof adminListOrganizations>;
+const mockAdminListSessions = adminListSessions as jest.MockedFunction<typeof adminListSessions>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
 describe('useAdmin hooks', () => {
@@ -74,6 +76,12 @@ describe('useAdmin hooks', () => {
       },
     };
 
+    const mockSessionsData = {
+      data: {
+        pagination: { total: 10 },
+      },
+    };
+
     it('fetches and calculates stats when user is superuser', async () => {
       mockUseAuth.mockReturnValue({
         user: { is_superuser: true } as any,
@@ -85,6 +93,7 @@ describe('useAdmin hooks', () => {
 
       mockAdminListUsers.mockResolvedValue(mockUsersData as any);
       mockAdminListOrganizations.mockResolvedValue(mockOrgsData as any);
+      mockAdminListSessions.mockResolvedValue(mockSessionsData as any);
 
       const { result } = renderHook(() => useAdminStats(), { wrapper });
 
@@ -94,7 +103,7 @@ describe('useAdmin hooks', () => {
         totalUsers: 3,
         activeUsers: 2,
         totalOrganizations: 5,
-        totalSessions: 0,
+        totalSessions: 10,
       });
 
       expect(mockAdminListUsers).toHaveBeenCalledWith({
@@ -103,6 +112,11 @@ describe('useAdmin hooks', () => {
       });
 
       expect(mockAdminListOrganizations).toHaveBeenCalledWith({
+        query: { page: 1, limit: 100 },
+        throwOnError: false,
+      });
+
+      expect(mockAdminListSessions).toHaveBeenCalledWith({
         query: { page: 1, limit: 100 },
         throwOnError: false,
       });
