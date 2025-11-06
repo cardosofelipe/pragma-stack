@@ -18,7 +18,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 /**
  * Constants for admin hooks
  */
-const STATS_FETCH_LIMIT = 10000; // High limit to fetch all records for stats calculation
+const STATS_FETCH_LIMIT = 100; // Maximum allowed by backend pagination (use pagination.total for actual count)
 const STATS_REFETCH_INTERVAL = 30000; // 30 seconds - refetch interval for near real-time stats
 const DEFAULT_PAGE_LIMIT = 50; // Default number of records per page for paginated lists
 
