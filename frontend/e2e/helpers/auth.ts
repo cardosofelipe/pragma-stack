@@ -342,4 +342,86 @@ export async function setupSuperuserMocks(page: Page): Promise<void> {
       await route.continue();
     }
   });
+
+  // Mock GET /api/v1/admin/stats - Get dashboard statistics
+  await page.route(`${baseURL}/api/v1/admin/stats`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          total_users: 150,
+          active_users: 120,
+          total_organizations: 25,
+          active_sessions: 45,
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock GET /api/v1/admin/organizations/:id - Get single organization
+  await page.route(`${baseURL}/api/v1/admin/organizations/*/`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      // Extract org ID from URL
+      const url = route.request().url();
+      const orgId = url.match(/organizations\/([^/]+)/)?.[1];
+      const org = MOCK_ORGANIZATIONS.find(o => o.id === orgId) || MOCK_ORGANIZATIONS[0];
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(org),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock GET /api/v1/admin/organizations/:id/members - Get organization members
+  await page.route(`${baseURL}/api/v1/admin/organizations/*/members*`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          data: [],
+          pagination: {
+            total: 0,
+            page: 1,
+            page_size: 20,
+            total_pages: 1,
+            has_next: false,
+            has_prev: false,
+          },
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock GET /api/v1/admin/sessions - Get all sessions (for stats calculation)
+  await page.route(`${baseURL}/api/v1/admin/sessions*`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          data: [MOCK_SESSION],
+          pagination: {
+            total: 45, // Total sessions for stats
+            page: 1,
+            page_size: 100,
+            total_pages: 1,
+            has_next: false,
+            has_prev: false,
+          },
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
 }

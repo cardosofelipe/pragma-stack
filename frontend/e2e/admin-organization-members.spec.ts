@@ -1,9 +1,7 @@
 /**
  * E2E Tests for Admin Organization Members Management
- * Tests basic navigation to organization members page
- *
- * Note: Interactive member management tests are covered by comprehensive unit tests (43 tests).
- * E2E tests focus on navigation and page structure due to backend API mock limitations.
+ * Tests AddMemberDialog Select interactions (excluded from unit tests with istanbul ignore)
+ * and basic navigation to organization members page
  */
 
 import { test, expect } from '@playwright/test';
@@ -115,5 +113,134 @@ test.describe('Admin Organization Members - Page Structure', () => {
     // Should have an icon
     const icon = backButton.locator('svg');
     await expect(icon).toBeVisible();
+  });
+});
+
+test.describe('Admin Organization Members - AddMemberDialog E2E Tests', () => {
+  test.beforeEach(async ({ page }) => {
+    await setupSuperuserMocks(page);
+    await loginViaUI(page);
+    await page.goto('/admin/organizations');
+    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+
+    // Navigate to members page
+    const actionButton = page.getByRole('button', { name: /Actions for/i }).first();
+    await actionButton.click();
+
+    await Promise.all([
+      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/, { timeout: 10000 }),
+      page.getByText('View Members').click()
+    ]);
+
+    // Open Add Member dialog
+    const addButton = page.getByRole('button', { name: /Add Member/i });
+    await addButton.click();
+
+    // Wait for dialog to be visible
+    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+  });
+
+  test('should open add member dialog when clicking add member button', async ({ page }) => {
+    // Dialog should be visible
+    const dialog = page.locator('[role="dialog"]');
+    await expect(dialog).toBeVisible();
+
+    // Should have dialog title
+    await expect(page.getByRole('heading', { name: /Add Member/i })).toBeVisible();
+  });
+
+  test('should display dialog description', async ({ page }) => {
+    await expect(page.getByText(/Add a new member to this organization/i)).toBeVisible();
+  });
+
+  test('should display user email select field', async ({ page }) => {
+    const dialog = page.locator('[role="dialog"]');
+    await expect(dialog.getByText('User Email')).toBeVisible();
+  });
+
+  test('should display role select field', async ({ page }) => {
+    const dialog = page.locator('[role="dialog"]');
+    await expect(dialog.getByText('Role')).toBeVisible();
+  });
+
+  test('should display add member and cancel buttons', async ({ page }) => {
+    const dialog = page.locator('[role="dialog"]');
+    await expect(dialog.getByRole('button', { name: /^Add Member$/i })).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Cancel/i })).toBeVisible();
+  });
+
+  test('should close dialog when clicking cancel', async ({ page }) => {
+    const dialog = page.locator('[role="dialog"]');
+    const cancelButton = dialog.getByRole('button', { name: /Cancel/i });
+
+    await cancelButton.click();
+
+    // Dialog should be closed
+    await expect(dialog).not.toBeVisible();
+  });
+
+  test('should open user email select dropdown when clicked', async ({ page }) => {
+    const dialog = page.locator('[role="dialog"]');
+
+    // Click user email select trigger
+    const userSelect = dialog.getByRole('combobox').first();
+    await userSelect.click();
+
+    // Dropdown should be visible with mock user options
+    await expect(page.getByRole('option', { name: /test@example.com/i })).toBeVisible();
+    await expect(page.getByRole('option', { name: /admin@example.com/i })).toBeVisible();
+  });
+
+  test('should select user email from dropdown', async ({ page }) => {
+    const dialog = page.locator('[role="dialog"]');
+
+    // Click user email select trigger
+    const userSelect = dialog.getByRole('combobox').first();
+    await userSelect.click();
+
+    // Select first user
+    await page.getByRole('option', { name: /test@example.com/i }).click();
+
+    // Selected value should be visible
+    await expect(userSelect).toContainText('test@example.com');
+  });
+
+  test('should open role select dropdown when clicked', async ({ page }) => {
+    const dialog = page.locator('[role="dialog"]');
+
+    // Click role select trigger (second combobox)
+    const roleSelects = dialog.getByRole('combobox');
+    const roleSelect = roleSelects.nth(1);
+    await roleSelect.click();
+
+    // Dropdown should show role options
+    await expect(page.getByRole('option', { name: /^Owner$/i })).toBeVisible();
+    await expect(page.getByRole('option', { name: /^Admin$/i })).toBeVisible();
+    await expect(page.getByRole('option', { name: /^Member$/i })).toBeVisible();
+    await expect(page.getByRole('option', { name: /^Guest$/i })).toBeVisible();
+  });
+
+  test('should select role from dropdown', async ({ page }) => {
+    const dialog = page.locator('[role="dialog"]');
+
+    // Click role select trigger
+    const roleSelects = dialog.getByRole('combobox');
+    const roleSelect = roleSelects.nth(1);
+    await roleSelect.click();
+
+    // Select admin role
+    await page.getByRole('option', { name: /^Admin$/i }).click();
+
+    // Selected value should be visible
+    await expect(roleSelect).toContainText('Admin');
+  });
+
+  test('should have default role as Member', async ({ page }) => {
+    const dialog = page.locator('[role="dialog"]');
+    const roleSelects = dialog.getByRole('combobox');
+    const roleSelect = roleSelects.nth(1);
+
+    // Default role should be Member
+    await expect(roleSelect).toContainText('Member');
   });
 });

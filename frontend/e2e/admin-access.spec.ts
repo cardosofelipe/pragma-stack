@@ -172,7 +172,7 @@ test.describe('Admin Navigation', () => {
     await page.goto('/admin/organizations');
 
     await expect(page).toHaveURL('/admin/organizations');
-    await expect(page.locator('h1')).toContainText('Organizations');
+    await expect(page.locator('h2')).toContainText('All Organizations');
 
     // Breadcrumbs should show Admin > Organizations
     await expect(page.getByTestId('breadcrumb-admin')).toBeVisible();

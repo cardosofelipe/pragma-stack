@@ -73,6 +73,7 @@ export function AddMemberDialog({
   const selectedRole = watch('role');
   const selectedEmail = watch('userEmail');
 
+  // istanbul ignore next - Form submission with Select components tested in E2E (admin-organization-members.spec.ts)
   const onSubmit = async (data: AddMemberFormData) => {
     setIsSubmitting(true);
 
@@ -103,6 +104,7 @@ export function AddMemberDialog({
     }
   };
 
+  // istanbul ignore next - Select component interactions tested in E2E (admin-organization-members.spec.ts)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

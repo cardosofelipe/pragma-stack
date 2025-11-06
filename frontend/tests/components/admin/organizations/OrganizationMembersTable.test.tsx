@@ -184,4 +184,73 @@ describe('OrganizationMembersTable', () => {
 
     expect(screen.queryByText(/Showing/)).not.toBeInTheDocument();
   });
+
+  it('renders member role badge correctly', () => {
+    const memberWithRole: OrganizationMember = {
+      user_id: 'user-4',
+      email: 'member@test.com',
+      first_name: 'Test',
+      last_name: 'Member',
+      role: 'member',
+      joined_at: '2025-02-15T00:00:00Z',
+    };
+
+    render(<OrganizationMembersTable {...defaultProps} members={[memberWithRole]} />);
+
+    expect(screen.getByText('Member')).toBeInTheDocument();
+  });
+
+  it('handles unknown role with default badge variant', () => {
+    const memberWithUnknownRole: OrganizationMember = {
+      user_id: 'user-5',
+      email: 'unknown@test.com',
+      first_name: 'Unknown',
+      last_name: 'Role',
+      role: 'unknown' as any,
+      joined_at: '2025-02-20T00:00:00Z',
+    };
+
+    render(<OrganizationMembersTable {...defaultProps} members={[memberWithUnknownRole]} />);
+
+    expect(screen.getByText('Unknown')).toBeInTheDocument();
+  });
+
+  it('calls onPageChange when previous button clicked', async () => {
+    const user = userEvent.setup();
+    const onPageChange = jest.fn();
+    const paginationOnPage2 = { ...mockPagination, page: 2, has_prev: true, total_pages: 3 };
+
+    render(
+      <OrganizationMembersTable
+        {...defaultProps}
+        onPageChange={onPageChange}
+        pagination={paginationOnPage2}
+      />
+    );
+
+    const prevButton = screen.getByRole('button', { name: 'Previous' });
+    await user.click(prevButton);
+
+    expect(onPageChange).toHaveBeenCalledWith(1);
+  });
+
+  it('calls onPageChange when page number button clicked', async () => {
+    const user = userEvent.setup();
+    const onPageChange = jest.fn();
+    const paginationMultiPage = { ...mockPagination, page: 1, has_next: true, total_pages: 3 };
+
+    render(
+      <OrganizationMembersTable
+        {...defaultProps}
+        onPageChange={onPageChange}
+        pagination={paginationMultiPage}
+      />
+    );
+
+    // Look for page 2 button
+    const page2Button = screen.getByRole('button', { name: '2' });
+    await user.click(page2Button);
+
+    expect(onPageChange).toHaveBeenCalledWith(2);
+  });
 });
