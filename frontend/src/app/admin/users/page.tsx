@@ -9,6 +9,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { UserManagementContent } from '@/components/admin/users/UserManagementContent';
 
 /* istanbul ignore next - Next.js metadata, not executable code */
 export const metadata: Metadata = {
@@ -36,26 +37,8 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
-        {/* Placeholder Content */}
-        <div className="rounded-lg border bg-card p-12 text-center">
-          <h3 className="text-xl font-semibold mb-2">
-            User Management Coming Soon
-          </h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            This page will allow you to view all users, create new accounts,
-            manage permissions, and perform bulk operations.
-          </p>
-          <p className="text-sm text-muted-foreground mt-4">
-            Features will include:
-          </p>
-          <ul className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto text-left">
-            <li>• User list with search and filtering</li>
-            <li>• Create/edit/delete user accounts</li>
-            <li>• Activate/deactivate users</li>
-            <li>• Role and permission management</li>
-            <li>• Bulk operations</li>
-          </ul>
-        </div>
+        {/* User Management Content */}
+        <UserManagementContent />
       </div>
     </div>
   );

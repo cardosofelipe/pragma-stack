@@ -11,8 +11,20 @@
 
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { adminListUsers, adminListOrganizations } from '@/lib/api/client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  adminListUsers,
+  adminListOrganizations,
+  adminCreateUser,
+  adminGetUser,
+  adminUpdateUser,
+  adminDeleteUser,
+  adminActivateUser,
+  adminDeactivateUser,
+  adminBulkUserAction,
+  type UserCreate,
+  type UserUpdate,
+} from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 /**
@@ -168,5 +180,192 @@ export function useAdminOrganizations(page = 1, limit = DEFAULT_PAGE_LIMIT) {
     },
     // Only fetch if user is a superuser (frontend guard)
     enabled: user?.is_superuser === true,
+  });
+}
+
+/**
+ * Hook to create a new user (admin only)
+ *
+ * @returns Mutation hook for creating users
+ */
+export function useCreateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userData: UserCreate) => {
+      const response = await adminCreateUser({
+        body: userData,
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to create user');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    onSuccess: () => {
+      // Invalidate user queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+    },
+  });
+}
+
+/**
+ * Hook to update an existing user (admin only)
+ *
+ * @returns Mutation hook for updating users
+ */
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      userId,
+      userData,
+    }: {
+      userId: string;
+      userData: UserUpdate;
+    }) => {
+      const response = await adminUpdateUser({
+        path: { user_id: userId },
+        body: userData,
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to update user');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    onSuccess: () => {
+      // Invalidate user queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+    },
+  });
+}
+
+/**
+ * Hook to delete a user (admin only)
+ *
+ * @returns Mutation hook for deleting users
+ */
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await adminDeleteUser({
+        path: { user_id: userId },
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to delete user');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    onSuccess: () => {
+      // Invalidate user queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+    },
+  });
+}
+
+/**
+ * Hook to activate a user (admin only)
+ *
+ * @returns Mutation hook for activating users
+ */
+export function useActivateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await adminActivateUser({
+        path: { user_id: userId },
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to activate user');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    onSuccess: () => {
+      // Invalidate user queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+    },
+  });
+}
+
+/**
+ * Hook to deactivate a user (admin only)
+ *
+ * @returns Mutation hook for deactivating users
+ */
+export function useDeactivateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await adminDeactivateUser({
+        path: { user_id: userId },
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to deactivate user');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    onSuccess: () => {
+      // Invalidate user queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+    },
+  });
+}
+
+/**
+ * Hook to perform bulk actions on users (admin only)
+ *
+ * @returns Mutation hook for bulk user actions
+ */
+export function useBulkUserAction() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      action,
+      userIds,
+    }: {
+      action: 'activate' | 'deactivate' | 'delete';
+      userIds: string[];
+    }) => {
+      const response = await adminBulkUserAction({
+        body: { action, user_ids: userIds },
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to perform bulk action');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    onSuccess: () => {
+      // Invalidate user queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+    },
   });
 }
