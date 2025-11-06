@@ -39,7 +39,7 @@ export default function AdminPage() {
             <Link href="/admin/users" className="block">
               <div className="rounded-lg border bg-card p-6 transition-colors hover:bg-accent cursor-pointer">
                 <div className="flex items-center gap-3 mb-2">
-                  <Users className="h-5 w-5 text-primary" />
+                  <Users className="h-5 w-5 text-primary" aria-hidden="true" />
                   <h3 className="font-semibold">User Management</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -51,7 +51,7 @@ export default function AdminPage() {
             <Link href="/admin/organizations" className="block">
               <div className="rounded-lg border bg-card p-6 transition-colors hover:bg-accent cursor-pointer">
                 <div className="flex items-center gap-3 mb-2">
-                  <Building2 className="h-5 w-5 text-primary" />
+                  <Building2 className="h-5 w-5 text-primary" aria-hidden="true" />
                   <h3 className="font-semibold">Organizations</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -63,7 +63,7 @@ export default function AdminPage() {
             <Link href="/admin/settings" className="block">
               <div className="rounded-lg border bg-card p-6 transition-colors hover:bg-accent cursor-pointer">
                 <div className="flex items-center gap-3 mb-2">
-                  <Settings className="h-5 w-5 text-primary" />
+                  <Settings className="h-5 w-5 text-primary" aria-hidden="true" />
                   <h3 className="font-semibold">System Settings</h3>
                 </div>
                 <p className="text-sm text-muted-foreground">

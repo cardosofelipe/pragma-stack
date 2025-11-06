@@ -4,35 +4,44 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AdminPage from '@/app/admin/page';
+import { useAdminStats } from '@/lib/api/hooks/useAdmin';
 
-// Helper function to render with QueryClientProvider
-function renderWithQueryClient(component: React.ReactElement) {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-      },
+// Mock the useAdminStats hook
+jest.mock('@/lib/api/hooks/useAdmin');
+
+const mockUseAdminStats = useAdminStats as jest.MockedFunction<typeof useAdminStats>;
+
+// Helper function to render with default mocked stats
+function renderWithMockedStats() {
+  mockUseAdminStats.mockReturnValue({
+    data: {
+      totalUsers: 100,
+      activeUsers: 80,
+      totalOrganizations: 20,
+      totalSessions: 30,
     },
-  });
+    isLoading: false,
+    isError: false,
+    error: null,
+  } as any);
 
-  return render(
-    <QueryClientProvider client={queryClient}>
-      {component}
-    </QueryClientProvider>
-  );
+  return render(<AdminPage />);
 }
 
 describe('AdminPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders admin dashboard title', () => {
-    renderWithQueryClient(<AdminPage />);
+    renderWithMockedStats();
 
     expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
   });
 
   it('renders description text', () => {
-    renderWithQueryClient(<AdminPage />);
+    renderWithMockedStats();
 
     expect(
       screen.getByText('Manage users, organizations, and system settings')
@@ -40,13 +49,13 @@ describe('AdminPage', () => {
   });
 
   it('renders quick actions section', () => {
-    renderWithQueryClient(<AdminPage />);
+    renderWithMockedStats();
 
     expect(screen.getByText('Quick Actions')).toBeInTheDocument();
   });
 
   it('renders user management card', () => {
-    renderWithQueryClient(<AdminPage />);
+    renderWithMockedStats();
 
     expect(screen.getByText('User Management')).toBeInTheDocument();
     expect(
@@ -55,7 +64,7 @@ describe('AdminPage', () => {
   });
 
   it('renders organizations card', () => {
-    renderWithQueryClient(<AdminPage />);
+    renderWithMockedStats();
 
     // Check for the quick actions card (not the stat card)
     expect(
@@ -64,7 +73,7 @@ describe('AdminPage', () => {
   });
 
   it('renders system settings card', () => {
-    renderWithQueryClient(<AdminPage />);
+    renderWithMockedStats();
 
     expect(screen.getByText('System Settings')).toBeInTheDocument();
     expect(
@@ -73,7 +82,7 @@ describe('AdminPage', () => {
   });
 
   it('renders quick actions in grid layout', () => {
-    renderWithQueryClient(<AdminPage />);
+    renderWithMockedStats();
 
     // Check for Quick Actions heading which is above the grid
     expect(screen.getByText('Quick Actions')).toBeInTheDocument();
@@ -84,7 +93,7 @@ describe('AdminPage', () => {
   });
 
   it('renders with proper container structure', () => {
-    const { container } = renderWithQueryClient(<AdminPage />);
+    const { container } = renderWithMockedStats();
 
     const containerDiv = container.querySelector('.container');
     expect(containerDiv).toBeInTheDocument();

@@ -17,7 +17,7 @@ export function DashboardStats() {
   if (isError) {
     return (
       <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
+        <AlertCircle className="h-4 w-4" aria-hidden="true" />
         <AlertDescription>
           Failed to load dashboard statistics: {error?.message || 'Unknown error'}
         </AlertDescription>

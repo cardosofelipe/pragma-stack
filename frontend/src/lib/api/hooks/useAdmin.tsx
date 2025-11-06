@@ -13,6 +13,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { adminListUsers, adminListOrganizations } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthContext';
+
+/**
+ * Constants for admin hooks
+ */
+const STATS_FETCH_LIMIT = 10000; // High limit to fetch all records for stats calculation
+const STATS_REFETCH_INTERVAL = 30000; // 30 seconds - refetch interval for near real-time stats
+const DEFAULT_PAGE_LIMIT = 50; // Default number of records per page for paginated lists
 
 /**
  * Admin Stats interface
@@ -31,6 +39,8 @@ export interface AdminStats {
  * @returns Admin statistics including user and organization counts
  */
 export function useAdminStats() {
+  const { user } = useAuth();
+
   return useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: async (): Promise<AdminStats> => {
@@ -39,7 +49,7 @@ export function useAdminStats() {
       const usersResponse = await adminListUsers({
         query: {
           page: 1,
-          limit: 10000, // High limit to get all users for stats
+          limit: STATS_FETCH_LIMIT,
         },
         throwOnError: false,
       });
@@ -58,7 +68,7 @@ export function useAdminStats() {
       const orgsResponse = await adminListOrganizations({
         query: {
           page: 1,
-          limit: 10000, // High limit to get all orgs for stats
+          limit: STATS_FETCH_LIMIT,
         },
         throwOnError: false,
       });
@@ -93,9 +103,11 @@ export function useAdminStats() {
       };
     },
     // Refetch every 30 seconds for near real-time stats
-    refetchInterval: 30000,
+    refetchInterval: STATS_REFETCH_INTERVAL,
     // Keep previous data while refetching to avoid UI flicker
     placeholderData: (previousData) => previousData,
+    // Only fetch if user is a superuser (frontend guard)
+    enabled: user?.is_superuser === true,
   });
 }
 
@@ -106,7 +118,9 @@ export function useAdminStats() {
  * @param limit - Number of records per page
  * @returns Paginated list of users
  */
-export function useAdminUsers(page = 1, limit = 50) {
+export function useAdminUsers(page = 1, limit = DEFAULT_PAGE_LIMIT) {
+  const { user } = useAuth();
+
   return useQuery({
     queryKey: ['admin', 'users', page, limit],
     queryFn: async () => {
@@ -122,6 +136,8 @@ export function useAdminUsers(page = 1, limit = 50) {
       // Type assertion: if no error, response has data
       return (response as { data: unknown }).data;
     },
+    // Only fetch if user is a superuser (frontend guard)
+    enabled: user?.is_superuser === true,
   });
 }
 
@@ -132,7 +148,9 @@ export function useAdminUsers(page = 1, limit = 50) {
  * @param limit - Number of records per page
  * @returns Paginated list of organizations
  */
-export function useAdminOrganizations(page = 1, limit = 50) {
+export function useAdminOrganizations(page = 1, limit = DEFAULT_PAGE_LIMIT) {
+  const { user } = useAuth();
+
   return useQuery({
     queryKey: ['admin', 'organizations', page, limit],
     queryFn: async () => {
@@ -148,5 +166,7 @@ export function useAdminOrganizations(page = 1, limit = 50) {
       // Type assertion: if no error, response has data
       return (response as { data: unknown }).data;
     },
+    // Only fetch if user is a superuser (frontend guard)
+    enabled: user?.is_superuser === true,
   });
 }

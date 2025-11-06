@@ -69,14 +69,14 @@ export function AdminSidebar() {
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="rounded-md p-2 hover:bg-accent"
+            className="rounded-md p-2 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             data-testid="sidebar-toggle"
           >
             {collapsed ? (
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
             ) : (
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4" aria-hidden="true" />
             )}
           </button>
         </div>
@@ -96,6 +96,7 @@ export function AdminSidebar() {
                 className={cn(
                   'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                   'hover:bg-accent hover:text-accent-foreground',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   isActive
                     ? 'bg-accent text-accent-foreground'
                     : 'text-muted-foreground',
@@ -104,7 +105,7 @@ export function AdminSidebar() {
                 title={collapsed ? item.name : undefined}
                 data-testid={`nav-${item.name.toLowerCase()}`}
               >
-                <Icon className="h-5 w-5 flex-shrink-0" />
+                <Icon className="h-5 w-5 flex-shrink-0" aria-hidden="true" />
                 {!collapsed && <span>{item.name}</span>}
               </Link>
             );

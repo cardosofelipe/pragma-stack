@@ -22,8 +22,8 @@ export default function AdminSettingsPage() {
         {/* Back Button + Header */}
         <div className="flex items-center gap-4">
           <Link href="/admin">
-            <Button variant="outline" size="icon">
-              <ArrowLeft className="h-4 w-4" />
+            <Button variant="outline" size="icon" aria-label="Back to Admin Dashboard">
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </Button>
           </Link>
           <div>

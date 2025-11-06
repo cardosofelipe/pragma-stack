@@ -90,6 +90,7 @@ export function StatCard({
               'h-6 w-6',
               loading ? 'text-muted-foreground' : 'text-primary'
             )}
+            aria-hidden="true"
           />
         </div>
       </div>
