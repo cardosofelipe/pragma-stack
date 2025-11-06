@@ -22,8 +22,18 @@ import {
   adminActivateUser,
   adminDeactivateUser,
   adminBulkUserAction,
+  adminCreateOrganization,
+  adminUpdateOrganization,
+  adminDeleteOrganization,
+  adminGetOrganization,
+  adminListOrganizationMembers,
+  adminAddOrganizationMember,
+  adminRemoveOrganizationMember,
   type UserCreate,
   type UserUpdate,
+  type OrganizationCreate,
+  type OrganizationUpdate,
+  type AddMemberRequest,
 } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthContext';
 
@@ -213,7 +223,7 @@ export function useAdminOrganizations(page = 1, limit = DEFAULT_PAGE_LIMIT) {
 
   return useQuery({
     queryKey: ['admin', 'organizations', page, limit],
-    queryFn: async () => {
+    queryFn: async (): Promise<PaginatedOrganizationResponse> => {
       const response = await adminListOrganizations({
         query: { page, limit },
         throwOnError: false,
@@ -224,7 +234,7 @@ export function useAdminOrganizations(page = 1, limit = DEFAULT_PAGE_LIMIT) {
       }
 
       // Type assertion: if no error, response has data
-      return (response as { data: unknown }).data;
+      return (response as { data: PaginatedOrganizationResponse }).data;
     },
     // Only fetch if user is a superuser (frontend guard)
     enabled: user?.is_superuser === true,
@@ -414,6 +424,285 @@ export function useBulkUserAction() {
       // Invalidate user queries to refetch
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+    },
+  });
+}
+
+/**
+ * Organization interface matching backend OrganizationResponse
+ */
+export interface Organization {
+  id: string;
+  name: string;
+  description: string | null;
+  is_active: boolean;
+  created_at: string;
+  member_count: number;
+}
+
+/**
+ * Paginated organization list response
+ */
+export interface PaginatedOrganizationResponse {
+  data: Organization[];
+  pagination: PaginationMeta;
+}
+
+/**
+ * Organization member interface matching backend OrganizationMemberResponse
+ */
+export interface OrganizationMember {
+  user_id: string;
+  email: string;
+  first_name: string;
+  last_name: string | null;
+  role: 'owner' | 'admin' | 'member' | 'guest';
+  joined_at: string;
+}
+
+/**
+ * Paginated organization member list response
+ */
+export interface PaginatedOrganizationMemberResponse {
+  data: OrganizationMember[];
+  pagination: PaginationMeta;
+}
+
+/**
+ * Hook to create a new organization (admin only)
+ *
+ * @returns Mutation hook for creating organizations
+ */
+export function useCreateOrganization() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orgData: OrganizationCreate) => {
+      const response = await adminCreateOrganization({
+        body: orgData,
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to create organization');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    onSuccess: () => {
+      // Invalidate organization queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['admin', 'organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+    },
+  });
+}
+
+/**
+ * Hook to update an existing organization (admin only)
+ *
+ * @returns Mutation hook for updating organizations
+ */
+export function useUpdateOrganization() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orgId,
+      orgData,
+    }: {
+      orgId: string;
+      orgData: OrganizationUpdate;
+    }) => {
+      const response = await adminUpdateOrganization({
+        path: { org_id: orgId },
+        body: orgData,
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to update organization');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    onSuccess: () => {
+      // Invalidate organization queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['admin', 'organizations'] });
+    },
+  });
+}
+
+/**
+ * Hook to delete an organization (admin only)
+ *
+ * @returns Mutation hook for deleting organizations
+ */
+export function useDeleteOrganization() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (orgId: string) => {
+      const response = await adminDeleteOrganization({
+        path: { org_id: orgId },
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to delete organization');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    onSuccess: () => {
+      // Invalidate organization queries to refetch
+      queryClient.invalidateQueries({ queryKey: ['admin', 'organizations'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+    },
+  });
+}
+
+/**
+ * Hook to fetch single organization (admin only)
+ *
+ * @param orgId - Organization ID
+ * @returns Query hook for fetching organization
+ */
+export function useGetOrganization(orgId: string | null) {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['admin', 'organization', orgId],
+    queryFn: async () => {
+      if (!orgId) {
+        throw new Error('Organization ID is required');
+      }
+
+      const response = await adminGetOrganization({
+        path: { org_id: orgId },
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to fetch organization');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    enabled: user?.is_superuser === true && !!orgId,
+  });
+}
+
+/**
+ * Hook to fetch organization members (admin only)
+ *
+ * @param orgId - Organization ID
+ * @param page - Page number (1-indexed)
+ * @param limit - Number of records per page
+ * @returns Paginated list of organization members
+ */
+export function useOrganizationMembers(
+  orgId: string | null,
+  page = 1,
+  limit = DEFAULT_PAGE_LIMIT
+) {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ['admin', 'organization', orgId, 'members', page, limit],
+    queryFn: async (): Promise<PaginatedOrganizationMemberResponse> => {
+      if (!orgId) {
+        throw new Error('Organization ID is required');
+      }
+
+      const response = await adminListOrganizationMembers({
+        path: { org_id: orgId },
+        query: { page, limit },
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to fetch organization members');
+      }
+
+      return (response as { data: PaginatedOrganizationMemberResponse }).data;
+    },
+    enabled: user?.is_superuser === true && !!orgId,
+  });
+}
+
+/**
+ * Hook to add a member to an organization (admin only)
+ *
+ * @returns Mutation hook for adding organization members
+ */
+export function useAddOrganizationMember() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orgId,
+      memberData,
+    }: {
+      orgId: string;
+      memberData: AddMemberRequest;
+    }) => {
+      const response = await adminAddOrganizationMember({
+        path: { org_id: orgId },
+        body: memberData,
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to add organization member');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    onSuccess: (_data, variables) => {
+      // Invalidate member queries to refetch
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'organization', variables.orgId, 'members'],
+      });
+      // Invalidate organization list to update member count
+      queryClient.invalidateQueries({ queryKey: ['admin', 'organizations'] });
+    },
+  });
+}
+
+/**
+ * Hook to remove a member from an organization (admin only)
+ *
+ * @returns Mutation hook for removing organization members
+ */
+export function useRemoveOrganizationMember() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      orgId,
+      userId,
+    }: {
+      orgId: string;
+      userId: string;
+    }) => {
+      const response = await adminRemoveOrganizationMember({
+        path: { org_id: orgId, user_id: userId },
+        throwOnError: false,
+      });
+
+      if ('error' in response) {
+        throw new Error('Failed to remove organization member');
+      }
+
+      return (response as { data: unknown }).data;
+    },
+    onSuccess: (_data, variables) => {
+      // Invalidate member queries to refetch
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'organization', variables.orgId, 'members'],
+      });
+      // Invalidate organization list to update member count
+      queryClient.invalidateQueries({ queryKey: ['admin', 'organizations'] });
     },
   });
 }
