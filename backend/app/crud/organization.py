@@ -4,7 +4,7 @@ import logging
 from typing import Optional, List, Dict, Any
 from uuid import UUID
 
-from sqlalchemy import func, or_, and_, select
+from sqlalchemy import func, or_, and_, select, case
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -149,15 +149,16 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
         """
         try:
             # Build base query with LEFT JOIN and GROUP BY
+            # Use CASE statement to count only active members
             query = (
                 select(
                     Organization,
                     func.count(
                         func.distinct(
-                            and_(
-                                UserOrganization.is_active == True,
-                                UserOrganization.user_id
-                            ).self_group()
+                            case(
+                                (UserOrganization.is_active == True, UserOrganization.user_id),
+                                else_=None
+                            )
                         )
                     ).label('member_count')
                 )
