@@ -391,7 +391,7 @@ describe('UserManagementContent', () => {
 
       renderWithProviders(<UserManagementContent />);
 
-      expect(mockUseAdminUsers).toHaveBeenCalledWith(2, 20);
+      expect(mockUseAdminUsers).toHaveBeenCalledWith(2, 20, null, null, null);
     });
 
     it('reads search query from URL params', () => {
@@ -400,9 +400,34 @@ describe('UserManagementContent', () => {
 
       renderWithProviders(<UserManagementContent />);
 
-      // Component should read the search param
-      // This is tested implicitly through the component render
-      expect(screen.getByTestId('user-list-table')).toBeInTheDocument();
+      expect(mockUseAdminUsers).toHaveBeenCalledWith(1, 20, 'test', null, null);
+    });
+
+    it('reads active filter from URL params', () => {
+      const paramsWithActive = new URLSearchParams('active=true');
+      mockUseSearchParams.mockReturnValue(paramsWithActive as any);
+
+      renderWithProviders(<UserManagementContent />);
+
+      expect(mockUseAdminUsers).toHaveBeenCalledWith(1, 20, null, true, null);
+    });
+
+    it('reads superuser filter from URL params', () => {
+      const paramsWithSuperuser = new URLSearchParams('superuser=false');
+      mockUseSearchParams.mockReturnValue(paramsWithSuperuser as any);
+
+      renderWithProviders(<UserManagementContent />);
+
+      expect(mockUseAdminUsers).toHaveBeenCalledWith(1, 20, null, null, false);
+    });
+
+    it('reads all params from URL', () => {
+      const params = new URLSearchParams('page=3&search=admin&active=true&superuser=true');
+      mockUseSearchParams.mockReturnValue(params as any);
+
+      renderWithProviders(<UserManagementContent />);
+
+      expect(mockUseAdminUsers).toHaveBeenCalledWith(3, 20, 'admin', true, true);
     });
 
     it('passes current user ID to table', () => {

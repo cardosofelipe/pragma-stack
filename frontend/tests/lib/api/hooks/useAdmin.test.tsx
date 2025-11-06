@@ -260,6 +260,117 @@ describe('useAdmin hooks', () => {
       await waitFor(() => expect(result.current.isError).toBe(true));
       expect(result.current.error).toBeDefined();
     });
+
+    it('passes search parameter to API', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { is_superuser: true } as any,
+        isAuthenticated: true,
+        isLoading: false,
+        login: jest.fn(),
+        logout: jest.fn(),
+      });
+
+      mockAdminListUsers.mockResolvedValue(mockResponse as any);
+
+      renderHook(() => useAdminUsers(1, 50, 'test@example.com'), { wrapper });
+
+      await waitFor(() => {
+        expect(mockAdminListUsers).toHaveBeenCalledWith({
+          query: { page: 1, limit: 50, search: 'test@example.com' },
+          throwOnError: false,
+        });
+      });
+    });
+
+    it('passes is_active filter parameter to API', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { is_superuser: true } as any,
+        isAuthenticated: true,
+        isLoading: false,
+        login: jest.fn(),
+        logout: jest.fn(),
+      });
+
+      mockAdminListUsers.mockResolvedValue(mockResponse as any);
+
+      renderHook(() => useAdminUsers(1, 50, null, true), { wrapper });
+
+      await waitFor(() => {
+        expect(mockAdminListUsers).toHaveBeenCalledWith({
+          query: { page: 1, limit: 50, is_active: true },
+          throwOnError: false,
+        });
+      });
+    });
+
+    it('passes is_superuser filter parameter to API', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { is_superuser: true } as any,
+        isAuthenticated: true,
+        isLoading: false,
+        login: jest.fn(),
+        logout: jest.fn(),
+      });
+
+      mockAdminListUsers.mockResolvedValue(mockResponse as any);
+
+      renderHook(() => useAdminUsers(1, 50, null, null, false), { wrapper });
+
+      await waitFor(() => {
+        expect(mockAdminListUsers).toHaveBeenCalledWith({
+          query: { page: 1, limit: 50, is_superuser: false },
+          throwOnError: false,
+        });
+      });
+    });
+
+    it('passes all filter parameters to API', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { is_superuser: true } as any,
+        isAuthenticated: true,
+        isLoading: false,
+        login: jest.fn(),
+        logout: jest.fn(),
+      });
+
+      mockAdminListUsers.mockResolvedValue(mockResponse as any);
+
+      renderHook(() => useAdminUsers(2, 20, 'admin', true, false), { wrapper });
+
+      await waitFor(() => {
+        expect(mockAdminListUsers).toHaveBeenCalledWith({
+          query: {
+            page: 2,
+            limit: 20,
+            search: 'admin',
+            is_active: true,
+            is_superuser: false
+          },
+          throwOnError: false,
+        });
+      });
+    });
+
+    it('excludes filter parameters when they are null', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { is_superuser: true } as any,
+        isAuthenticated: true,
+        isLoading: false,
+        login: jest.fn(),
+        logout: jest.fn(),
+      });
+
+      mockAdminListUsers.mockResolvedValue(mockResponse as any);
+
+      renderHook(() => useAdminUsers(1, 50, null, null, null), { wrapper });
+
+      await waitFor(() => {
+        expect(mockAdminListUsers).toHaveBeenCalledWith({
+          query: { page: 1, limit: 50 },
+          throwOnError: false,
+        });
+      });
+    });
   });
 
   describe('useAdminOrganizations', () => {

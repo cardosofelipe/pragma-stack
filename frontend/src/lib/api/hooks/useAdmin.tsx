@@ -161,16 +161,31 @@ export interface PaginatedUserResponse {
  *
  * @param page - Page number (1-indexed)
  * @param limit - Number of records per page
+ * @param search - Search query for email or name
+ * @param is_active - Filter by active status (true, false, or null for all)
+ * @param is_superuser - Filter by superuser status (true, false, or null for all)
  * @returns Paginated list of users
  */
-export function useAdminUsers(page = 1, limit = DEFAULT_PAGE_LIMIT) {
+export function useAdminUsers(
+  page = 1,
+  limit = DEFAULT_PAGE_LIMIT,
+  search?: string | null,
+  is_active?: boolean | null,
+  is_superuser?: boolean | null
+) {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['admin', 'users', page, limit],
+    queryKey: ['admin', 'users', page, limit, search, is_active, is_superuser],
     queryFn: async (): Promise<PaginatedUserResponse> => {
       const response = await adminListUsers({
-        query: { page, limit },
+        query: {
+          page,
+          limit,
+          ...(search ? { search } : {}),
+          ...(is_active !== null && is_active !== undefined ? { is_active } : {}),
+          ...(is_superuser !== null && is_superuser !== undefined ? { is_superuser } : {}),
+        },
         throwOnError: false,
       });
 

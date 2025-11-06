@@ -26,6 +26,10 @@ export function UserManagementContent() {
   const filterActive = searchParams.get('active') || null;
   const filterSuperuser = searchParams.get('superuser') || null;
 
+  // Convert filter strings to booleans for API
+  const isActiveFilter = filterActive === 'true' ? true : filterActive === 'false' ? false : null;
+  const isSuperuserFilter = filterSuperuser === 'true' ? true : filterSuperuser === 'false' ? false : null;
+
   // Local state
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -33,7 +37,13 @@ export function UserManagementContent() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   // Fetch users with query params
-  const { data, isLoading } = useAdminUsers(page, 20);
+  const { data, isLoading } = useAdminUsers(
+    page,
+    20,
+    searchQuery || null,
+    isActiveFilter,
+    isSuperuserFilter
+  );
 
   const users: User[] = data?.data || [];
   const pagination: PaginationMeta = data?.pagination || {
