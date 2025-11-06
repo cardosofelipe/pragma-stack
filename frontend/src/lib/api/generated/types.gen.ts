@@ -24,6 +24,76 @@ export type AddMemberRequest = {
 };
 
 /**
+ * AdminSessionResponse
+ *
+ * Schema for session responses in admin panel.
+ *
+ * Includes user information for admin to see who owns each session.
+ */
+export type AdminSessionResponse = {
+    /**
+     * Device Name
+     *
+     * Friendly device name
+     */
+    device_name?: string | null;
+    /**
+     * Device Id
+     *
+     * Persistent device identifier
+     */
+    device_id?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * User Email
+     *
+     * Email of the user who owns this session
+     */
+    user_email: string;
+    /**
+     * User Full Name
+     *
+     * Full name of the user
+     */
+    user_full_name?: string | null;
+    /**
+     * Ip Address
+     */
+    ip_address?: string | null;
+    /**
+     * Location City
+     */
+    location_city?: string | null;
+    /**
+     * Location Country
+     */
+    location_country?: string | null;
+    /**
+     * Last Used At
+     */
+    last_used_at: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Expires At
+     */
+    expires_at: string;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+};
+
+/**
  * Body_login_oauth
  */
 export type BodyLoginOauth = {
@@ -310,6 +380,22 @@ export type OrganizationUpdate = {
     settings?: {
         [key: string]: unknown;
     } | null;
+};
+
+/**
+ * PaginatedResponse[AdminSessionResponse]
+ */
+export type PaginatedResponseAdminSessionResponse = {
+    /**
+     * Data
+     *
+     * List of items
+     */
+    data: Array<AdminSessionResponse>;
+    /**
+     * Pagination metadata
+     */
+    pagination: PaginationMeta;
 };
 
 /**
@@ -1710,6 +1796,46 @@ export type AdminRemoveOrganizationMemberResponses = {
 };
 
 export type AdminRemoveOrganizationMemberResponse = AdminRemoveOrganizationMemberResponses[keyof AdminRemoveOrganizationMemberResponses];
+
+export type AdminListSessionsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Is Active
+         *
+         * Filter by active status
+         */
+        is_active?: boolean | null;
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/admin/sessions';
+};
+
+export type AdminListSessionsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminListSessionsError = AdminListSessionsErrors[keyof AdminListSessionsErrors];
+
+export type AdminListSessionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaginatedResponseAdminSessionResponse;
+};
+
+export type AdminListSessionsResponse = AdminListSessionsResponses[keyof AdminListSessionsResponses];
 
 export type GetMyOrganizationsData = {
     body?: never;

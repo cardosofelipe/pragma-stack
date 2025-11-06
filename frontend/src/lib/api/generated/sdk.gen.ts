@@ -3,7 +3,7 @@
 
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AdminActivateUserData, AdminActivateUserErrors, AdminActivateUserResponses, AdminAddOrganizationMemberData, AdminAddOrganizationMemberErrors, AdminAddOrganizationMemberResponses, AdminBulkUserActionData, AdminBulkUserActionErrors, AdminBulkUserActionResponses, AdminCreateOrganizationData, AdminCreateOrganizationErrors, AdminCreateOrganizationResponses, AdminCreateUserData, AdminCreateUserErrors, AdminCreateUserResponses, AdminDeactivateUserData, AdminDeactivateUserErrors, AdminDeactivateUserResponses, AdminDeleteOrganizationData, AdminDeleteOrganizationErrors, AdminDeleteOrganizationResponses, AdminDeleteUserData, AdminDeleteUserErrors, AdminDeleteUserResponses, AdminGetOrganizationData, AdminGetOrganizationErrors, AdminGetOrganizationResponses, AdminGetUserData, AdminGetUserErrors, AdminGetUserResponses, AdminListOrganizationMembersData, AdminListOrganizationMembersErrors, AdminListOrganizationMembersResponses, AdminListOrganizationsData, AdminListOrganizationsErrors, AdminListOrganizationsResponses, AdminListUsersData, AdminListUsersErrors, AdminListUsersResponses, AdminRemoveOrganizationMemberData, AdminRemoveOrganizationMemberErrors, AdminRemoveOrganizationMemberResponses, AdminUpdateOrganizationData, AdminUpdateOrganizationErrors, AdminUpdateOrganizationResponses, AdminUpdateUserData, AdminUpdateUserErrors, AdminUpdateUserResponses, ChangeCurrentUserPasswordData, ChangeCurrentUserPasswordErrors, ChangeCurrentUserPasswordResponses, CleanupExpiredSessionsData, CleanupExpiredSessionsResponses, ConfirmPasswordResetData, ConfirmPasswordResetErrors, ConfirmPasswordResetResponses, DeleteUserData, DeleteUserErrors, DeleteUserResponses, GetCurrentUserProfileData, GetCurrentUserProfileResponses, GetMyOrganizationsData, GetMyOrganizationsErrors, GetMyOrganizationsResponses, GetOrganizationData, GetOrganizationErrors, GetOrganizationMembersData, GetOrganizationMembersErrors, GetOrganizationMembersResponses, GetOrganizationResponses, GetUserByIdData, GetUserByIdErrors, GetUserByIdResponses, HealthCheckData, HealthCheckResponses, ListMySessionsData, ListMySessionsResponses, ListUsersData, ListUsersErrors, ListUsersResponses, LoginData, LoginErrors, LoginOauthData, LoginOauthErrors, LoginOauthResponses, LoginResponses, LogoutAllData, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RequestPasswordResetData, RequestPasswordResetErrors, RequestPasswordResetResponses, RevokeSessionData, RevokeSessionErrors, RevokeSessionResponses, RootGetData, RootGetResponses, UpdateCurrentUserData, UpdateCurrentUserErrors, UpdateCurrentUserResponses, UpdateOrganizationData, UpdateOrganizationErrors, UpdateOrganizationResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses } from './types.gen';
+import type { AdminActivateUserData, AdminActivateUserErrors, AdminActivateUserResponses, AdminAddOrganizationMemberData, AdminAddOrganizationMemberErrors, AdminAddOrganizationMemberResponses, AdminBulkUserActionData, AdminBulkUserActionErrors, AdminBulkUserActionResponses, AdminCreateOrganizationData, AdminCreateOrganizationErrors, AdminCreateOrganizationResponses, AdminCreateUserData, AdminCreateUserErrors, AdminCreateUserResponses, AdminDeactivateUserData, AdminDeactivateUserErrors, AdminDeactivateUserResponses, AdminDeleteOrganizationData, AdminDeleteOrganizationErrors, AdminDeleteOrganizationResponses, AdminDeleteUserData, AdminDeleteUserErrors, AdminDeleteUserResponses, AdminGetOrganizationData, AdminGetOrganizationErrors, AdminGetOrganizationResponses, AdminGetUserData, AdminGetUserErrors, AdminGetUserResponses, AdminListOrganizationMembersData, AdminListOrganizationMembersErrors, AdminListOrganizationMembersResponses, AdminListOrganizationsData, AdminListOrganizationsErrors, AdminListOrganizationsResponses, AdminListSessionsData, AdminListSessionsErrors, AdminListSessionsResponses, AdminListUsersData, AdminListUsersErrors, AdminListUsersResponses, AdminRemoveOrganizationMemberData, AdminRemoveOrganizationMemberErrors, AdminRemoveOrganizationMemberResponses, AdminUpdateOrganizationData, AdminUpdateOrganizationErrors, AdminUpdateOrganizationResponses, AdminUpdateUserData, AdminUpdateUserErrors, AdminUpdateUserResponses, ChangeCurrentUserPasswordData, ChangeCurrentUserPasswordErrors, ChangeCurrentUserPasswordResponses, CleanupExpiredSessionsData, CleanupExpiredSessionsResponses, ConfirmPasswordResetData, ConfirmPasswordResetErrors, ConfirmPasswordResetResponses, DeleteUserData, DeleteUserErrors, DeleteUserResponses, GetCurrentUserProfileData, GetCurrentUserProfileResponses, GetMyOrganizationsData, GetMyOrganizationsErrors, GetMyOrganizationsResponses, GetOrganizationData, GetOrganizationErrors, GetOrganizationMembersData, GetOrganizationMembersErrors, GetOrganizationMembersResponses, GetOrganizationResponses, GetUserByIdData, GetUserByIdErrors, GetUserByIdResponses, HealthCheckData, HealthCheckResponses, ListMySessionsData, ListMySessionsResponses, ListUsersData, ListUsersErrors, ListUsersResponses, LoginData, LoginErrors, LoginOauthData, LoginOauthErrors, LoginOauthResponses, LoginResponses, LogoutAllData, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterResponses, RequestPasswordResetData, RequestPasswordResetErrors, RequestPasswordResetResponses, RevokeSessionData, RevokeSessionErrors, RevokeSessionResponses, RootGetData, RootGetResponses, UpdateCurrentUserData, UpdateCurrentUserErrors, UpdateCurrentUserResponses, UpdateOrganizationData, UpdateOrganizationErrors, UpdateOrganizationResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -808,6 +808,28 @@ export const adminRemoveOrganizationMember = <ThrowOnError extends boolean = fal
             }
         ],
         url: '/api/v1/admin/organizations/{org_id}/members/{user_id}',
+        ...options
+    });
+};
+
+/**
+ * Admin: List All Sessions
+ *
+ * List all sessions across all users (admin only).
+ *
+ * Returns paginated list of sessions with user information.
+ * Useful for admin dashboard statistics and session monitoring.
+ */
+export const adminListSessions = <ThrowOnError extends boolean = false>(options?: Options<AdminListSessionsData, ThrowOnError>) => {
+    return (options?.client ?? client).get<AdminListSessionsResponses, AdminListSessionsErrors, ThrowOnError>({
+        responseType: 'json',
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/admin/sessions',
         ...options
     });
 };

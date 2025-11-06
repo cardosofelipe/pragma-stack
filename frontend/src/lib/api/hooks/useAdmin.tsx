@@ -11,31 +11,31 @@
 
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
 import {
-  adminListUsers,
-  adminListOrganizations,
-  adminCreateUser,
-  adminGetUser,
-  adminUpdateUser,
-  adminDeleteUser,
-  adminActivateUser,
-  adminDeactivateUser,
-  adminBulkUserAction,
-  adminCreateOrganization,
-  adminUpdateOrganization,
-  adminDeleteOrganization,
-  adminGetOrganization,
-  adminListOrganizationMembers,
-  adminAddOrganizationMember,
-  adminRemoveOrganizationMember,
-  type UserCreate,
-  type UserUpdate,
-  type OrganizationCreate,
-  type OrganizationUpdate,
-  type AddMemberRequest,
+    type AddMemberRequest,
+    adminActivateUser,
+    adminAddOrganizationMember,
+    adminBulkUserAction,
+    adminCreateOrganization,
+    adminCreateUser,
+    adminDeactivateUser,
+    adminDeleteOrganization,
+    adminDeleteUser,
+    adminGetOrganization,
+    adminListOrganizationMembers,
+    adminListOrganizations,
+    adminListSessions,
+    adminListUsers,
+    adminRemoveOrganizationMember,
+    adminUpdateOrganization,
+    adminUpdateUser,
+    type OrganizationCreate,
+    type OrganizationUpdate,
+    type UserCreate,
+    type UserUpdate,
 } from '@/lib/api/client';
-import { useAuth } from '@/lib/auth/AuthContext';
+import {useAuth} from '@/lib/auth/AuthContext';
 
 /**
  * Constants for admin hooks
@@ -51,7 +51,7 @@ export interface AdminStats {
   totalUsers: number;
   activeUsers: number;
   totalOrganizations: number;
-  totalSessions: number; // TODO: Requires admin sessions endpoint
+  totalSessions: number;
 }
 
 /**
@@ -103,19 +103,22 @@ export function useAdminStats() {
       const orgsData = (orgsResponse as { data: { pagination: { total: number } } }).data;
       const totalOrganizations = orgsData?.pagination?.total || 0;
 
-      // TODO: Add admin sessions endpoint
-      // Currently no admin-level endpoint exists to fetch all sessions
-      // across all users. The /api/v1/sessions/me endpoint only returns
-      // sessions for the current user.
-      //
-      // Once backend implements /api/v1/admin/sessions, uncomment below:
-      // const sessionsResponse = await adminListSessions({
-      //   query: { page: 1, limit: 10000 },
-      //   throwOnError: false,
-      // });
-      // const totalSessions = sessionsResponse.data?.pagination?.total || 0;
+      // Fetch sessions list
+      const sessionsResponse = await adminListSessions({
+        query: {
+          page: 1,
+          limit: STATS_FETCH_LIMIT,
+        },
+        throwOnError: false,
+      });
 
-      const totalSessions = 0; // Placeholder until admin sessions endpoint exists
+      if ('error' in sessionsResponse) {
+        throw new Error('Failed to fetch sessions');
+      }
+
+      // Type assertion: if no error, response has data
+      const sessionsData = (sessionsResponse as { data: { pagination: { total: number } } }).data;
+      const totalSessions = sessionsData?.pagination?.total || 0;
 
       return {
         totalUsers,
