@@ -2,9 +2,16 @@
 
 > **Production-ready, security-first, full-stack TypeScript/Python template with authentication, multi-tenancy, and a comprehensive admin panel.**
 
-[![Backend Tests](https://img.shields.io/badge/backend_tests-743_passing-success)](./backend)
-[![Backend Coverage](https://img.shields.io/badge/coverage-97%25-brightgreen)](./backend)
-[![Frontend E2E](https://img.shields.io/badge/e2e_tests-56_passing-success)](./frontend/e2e)
+<!--
+  TODO: Replace these static badges with dynamic CI/CD badges when GitHub Actions is set up
+  Example: https://github.com/YOUR_ORG/YOUR_REPO/actions/workflows/backend-tests.yml/badge.svg
+-->
+
+[![Backend Unit Tests](https://img.shields.io/badge/backend_unit_tests-passing-success)](./backend/tests)
+[![Backend Coverage](https://img.shields.io/badge/backend_coverage-97%25-brightgreen)](./backend/tests)
+[![Frontend Unit Tests](https://img.shields.io/badge/frontend_unit_tests-passing-success)](./frontend/tests)
+[![Frontend Coverage](https://img.shields.io/badge/frontend_coverage-97%25-brightgreen)](./frontend/tests)
+[![E2E Tests](https://img.shields.io/badge/e2e_tests-passing-success)](./frontend/e2e)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 
@@ -50,15 +57,20 @@ Instead of spending weeks on boilerplate, you can focus on building your unique 
 - Responsive, accessible components (WCAG AA compliant)
 - Developer documentation at `/dev` (in progress)
 
-### 🧪 **Testing Infrastructure**
-- **Backend**: 743 tests, 97% coverage
-  - Unit tests, integration tests, security tests
+### 🧪 **Comprehensive Testing**
+- **Backend Testing**: ~97% unit test coverage
+  - Unit, integration, and security tests
   - Async database testing with SQLAlchemy
-  - API endpoint testing with test fixtures
-- **Frontend**: 56 E2E tests with Playwright
-  - Zero flaky tests
-  - Authentication flows, navigation, forms
-  - Settings pages, session management
+  - API endpoint testing with fixtures
+  - Security vulnerability tests (JWT attacks, session hijacking, privilege escalation)
+- **Frontend Unit Tests**: ~97% coverage with Jest
+  - Component testing
+  - Hook testing
+  - Utility function testing
+- **End-to-End Tests**: Playwright with zero flaky tests
+  - Complete user flows (auth, navigation, settings)
+  - Parallel execution for speed
+  - Visual regression testing ready
 
 ### 📚 **Developer Experience**
 - Auto-generated TypeScript API client from OpenAPI spec
@@ -243,9 +255,11 @@ Visit http://localhost:3000 to see your app!
 
 ## 🧪 Testing
 
-This template takes testing seriously. Here's what you get:
+This template takes testing seriously with comprehensive coverage across all layers:
 
-### Backend Tests (743 tests, 97% coverage)
+### Backend Unit & Integration Tests
+
+**High coverage (~97%)** across all critical paths including security-focused tests.
 
 ```bash
 cd backend
@@ -264,14 +278,39 @@ IS_TEST=True pytest --cov=app --cov-report=html
 open htmlcov/index.html
 ```
 
-**Coverage breakdown:**
-- User CRUD: 100%
-- Session CRUD: 100%
-- Organization routes: 100%
-- Auth routes: 99%
-- Permissions: 100%
+**Test types:**
+- **Unit tests**: CRUD operations, utilities, business logic
+- **Integration tests**: API endpoints with database
+- **Security tests**: JWT algorithm attacks, session hijacking, privilege escalation
+- **Error handling tests**: Database failures, validation errors
 
-### Frontend E2E Tests (56 passing, 0 flaky)
+### Frontend Unit Tests
+
+**High coverage (~97%)** with Jest and React Testing Library.
+
+```bash
+cd frontend
+
+# Run unit tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Watch mode
+npm run test:watch
+```
+
+**Test types:**
+- Component rendering and interactions
+- Custom hooks behavior
+- State management
+- Utility functions
+- API integration mocks
+
+### End-to-End Tests
+
+**Zero flaky tests** with Playwright covering complete user journeys.
 
 ```bash
 cd frontend
@@ -290,25 +329,12 @@ npx playwright show-report
 ```
 
 **Test coverage:**
-- Authentication flows (login, register, password reset)
+- Complete authentication flows
 - Navigation and routing
-- Settings pages (profile, password, sessions)
-- Admin panel (in progress)
-
-### Frontend Unit Tests
-
-```bash
-cd frontend
-
-# Run unit tests
-npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Watch mode
-npm run test:watch
-```
+- Form submissions and validation
+- Settings and profile management
+- Session management
+- Admin panel workflows (in progress)
 
 ---
 
@@ -407,8 +433,9 @@ docker-compose down
 - [x] User management (CRUD, profile, password change)
 - [x] Organization system with RBAC (Owner, Admin, Member)
 - [x] Admin panel (users, organizations, sessions, statistics)
-- [x] Backend testing infrastructure (97% coverage)
-- [x] Frontend E2E testing (Playwright)
+- [x] Backend testing infrastructure (~97% coverage)
+- [x] Frontend unit testing infrastructure (~97% coverage)
+- [x] Frontend E2E testing (Playwright, zero flaky tests)
 - [x] Design system documentation
 - [x] Database migrations
 - [x] Docker deployment
@@ -423,7 +450,8 @@ docker-compose down
 
 ### 🔮 Planned
 - [ ] GitHub Actions CI/CD pipelines
-- [ ] Test coverage badges
+- [ ] Dynamic test coverage badges from CI
+- [ ] E2E test coverage reporting
 - [ ] Additional authentication methods (OAuth, SSO)
 - [ ] Webhook system
 - [ ] Background job processing

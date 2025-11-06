@@ -1,0 +1,86 @@
+# Backend Unit Tests CI Pipeline
+#
+# Rename this file to backend-tests.yml to enable it
+# This will make the backend test badges dynamic
+#
+# Required repository secrets:
+# - None (uses default GITHUB_TOKEN)
+
+name: Backend Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-tests.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    - name: Install dependencies
+      working-directory: ./backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run tests with coverage
+      working-directory: ./backend
+      env:
+        IS_TEST: True
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: test_db
+        SECRET_KEY: test-secret-key-for-ci-only
+      run: |
+        pytest --cov=app --cov-report=xml --cov-report=term-missing -v
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        files: ./backend/coverage.xml
+        flags: backend
+        name: backend-coverage
+        fail_ci_if_error: true
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Generate coverage badge
+      uses: schneegans/dynamic-badges-action@v1.7.0
+      with:
+        auth: ${{ secrets.GIST_SECRET }}
+        gistID: YOUR_GIST_ID_HERE
+        filename: backend-coverage.json
+        label: backend coverage
+        message: ${{ env.COVERAGE }}%
+        color: brightgreen

@@ -1,0 +1,105 @@
+# End-to-End Tests CI Pipeline
+#
+# Rename this file to e2e-tests.yml to enable it
+# This will make the E2E test badges dynamic
+#
+# Required repository secrets:
+# - None (uses default GITHUB_TOKEN)
+
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: './frontend/package-lock.json'
+
+    - name: Install backend dependencies
+      working-directory: ./backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Setup backend database
+      working-directory: ./backend
+      env:
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: test_db
+        SECRET_KEY: test-secret-key-for-ci-only
+      run: |
+        alembic upgrade head
+        python -c "from app.init_db import init_db; import asyncio; asyncio.run(init_db())"
+
+    - name: Start backend server
+      working-directory: ./backend
+      env:
+        POSTGRES_HOST: localhost
+        POSTGRES_PORT: 5432
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: test_db
+        SECRET_KEY: test-secret-key-for-ci-only
+      run: |
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+        sleep 5  # Wait for server to start
+
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm ci
+
+    - name: Install Playwright browsers
+      working-directory: ./frontend
+      run: npx playwright install --with-deps chromium
+
+    - name: Run E2E tests
+      working-directory: ./frontend
+      env:
+        NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      run: npm run test:e2e
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report
+        path: frontend/playwright-report/
+        retention-days: 30
