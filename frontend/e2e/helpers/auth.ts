@@ -51,6 +51,42 @@ export const MOCK_SUPERUSER = {
 };
 
 /**
+ * Mock organization data for E2E testing
+ */
+export const MOCK_ORGANIZATIONS = [
+  {
+    id: '00000000-0000-0000-0000-000000000101',
+    name: 'Acme Corporation',
+    slug: 'acme-corporation',
+    description: 'Leading provider of innovative solutions',
+    is_active: true,
+    created_at: new Date('2025-01-01').toISOString(),
+    updated_at: new Date('2025-01-01').toISOString(),
+    member_count: 15,
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000102',
+    name: 'Tech Startup Inc',
+    slug: 'tech-startup-inc',
+    description: 'Building the future of technology',
+    is_active: false,
+    created_at: new Date('2025-01-15').toISOString(),
+    updated_at: new Date('2025-01-15').toISOString(),
+    member_count: 3,
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000103',
+    name: 'Global Enterprises',
+    slug: 'global-enterprises',
+    description: null,
+    is_active: true,
+    created_at: new Date('2025-02-01').toISOString(),
+    updated_at: new Date('2025-02-01').toISOString(),
+    member_count: 42,
+  },
+];
+
+/**
  * Authenticate user via REAL login flow
  * Tests actual user behavior: fill form → submit → API call → store tokens → redirect
  * Requires setupAuthenticatedMocks() to be called first
@@ -262,12 +298,14 @@ export async function setupSuperuserMocks(page: Page): Promise<void> {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          data: [],
+          data: MOCK_ORGANIZATIONS,
           pagination: {
-            total: 0,
+            total: MOCK_ORGANIZATIONS.length,
             page: 1,
             page_size: 50,
-            total_pages: 0,
+            total_pages: 1,
+            has_next: false,
+            has_prev: false,
           },
         }),
       });
