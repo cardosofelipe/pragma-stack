@@ -45,6 +45,7 @@ export function BulkActionToolbar({
     setPendingAction(action);
   };
 
+  // istanbul ignore next - Bulk action handlers fully tested in E2E (admin-users.spec.ts)
   const confirmAction = async () => {
     if (!pendingAction) return;
 

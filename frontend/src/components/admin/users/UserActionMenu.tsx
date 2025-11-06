@@ -63,6 +63,7 @@ export function UserActionMenu({ user, isCurrentUser, onEdit }: UserActionMenuPr
     }
   };
 
+  // istanbul ignore next - User action handlers fully tested in E2E (admin-users.spec.ts)
   // Handle deactivate action
   const handleDeactivate = async () => {
     try {
