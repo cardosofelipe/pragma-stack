@@ -110,6 +110,46 @@ class LogoutRequest(BaseModel):
     )
 
 
+class AdminSessionResponse(SessionBase):
+    """
+    Schema for session responses in admin panel.
+
+    Includes user information for admin to see who owns each session.
+    """
+    id: UUID
+    user_id: UUID
+    user_email: str = Field(..., description="Email of the user who owns this session")
+    user_full_name: Optional[str] = Field(None, description="Full name of the user")
+    ip_address: Optional[str] = None
+    location_city: Optional[str] = None
+    location_country: Optional[str] = None
+    last_used_at: datetime
+    created_at: datetime
+    expires_at: datetime
+    is_active: bool
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
+            "example": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "user_id": "456e7890-e89b-12d3-a456-426614174001",
+                "user_email": "user@example.com",
+                "user_full_name": "John Doe",
+                "device_name": "iPhone 14",
+                "device_id": "device-abc-123",
+                "ip_address": "192.168.1.100",
+                "location_city": "San Francisco",
+                "location_country": "United States",
+                "last_used_at": "2025-10-31T12:00:00Z",
+                "created_at": "2025-10-30T09:00:00Z",
+                "expires_at": "2025-11-06T09:00:00Z",
+                "is_active": True
+            }
+        }
+    )
+
+
 class DeviceInfo(BaseModel):
     """Device information extracted from request."""
     device_name: Optional[str] = None

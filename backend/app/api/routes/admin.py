@@ -19,6 +19,7 @@ from app.core.database import get_db
 from app.core.exceptions import NotFoundError, DuplicateError, AuthorizationError, ErrorCode
 from app.crud.organization import organization as organization_crud
 from app.crud.user import user as user_crud
+from app.crud.session import session as session_crud
 from app.models.user import User
 from app.models.user_organization import OrganizationRole
 from app.schemas.common import (
@@ -35,6 +36,7 @@ from app.schemas.organizations import (
     OrganizationMemberResponse
 )
 from app.schemas.users import UserResponse, UserCreate, UserUpdate
+from app.schemas.sessions import AdminSessionResponse
 
 logger = logging.getLogger(__name__)
 
@@ -783,4 +785,83 @@ async def admin_remove_organization_member(
         raise
     except Exception as e:
         logger.error(f"Error removing member from organization (admin): {str(e)}", exc_info=True)
+        raise
+
+
+# ============================================================================
+# Session Management Endpoints
+# ============================================================================
+
+@router.get(
+    "/sessions",
+    response_model=PaginatedResponse[AdminSessionResponse],
+    summary="Admin: List All Sessions",
+    description="""
+    List all sessions across all users (admin only).
+
+    Returns paginated list of sessions with user information.
+    Useful for admin dashboard statistics and session monitoring.
+    """,
+    operation_id="admin_list_sessions"
+)
+async def admin_list_sessions(
+    pagination: PaginationParams = Depends(),
+    is_active: Optional[bool] = Query(None, description="Filter by active status"),
+    admin: User = Depends(require_superuser),
+    db: AsyncSession = Depends(get_db)
+) -> Any:
+    """List all sessions across all users with filtering and pagination."""
+    try:
+        # Get sessions with user info (eager loaded to prevent N+1)
+        sessions, total = await session_crud.get_all_sessions(
+            db,
+            skip=pagination.offset,
+            limit=pagination.limit,
+            active_only=is_active if is_active is not None else True,
+            with_user=True
+        )
+
+        # Build response objects with user information
+        session_responses = []
+        for session in sessions:
+            # Get user full name
+            user_full_name = None
+            if session.user.first_name or session.user.last_name:
+                parts = []
+                if session.user.first_name:
+                    parts.append(session.user.first_name)
+                if session.user.last_name:
+                    parts.append(session.user.last_name)
+                user_full_name = " ".join(parts)
+
+            session_response = AdminSessionResponse(
+                id=session.id,
+                user_id=session.user_id,
+                user_email=session.user.email,
+                user_full_name=user_full_name,
+                device_name=session.device_name,
+                device_id=session.device_id,
+                ip_address=session.ip_address,
+                location_city=session.location_city,
+                location_country=session.location_country,
+                last_used_at=session.last_used_at,
+                created_at=session.created_at,
+                expires_at=session.expires_at,
+                is_active=session.is_active
+            )
+            session_responses.append(session_response)
+
+        logger.info(f"Admin {admin.email} listed {len(session_responses)} sessions (total: {total})")
+
+        pagination_meta = create_pagination_meta(
+            total=total,
+            page=pagination.page,
+            limit=pagination.limit,
+            items_count=len(session_responses)
+        )
+
+        return PaginatedResponse(data=session_responses, pagination=pagination_meta)
+
+    except Exception as e:
+        logger.error(f"Error listing sessions (admin): {str(e)}", exc_info=True)
         raise

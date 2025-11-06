@@ -9,6 +9,8 @@ from fastapi import status
 
 from app.models.organization import Organization
 from app.models.user_organization import UserOrganization, OrganizationRole
+from app.models.user_session import UserSession
+from datetime import datetime, timezone, timedelta
 
 
 @pytest_asyncio.fixture
@@ -837,3 +839,159 @@ class TestAdminRemoveOrganizationMember:
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+# ===== SESSION MANAGEMENT TESTS =====
+
+class TestAdminListSessions:
+    """Tests for admin sessions list endpoint."""
+
+    @pytest.mark.asyncio
+    async def test_admin_list_sessions_success(self, client, async_test_superuser, async_test_user, async_test_db, superuser_token):
+        """Test listing all sessions as admin."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create some test sessions
+        async with AsyncTestingSessionLocal() as session:
+            now = datetime.now(timezone.utc)
+            expires_at = now + timedelta(days=7)
+
+            session1 = UserSession(
+                user_id=async_test_user.id,
+                refresh_token_jti="jti-test-1",
+                device_name="iPhone 14",
+                device_id="device-1",
+                ip_address="192.168.1.100",
+                user_agent="Mozilla/5.0",
+                last_used_at=now,
+                expires_at=expires_at,
+                is_active=True,
+                location_city="San Francisco",
+                location_country="United States"
+            )
+            session2 = UserSession(
+                user_id=async_test_superuser.id,
+                refresh_token_jti="jti-test-2",
+                device_name="MacBook Pro",
+                device_id="device-2",
+                ip_address="192.168.1.101",
+                user_agent="Mozilla/5.0",
+                last_used_at=now,
+                expires_at=expires_at,
+                is_active=True
+            )
+            session.add_all([session1, session2])
+            await session.commit()
+
+        response = await client.get(
+            "/api/v1/admin/sessions?page=1&limit=10",
+            headers={"Authorization": f"Bearer {superuser_token}"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert "data" in data
+        assert "pagination" in data
+        assert len(data["data"]) >= 2  # At least our 2 test sessions
+        assert data["pagination"]["total"] >= 2
+
+        # Verify session structure includes user info
+        first_session = data["data"][0]
+        assert "id" in first_session
+        assert "user_id" in first_session
+        assert "user_email" in first_session
+        assert "device_name" in first_session
+        assert "ip_address" in first_session
+        assert "is_active" in first_session
+
+    @pytest.mark.asyncio
+    async def test_admin_list_sessions_filter_active(self, client, async_test_superuser, async_test_user, async_test_db, superuser_token):
+        """Test filtering sessions by active status."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create active and inactive sessions
+        async with AsyncTestingSessionLocal() as session:
+            now = datetime.now(timezone.utc)
+            expires_at = now + timedelta(days=7)
+
+            active_session = UserSession(
+                user_id=async_test_user.id,
+                refresh_token_jti="jti-active",
+                device_name="Active Device",
+                ip_address="192.168.1.100",
+                last_used_at=now,
+                expires_at=expires_at,
+                is_active=True
+            )
+            inactive_session = UserSession(
+                user_id=async_test_user.id,
+                refresh_token_jti="jti-inactive",
+                device_name="Inactive Device",
+                ip_address="192.168.1.101",
+                last_used_at=now,
+                expires_at=expires_at,
+                is_active=False
+            )
+            session.add_all([active_session, inactive_session])
+            await session.commit()
+
+        # Get only active sessions (default)
+        response = await client.get(
+            "/api/v1/admin/sessions?page=1&limit=100",
+            headers={"Authorization": f"Bearer {superuser_token}"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+
+        # All returned sessions should be active
+        for sess in data["data"]:
+            assert sess["is_active"] is True
+
+    @pytest.mark.asyncio
+    async def test_admin_list_sessions_pagination(self, client, async_test_superuser, async_test_db, superuser_token):
+        """Test pagination of sessions list."""
+        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create multiple sessions
+        async with AsyncTestingSessionLocal() as session:
+            now = datetime.now(timezone.utc)
+            expires_at = now + timedelta(days=7)
+
+            sessions = []
+            for i in range(5):
+                sess = UserSession(
+                    user_id=async_test_superuser.id,
+                    refresh_token_jti=f"jti-pagination-{i}",
+                    device_name=f"Device {i}",
+                    ip_address=f"192.168.1.{100+i}",
+                    last_used_at=now,
+                    expires_at=expires_at,
+                    is_active=True
+                )
+                sessions.append(sess)
+            session.add_all(sessions)
+            await session.commit()
+
+        # Get first page with limit 2
+        response = await client.get(
+            "/api/v1/admin/sessions?page=1&limit=2",
+            headers={"Authorization": f"Bearer {superuser_token}"}
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert len(data["data"]) == 2
+        assert data["pagination"]["page"] == 1
+        assert data["pagination"]["page_size"] == 2
+        assert data["pagination"]["total"] >= 5
+
+    @pytest.mark.asyncio
+    async def test_admin_list_sessions_unauthorized(self, client, async_test_user, user_token):
+        """Test that non-admin users cannot access admin sessions endpoint."""
+        response = await client.get(
+            "/api/v1/admin/sessions?page=1&limit=10",
+            headers={"Authorization": f"Bearer {user_token}"}
+        )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN

@@ -420,6 +420,59 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
             logger.error(f"Error counting sessions for user {user_id}: {str(e)}")
             raise
 
+    async def get_all_sessions(
+        self,
+        db: AsyncSession,
+        *,
+        skip: int = 0,
+        limit: int = 100,
+        active_only: bool = True,
+        with_user: bool = True
+    ) -> tuple[List[UserSession], int]:
+        """
+        Get all sessions across all users with pagination (admin only).
+
+        Args:
+            db: Database session
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            active_only: If True, return only active sessions
+            with_user: If True, eager load user relationship to prevent N+1
+
+        Returns:
+            Tuple of (list of UserSession objects, total count)
+        """
+        try:
+            # Build query
+            query = select(UserSession)
+
+            # Add eager loading if requested to prevent N+1 queries
+            if with_user:
+                query = query.options(joinedload(UserSession.user))
+
+            if active_only:
+                query = query.where(UserSession.is_active == True)
+
+            # Get total count
+            count_query = select(func.count(UserSession.id))
+            if active_only:
+                count_query = count_query.where(UserSession.is_active == True)
+
+            count_result = await db.execute(count_query)
+            total = count_result.scalar_one()
+
+            # Apply pagination and ordering
+            query = query.order_by(UserSession.last_used_at.desc()).offset(skip).limit(limit)
+
+            result = await db.execute(query)
+            sessions = list(result.scalars().all())
+
+            return sessions, total
+
+        except Exception as e:
+            logger.error(f"Error getting all sessions: {str(e)}", exc_info=True)
+            raise
+
 
 # Create singleton instance
 session = CRUDSession(UserSession)
