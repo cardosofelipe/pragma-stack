@@ -86,8 +86,8 @@ export function UserManagementContent() {
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
       const selectableUsers = users
-        .filter((u: any) => u.id !== currentUser?.id)
-        .map((u: any) => u.id);
+        .filter((u) => u.id !== currentUser?.id)
+        .map((u) => u.id);
       setSelectedUsers(selectableUsers);
     } else {
       setSelectedUsers([]);

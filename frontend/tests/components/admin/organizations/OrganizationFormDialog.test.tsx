@@ -39,7 +39,6 @@ describe('OrganizationFormDialog', () => {
   const mockOrganization: Organization = {
     id: 'org-1',
     name: 'Test Organization',
-    slug: 'test-org',
     description: 'Test description',
     is_active: true,
     created_at: '2025-01-01',

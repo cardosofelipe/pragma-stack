@@ -32,7 +32,6 @@ describe('OrganizationActionMenu', () => {
   const mockOrganization: Organization = {
     id: '1',
     name: 'Acme Corporation',
-    slug: 'acme-corporation',
     description: 'Leading provider',
     is_active: true,
     created_at: '2025-01-01T00:00:00Z',

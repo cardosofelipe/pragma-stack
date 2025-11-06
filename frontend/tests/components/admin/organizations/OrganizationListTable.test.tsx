@@ -22,7 +22,6 @@ describe('OrganizationListTable', () => {
     {
       id: '1',
       name: 'Acme Corporation',
-      slug: 'acme-corporation',
       description: 'Leading provider of innovative solutions',
       is_active: true,
       created_at: '2025-01-01T00:00:00Z',
@@ -32,7 +31,6 @@ describe('OrganizationListTable', () => {
     {
       id: '2',
       name: 'Tech Startup Inc',
-      slug: 'tech-startup-inc',
       description: null,
       is_active: false,
       created_at: '2025-01-15T00:00:00Z',

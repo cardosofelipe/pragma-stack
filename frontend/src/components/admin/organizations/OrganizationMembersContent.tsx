@@ -26,7 +26,6 @@ interface OrganizationMembersContentProps {
 export function OrganizationMembersContent({ organizationId }: OrganizationMembersContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user: currentUser } = useAuth();
 
   // URL state
   const page = parseInt(searchParams.get('page') || '1', 10);

@@ -17,12 +17,14 @@ export const metadata: Metadata = {
 };
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function OrganizationMembersPage({ params }: PageProps) {
+export default async function OrganizationMembersPage({ params }: PageProps) {
+  const { id } = await params;
+
   return (
     <div className="container mx-auto px-6 py-8">
       <div className="space-y-6">
@@ -36,7 +38,7 @@ export default function OrganizationMembersPage({ params }: PageProps) {
         </div>
 
         {/* Organization Members Content */}
-        <OrganizationMembersContent organizationId={params.id} />
+        <OrganizationMembersContent organizationId={id} />
       </div>
     </div>
   );

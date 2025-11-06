@@ -168,7 +168,7 @@ export function UserFormDialog({
 
         await updateUser.mutateAsync({
           userId: user.id,
-          userData: updateData as any,
+          userData: updateData,
         });
 
         toast.success(`User ${data.first_name} ${data.last_name || ''} updated successfully`);
@@ -181,9 +181,8 @@ export function UserFormDialog({
           first_name: data.first_name,
           last_name: data.last_name || undefined,
           password: data.password,
-          is_active: data.is_active,
           is_superuser: data.is_superuser,
-        } as any);
+        });
 
         toast.success(`User ${data.first_name} ${data.last_name || ''} created successfully`);
         onOpenChange(false);

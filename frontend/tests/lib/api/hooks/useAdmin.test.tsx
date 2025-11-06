@@ -487,7 +487,6 @@ describe('useAdmin hooks', () => {
           first_name: 'New',
           last_name: 'User',
           password: 'Password123',
-          is_active: true,
           is_superuser: false,
         });
       });
@@ -498,7 +497,6 @@ describe('useAdmin hooks', () => {
           first_name: 'New',
           last_name: 'User',
           password: 'Password123',
-          is_active: true,
           is_superuser: false,
         },
         throwOnError: false,
@@ -516,7 +514,6 @@ describe('useAdmin hooks', () => {
           email: 'test@example.com',
           first_name: 'Test',
           password: 'Password123',
-          is_active: true,
           is_superuser: false,
         })
       ).rejects.toThrow('Failed to create user');
@@ -536,7 +533,6 @@ describe('useAdmin hooks', () => {
         await result.current.mutateAsync({
           userId: '1',
           userData: {
-            email: 'updated@example.com',
             first_name: 'Updated',
           },
         });
@@ -545,7 +541,6 @@ describe('useAdmin hooks', () => {
       expect(mockUpdateUser).toHaveBeenCalledWith({
         path: { user_id: '1' },
         body: {
-          email: 'updated@example.com',
           first_name: 'Updated',
         },
         throwOnError: false,
@@ -561,7 +556,7 @@ describe('useAdmin hooks', () => {
       await expect(
         result.current.mutateAsync({
           userId: '1',
-          userData: { email: 'test@example.com' },
+          userData: { first_name: 'Test' },
         })
       ).rejects.toThrow('Failed to update user');
     });

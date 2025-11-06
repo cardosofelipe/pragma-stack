@@ -76,7 +76,6 @@ export function UserListTable({
 
   const allSelected =
     users.length > 0 && users.every((user) => selectedUsers.includes(user.id));
-  const someSelected = users.some((user) => selectedUsers.includes(user.id));
 
   return (
     <div className="space-y-4">

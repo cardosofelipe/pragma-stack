@@ -21,7 +21,6 @@ import { OrganizationFormDialog } from './OrganizationFormDialog';
 export function OrganizationManagementContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user: currentUser } = useAuth();
 
   // URL state
   const page = parseInt(searchParams.get('page') || '1', 10);

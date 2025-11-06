@@ -69,7 +69,7 @@ export function AddMemberDialog({
     },
   });
 
-  const { register, handleSubmit, formState: { errors }, setValue, watch } = form;
+  const { handleSubmit, formState: { errors }, setValue, watch } = form;
   const selectedRole = watch('role');
   const selectedEmail = watch('userEmail');
 
