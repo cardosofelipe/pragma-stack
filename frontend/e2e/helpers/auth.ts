@@ -293,7 +293,12 @@ export async function setupSuperuserMocks(page: Page): Promise<void> {
 
   // Mock GET /api/v1/admin/organizations - Get all organizations (admin endpoint)
   await page.route(`${baseURL}/api/v1/admin/organizations*`, async (route: Route) => {
-    if (route.request().method() === 'GET') {
+    const url = route.request().url();
+
+    // Only handle list endpoint (no ID in path) - must have either end of URL or query params after /organizations
+    const isListEndpoint = url.match(/\/admin\/organizations(\?|$)/);
+
+    if (route.request().method() === 'GET' && isListEndpoint) {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -362,11 +367,15 @@ export async function setupSuperuserMocks(page: Page): Promise<void> {
   });
 
   // Mock GET /api/v1/admin/organizations/:id - Get single organization
-  await page.route(`${baseURL}/api/v1/admin/organizations/*/`, async (route: Route) => {
-    if (route.request().method() === 'GET') {
+  await page.route(`${baseURL}/api/v1/admin/organizations/*`, async (route: Route) => {
+    const url = route.request().url();
+
+    // Only handle single org endpoint (has ID but no /members suffix)
+    const isSingleOrgEndpoint = url.match(/\/admin\/organizations\/[0-9a-f-]+\/?$/i);
+
+    if (route.request().method() === 'GET' && isSingleOrgEndpoint) {
       // Extract org ID from URL
-      const url = route.request().url();
-      const orgId = url.match(/organizations\/([^/]+)/)?.[1];
+      const orgId = url.match(/organizations\/([^/]+)/)?.[1]?.replace(/\/$/, ''); // Remove trailing slash if any
       const org = MOCK_ORGANIZATIONS.find(o => o.id === orgId) || MOCK_ORGANIZATIONS[0];
 
       await route.fulfill({

@@ -150,17 +150,17 @@ test.describe('Admin Organization Members - AddMemberDialog E2E Tests', () => {
   });
 
   test('should display dialog description', async ({ page }) => {
-    await expect(page.getByText(/Add a new member to this organization/i)).toBeVisible();
+    await expect(page.getByText(/Add a user to this organization and assign them a role/i)).toBeVisible();
   });
 
   test('should display user email select field', async ({ page }) => {
     const dialog = page.locator('[role="dialog"]');
-    await expect(dialog.getByText('User Email')).toBeVisible();
+    await expect(dialog.getByText('User Email *')).toBeVisible();
   });
 
   test('should display role select field', async ({ page }) => {
     const dialog = page.locator('[role="dialog"]');
-    await expect(dialog.getByText('Role')).toBeVisible();
+    await expect(dialog.getByText('Role *')).toBeVisible();
   });
 
   test('should display add member and cancel buttons', async ({ page }) => {

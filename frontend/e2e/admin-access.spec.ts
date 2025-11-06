@@ -172,7 +172,7 @@ test.describe('Admin Navigation', () => {
     await page.goto('/admin/organizations');
 
     await expect(page).toHaveURL('/admin/organizations');
-    await expect(page.locator('h2')).toContainText('All Organizations');
+    await expect(page.getByRole('heading', { name: 'All Organizations' })).toBeVisible();
 
     // Breadcrumbs should show Admin > Organizations
     await expect(page.getByTestId('breadcrumb-admin')).toBeVisible();
@@ -270,9 +270,12 @@ test.describe('Admin Breadcrumbs', () => {
 
     // Click 'Admin' breadcrumb to go back to dashboard
     const adminBreadcrumb = page.getByTestId('breadcrumb-admin');
-    await adminBreadcrumb.click();
 
-    await page.waitForURL('/admin', { timeout: 5000 });
+    await Promise.all([
+      page.waitForURL('/admin', { timeout: 10000 }),
+      adminBreadcrumb.click()
+    ]);
+
     await expect(page).toHaveURL('/admin');
   });
 });

@@ -15,22 +15,18 @@ test.describe('Password Change', () => {
     await loginViaUI(page);
 
     // Navigate to password page
-    await page.goto('/settings/password');
+    await page.goto('/settings/password', { waitUntil: 'networkidle' });
 
-    // Wait for page to render
-    await page.waitForTimeout(1000);
+    // Wait for form to be visible
+    await page.getByLabel(/current password/i).waitFor({ state: 'visible', timeout: 10000 });
   });
 
   test('should display password change form', async ({ page }) => {
     // Check page title
-    await expect(page.locator('h2')).toContainText('Password');
-
-    // Wait for form to be visible
-    const currentPasswordInput = page.getByLabel(/current password/i);
-    await currentPasswordInput.waitFor({ state: 'visible', timeout: 10000 });
+    await expect(page.getByRole('heading', { name: 'Password' })).toBeVisible();
 
     // Verify all password fields are present
-    await expect(currentPasswordInput).toBeVisible();
+    await expect(page.getByLabel(/current password/i)).toBeVisible();
     await expect(page.getByLabel(/^new password/i)).toBeVisible();
     await expect(page.getByLabel(/confirm.*password/i)).toBeVisible();
 
