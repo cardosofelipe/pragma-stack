@@ -29,25 +29,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { UserActionMenu } from './UserActionMenu';
-
-interface User {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string | null;
-  is_active: boolean;
-  is_superuser: boolean;
-  created_at: string;
-}
-
-interface PaginationMeta {
-  total: number;
-  page: number;
-  page_size: number;
-  total_pages: number;
-  has_next: boolean;
-  has_prev: boolean;
-}
+import type { User, PaginationMeta } from '@/lib/api/hooks/useAdmin';
 
 interface UserListTableProps {
   users: User[];

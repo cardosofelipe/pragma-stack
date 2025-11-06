@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 import {
   useCreateUser,
   useUpdateUser,
+  type User,
 } from '@/lib/api/hooks/useAdmin';
 
 // ============================================================================
@@ -57,15 +58,6 @@ type UserFormData = z.infer<typeof userFormSchema>;
 // ============================================================================
 // Component
 // ============================================================================
-
-interface User {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string | null;
-  is_active: boolean;
-  is_superuser: boolean;
-}
 
 interface UserFormDialogProps {
   open: boolean;

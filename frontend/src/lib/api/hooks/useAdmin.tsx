@@ -124,6 +124,39 @@ export function useAdminStats() {
 }
 
 /**
+ * Pagination metadata structure
+ */
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  has_next: boolean;
+  has_prev: boolean;
+}
+
+/**
+ * User interface matching backend UserResponse
+ */
+export interface User {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string | null;
+  is_active: boolean;
+  is_superuser: boolean;
+  created_at: string;
+}
+
+/**
+ * Paginated user list response
+ */
+export interface PaginatedUserResponse {
+  data: User[];
+  pagination: PaginationMeta;
+}
+
+/**
  * Hook to fetch paginated list of all users (for admin)
  *
  * @param page - Page number (1-indexed)
@@ -135,7 +168,7 @@ export function useAdminUsers(page = 1, limit = DEFAULT_PAGE_LIMIT) {
 
   return useQuery({
     queryKey: ['admin', 'users', page, limit],
-    queryFn: async () => {
+    queryFn: async (): Promise<PaginatedUserResponse> => {
       const response = await adminListUsers({
         query: { page, limit },
         throwOnError: false,
@@ -146,7 +179,7 @@ export function useAdminUsers(page = 1, limit = DEFAULT_PAGE_LIMIT) {
       }
 
       // Type assertion: if no error, response has data
-      return (response as { data: unknown }).data;
+      return (response as { data: PaginatedUserResponse }).data;
     },
     // Only fetch if user is a superuser (frontend guard)
     enabled: user?.is_superuser === true,

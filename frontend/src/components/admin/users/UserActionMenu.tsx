@@ -30,16 +30,8 @@ import {
   useActivateUser,
   useDeactivateUser,
   useDeleteUser,
+  type User,
 } from '@/lib/api/hooks/useAdmin';
-
-interface User {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string | null;
-  is_active: boolean;
-  is_superuser: boolean;
-}
 
 interface UserActionMenuProps {
   user: User;

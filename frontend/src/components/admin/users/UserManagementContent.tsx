@@ -10,7 +10,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { useAdminUsers } from '@/lib/api/hooks/useAdmin';
+import { useAdminUsers, type User, type PaginationMeta } from '@/lib/api/hooks/useAdmin';
 import { UserListTable } from './UserListTable';
 import { UserFormDialog } from './UserFormDialog';
 import { BulkActionToolbar } from './BulkActionToolbar';
@@ -30,13 +30,13 @@ export function UserManagementContent() {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
-  const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   // Fetch users with query params
   const { data, isLoading } = useAdminUsers(page, 20);
 
-  const users = data?.data || [];
-  const pagination = data?.pagination || {
+  const users: User[] = data?.data || [];
+  const pagination: PaginationMeta = data?.pagination || {
     total: 0,
     page: 1,
     page_size: 20,
@@ -107,7 +107,7 @@ export function UserManagementContent() {
     setDialogOpen(true);
   };
 
-  const handleEditUser = (user: any) => {
+  const handleEditUser = (user: User) => {
     setDialogMode('edit');
     setEditingUser(user);
     setDialogOpen(true);
