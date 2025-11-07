@@ -8,6 +8,7 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { ChartCard } from './ChartCard';
 import { format, subDays } from 'date-fns';
+import { CHART_PALETTES } from '@/lib/chart-colors';
 
 export interface SessionActivityData {
   date: string;
@@ -52,29 +53,32 @@ export function SessionActivityChart({ data, loading, error }: SessionActivityCh
         <AreaChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <defs>
             <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+              <stop offset="5%" stopColor={CHART_PALETTES.area[0]} stopOpacity={0.8} />
+              <stop offset="95%" stopColor={CHART_PALETTES.area[0]} stopOpacity={0.1} />
             </linearGradient>
             <linearGradient id="colorNew" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0.1} />
+              <stop offset="5%" stopColor={CHART_PALETTES.area[1]} stopOpacity={0.8} />
+              <stop offset="95%" stopColor={CHART_PALETTES.area[1]} stopOpacity={0.1} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
           <XAxis
             dataKey="date"
-            className="text-xs"
-            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            stroke="hsl(var(--border))"
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+            tickLine={{ stroke: 'hsl(var(--border))' }}
           />
           <YAxis
-            className="text-xs"
-            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            stroke="hsl(var(--border))"
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+            tickLine={{ stroke: 'hsl(var(--border))' }}
           />
           <Tooltip
             contentStyle={{
               backgroundColor: 'hsl(var(--popover))',
               border: '1px solid hsl(var(--border))',
               borderRadius: '6px',
+              color: 'hsl(var(--popover-foreground))',
             }}
             labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
           />
@@ -87,7 +91,7 @@ export function SessionActivityChart({ data, loading, error }: SessionActivityCh
             type="monotone"
             dataKey="activeSessions"
             name="Active Sessions"
-            stroke="hsl(var(--primary))"
+            stroke={CHART_PALETTES.area[0]}
             strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorActive)"
@@ -96,7 +100,7 @@ export function SessionActivityChart({ data, loading, error }: SessionActivityCh
             type="monotone"
             dataKey="newSessions"
             name="New Sessions"
-            stroke="hsl(var(--chart-2))"
+            stroke={CHART_PALETTES.area[1]}
             strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorNew)"

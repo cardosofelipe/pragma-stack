@@ -8,6 +8,7 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { ChartCard } from './ChartCard';
 import { format, subDays } from 'date-fns';
+import { CHART_PALETTES } from '@/lib/chart-colors';
 
 export interface UserGrowthData {
   date: string;
@@ -54,18 +55,21 @@ export function UserGrowthChart({ data, loading, error }: UserGrowthChartProps) 
           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
           <XAxis
             dataKey="date"
-            className="text-xs"
-            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            stroke="hsl(var(--border))"
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+            tickLine={{ stroke: 'hsl(var(--border))' }}
           />
           <YAxis
-            className="text-xs"
-            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            stroke="hsl(var(--border))"
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+            tickLine={{ stroke: 'hsl(var(--border))' }}
           />
           <Tooltip
             contentStyle={{
               backgroundColor: 'hsl(var(--popover))',
               border: '1px solid hsl(var(--border))',
               borderRadius: '6px',
+              color: 'hsl(var(--popover-foreground))',
             }}
             labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
           />
@@ -78,7 +82,7 @@ export function UserGrowthChart({ data, loading, error }: UserGrowthChartProps) 
             type="monotone"
             dataKey="totalUsers"
             name="Total Users"
-            stroke="hsl(var(--primary))"
+            stroke={CHART_PALETTES.line[0]}
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 6 }}
@@ -87,7 +91,7 @@ export function UserGrowthChart({ data, loading, error }: UserGrowthChartProps) 
             type="monotone"
             dataKey="activeUsers"
             name="Active Users"
-            stroke="hsl(var(--chart-2))"
+            stroke={CHART_PALETTES.line[1]}
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 6 }}

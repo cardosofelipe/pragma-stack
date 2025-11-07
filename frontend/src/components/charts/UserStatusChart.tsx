@@ -7,6 +7,7 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { ChartCard } from './ChartCard';
+import { CHART_PALETTES } from '@/lib/chart-colors';
 
 export interface UserStatusData {
   name: string;
@@ -23,10 +24,10 @@ interface UserStatusChartProps {
 // Generate mock data for development/demo
 function generateMockData(): UserStatusData[] {
   return [
-    { name: 'Active', value: 142, color: 'hsl(var(--chart-1))' },
-    { name: 'Inactive', value: 28, color: 'hsl(var(--chart-2))' },
-    { name: 'Pending', value: 15, color: 'hsl(var(--chart-3))' },
-    { name: 'Suspended', value: 5, color: 'hsl(var(--chart-4))' },
+    { name: 'Active', value: 142, color: CHART_PALETTES.pie[0] },
+    { name: 'Inactive', value: 28, color: CHART_PALETTES.pie[1] },
+    { name: 'Pending', value: 15, color: CHART_PALETTES.pie[2] },
+    { name: 'Suspended', value: 5, color: CHART_PALETTES.pie[3] },
   ];
 }
 
@@ -67,6 +68,7 @@ export function UserStatusChart({ data, loading, error }: UserStatusChartProps) 
               backgroundColor: 'hsl(var(--popover))',
               border: '1px solid hsl(var(--border))',
               borderRadius: '6px',
+              color: 'hsl(var(--popover-foreground))',
             }}
             labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
           />
@@ -75,6 +77,7 @@ export function UserStatusChart({ data, loading, error }: UserStatusChartProps) 
             height={36}
             wrapperStyle={{
               paddingTop: '20px',
+              color: 'hsl(var(--foreground))',
             }}
           />
         </PieChart>

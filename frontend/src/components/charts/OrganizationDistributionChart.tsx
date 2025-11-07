@@ -7,6 +7,7 @@
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { ChartCard } from './ChartCard';
+import { CHART_PALETTES } from '@/lib/chart-colors';
 
 export interface OrganizationDistributionData {
   name: string;
@@ -51,18 +52,21 @@ export function OrganizationDistributionChart({
           <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
           <XAxis
             dataKey="name"
-            className="text-xs"
-            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            stroke="hsl(var(--border))"
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+            tickLine={{ stroke: 'hsl(var(--border))' }}
           />
           <YAxis
-            className="text-xs"
-            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            stroke="hsl(var(--border))"
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+            tickLine={{ stroke: 'hsl(var(--border))' }}
           />
           <Tooltip
             contentStyle={{
               backgroundColor: 'hsl(var(--popover))',
               border: '1px solid hsl(var(--border))',
               borderRadius: '6px',
+              color: 'hsl(var(--popover-foreground))',
             }}
             labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
           />
@@ -74,13 +78,13 @@ export function OrganizationDistributionChart({
           <Bar
             dataKey="members"
             name="Total Members"
-            fill="hsl(var(--primary))"
+            fill={CHART_PALETTES.bar[0]}
             radius={[4, 4, 0, 0]}
           />
           <Bar
             dataKey="activeMembers"
             name="Active Members"
-            fill="hsl(var(--chart-2))"
+            fill={CHART_PALETTES.bar[1]}
             radius={[4, 4, 0, 0]}
           />
         </BarChart>
