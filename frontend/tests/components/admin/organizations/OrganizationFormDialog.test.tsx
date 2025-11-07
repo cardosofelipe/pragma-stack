@@ -42,7 +42,6 @@ describe('OrganizationFormDialog', () => {
     description: 'Test description',
     is_active: true,
     created_at: '2025-01-01',
-    updated_at: '2025-01-01',
     member_count: 5,
   };
 

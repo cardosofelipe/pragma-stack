@@ -9,7 +9,6 @@ import { useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/lib/auth/AuthContext';
 import {
   useAdminOrganizations,
   type Organization,
