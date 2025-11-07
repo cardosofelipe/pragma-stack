@@ -8,6 +8,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { DashboardStats } from '@/components/admin';
+import {
+  UserGrowthChart,
+  OrganizationDistributionChart,
+  SessionActivityChart,
+  UserStatusChart,
+} from '@/components/charts';
 import { Users, Building2, Settings } from 'lucide-react';
 
 /* istanbul ignore next - Next.js metadata, not executable code */
@@ -71,6 +77,17 @@ export default function AdminPage() {
                 </p>
               </div>
             </Link>
+          </div>
+        </div>
+
+        {/* Analytics Charts */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Analytics Overview</h2>
+          <div className="grid gap-6 md:grid-cols-2">
+            <UserGrowthChart />
+            <SessionActivityChart />
+            <OrganizationDistributionChart />
+            <UserStatusChart />
           </div>
         </div>
       </div>

@@ -10,6 +10,14 @@ import { useAdminStats } from '@/lib/api/hooks/useAdmin';
 // Mock the useAdminStats hook
 jest.mock('@/lib/api/hooks/useAdmin');
 
+// Mock chart components
+jest.mock('@/components/charts', () => ({
+  UserGrowthChart: () => <div data-testid="user-growth-chart">User Growth Chart</div>,
+  OrganizationDistributionChart: () => <div data-testid="org-distribution-chart">Org Distribution Chart</div>,
+  SessionActivityChart: () => <div data-testid="session-activity-chart">Session Activity Chart</div>,
+  UserStatusChart: () => <div data-testid="user-status-chart">User Status Chart</div>,
+}));
+
 const mockUseAdminStats = useAdminStats as jest.MockedFunction<typeof useAdminStats>;
 
 // Helper function to render with default mocked stats
@@ -98,5 +106,20 @@ describe('AdminPage', () => {
     const containerDiv = container.querySelector('.container');
     expect(containerDiv).toBeInTheDocument();
     expect(containerDiv).toHaveClass('mx-auto', 'px-6', 'py-8');
+  });
+
+  it('renders analytics overview section', () => {
+    renderWithMockedStats();
+
+    expect(screen.getByText('Analytics Overview')).toBeInTheDocument();
+  });
+
+  it('renders all chart components', () => {
+    renderWithMockedStats();
+
+    expect(screen.getByTestId('user-growth-chart')).toBeInTheDocument();
+    expect(screen.getByTestId('org-distribution-chart')).toBeInTheDocument();
+    expect(screen.getByTestId('session-activity-chart')).toBeInTheDocument();
+    expect(screen.getByTestId('user-status-chart')).toBeInTheDocument();
   });
 });
