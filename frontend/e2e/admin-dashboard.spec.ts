@@ -34,7 +34,7 @@ test.describe('Admin Dashboard - Statistics Cards', () => {
 
   test('should display all stat cards', async ({ page }) => {
     // Wait for stats to load
-    await page.waitForSelector('[data-testid="dashboard-stats"]', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="dashboard-stats"]');
 
     // Check all stat cards are visible using data-testid to avoid ambiguity
     const statCards = page.getByTestId('stat-title');
@@ -47,7 +47,7 @@ test.describe('Admin Dashboard - Statistics Cards', () => {
 
   test('should display stat card values', async ({ page }) => {
     // Wait for stats to load
-    await page.waitForSelector('[data-testid="dashboard-stats"]', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="dashboard-stats"]');
 
     // Stats should have numeric values (from mock data)
     // Mock returns: 2 users (MOCK_USER + MOCK_SUPERUSER), 3 orgs, 45 sessions
@@ -83,7 +83,7 @@ test.describe('Admin Dashboard - Quick Actions', () => {
     const userManagementLink = page.getByRole('link', { name: /User Management/i });
 
     await Promise.all([
-      page.waitForURL('/admin/users', { timeout: 10000 }),
+      page.waitForURL('/admin/users'),
       userManagementLink.click()
     ]);
 
@@ -96,7 +96,7 @@ test.describe('Admin Dashboard - Quick Actions', () => {
     const organizationsLink = quickActionsSection.getByRole('link', { name: /Organizations/i });
 
     await Promise.all([
-      page.waitForURL('/admin/organizations', { timeout: 10000 }),
+      page.waitForURL('/admin/organizations'),
       organizationsLink.click()
     ]);
 

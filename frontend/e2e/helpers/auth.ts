@@ -105,7 +105,7 @@ export async function loginViaUI(page: Page, email = 'test@example.com', passwor
 
   // Submit and wait for navigation to home
   await Promise.all([
-    page.waitForURL('/', { timeout: 10000 }),
+    page.waitForURL('/'),
     page.locator('button[type="submit"]').click(),
   ]);
 

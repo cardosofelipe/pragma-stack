@@ -12,7 +12,7 @@ test.describe('Admin Organization Members - Navigation from Organizations List',
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
   });
 
   test('should navigate to members page when clicking view members in action menu', async ({ page }) => {
@@ -22,7 +22,7 @@ test.describe('Admin Organization Members - Navigation from Organizations List',
 
     // Click "View Members"
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/, { timeout: 10000 }),
+      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
       page.getByText('View Members').click()
     ]);
 
@@ -37,7 +37,7 @@ test.describe('Admin Organization Members - Navigation from Organizations List',
 
     // Click on member count
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/, { timeout: 10000 }),
+      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
       memberButton.click()
     ]);
 
@@ -51,14 +51,14 @@ test.describe('Admin Organization Members - Page Structure', () => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Navigate to members page
     const actionButton = page.getByRole('button', { name: /Actions for/i }).first();
     await actionButton.click();
 
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/, { timeout: 10000 }),
+      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
       page.getByText('View Members').click()
     ]);
   });
@@ -67,7 +67,7 @@ test.describe('Admin Organization Members - Page Structure', () => {
     await expect(page).toHaveURL(/\/admin\/organizations\/[^/]+\/members/);
 
     // Wait for page to load
-    await page.waitForSelector('table', { timeout: 10000 });
+    await page.waitForSelector('table');
 
     // Should show organization name in heading
     await expect(page.getByRole('heading', { name: /Members/i })).toBeVisible();
@@ -90,7 +90,7 @@ test.describe('Admin Organization Members - Page Structure', () => {
 
   test('should have proper heading hierarchy', async ({ page }) => {
     // Wait for page to load
-    await page.waitForSelector('table', { timeout: 10000 });
+    await page.waitForSelector('table');
 
     // Page should have h2 with organization name
     const heading = page.getByRole('heading', { name: /Members/i });
@@ -98,7 +98,7 @@ test.describe('Admin Organization Members - Page Structure', () => {
   });
 
   test('should have proper table structure', async ({ page }) => {
-    await page.waitForSelector('table', { timeout: 10000 });
+    await page.waitForSelector('table');
 
     // Table should have thead and tbody
     const table = page.locator('table');
@@ -121,14 +121,14 @@ test.describe('Admin Organization Members - AddMemberDialog E2E Tests', () => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Navigate to members page
     const actionButton = page.getByRole('button', { name: /Actions for/i }).first();
     await actionButton.click();
 
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/, { timeout: 10000 }),
+      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
       page.getByText('View Members').click()
     ]);
 
@@ -137,7 +137,7 @@ test.describe('Admin Organization Members - AddMemberDialog E2E Tests', () => {
     await addButton.click();
 
     // Wait for dialog to be visible
-    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+    await page.waitForSelector('[role="dialog"]');
   });
 
   test('should open add member dialog when clicking add member button', async ({ page }) => {

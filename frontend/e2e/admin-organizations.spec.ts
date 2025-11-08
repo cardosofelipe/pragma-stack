@@ -17,7 +17,7 @@ test.describe('Admin Organization Management - Page Load', () => {
     await expect(page).toHaveURL('/admin/organizations');
 
     // Wait for page to load
-    await page.waitForSelector('table', { timeout: 10000 });
+    await page.waitForSelector('table');
 
     await expect(page.getByRole('heading', { name: 'All Organizations' })).toBeVisible();
   });
@@ -46,7 +46,7 @@ test.describe('Admin Organization Management - Organization List Table', () => {
 
   test('should display organization list table with headers', async ({ page }) => {
     // Wait for table to load
-    await page.waitForSelector('table', { timeout: 10000 });
+    await page.waitForSelector('table');
 
     // Check table exists and has structure
     const table = page.locator('table');
@@ -59,7 +59,7 @@ test.describe('Admin Organization Management - Organization List Table', () => {
 
   test('should display organization data rows', async ({ page }) => {
     // Wait for table to load
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Should have at least one organization row
     const orgRows = page.locator('table tbody tr');
@@ -68,7 +68,7 @@ test.describe('Admin Organization Management - Organization List Table', () => {
   });
 
   test('should display organization status badges', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Should see Active or Inactive badges
     const statusBadges = page.locator('table tbody').getByText(/Active|Inactive/);
@@ -77,7 +77,7 @@ test.describe('Admin Organization Management - Organization List Table', () => {
   });
 
   test('should display action menu for each organization', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Each row should have an action menu button
     const actionButtons = page.getByRole('button', { name: /Actions for/i });
@@ -86,7 +86,7 @@ test.describe('Admin Organization Management - Organization List Table', () => {
   });
 
   test('should display member counts', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Should show member counts in the Members column
     const membersColumn = page.locator('table tbody tr td').filter({ hasText: /^\d+$/ });
@@ -95,7 +95,7 @@ test.describe('Admin Organization Management - Organization List Table', () => {
   });
 
   test('should display organization names and descriptions', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Organization name should be visible
     const orgNames = page.locator('table tbody td').first();
@@ -111,7 +111,7 @@ test.describe('Admin Organization Management - Pagination', () => {
   });
 
   test('should display pagination info', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Should show "Showing X to Y of Z organizations"
     await expect(page.getByText(/Showing \d+ to \d+ of \d+ organizations/)).toBeVisible();
@@ -141,7 +141,7 @@ test.describe('Admin Organization Management - Action Menu', () => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
   });
 
   test('should open action menu when clicked', async ({ page }) => {
@@ -192,7 +192,7 @@ test.describe('Admin Organization Management - Action Menu', () => {
 
     // Click view members - use Promise.all for Next.js Link navigation
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/, { timeout: 10000 }),
+      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
       page.getByText('View Members').click()
     ]);
 
@@ -247,7 +247,7 @@ test.describe('Admin Organization Management - Edit Organization Dialog', () => 
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
   });
 
   test('should open edit dialog with existing organization data', async ({ page }) => {
@@ -296,7 +296,7 @@ test.describe('Admin Organization Management - Member Count Interaction', () => 
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
   });
 
   test('should allow clicking on member count to view members', async ({ page }) => {
@@ -306,7 +306,7 @@ test.describe('Admin Organization Management - Member Count Interaction', () => 
 
     // Click on member count - use Promise.all for Next.js Link navigation
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/, { timeout: 10000 }),
+      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
       memberButton.click()
     ]);
 
@@ -324,14 +324,14 @@ test.describe('Admin Organization Management - Accessibility', () => {
 
   test('should have proper heading hierarchy', async ({ page }) => {
     // Wait for table to load
-    await page.waitForSelector('table', { timeout: 10000 });
+    await page.waitForSelector('table');
 
     // Page should have h2 with proper text
     await expect(page.getByRole('heading', { name: 'All Organizations' })).toBeVisible();
   });
 
   test('should have accessible labels for action menus', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Action buttons should have descriptive labels
     const actionButton = page.getByRole('button', { name: /Actions for/i }).first();
@@ -339,7 +339,7 @@ test.describe('Admin Organization Management - Accessibility', () => {
   });
 
   test('should have proper table structure', async ({ page }) => {
-    await page.waitForSelector('table', { timeout: 10000 });
+    await page.waitForSelector('table');
 
     // Table should have thead and tbody
     const table = page.locator('table');

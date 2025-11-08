@@ -21,7 +21,7 @@ test.describe('Settings Navigation', () => {
     await expect(page).toHaveURL('/');
 
     // Navigate to settings/profile
-    await page.goto('/settings/profile', { waitUntil: 'networkidle' });
+    await page.goto('/settings/profile');
 
     // Verify navigation successful
     await expect(page).toHaveURL('/settings/profile');
@@ -36,7 +36,7 @@ test.describe('Settings Navigation', () => {
     await expect(page).toHaveURL('/');
 
     // Navigate to settings/password
-    await page.goto('/settings/password', { waitUntil: 'networkidle' });
+    await page.goto('/settings/password');
 
     // Verify navigation successful
     await expect(page).toHaveURL('/settings/password');
@@ -47,21 +47,21 @@ test.describe('Settings Navigation', () => {
 
   test('should navigate between settings pages', async ({ page }) => {
     // Start at profile page
-    await page.goto('/settings/profile', { waitUntil: 'networkidle' });
+    await page.goto('/settings/profile');
     await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
 
     // Navigate to password page
-    await page.goto('/settings/password', { waitUntil: 'networkidle' });
+    await page.goto('/settings/password');
     await expect(page.getByRole('heading', { name: 'Password' })).toBeVisible();
 
     // Navigate back to profile page
-    await page.goto('/settings/profile', { waitUntil: 'networkidle' });
+    await page.goto('/settings/profile');
     await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
   });
 
   test('should redirect from /settings to /settings/profile', async ({ page }) => {
     // Navigate to base settings page
-    await page.goto('/settings', { waitUntil: 'networkidle' });
+    await page.goto('/settings');
 
     // Should redirect to profile page
     await expect(page).toHaveURL('/settings/profile');
@@ -72,7 +72,7 @@ test.describe('Settings Navigation', () => {
 
   test('should display preferences page placeholder', async ({ page }) => {
     // Navigate to preferences page
-    await page.goto('/settings/preferences', { waitUntil: 'networkidle' });
+    await page.goto('/settings/preferences');
 
     // Verify navigation successful
     await expect(page).toHaveURL('/settings/preferences');

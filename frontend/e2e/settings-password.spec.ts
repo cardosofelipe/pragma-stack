@@ -15,10 +15,10 @@ test.describe('Password Change', () => {
     // Auth already cached in storage state (loginViaUI removed for performance)
 
     // Navigate to password page
-    await page.goto('/settings/password', { waitUntil: 'networkidle' });
+    await page.goto('/settings/password');
 
     // Wait for form to be visible
-    await page.getByLabel(/current password/i).waitFor({ state: 'visible', timeout: 10000 });
+    await page.getByLabel(/current password/i).waitFor({ state: 'visible' });
   });
 
   // TODO: Fix flaky test - failed once at 12.8s, passed on retry at 8.3s
@@ -40,7 +40,7 @@ test.describe('Password Change', () => {
   test('should have all password fields as password type', async ({ page }) => {
     // Wait for form to load
     const currentPasswordInput = page.getByLabel(/current password/i);
-    await currentPasswordInput.waitFor({ state: 'visible', timeout: 10000 });
+    await currentPasswordInput.waitFor({ state: 'visible' });
 
     // Verify all password fields have type="password"
     await expect(currentPasswordInput).toHaveAttribute('type', 'password');
@@ -51,7 +51,7 @@ test.describe('Password Change', () => {
   test('should have submit button disabled initially', async ({ page }) => {
     // Wait for form to load
     const submitButton = page.getByRole('button', { name: /change password/i });
-    await submitButton.waitFor({ state: 'visible', timeout: 10000 });
+    await submitButton.waitFor({ state: 'visible' });
 
     // Verify button is disabled when form is empty/untouched
     await expect(submitButton).toBeDisabled();

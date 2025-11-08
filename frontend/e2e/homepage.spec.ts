@@ -10,7 +10,6 @@ test.describe('Homepage - Desktop Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     // Wait for page to be fully loaded
-    await page.waitForLoadState('networkidle');
   });
 
   test('should display header with logo and navigation', async ({ page }) => {
@@ -36,7 +35,7 @@ test.describe('Homepage - Desktop Navigation', () => {
     const componentsLink = header.getByRole('link', { name: 'Components', exact: true });
 
     await Promise.all([
-      page.waitForURL('/dev', { timeout: 10000 }),
+      page.waitForURL('/dev'),
       componentsLink.click()
     ]);
 
@@ -49,7 +48,7 @@ test.describe('Homepage - Desktop Navigation', () => {
     const adminLink = header.getByRole('link', { name: 'Admin Demo', exact: true });
 
     await Promise.all([
-      page.waitForURL('/admin', { timeout: 10000 }),
+      page.waitForURL('/admin'),
       adminLink.click()
     ]);
 
@@ -62,7 +61,7 @@ test.describe('Homepage - Desktop Navigation', () => {
     const headerLoginLink = header.getByRole('link', { name: /^Login$/i });
 
     await Promise.all([
-      page.waitForURL('/login', { timeout: 10000 }),
+      page.waitForURL('/login'),
       headerLoginLink.click()
     ]);
 
@@ -88,7 +87,6 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
   });
 
   test('should display mobile menu toggle button', async ({ page }) => {
@@ -101,7 +99,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
     await menuButton.click();
 
     // Wait for sheet to be visible
-    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+    await page.waitForSelector('[role="dialog"]');
 
     // Navigation links should be visible in mobile menu
     const mobileMenu = page.locator('[role="dialog"]');
@@ -111,7 +109,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
 
   test('should display GitHub link in mobile menu', async ({ page }) => {
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+    await page.waitForSelector('[role="dialog"]');
 
     const mobileMenu = page.locator('[role="dialog"]');
     const githubLink = mobileMenu.getByRole('link', { name: /GitHub Star/i });
@@ -123,13 +121,13 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
   test('should navigate to components page from mobile menu', async ({ page }) => {
     // Open mobile menu
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+    await page.waitForSelector('[role="dialog"]');
 
     // Click Components link
     const componentsLink = page.locator('[role="dialog"]').getByRole('link', { name: 'Components' });
 
     await Promise.all([
-      page.waitForURL('/dev', { timeout: 10000 }),
+      page.waitForURL('/dev'),
       componentsLink.click()
     ]);
 
@@ -139,13 +137,13 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
   test('should navigate to admin demo from mobile menu', async ({ page }) => {
     // Open mobile menu
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+    await page.waitForSelector('[role="dialog"]');
 
     // Click Admin Demo link
     const adminLink = page.locator('[role="dialog"]').getByRole('link', { name: 'Admin Demo' });
 
     await Promise.all([
-      page.waitForURL('/admin', { timeout: 10000 }),
+      page.waitForURL('/admin'),
       adminLink.click()
     ]);
 
@@ -154,7 +152,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
 
   test('should display Try Demo button in mobile menu', async ({ page }) => {
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+    await page.waitForSelector('[role="dialog"]');
 
     const mobileMenu = page.locator('[role="dialog"]');
     const demoButton = mobileMenu.getByRole('button', { name: /Try Demo/i });
@@ -165,7 +163,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
   test('should open demo modal from mobile menu Try Demo button', async ({ page }) => {
     // Open mobile menu
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+    await page.waitForSelector('[role="dialog"]');
 
     // Click Try Demo in mobile menu
     const mobileMenu = page.locator('[role="dialog"]');
@@ -181,14 +179,14 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
   test('should navigate to login from mobile menu', async ({ page }) => {
     // Open mobile menu
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+    await page.waitForSelector('[role="dialog"]');
 
     // Click Login link in mobile menu
     const mobileMenu = page.locator('[role="dialog"]');
     const loginLink = mobileMenu.getByRole('link', { name: /Login/i });
 
     await Promise.all([
-      page.waitForURL('/login', { timeout: 10000 }),
+      page.waitForURL('/login'),
       loginLink.click()
     ]);
 
@@ -198,20 +196,19 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
   test('should close mobile menu when clicking outside', async ({ page }) => {
     // Open mobile menu
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+    await page.waitForSelector('[role="dialog"]');
 
     // Press Escape key to close menu (more reliable than clicking overlay)
     await page.keyboard.press('Escape');
 
     // Menu should close
-    await expect(page.locator('[role="dialog"]')).not.toBeVisible({ timeout: 2000 });
+    await expect(page.locator('[role="dialog"]')).not.toBeVisible();
   });
 });
 
 test.describe('Homepage - Hero Section', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
   });
 
   test('should display main headline', async ({ page }) => {
@@ -241,7 +238,7 @@ test.describe('Homepage - Hero Section', () => {
     const exploreLink = page.getByRole('link', { name: /Explore Components/i }).first();
 
     await Promise.all([
-      page.waitForURL('/dev', { timeout: 10000 }),
+      page.waitForURL('/dev'),
       exploreLink.click()
     ]);
 
@@ -252,7 +249,6 @@ test.describe('Homepage - Hero Section', () => {
 test.describe('Homepage - Demo Credentials Modal', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
   });
 
   test('should display regular and admin credentials', async ({ page }) => {
@@ -275,6 +271,8 @@ test.describe('Homepage - Demo Credentials Modal', () => {
     await page.getByRole('button', { name: /Try Demo/i }).first().click();
 
     const dialog = page.getByRole('dialog');
+    await dialog.waitFor({ state: 'visible' });
+
     // Click first copy button (regular user) within dialog
     const copyButtons = dialog.getByRole('button', { name: /Copy/i });
     await copyButtons.first().click();
@@ -287,10 +285,12 @@ test.describe('Homepage - Demo Credentials Modal', () => {
     await page.getByRole('button', { name: /Try Demo/i }).first().click();
 
     const dialog = page.getByRole('dialog');
+    await dialog.waitFor({ state: 'visible' });
+
     const loginLink = dialog.getByRole('link', { name: /Go to Login/i });
 
     await Promise.all([
-      page.waitForURL('/login', { timeout: 10000 }),
+      page.waitForURL('/login'),
       loginLink.click()
     ]);
 
@@ -301,6 +301,8 @@ test.describe('Homepage - Demo Credentials Modal', () => {
     await page.getByRole('button', { name: /Try Demo/i }).first().click();
 
     const dialog = page.getByRole('dialog');
+    await dialog.waitFor({ state: 'visible' });
+
     const closeButton = dialog.getByRole('button', { name: /^Close$/i }).first();
     await closeButton.click();
 
@@ -311,7 +313,6 @@ test.describe('Homepage - Demo Credentials Modal', () => {
 test.describe('Homepage - Animated Terminal', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
   });
 
   test('should display terminal section', async ({ page }) => {
@@ -337,7 +338,7 @@ test.describe('Homepage - Animated Terminal', () => {
 
     // Terminal should show git clone command (check for just "git clone" to be more flexible)
     const terminalText = await page.locator('.font-mono').filter({ hasText: 'git clone' }).first();
-    await expect(terminalText).toBeVisible({ timeout: 10000 });
+    await expect(terminalText).toBeVisible();
   });
 
   test('should display Try Live Demo button below terminal', async ({ page }) => {
@@ -355,7 +356,7 @@ test.describe('Homepage - Animated Terminal', () => {
     const terminalDemoLink = demoLinks.last(); // Last one should be from terminal section
 
     await Promise.all([
-      page.waitForURL('/login', { timeout: 10000 }),
+      page.waitForURL('/login'),
       terminalDemoLink.click()
     ]);
 
@@ -366,7 +367,6 @@ test.describe('Homepage - Animated Terminal', () => {
 test.describe('Homepage - Feature Sections', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
   });
 
   test('should display feature grid section', async ({ page }) => {
@@ -382,7 +382,7 @@ test.describe('Homepage - Feature Sections', () => {
     const authLink = page.getByRole('link', { name: /View Auth Flow/i });
 
     await Promise.all([
-      page.waitForURL('/login', { timeout: 10000 }),
+      page.waitForURL('/login'),
       authLink.click()
     ]);
 
@@ -393,7 +393,7 @@ test.describe('Homepage - Feature Sections', () => {
     const adminLink = page.getByRole('link', { name: /Try Admin Panel/i });
 
     await Promise.all([
-      page.waitForURL('/admin', { timeout: 10000 }),
+      page.waitForURL('/admin'),
       adminLink.click()
     ]);
 
@@ -418,7 +418,6 @@ test.describe('Homepage - Feature Sections', () => {
 test.describe('Homepage - Footer', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
   });
 
   test('should display footer with copyright', async ({ page }) => {
@@ -432,7 +431,6 @@ test.describe('Homepage - Footer', () => {
 test.describe('Homepage - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
   });
 
   test('should have proper heading hierarchy', async ({ page }) => {
@@ -455,7 +453,6 @@ test.describe('Homepage - Accessibility', () => {
   test('should have mobile menu button with accessible label', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.reload();
-    await page.waitForLoadState('networkidle');
 
     const menuButton = page.getByRole('button', { name: /Toggle menu/i });
     await expect(menuButton).toBeVisible();

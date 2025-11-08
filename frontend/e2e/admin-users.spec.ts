@@ -43,7 +43,7 @@ test.describe('Admin User Management - User List Table', () => {
 
   test('should display user list table with headers', async ({ page }) => {
     // Wait for table to load
-    await page.waitForSelector('table', { timeout: 10000 });
+    await page.waitForSelector('table');
 
     // Check table exists and has structure
     const table = page.locator('table');
@@ -56,7 +56,7 @@ test.describe('Admin User Management - User List Table', () => {
 
   test('should display user data rows', async ({ page }) => {
     // Wait for table to load
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Should have at least one user row
     const userRows = page.locator('table tbody tr');
@@ -65,7 +65,7 @@ test.describe('Admin User Management - User List Table', () => {
   });
 
   test('should display user status badges', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Should see Active or Inactive badges
     const statusBadges = page.locator('table tbody').getByText(/Active|Inactive/);
@@ -74,7 +74,7 @@ test.describe('Admin User Management - User List Table', () => {
   });
 
   test('should display action menu for each user', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Each row should have an action menu button
     const actionButtons = page.getByRole('button', { name: /Actions for/i });
@@ -88,7 +88,7 @@ test.describe('Admin User Management - User List Table', () => {
   });
 
   test('should display individual row checkboxes', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Should have checkboxes for selecting users
     const rowCheckboxes = page.locator('table tbody').getByRole('checkbox');
@@ -227,7 +227,7 @@ test.describe('Admin User Management - Pagination', () => {
   });
 
   test('should display pagination info', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Should show "Showing X to Y of Z users"
     await expect(page.getByText(/Showing \d+ to \d+ of \d+ users/)).toBeVisible();
@@ -242,7 +242,7 @@ test.describe('Admin User Management - Row Selection', () => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
   });
 
   test('should select individual user row', async ({ page }) => {
@@ -429,7 +429,7 @@ test.describe('Admin User Management - Action Menu', () => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
   });
 
   test('should open action menu when clicked', async ({ page }) => {
@@ -482,7 +482,7 @@ test.describe('Admin User Management - Edit User Dialog', () => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
   });
 
   test('should open edit dialog with existing user data', async ({ page }) => {
@@ -543,7 +543,7 @@ test.describe('Admin User Management - Bulk Actions', () => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
   });
 
   test('should show bulk activate button in toolbar', async ({ page }) => {
@@ -623,7 +623,7 @@ test.describe('Admin User Management - Accessibility', () => {
   });
 
   test('should have accessible labels for checkboxes', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Select all checkbox should have label
     const selectAllCheckbox = page.getByLabel('Select all users');
@@ -631,7 +631,7 @@ test.describe('Admin User Management - Accessibility', () => {
   });
 
   test('should have accessible labels for action menus', async ({ page }) => {
-    await page.waitForSelector('table tbody tr', { timeout: 10000 });
+    await page.waitForSelector('table tbody tr');
 
     // Action buttons should have descriptive labels
     const actionButton = page.getByRole('button', { name: /Actions for/i }).first();

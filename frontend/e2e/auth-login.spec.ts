@@ -96,10 +96,10 @@ test.describe('Login Flow', () => {
     const passwordInput = page.locator('input[name="password"]');
     const submitButton = page.locator('button[type="submit"]');
 
-    await expect(emailInput).toBeVisible({ timeout: 10000 });
-    await expect(passwordInput).toBeVisible({ timeout: 10000 });
-    await expect(submitButton).toBeVisible({ timeout: 10000 });
-    await expect(submitButton).toBeEnabled({ timeout: 10000 });
+    await expect(emailInput).toBeVisible();
+    await expect(passwordInput).toBeVisible();
+    await expect(submitButton).toBeVisible();
+    await expect(submitButton).toBeEnabled();
 
     // Touch fields to mimic user interaction
     await emailInput.focus();
@@ -111,8 +111,8 @@ test.describe('Login Flow', () => {
     await submitButton.click();
 
     // Wait for validation errors - allow extra time for slower browsers
-    await expect(page.locator('#email-error')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('#password-error')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#email-error')).toBeVisible();
+    await expect(page.locator('#password-error')).toBeVisible();
 
     // Verify error messages
     await expect(page.locator('#email-error')).toContainText('Email is required');
@@ -163,7 +163,7 @@ test.describe('Login Flow', () => {
     const forgotLink = page.getByRole('link', { name: 'Forgot password?' });
 
     await Promise.all([
-      page.waitForURL('/password-reset', { timeout: 10000 }),
+      page.waitForURL('/password-reset'),
       forgotLink.click()
     ]);
 
@@ -177,7 +177,7 @@ test.describe('Login Flow', () => {
     const signupLink = page.getByRole('link', { name: 'Sign up' });
 
     await Promise.all([
-      page.waitForURL('/register', { timeout: 10000 }),
+      page.waitForURL('/register'),
       signupLink.click()
     ]);
 

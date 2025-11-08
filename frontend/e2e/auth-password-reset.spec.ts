@@ -56,7 +56,7 @@ test.describe('Password Reset Request Flow', () => {
     const loginLink = page.getByRole('link', { name: 'Back to login' });
 
     await Promise.all([
-      page.waitForURL('/login', { timeout: 10000 }),
+      page.waitForURL('/login', ),
       loginLink.click()
     ]);
 
@@ -197,7 +197,7 @@ test.describe('Password Reset Confirm Flow', () => {
     const resetLink = page.getByRole('link', { name: 'Request new reset link' });
 
     await Promise.all([
-      page.waitForURL('/password-reset', { timeout: 10000 }),
+      page.waitForURL('/password-reset', ),
       resetLink.click()
     ]);
 

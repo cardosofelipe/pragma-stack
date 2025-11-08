@@ -94,7 +94,6 @@ test.describe('Registration Flow', () => {
 
   test('should show validation errors for empty form', async ({ page }) => {
     // Wait for React hydration to complete
-    await page.waitForLoadState('networkidle');
 
     // Interact with email field to ensure form is interactive
     const emailInput = page.locator('input[name="email"]');
@@ -105,9 +104,9 @@ test.describe('Registration Flow', () => {
     await page.locator('button[type="submit"]').click();
 
     // Wait for validation errors - Firefox may be slower
-    await expect(page.locator('#email-error')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('#first_name-error')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('#password-error')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('#email-error')).toBeVisible();
+    await expect(page.locator('#first_name-error')).toBeVisible();
+    await expect(page.locator('#password-error')).toBeVisible();
   });
 
   test('should show validation error for invalid email', async ({ page }) => {
@@ -217,7 +216,7 @@ test.describe('Registration Flow', () => {
 
     // Use Promise.all to wait for navigation
     await Promise.all([
-      page.waitForURL('/login', { timeout: 10000 }),
+      page.waitForURL('/login'),
       loginLink.click()
     ]);
 

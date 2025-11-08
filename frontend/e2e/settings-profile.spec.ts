@@ -27,7 +27,7 @@ test.describe('Profile Settings', () => {
 
     // Wait for form to be populated with user data (use label-based selectors)
     const firstNameInput = page.getByLabel(/first name/i);
-    await firstNameInput.waitFor({ state: 'visible', timeout: 10000 });
+    await firstNameInput.waitFor({ state: 'visible' });
 
     // Verify form fields are populated with mock user data
     await expect(firstNameInput).toHaveValue(MOCK_USER.first_name);
@@ -38,7 +38,7 @@ test.describe('Profile Settings', () => {
   test('should show email as read-only', async ({ page }) => {
     // Wait for form to load
     const emailInput = page.getByLabel(/email/i);
-    await emailInput.waitFor({ state: 'visible', timeout: 10000 });
+    await emailInput.waitFor({ state: 'visible' });
 
     // Verify email field is disabled or read-only
     const isDisabled = await emailInput.isDisabled();

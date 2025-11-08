@@ -18,7 +18,7 @@ test.describe('Admin Access Control', () => {
 
     // Navigate to authenticated page to test authenticated header (not homepage)
     await page.goto('/settings');
-    await page.waitForSelector('h1:has-text("Settings")', { timeout: 10000 });
+    await page.waitForSelector('h1:has-text("Settings")');
 
     // Should not see admin link in authenticated header navigation
     const adminLinks = page.getByRole('link', { name: /^admin$/i });
@@ -37,7 +37,7 @@ test.describe('Admin Access Control', () => {
     await page.goto('/admin');
 
     // Should be redirected away from admin (to login or home)
-    await page.waitForURL(/\/(auth\/login|$)/, { timeout: 5000 });
+    await page.waitForURL(/\/(auth\/login|$)/);
     expect(page.url()).not.toContain('/admin');
   });
 
@@ -50,7 +50,7 @@ test.describe('Admin Access Control', () => {
     // Navigate to settings page to ensure user state is loaded
     // (AuthGuard fetches user on protected pages)
     await page.goto('/settings');
-    await page.waitForSelector('h1:has-text("Settings")', { timeout: 10000 });
+    await page.waitForSelector('h1:has-text("Settings")');
 
     // Should see admin link in header navigation bar
     // Use exact text match to avoid matching "Admin Panel" from sidebar
@@ -232,7 +232,7 @@ test.describe('Admin Navigation', () => {
     const dashboardLink = page.getByTestId('nav-dashboard');
     await dashboardLink.click();
 
-    await page.waitForURL('/admin', { timeout: 5000 });
+    await page.waitForURL('/admin');
     await expect(page).toHaveURL('/admin');
     await expect(page.locator('h1')).toContainText('Admin Dashboard');
   });
@@ -277,7 +277,7 @@ test.describe('Admin Breadcrumbs', () => {
     const adminBreadcrumb = page.getByTestId('breadcrumb-admin');
 
     await Promise.all([
-      page.waitForURL('/admin', { timeout: 10000 }),
+      page.waitForURL('/admin'),
       adminBreadcrumb.click()
     ]);
 
