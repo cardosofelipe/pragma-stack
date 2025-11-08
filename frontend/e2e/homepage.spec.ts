@@ -44,17 +44,22 @@ test.describe('Homepage - Desktop Navigation', () => {
   });
 
   test('should navigate to admin demo via header link', async ({ page }) => {
+    // Click the exact Admin Demo link in header navigation
+    const header = page.locator('header').first();
+    const adminLink = header.getByRole('link', { name: 'Admin Demo', exact: true });
+
     await Promise.all([
       page.waitForURL('/admin', { timeout: 10000 }),
-      page.getByRole('link', { name: 'Admin Demo' }).click()
+      adminLink.click()
     ]);
 
     await expect(page).toHaveURL('/admin');
   });
 
   test('should navigate to login page via header button', async ({ page }) => {
-    const loginLinks = page.getByRole('link', { name: /^Login$/i });
-    const headerLoginLink = loginLinks.first(); // Header login button
+    // Click the Login link in header
+    const header = page.locator('header').first();
+    const headerLoginLink = header.getByRole('link', { name: /^Login$/i });
 
     await Promise.all([
       page.waitForURL('/login', { timeout: 10000 }),
@@ -263,7 +268,10 @@ test.describe('Homepage - Demo Credentials Modal', () => {
     await expect(dialog.getByText('Admin123!').first()).toBeVisible();
   });
 
-  test('should copy regular user credentials to clipboard', async ({ page }) => {
+  test('should copy regular user credentials to clipboard', async ({ page, context }) => {
+    // Grant clipboard permissions
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+
     await page.getByRole('button', { name: /Try Demo/i }).first().click();
 
     const dialog = page.getByRole('dialog');
@@ -272,7 +280,7 @@ test.describe('Homepage - Demo Credentials Modal', () => {
     await copyButtons.first().click();
 
     // Button should show "Copied!"
-    await expect(dialog.getByText('Copied!').first()).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Copied!' })).toBeVisible();
   });
 
   test('should navigate to login page from modal', async ({ page }) => {
@@ -293,7 +301,7 @@ test.describe('Homepage - Demo Credentials Modal', () => {
     await page.getByRole('button', { name: /Try Demo/i }).first().click();
 
     const dialog = page.getByRole('dialog');
-    const closeButton = dialog.getByRole('button', { name: /^Close$/i });
+    const closeButton = dialog.getByRole('button', { name: /^Close$/i }).first();
     await closeButton.click();
 
     await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 2000 });
