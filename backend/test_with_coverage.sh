@@ -1,0 +1,1 @@
+python -m pytest --cov=app --cov-report=html --cov-report=term-missing -v -n 20
