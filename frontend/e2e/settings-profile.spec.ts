@@ -12,7 +12,7 @@ test.describe('Profile Settings', () => {
     await setupAuthenticatedMocks(page);
 
     // Login via UI to establish authenticated session
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
 
     // Navigate to profile page
     await page.goto('/settings/profile');

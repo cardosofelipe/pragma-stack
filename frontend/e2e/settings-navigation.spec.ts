@@ -12,11 +12,12 @@ test.describe('Settings Navigation', () => {
     await setupAuthenticatedMocks(page);
 
     // Login via UI to establish authenticated session
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
   });
 
   test('should navigate from home to settings profile', async ({ page }) => {
-    // From home page
+    // Start at home page (auth already cached in storage state)
+    await page.goto('/');
     await expect(page).toHaveURL('/');
 
     // Navigate to settings/profile
@@ -30,7 +31,8 @@ test.describe('Settings Navigation', () => {
   });
 
   test('should navigate from home to settings password', async ({ page }) => {
-    // From home page
+    // Start at home page (auth already cached in storage state)
+    await page.goto('/');
     await expect(page).toHaveURL('/');
 
     // Navigate to settings/password

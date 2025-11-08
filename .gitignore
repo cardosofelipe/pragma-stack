@@ -27,6 +27,10 @@ coverage
 # nyc test coverage
 .nyc_output
 
+# Playwright authentication state (contains test auth tokens)
+frontend/e2e/.auth/
+**/playwright/.auth/
+
 # Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
 .grunt
 

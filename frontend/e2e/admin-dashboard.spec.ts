@@ -9,7 +9,7 @@ import { setupSuperuserMocks, loginViaUI } from './helpers/auth';
 test.describe('Admin Dashboard - Page Load', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin');
   });
 
@@ -28,7 +28,7 @@ test.describe('Admin Dashboard - Page Load', () => {
 test.describe('Admin Dashboard - Statistics Cards', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin');
   });
 
@@ -61,7 +61,7 @@ test.describe('Admin Dashboard - Statistics Cards', () => {
 test.describe('Admin Dashboard - Quick Actions', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin');
   });
 
@@ -107,7 +107,7 @@ test.describe('Admin Dashboard - Quick Actions', () => {
 test.describe('Admin Dashboard - Analytics Charts', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin');
   });
 
@@ -152,7 +152,7 @@ test.describe('Admin Dashboard - Analytics Charts', () => {
 test.describe('Admin Dashboard - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin');
   });
 

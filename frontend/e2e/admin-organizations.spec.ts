@@ -9,7 +9,7 @@ import { setupSuperuserMocks, loginViaUI } from './helpers/auth';
 test.describe('Admin Organization Management - Page Load', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
   });
 
@@ -40,7 +40,7 @@ test.describe('Admin Organization Management - Page Load', () => {
 test.describe('Admin Organization Management - Organization List Table', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
   });
 
@@ -106,7 +106,7 @@ test.describe('Admin Organization Management - Organization List Table', () => {
 test.describe('Admin Organization Management - Pagination', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
   });
 
@@ -126,7 +126,7 @@ test.describe('Admin Organization Management - Pagination', () => {
 test.describe('Admin Organization Management - Create Organization Button', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
   });
 
@@ -139,7 +139,7 @@ test.describe('Admin Organization Management - Create Organization Button', () =
 test.describe('Admin Organization Management - Action Menu', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
     await page.waitForSelector('table tbody tr', { timeout: 10000 });
   });
@@ -245,7 +245,7 @@ test.describe('Admin Organization Management - Action Menu', () => {
 test.describe('Admin Organization Management - Edit Organization Dialog', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
     await page.waitForSelector('table tbody tr', { timeout: 10000 });
   });
@@ -294,7 +294,7 @@ test.describe('Admin Organization Management - Edit Organization Dialog', () => 
 test.describe('Admin Organization Management - Member Count Interaction', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
     await page.waitForSelector('table tbody tr', { timeout: 10000 });
   });
@@ -318,7 +318,7 @@ test.describe('Admin Organization Management - Member Count Interaction', () => 
 test.describe('Admin Organization Management - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
   });
 

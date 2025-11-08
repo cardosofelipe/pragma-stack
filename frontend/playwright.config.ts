@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
 
 /**
  * Read environment variables from file.
@@ -18,7 +19,7 @@ export default defineConfig({
   /* Retry on CI and locally to handle flaky tests */
   retries: process.env.CI ? 2 : 1,
   /* Use 8 workers locally (optimized for parallel execution), 1 on CI to reduce resource usage */
-  workers: process.env.CI ? 1 : 8,
+  workers: process.env.CI ? 1 : 16,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI ? 'github' : 'list',
   /* Suppress console output unless VERBOSE=true */
@@ -40,43 +41,79 @@ export default defineConfig({
     // video: 'retain-on-failure',
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects with authentication state caching for performance */
   projects: [
+    /**
+     * Setup Project - Runs FIRST
+     * Creates authenticated browser states (admin + regular user)
+     * Saves to e2e/.auth/*.json for reuse across tests
+     * Performance: Login 2 times instead of 133 times (~11min savings!)
+     */
     {
-      name: 'chromium',
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
       use: { ...devices['Desktop Chrome'] },
     },
-    //
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
 
-    // Disabled: WebKit has missing system dependencies on this OS
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
+    /**
+     * Admin Tests - Superuser Authenticated
+     * Requires admin/superuser privileges (access to /admin routes)
+     * Uses cached auth state from setup project
+     */
+    {
+      name: 'admin tests',
+      testMatch: /admin-.*\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: path.join(__dirname, 'e2e', '.auth', 'admin.json'), // Reuse admin auth state
+      },
+      dependencies: ['setup'], // Wait for setup to create admin.json
+    },
 
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
+    /**
+     * Settings Tests - Regular User Authenticated
+     * Requires regular user auth (access to /settings routes)
+     * Uses cached auth state from setup project
+     */
+    {
+      name: 'settings tests',
+      testMatch: /settings-.*\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: path.join(__dirname, 'e2e', '.auth', 'user.json'), // Reuse user auth state
+      },
+      dependencies: ['setup'], // Wait for setup to create user.json
+    },
 
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
+    /**
+     * Auth Guard Tests - Tests Auth System Itself
+     * Tests authentication flows, guards, redirects
+     * Needs to test both authenticated and unauthenticated states
+     * Dependencies on setup to ensure auth system works
+     */
+    {
+      name: 'auth guard tests',
+      testMatch: /auth-guard\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'], // Ensure auth system is working first
+    },
+
+    /**
+     * Public Tests - No Authentication Required
+     * Tests public pages: homepage, login, register, password reset
+     * No dependency on setup (faster startup for these tests)
+     */
+    {
+      name: 'public tests',
+      testMatch: [
+        /homepage\.spec\.ts/,
+        /auth-login\.spec\.ts/,
+        /auth-register\.spec\.ts/,
+        /auth-password-reset\.spec\.ts/,
+        /theme-toggle\.spec\.ts/,
+      ],
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
 
   /* Run your local dev server before starting the tests */

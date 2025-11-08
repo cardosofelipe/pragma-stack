@@ -10,7 +10,7 @@ import { setupSuperuserMocks, loginViaUI } from './helpers/auth';
 test.describe('Admin Organization Members - Navigation from Organizations List', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
     await page.waitForSelector('table tbody tr', { timeout: 10000 });
   });
@@ -49,7 +49,7 @@ test.describe('Admin Organization Members - Navigation from Organizations List',
 test.describe('Admin Organization Members - Page Structure', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
     await page.waitForSelector('table tbody tr', { timeout: 10000 });
 
@@ -119,7 +119,7 @@ test.describe('Admin Organization Members - Page Structure', () => {
 test.describe('Admin Organization Members - AddMemberDialog E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/organizations');
     await page.waitForSelector('table tbody tr', { timeout: 10000 });
 

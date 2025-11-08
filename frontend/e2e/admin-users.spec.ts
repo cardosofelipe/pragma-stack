@@ -9,7 +9,7 @@ import { setupSuperuserMocks, loginViaUI } from './helpers/auth';
 test.describe('Admin User Management - Page Load', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
   });
 
@@ -37,7 +37,7 @@ test.describe('Admin User Management - Page Load', () => {
 test.describe('Admin User Management - User List Table', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
   });
 
@@ -100,7 +100,7 @@ test.describe('Admin User Management - User List Table', () => {
 test.describe('Admin User Management - Search and Filters', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
   });
 
@@ -222,7 +222,7 @@ test.describe('Admin User Management - Search and Filters', () => {
 test.describe('Admin User Management - Pagination', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
   });
 
@@ -240,7 +240,7 @@ test.describe('Admin User Management - Pagination', () => {
 test.describe('Admin User Management - Row Selection', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
     await page.waitForSelector('table tbody tr', { timeout: 10000 });
   });
@@ -303,7 +303,7 @@ test.describe('Admin User Management - Row Selection', () => {
 test.describe('Admin User Management - Create User Dialog', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
   });
 
@@ -427,7 +427,7 @@ test.describe('Admin User Management - Create User Dialog', () => {
 test.describe('Admin User Management - Action Menu', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
     await page.waitForSelector('table tbody tr', { timeout: 10000 });
   });
@@ -480,7 +480,7 @@ test.describe('Admin User Management - Action Menu', () => {
 test.describe('Admin User Management - Edit User Dialog', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
     await page.waitForSelector('table tbody tr', { timeout: 10000 });
   });
@@ -541,7 +541,7 @@ test.describe('Admin User Management - Edit User Dialog', () => {
 test.describe('Admin User Management - Bulk Actions', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
     await page.waitForSelector('table tbody tr', { timeout: 10000 });
   });
@@ -611,7 +611,7 @@ test.describe('Admin User Management - Bulk Actions', () => {
 test.describe('Admin User Management - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin/users');
   });
 

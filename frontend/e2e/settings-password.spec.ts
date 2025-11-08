@@ -12,7 +12,7 @@ test.describe('Password Change', () => {
     await setupAuthenticatedMocks(page);
 
     // Login via UI to establish authenticated session
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
 
     // Navigate to password page
     await page.goto('/settings/password', { waitUntil: 'networkidle' });

@@ -14,7 +14,7 @@ test.describe('Admin Access Control', () => {
   test('regular user should not see admin link in header', async ({ page }) => {
     // Set up mocks for regular user (not superuser)
     await setupAuthenticatedMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
 
     // Navigate to authenticated page to test authenticated header (not homepage)
     await page.goto('/settings');
@@ -31,7 +31,7 @@ test.describe('Admin Access Control', () => {
   }) => {
     // Set up mocks for regular user
     await setupAuthenticatedMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
 
     // Try to access admin page directly
     await page.goto('/admin');
@@ -42,9 +42,10 @@ test.describe('Admin Access Control', () => {
   });
 
   test('superuser should see admin link in header', async ({ page }) => {
-    // Set up mocks for superuser
+    // Auth state already loaded from setup (admin.json storage state)
+    // Set up API route mocks for superuser
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Note: loginViaUI removed - auth already cached in storage state!
 
     // Navigate to settings page to ensure user state is loaded
     // (AuthGuard fetches user on protected pages)
@@ -65,7 +66,7 @@ test.describe('Admin Access Control', () => {
   }) => {
     // Set up mocks for superuser
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
 
     // Navigate to admin page
     await page.goto('/admin');
@@ -79,7 +80,7 @@ test.describe('Admin Access Control', () => {
 test.describe('Admin Dashboard', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin');
   });
 
@@ -134,7 +135,7 @@ test.describe('Admin Dashboard', () => {
 test.describe('Admin Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
     await page.goto('/admin');
   });
 
@@ -240,7 +241,7 @@ test.describe('Admin Navigation', () => {
 test.describe('Admin Breadcrumbs', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
-    await loginViaUI(page);
+    // Auth already cached in storage state (loginViaUI removed for performance)
   });
 
   test('should show single breadcrumb on dashboard', async ({ page }) => {
