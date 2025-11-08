@@ -23,6 +23,19 @@ global.BroadcastChannel = class BroadcastChannel {
   removeEventListener() {}
 };
 
+// Mock IntersectionObserver for components that use viewport detection
+global.IntersectionObserver = class IntersectionObserver {
+  constructor(callback) {
+    this.callback = callback;
+  }
+  observe() {
+    // Immediately trigger the callback with isIntersecting: true for tests
+    this.callback([{ isIntersecting: true }]);
+  }
+  unobserve() {}
+  disconnect() {}
+};
+
 // Use real Web Crypto API polyfill for Node environment
 const cryptoPolyfill = new Crypto();
 

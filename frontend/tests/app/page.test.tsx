@@ -1,12 +1,12 @@
 /**
  * Tests for Home Page
- * Smoke tests for static content
+ * Tests for the new FastNext Template landing page
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import Home from '@/app/page';
 
-// Mock Next.js Image component
+// Mock Next.js components
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => {
@@ -15,56 +15,241 @@ jest.mock('next/image', () => ({
   },
 }));
 
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({ children, href, ...props }: any) => {
+    return (
+      <a href={href} {...props}>
+        {children}
+      </a>
+    );
+  },
+}));
+
+// Mock framer-motion to avoid animation issues in tests
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    h1: ({ children, ...props }: any) => <h1 {...props}>{children}</h1>,
+    p: ({ children, ...props }: any) => <p {...props}>{children}</p>,
+    section: ({ children, ...props }: any) => <section {...props}>{children}</section>,
+  },
+  AnimatePresence: ({ children }: any) => <>{children}</>,
+  useInView: () => true, // Always in view for tests
+}));
+
+// Mock react-syntax-highlighter to avoid ESM issues
+jest.mock('react-syntax-highlighter', () => ({
+  Prism: ({ children, ...props }: any) => <pre {...props}>{children}</pre>,
+}));
+
+jest.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
+  vscDarkPlus: {},
+}));
+
 describe('HomePage', () => {
-  it('renders without crashing', () => {
-    render(<Home />);
-    expect(screen.getByText(/get started by editing/i)).toBeInTheDocument();
+  describe('Page Structure', () => {
+    it('renders without crashing', () => {
+      render(<Home />);
+      expect(screen.getByRole('banner')).toBeInTheDocument(); // header
+      expect(screen.getByRole('main')).toBeInTheDocument();
+      expect(screen.getByRole('contentinfo')).toBeInTheDocument(); // footer
+    });
+
+    it('renders header with logo', () => {
+      render(<Home />);
+      const header = screen.getByRole('banner');
+      expect(within(header).getByText('FastNext')).toBeInTheDocument();
+      expect(within(header).getByText('Template')).toBeInTheDocument();
+    });
+
+    it('renders footer with copyright', () => {
+      render(<Home />);
+      const footer = screen.getByRole('contentinfo');
+      expect(within(footer).getByText(/FastNext Template. MIT Licensed/i)).toBeInTheDocument();
+    });
   });
 
-  it('renders Next.js logo', () => {
-    render(<Home />);
+  describe('Hero Section', () => {
+    it('renders main headline', () => {
+      render(<Home />);
+      expect(screen.getAllByText(/Everything You Need to Build/i)[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/Modern Web Applications/i)[0]).toBeInTheDocument();
+    });
 
-    const logo = screen.getByAltText('Next.js logo');
-    expect(logo).toBeInTheDocument();
-    expect(logo).toHaveAttribute('src', '/next.svg');
+    it('renders production-ready messaging', () => {
+      render(<Home />);
+      expect(screen.getByText(/Production-ready FastAPI/i)).toBeInTheDocument();
+    });
+
+    it('renders test coverage stats', () => {
+      render(<Home />);
+      const coverageTexts = screen.getAllByText('97%');
+      expect(coverageTexts.length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Test Coverage/i)[0]).toBeInTheDocument();
+      const testCountTexts = screen.getAllByText('743');
+      expect(testCountTexts.length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Passing Tests/i)[0]).toBeInTheDocument();
+    });
   });
 
-  it('renders Vercel logo', () => {
-    render(<Home />);
+  describe('Context Section', () => {
+    it('renders what you get message', () => {
+      render(<Home />);
+      expect(screen.getByText(/What You Get Out of the Box/i)).toBeInTheDocument();
+    });
 
-    const logo = screen.getByAltText('Vercel logomark');
-    expect(logo).toBeInTheDocument();
-    expect(logo).toHaveAttribute('src', '/vercel.svg');
+    it('renders key features', () => {
+      render(<Home />);
+      expect(screen.getAllByText(/Clone & Deploy in < 5 minutes/i)[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/97% Test Coverage \(743 tests\)/i)[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/12\+ Documentation Guides/i)[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/Zero Commercial Dependencies/i)[0]).toBeInTheDocument();
+    });
   });
 
-  it('has correct external links', () => {
-    render(<Home />);
+  describe('Feature Grid', () => {
+    it('renders comprehensive features heading', () => {
+      render(<Home />);
+      expect(screen.getByText(/Comprehensive Features, No Assembly Required/i)).toBeInTheDocument();
+    });
 
-    const deployLink = screen.getByRole('link', { name: /deploy now/i });
-    expect(deployLink).toHaveAttribute('href', expect.stringContaining('vercel.com'));
-    expect(deployLink).toHaveAttribute('target', '_blank');
-    expect(deployLink).toHaveAttribute('rel', 'noopener noreferrer');
+    it('renders all 6 feature cards', () => {
+      render(<Home />);
+      expect(screen.getAllByText('Authentication & Security')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Multi-Tenant Organizations')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Admin Dashboard')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Complete Documentation')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Production Ready')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Developer Experience')[0]).toBeInTheDocument();
+    });
 
-    const docsLink = screen.getByRole('link', { name: /read our docs/i });
-    expect(docsLink).toHaveAttribute('href', expect.stringContaining('nextjs.org/docs'));
-    expect(docsLink).toHaveAttribute('target', '_blank');
+    it('has CTAs for each feature', () => {
+      render(<Home />);
+      expect(screen.getByRole('link', { name: /View Auth Flow/i })).toHaveAttribute('href', '/login');
+      expect(screen.getByRole('link', { name: /See Organizations/i })).toHaveAttribute('href', '/admin/organizations');
+      expect(screen.getByRole('link', { name: /Try Admin Panel/i })).toHaveAttribute('href', '/admin');
+    });
   });
 
-  it('renders footer links', () => {
-    render(<Home />);
+  describe('Demo Section', () => {
+    it('renders demo section heading', () => {
+      render(<Home />);
+      expect(screen.getByText(/See It In Action/i)).toBeInTheDocument();
+    });
 
-    expect(screen.getByRole('link', { name: /learn/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /examples/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /go to nextjs\.org/i })).toBeInTheDocument();
+    it('renders demo cards', () => {
+      render(<Home />);
+      expect(screen.getAllByText('Component Showcase')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Authentication Flow')[0]).toBeInTheDocument();
+      // Admin Dashboard appears in both Feature Grid and Demo Section, so use getAllByText
+      const adminDashboards = screen.getAllByText('Admin Dashboard');
+      expect(adminDashboards.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('displays demo credentials', () => {
+      render(<Home />);
+      const credentials = screen.getAllByText(/Demo Credentials:/i);
+      expect(credentials.length).toBeGreaterThan(0);
+    });
   });
 
-  it('has accessible image alt texts', () => {
-    render(<Home />);
+  describe('Tech Stack Section', () => {
+    it('renders tech stack heading', () => {
+      render(<Home />);
+      expect(screen.getByText(/Modern, Type-Safe, Production-Grade Stack/i)).toBeInTheDocument();
+    });
 
-    expect(screen.getByAltText('Next.js logo')).toBeInTheDocument();
-    expect(screen.getByAltText('Vercel logomark')).toBeInTheDocument();
-    expect(screen.getByAltText('File icon')).toBeInTheDocument();
-    expect(screen.getByAltText('Window icon')).toBeInTheDocument();
-    expect(screen.getByAltText('Globe icon')).toBeInTheDocument();
+    it('renders all technologies', () => {
+      render(<Home />);
+      expect(screen.getAllByText('FastAPI')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Next.js 15')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('PostgreSQL')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('TypeScript')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Docker')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('TailwindCSS')[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/shadcn\/ui/i)[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Playwright')[0]).toBeInTheDocument();
+    });
+  });
+
+  describe('Philosophy Section', () => {
+    it('renders why this template exists', () => {
+      render(<Home />);
+      expect(screen.getByText(/Why This Template Exists/i)).toBeInTheDocument();
+    });
+
+    it('renders what you wont find section', () => {
+      render(<Home />);
+      expect(screen.getByText(/What You Won't Find Here/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Vendor lock-in/i)[0]).toBeInTheDocument();
+    });
+
+    it('renders what you will find section', () => {
+      render(<Home />);
+      expect(screen.getByText(/What You Will Find/i)).toBeInTheDocument();
+      expect(screen.getByText(/Production patterns that actually work/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Quick Start Section', () => {
+    it('renders quick start heading', () => {
+      render(<Home />);
+      expect(screen.getByText(/5-Minute Setup/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('CTA Section', () => {
+    it('renders final CTA', () => {
+      render(<Home />);
+      expect(screen.getByText(/Start Building,/i)).toBeInTheDocument();
+      expect(screen.getByText(/Not Boilerplating/i)).toBeInTheDocument();
+    });
+
+    it('has GitHub link', () => {
+      render(<Home />);
+      const githubLinks = screen.getAllByRole('link', { name: /GitHub/i });
+      expect(githubLinks.length).toBeGreaterThan(0);
+      expect(githubLinks[0]).toHaveAttribute('href', expect.stringContaining('github.com'));
+    });
+  });
+
+  describe('Navigation Links', () => {
+    it('has login link', () => {
+      render(<Home />);
+      const loginLinks = screen.getAllByRole('link', { name: /Login/i });
+      expect(loginLinks.some(link => link.getAttribute('href') === '/login')).toBe(true);
+    });
+
+    it('has component showcase link', () => {
+      render(<Home />);
+      const devLinks = screen.getAllByRole('link', { name: /Component/i });
+      expect(devLinks.some(link => link.getAttribute('href') === '/dev')).toBe(true);
+    });
+
+    it('has admin demo link', () => {
+      render(<Home />);
+      const adminLinks = screen.getAllByRole('link', { name: /Admin/i });
+      expect(adminLinks.some(link => link.getAttribute('href') === '/admin')).toBe(true);
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('has proper heading hierarchy', () => {
+      render(<Home />);
+      const main = screen.getByRole('main');
+      const headings = within(main).getAllByRole('heading');
+      expect(headings.length).toBeGreaterThan(0);
+    });
+
+    it('has external links with proper attributes', () => {
+      render(<Home />);
+      const githubLinks = screen.getAllByRole('link', { name: /GitHub/i });
+      const externalLink = githubLinks.find(link =>
+        link.getAttribute('href')?.includes('github.com')
+      );
+      expect(externalLink).toHaveAttribute('target', '_blank');
+      expect(externalLink).toHaveAttribute('rel', 'noopener noreferrer');
+    });
   });
 });
