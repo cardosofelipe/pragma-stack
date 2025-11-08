@@ -62,7 +62,7 @@ export function DemoSection() {
         {demos.map((demo, index) => (
           <motion.div
             key={demo.title}
-            className="rounded-lg border bg-card p-6 hover:shadow-lg transition-shadow"
+            className="h-full flex flex-col rounded-lg border bg-card p-6 hover:shadow-lg transition-shadow"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
@@ -75,7 +75,7 @@ export function DemoSection() {
             </div>
 
             <h3 className="text-xl font-semibold mb-2">{demo.title}</h3>
-            <p className="text-muted-foreground mb-4 leading-relaxed">
+            <p className="text-muted-foreground mb-4 leading-relaxed flex-1">
               {demo.description}
             </p>
 

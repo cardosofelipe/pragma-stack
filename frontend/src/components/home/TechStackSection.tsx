@@ -78,14 +78,14 @@ export function TechStackSection() {
         {technologies.map((tech, index) => (
           <motion.div
             key={tech.name}
-            className="group relative"
+            className="group relative h-full"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-100px' }}
             transition={{ duration: 0.4, delay: index * 0.05 }}
             whileHover={{ scale: 1.05 }}
           >
-            <div className="rounded-lg border bg-card p-6 text-center hover:shadow-lg transition-all">
+            <div className="h-full flex flex-col items-center justify-center rounded-lg border bg-card p-6 text-center hover:shadow-lg transition-all">
               {/* Tech Badge */}
               <div className={`inline-block rounded-full bg-gradient-to-r ${tech.color} px-4 py-2 text-white font-semibold text-sm mb-2`}>
                 {tech.name}

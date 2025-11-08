@@ -28,7 +28,7 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <motion.div
-      className="group relative rounded-lg border bg-card p-6 hover:shadow-lg transition-all"
+      className="group relative h-full flex flex-col rounded-lg border bg-card p-6 hover:shadow-lg transition-all"
       whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
     >
@@ -48,7 +48,7 @@ export function FeatureCard({
       </div>
 
       {/* Description */}
-      <p className="text-muted-foreground mb-4 leading-relaxed">{description}</p>
+      <p className="text-muted-foreground mb-4 leading-relaxed flex-1">{description}</p>
 
       {/* CTA Link */}
       <Link

@@ -55,7 +55,7 @@ export function PhilosophySection() {
         <div className="grid md:grid-cols-2 gap-8 mt-12">
           {/* What You Won't Find */}
           <motion.div
-            className="rounded-lg border bg-card p-6"
+            className="h-full rounded-lg border bg-card p-6"
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-100px' }}
@@ -77,7 +77,7 @@ export function PhilosophySection() {
 
           {/* What You Will Find */}
           <motion.div
-            className="rounded-lg border bg-card p-6"
+            className="h-full rounded-lg border bg-card p-6"
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: '-100px' }}
