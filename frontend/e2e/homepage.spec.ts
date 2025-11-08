@@ -99,19 +99,20 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
     await menuButton.click();
 
     // Wait for sheet to be visible
-    await page.waitForSelector('[role="dialog"]');
+    const mobileMenu = page.locator('[role="dialog"]');
+    await mobileMenu.waitFor({ state: 'visible' });
 
     // Navigation links should be visible in mobile menu
-    const mobileMenu = page.locator('[role="dialog"]');
     await expect(mobileMenu.getByRole('link', { name: 'Components' })).toBeVisible();
     await expect(mobileMenu.getByRole('link', { name: 'Admin Demo' })).toBeVisible();
   });
 
   test('should display GitHub link in mobile menu', async ({ page }) => {
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]');
 
     const mobileMenu = page.locator('[role="dialog"]');
+    await mobileMenu.waitFor({ state: 'visible' });
+
     const githubLink = mobileMenu.getByRole('link', { name: /GitHub Star/i });
 
     await expect(githubLink).toBeVisible();
@@ -121,10 +122,13 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
   test('should navigate to components page from mobile menu', async ({ page }) => {
     // Open mobile menu
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]');
+
+    const mobileMenu = page.locator('[role="dialog"]');
+    await mobileMenu.waitFor({ state: 'visible' });
 
     // Click Components link
-    const componentsLink = page.locator('[role="dialog"]').getByRole('link', { name: 'Components' });
+    const componentsLink = mobileMenu.getByRole('link', { name: 'Components' });
+    await componentsLink.waitFor({ state: 'visible' });
 
     await Promise.all([
       page.waitForURL('/dev'),
@@ -137,10 +141,13 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
   test('should navigate to admin demo from mobile menu', async ({ page }) => {
     // Open mobile menu
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]');
+
+    const mobileMenu = page.locator('[role="dialog"]');
+    await mobileMenu.waitFor({ state: 'visible' });
 
     // Click Admin Demo link
-    const adminLink = page.locator('[role="dialog"]').getByRole('link', { name: 'Admin Demo' });
+    const adminLink = mobileMenu.getByRole('link', { name: 'Admin Demo' });
+    await adminLink.waitFor({ state: 'visible' });
 
     await Promise.all([
       page.waitForURL('/admin'),
@@ -152,9 +159,10 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
 
   test('should display Try Demo button in mobile menu', async ({ page }) => {
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]');
 
     const mobileMenu = page.locator('[role="dialog"]');
+    await mobileMenu.waitFor({ state: 'visible' });
+
     const demoButton = mobileMenu.getByRole('button', { name: /Try Demo/i });
 
     await expect(demoButton).toBeVisible();
@@ -163,14 +171,14 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
   test('should open demo modal from mobile menu Try Demo button', async ({ page }) => {
     // Open mobile menu
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]');
+
+    const mobileMenu = page.locator('[role="dialog"]');
+    await mobileMenu.waitFor({ state: 'visible' });
 
     // Click Try Demo in mobile menu
-    const mobileMenu = page.locator('[role="dialog"]');
-    await mobileMenu.getByRole('button', { name: /Try Demo/i }).click();
-
-    // Wait a bit for mobile menu to close and modal to open
-    await page.waitForTimeout(500);
+    const demoButton = mobileMenu.getByRole('button', { name: /Try Demo/i });
+    await demoButton.waitFor({ state: 'visible' });
+    await demoButton.click();
 
     // Demo credentials dialog should be visible
     await expect(page.getByRole('heading', { name: /Try the Live Demo/i })).toBeVisible();
@@ -179,11 +187,14 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
   test('should navigate to login from mobile menu', async ({ page }) => {
     // Open mobile menu
     await page.getByRole('button', { name: /Toggle menu/i }).click();
-    await page.waitForSelector('[role="dialog"]');
+
+    // Wait for dialog to be fully visible
+    const mobileMenu = page.locator('[role="dialog"]');
+    await mobileMenu.waitFor({ state: 'visible' });
 
     // Click Login link in mobile menu
-    const mobileMenu = page.locator('[role="dialog"]');
     const loginLink = mobileMenu.getByRole('link', { name: /Login/i });
+    await loginLink.waitFor({ state: 'visible' });
 
     await Promise.all([
       page.waitForURL('/login'),
@@ -255,6 +266,8 @@ test.describe('Homepage - Demo Credentials Modal', () => {
     await page.getByRole('button', { name: /Try Demo/i }).first().click();
 
     const dialog = page.getByRole('dialog');
+    await dialog.waitFor({ state: 'visible' });
+
     await expect(dialog.getByText('Regular User').first()).toBeVisible();
     await expect(dialog.getByText('demo@example.com').first()).toBeVisible();
     await expect(dialog.getByText('Demo123!').first()).toBeVisible();
@@ -333,12 +346,9 @@ test.describe('Homepage - Animated Terminal', () => {
   test('should display terminal commands', async ({ page }) => {
     await page.locator('text=bash').first().scrollIntoViewIfNeeded();
 
-    // Wait for terminal content to appear (animation takes time)
-    await page.waitForTimeout(2500);
-
-    // Terminal should show git clone command (check for just "git clone" to be more flexible)
-    const terminalText = await page.locator('.font-mono').filter({ hasText: 'git clone' }).first();
-    await expect(terminalText).toBeVisible();
+    // Terminal should show git clone command (wait for it to appear via animation)
+    const terminalText = page.locator('.font-mono').filter({ hasText: 'git clone' }).first();
+    await expect(terminalText).toBeVisible({ timeout: 15000 }); // Animation takes time
   });
 
   test('should display Try Live Demo button below terminal', async ({ page }) => {
