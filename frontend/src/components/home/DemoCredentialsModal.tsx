@@ -1,0 +1,141 @@
+/**
+ * Demo Credentials Modal
+ * Displays demo login credentials for testing the live application
+ */
+
+'use client';
+
+import { useState } from 'react';
+import Link from 'next/link';
+import { Copy, Check } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+
+interface DemoCredentialsModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProps) {
+  const [copiedRegular, setCopiedRegular] = useState(false);
+  const [copiedAdmin, setCopiedAdmin] = useState(false);
+
+  const regularCredentials = 'demo@example.com\nDemo123!';
+  const adminCredentials = 'admin@example.com\nAdmin123!';
+
+  const copyToClipboard = async (text: string, type: 'regular' | 'admin') => {
+    try {
+      await navigator.clipboard.writeText(text);
+      if (type === 'regular') {
+        setCopiedRegular(true);
+        setTimeout(() => setCopiedRegular(false), 2000);
+      } else {
+        setCopiedAdmin(true);
+        setTimeout(() => setCopiedAdmin(false), 2000);
+      }
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Try the Live Demo</DialogTitle>
+          <DialogDescription>
+            Use these credentials to explore the template&apos;s features. Both accounts are pre-configured with sample data.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 my-4">
+          {/* Regular User Credentials */}
+          <div className="rounded-lg border p-4 space-y-3 bg-card">
+            <div className="flex items-center justify-between">
+              <p className="font-semibold text-sm">Regular User</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyToClipboard(regularCredentials, 'regular')}
+                className="h-8 gap-2"
+              >
+                {copiedRegular ? (
+                  <Check className="h-4 w-4 text-green-600" aria-hidden="true" />
+                ) : (
+                  <Copy className="h-4 w-4" aria-hidden="true" />
+                )}
+                <span className="sr-only">Copy regular user credentials</span>
+                {copiedRegular ? 'Copied!' : 'Copy'}
+              </Button>
+            </div>
+            <div className="font-mono text-sm space-y-1 text-muted-foreground">
+              <p className="flex items-center gap-2">
+                <span className="text-xs font-sans text-muted-foreground/70">Email:</span>
+                <span className="text-foreground">demo@example.com</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="text-xs font-sans text-muted-foreground/70">Password:</span>
+                <span className="text-foreground">Demo123!</span>
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Access settings, organizations, and user features
+            </p>
+          </div>
+
+          {/* Admin User Credentials */}
+          <div className="rounded-lg border p-4 space-y-3 bg-card">
+            <div className="flex items-center justify-between">
+              <p className="font-semibold text-sm">Admin User (Superuser)</p>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copyToClipboard(adminCredentials, 'admin')}
+                className="h-8 gap-2"
+              >
+                {copiedAdmin ? (
+                  <Check className="h-4 w-4 text-green-600" aria-hidden="true" />
+                ) : (
+                  <Copy className="h-4 w-4" aria-hidden="true" />
+                )}
+                <span className="sr-only">Copy admin user credentials</span>
+                {copiedAdmin ? 'Copied!' : 'Copy'}
+              </Button>
+            </div>
+            <div className="font-mono text-sm space-y-1 text-muted-foreground">
+              <p className="flex items-center gap-2">
+                <span className="text-xs font-sans text-muted-foreground/70">Email:</span>
+                <span className="text-foreground">admin@example.com</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <span className="text-xs font-sans text-muted-foreground/70">Password:</span>
+                <span className="text-foreground">Admin123!</span>
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Full admin panel access: user management, analytics, bulk operations
+            </p>
+          </div>
+        </div>
+
+        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
+            Close
+          </Button>
+          <Button asChild className="w-full sm:w-auto">
+            <Link href="/login" onClick={onClose}>
+              Go to Login →
+            </Link>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
