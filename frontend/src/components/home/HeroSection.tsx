@@ -5,15 +5,16 @@
 
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, Github, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DemoCredentialsModal } from './DemoCredentialsModal';
 
-export function HeroSection() {
-  const [demoModalOpen, setDemoModalOpen] = useState(false);
+interface HeroSectionProps {
+  onOpenDemoModal: () => void;
+}
+
+export function HeroSection({ onOpenDemoModal }: HeroSectionProps) {
 
   return (
     <section className="relative overflow-hidden">
@@ -80,7 +81,7 @@ export function HeroSection() {
           >
             <Button
               size="lg"
-              onClick={() => setDemoModalOpen(true)}
+              onClick={onOpenDemoModal}
               className="gap-2 text-base group"
             >
               <Play className="h-5 w-5 group-hover:scale-110 transition-transform" aria-hidden="true" />
@@ -139,12 +140,6 @@ export function HeroSection() {
           </motion.div>
         </div>
       </div>
-
-      {/* Demo Credentials Modal */}
-      <DemoCredentialsModal
-        open={demoModalOpen}
-        onClose={() => setDemoModalOpen(false)}
-      />
     </section>
   );
 }

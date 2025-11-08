@@ -1,0 +1,456 @@
+/**
+ * E2E Tests for Homepage
+ * Tests mobile menu interactions, navigation, CTAs, and animated terminal
+ * These tests cover functionality excluded from unit tests (Header mobile menu, AnimatedTerminal)
+ */
+
+import { test, expect } from '@playwright/test';
+
+test.describe('Homepage - Desktop Navigation', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should display header with logo and navigation', async ({ page }) => {
+    // Logo should be visible
+    await expect(page.getByRole('link', { name: /FastNext/i })).toBeVisible();
+
+    // Desktop navigation links should be visible (use locator to find within header)
+    const header = page.locator('header').first();
+    await expect(header.getByRole('link', { name: 'Components', exact: true })).toBeVisible();
+    await expect(header.getByRole('link', { name: 'Admin Demo', exact: true })).toBeVisible();
+  });
+
+  test('should display GitHub link with star badge', async ({ page }) => {
+    // Find GitHub link by checking for one that has github.com in href
+    const githubLink = page.locator('a[href*="github.com"]').first();
+    await expect(githubLink).toBeVisible();
+    await expect(githubLink).toHaveAttribute('target', '_blank');
+  });
+
+  test('should navigate to components page via header link', async ({ page }) => {
+    // Click the exact Components link in header navigation
+    const header = page.locator('header').first();
+    const componentsLink = header.getByRole('link', { name: 'Components', exact: true });
+
+    await Promise.all([
+      page.waitForURL('/dev', { timeout: 10000 }),
+      componentsLink.click()
+    ]);
+
+    await expect(page).toHaveURL('/dev');
+  });
+
+  test('should navigate to admin demo via header link', async ({ page }) => {
+    await Promise.all([
+      page.waitForURL('/admin', { timeout: 10000 }),
+      page.getByRole('link', { name: 'Admin Demo' }).click()
+    ]);
+
+    await expect(page).toHaveURL('/admin');
+  });
+
+  test('should navigate to login page via header button', async ({ page }) => {
+    const loginLinks = page.getByRole('link', { name: /^Login$/i });
+    const headerLoginLink = loginLinks.first(); // Header login button
+
+    await Promise.all([
+      page.waitForURL('/login', { timeout: 10000 }),
+      headerLoginLink.click()
+    ]);
+
+    await expect(page).toHaveURL('/login');
+  });
+
+  test('should open demo credentials modal when clicking Try Demo', async ({ page }) => {
+    await page.getByRole('button', { name: /Try Demo/i }).first().click();
+
+    // Dialog should be visible
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole('heading', { name: /Try the Live Demo/i })).toBeVisible();
+
+    // Should show credentials (scope to dialog to avoid duplicates)
+    await expect(dialog.getByText('demo@example.com').first()).toBeVisible();
+    await expect(dialog.getByText('admin@example.com').first()).toBeVisible();
+  });
+});
+
+test.describe('Homepage - Mobile Menu Interactions', () => {
+  test.beforeEach(async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should display mobile menu toggle button', async ({ page }) => {
+    const menuButton = page.getByRole('button', { name: /Toggle menu/i });
+    await expect(menuButton).toBeVisible();
+  });
+
+  test('should open mobile menu when clicking toggle button', async ({ page }) => {
+    const menuButton = page.getByRole('button', { name: /Toggle menu/i });
+    await menuButton.click();
+
+    // Wait for sheet to be visible
+    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+
+    // Navigation links should be visible in mobile menu
+    const mobileMenu = page.locator('[role="dialog"]');
+    await expect(mobileMenu.getByRole('link', { name: 'Components' })).toBeVisible();
+    await expect(mobileMenu.getByRole('link', { name: 'Admin Demo' })).toBeVisible();
+  });
+
+  test('should display GitHub link in mobile menu', async ({ page }) => {
+    await page.getByRole('button', { name: /Toggle menu/i }).click();
+    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+
+    const mobileMenu = page.locator('[role="dialog"]');
+    const githubLink = mobileMenu.getByRole('link', { name: /GitHub Star/i });
+
+    await expect(githubLink).toBeVisible();
+    await expect(githubLink).toHaveAttribute('href', expect.stringContaining('github.com'));
+  });
+
+  test('should navigate to components page from mobile menu', async ({ page }) => {
+    // Open mobile menu
+    await page.getByRole('button', { name: /Toggle menu/i }).click();
+    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+
+    // Click Components link
+    const componentsLink = page.locator('[role="dialog"]').getByRole('link', { name: 'Components' });
+
+    await Promise.all([
+      page.waitForURL('/dev', { timeout: 10000 }),
+      componentsLink.click()
+    ]);
+
+    await expect(page).toHaveURL('/dev');
+  });
+
+  test('should navigate to admin demo from mobile menu', async ({ page }) => {
+    // Open mobile menu
+    await page.getByRole('button', { name: /Toggle menu/i }).click();
+    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+
+    // Click Admin Demo link
+    const adminLink = page.locator('[role="dialog"]').getByRole('link', { name: 'Admin Demo' });
+
+    await Promise.all([
+      page.waitForURL('/admin', { timeout: 10000 }),
+      adminLink.click()
+    ]);
+
+    await expect(page).toHaveURL('/admin');
+  });
+
+  test('should display Try Demo button in mobile menu', async ({ page }) => {
+    await page.getByRole('button', { name: /Toggle menu/i }).click();
+    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+
+    const mobileMenu = page.locator('[role="dialog"]');
+    const demoButton = mobileMenu.getByRole('button', { name: /Try Demo/i });
+
+    await expect(demoButton).toBeVisible();
+  });
+
+  test('should open demo modal from mobile menu Try Demo button', async ({ page }) => {
+    // Open mobile menu
+    await page.getByRole('button', { name: /Toggle menu/i }).click();
+    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+
+    // Click Try Demo in mobile menu
+    const mobileMenu = page.locator('[role="dialog"]');
+    await mobileMenu.getByRole('button', { name: /Try Demo/i }).click();
+
+    // Wait a bit for mobile menu to close and modal to open
+    await page.waitForTimeout(500);
+
+    // Demo credentials dialog should be visible
+    await expect(page.getByRole('heading', { name: /Try the Live Demo/i })).toBeVisible();
+  });
+
+  test('should navigate to login from mobile menu', async ({ page }) => {
+    // Open mobile menu
+    await page.getByRole('button', { name: /Toggle menu/i }).click();
+    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+
+    // Click Login link in mobile menu
+    const mobileMenu = page.locator('[role="dialog"]');
+    const loginLink = mobileMenu.getByRole('link', { name: /Login/i });
+
+    await Promise.all([
+      page.waitForURL('/login', { timeout: 10000 }),
+      loginLink.click()
+    ]);
+
+    await expect(page).toHaveURL('/login');
+  });
+
+  test('should close mobile menu when clicking outside', async ({ page }) => {
+    // Open mobile menu
+    await page.getByRole('button', { name: /Toggle menu/i }).click();
+    await page.waitForSelector('[role="dialog"]', { timeout: 5000 });
+
+    // Press Escape key to close menu (more reliable than clicking overlay)
+    await page.keyboard.press('Escape');
+
+    // Menu should close
+    await expect(page.locator('[role="dialog"]')).not.toBeVisible({ timeout: 2000 });
+  });
+});
+
+test.describe('Homepage - Hero Section', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should display main headline', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /Everything You Need to Build/i }).first()).toBeVisible();
+    await expect(page.getByText(/Modern Web Applications/i).first()).toBeVisible();
+  });
+
+  test('should display badge with key highlights', async ({ page }) => {
+    await expect(page.getByText('MIT Licensed').first()).toBeVisible();
+    await expect(page.getByText(/97% Test Coverage/).first()).toBeVisible();
+    await expect(page.getByText('Production Ready').first()).toBeVisible();
+  });
+
+  test('should display test coverage stats', async ({ page }) => {
+    await expect(page.getByText('97%').first()).toBeVisible();
+    await expect(page.getByText('743').first()).toBeVisible();
+    await expect(page.getByText(/Passing Tests/).first()).toBeVisible();
+  });
+
+  test('should navigate to GitHub when clicking View on GitHub', async ({ page }) => {
+    const githubLink = page.getByRole('link', { name: /View on GitHub/i }).first();
+    await expect(githubLink).toBeVisible();
+    await expect(githubLink).toHaveAttribute('href', expect.stringContaining('github.com'));
+  });
+
+  test('should navigate to components when clicking Explore Components', async ({ page }) => {
+    const exploreLink = page.getByRole('link', { name: /Explore Components/i }).first();
+
+    await Promise.all([
+      page.waitForURL('/dev', { timeout: 10000 }),
+      exploreLink.click()
+    ]);
+
+    await expect(page).toHaveURL('/dev');
+  });
+});
+
+test.describe('Homepage - Demo Credentials Modal', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should display regular and admin credentials', async ({ page }) => {
+    await page.getByRole('button', { name: /Try Demo/i }).first().click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText('Regular User').first()).toBeVisible();
+    await expect(dialog.getByText('demo@example.com').first()).toBeVisible();
+    await expect(dialog.getByText('Demo123!').first()).toBeVisible();
+
+    await expect(dialog.getByText('Admin User (Superuser)').first()).toBeVisible();
+    await expect(dialog.getByText('admin@example.com').first()).toBeVisible();
+    await expect(dialog.getByText('Admin123!').first()).toBeVisible();
+  });
+
+  test('should copy regular user credentials to clipboard', async ({ page }) => {
+    await page.getByRole('button', { name: /Try Demo/i }).first().click();
+
+    const dialog = page.getByRole('dialog');
+    // Click first copy button (regular user) within dialog
+    const copyButtons = dialog.getByRole('button', { name: /Copy/i });
+    await copyButtons.first().click();
+
+    // Button should show "Copied!"
+    await expect(dialog.getByText('Copied!').first()).toBeVisible();
+  });
+
+  test('should navigate to login page from modal', async ({ page }) => {
+    await page.getByRole('button', { name: /Try Demo/i }).first().click();
+
+    const dialog = page.getByRole('dialog');
+    const loginLink = dialog.getByRole('link', { name: /Go to Login/i });
+
+    await Promise.all([
+      page.waitForURL('/login', { timeout: 10000 }),
+      loginLink.click()
+    ]);
+
+    await expect(page).toHaveURL('/login');
+  });
+
+  test('should close modal when clicking close button', async ({ page }) => {
+    await page.getByRole('button', { name: /Try Demo/i }).first().click();
+
+    const dialog = page.getByRole('dialog');
+    const closeButton = dialog.getByRole('button', { name: /^Close$/i });
+    await closeButton.click();
+
+    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 2000 });
+  });
+});
+
+test.describe('Homepage - Animated Terminal', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should display terminal section', async ({ page }) => {
+    // Scroll to terminal section
+    await page.locator('text=Get Started in Seconds').first().scrollIntoViewIfNeeded();
+
+    await expect(page.getByRole('heading', { name: /Get Started in Seconds/i }).first()).toBeVisible();
+    await expect(page.getByText(/Clone, run, and start building/i).first()).toBeVisible();
+  });
+
+  test('should display terminal window with bash indicator', async ({ page }) => {
+    await page.locator('text=bash').first().scrollIntoViewIfNeeded();
+
+    // Terminal should have bash indicator
+    await expect(page.getByText('bash').first()).toBeVisible();
+  });
+
+  test('should display terminal commands', async ({ page }) => {
+    await page.locator('text=bash').first().scrollIntoViewIfNeeded();
+
+    // Wait for terminal content to appear (animation takes time)
+    await page.waitForTimeout(2500);
+
+    // Terminal should show git clone command (check for just "git clone" to be more flexible)
+    const terminalText = await page.locator('.font-mono').filter({ hasText: 'git clone' }).first();
+    await expect(terminalText).toBeVisible({ timeout: 10000 });
+  });
+
+  test('should display Try Live Demo button below terminal', async ({ page }) => {
+    await page.locator('text=Get Started in Seconds').scrollIntoViewIfNeeded();
+
+    const demoLink = page.getByRole('link', { name: /Try Live Demo/i }).first();
+    await expect(demoLink).toBeVisible();
+  });
+
+  test('should navigate to login when clicking Try Live Demo below terminal', async ({ page }) => {
+    await page.locator('text=Get Started in Seconds').scrollIntoViewIfNeeded();
+
+    // Find the Try Live Demo link in terminal section (not the one in header)
+    const demoLinks = page.getByRole('link', { name: /Try Live Demo/i });
+    const terminalDemoLink = demoLinks.last(); // Last one should be from terminal section
+
+    await Promise.all([
+      page.waitForURL('/login', { timeout: 10000 }),
+      terminalDemoLink.click()
+    ]);
+
+    await expect(page).toHaveURL('/login');
+  });
+});
+
+test.describe('Homepage - Feature Sections', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should display feature grid section', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /Comprehensive Features/i })).toBeVisible();
+
+    // Check for key features
+    await expect(page.getByText('Authentication & Security').first()).toBeVisible();
+    await expect(page.getByText('Multi-Tenant Organizations').first()).toBeVisible();
+    await expect(page.getByText('Admin Dashboard').first()).toBeVisible();
+  });
+
+  test('should navigate to login from auth feature CTA', async ({ page }) => {
+    const authLink = page.getByRole('link', { name: /View Auth Flow/i });
+
+    await Promise.all([
+      page.waitForURL('/login', { timeout: 10000 }),
+      authLink.click()
+    ]);
+
+    await expect(page).toHaveURL('/login');
+  });
+
+  test('should navigate to admin from admin panel CTA', async ({ page }) => {
+    const adminLink = page.getByRole('link', { name: /Try Admin Panel/i });
+
+    await Promise.all([
+      page.waitForURL('/admin', { timeout: 10000 }),
+      adminLink.click()
+    ]);
+
+    await expect(page).toHaveURL('/admin');
+  });
+
+  test('should display tech stack section', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /Modern, Type-Safe, Production-Grade Stack/i })).toBeVisible();
+
+    // Check for key technologies
+    await expect(page.getByText('FastAPI').first()).toBeVisible();
+    await expect(page.getByText('Next.js 15').first()).toBeVisible();
+    await expect(page.getByText('PostgreSQL').first()).toBeVisible();
+  });
+
+  test('should display philosophy section', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /Why This Template Exists/i })).toBeVisible();
+    await expect(page.getByText(/Free forever, MIT licensed/i)).toBeVisible();
+  });
+});
+
+test.describe('Homepage - Footer', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should display footer with copyright', async ({ page }) => {
+    // Scroll to footer
+    await page.locator('footer').scrollIntoViewIfNeeded();
+
+    await expect(page.getByText(/FastNext Template. MIT Licensed/i)).toBeVisible();
+  });
+});
+
+test.describe('Homepage - Accessibility', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('should have proper heading hierarchy', async ({ page }) => {
+    // Main heading should be h1
+    const h1 = page.getByRole('heading', { level: 1 }).first();
+    await expect(h1).toBeVisible();
+  });
+
+  test('should have accessible navigation', async ({ page }) => {
+    const nav = page.getByRole('banner'); // header has role="banner"
+    await expect(nav).toBeVisible();
+  });
+
+  test('should have accessible links with proper attributes', async ({ page }) => {
+    const githubLink = page.locator('a[href*="github.com"]').first();
+    await expect(githubLink).toHaveAttribute('target', '_blank');
+    await expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  test('should have mobile menu button with accessible label', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+
+    const menuButton = page.getByRole('button', { name: /Toggle menu/i });
+    await expect(menuButton).toBeVisible();
+    await expect(menuButton).toHaveAttribute('aria-label', 'Toggle menu');
+  });
+});

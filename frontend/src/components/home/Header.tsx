@@ -9,11 +9,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X, Github, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DemoCredentialsModal } from './DemoCredentialsModal';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
-export function Header() {
-  const [demoModalOpen, setDemoModalOpen] = useState(false);
+interface HeaderProps {
+  onOpenDemoModal: () => void;
+}
+
+export function Header({ onOpenDemoModal }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -63,7 +65,7 @@ export function Header() {
 
             {/* CTAs */}
             <Button
-              onClick={() => setDemoModalOpen(true)}
+              onClick={onOpenDemoModal}
               variant="default"
               size="sm"
             >
@@ -98,7 +100,7 @@ export function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                     className="text-lg font-medium hover:text-primary transition-colors"
                   >
-                    {link.href}
+                    {link.label}
                   </Link>
                 ))}
 
@@ -122,7 +124,7 @@ export function Header() {
                   <Button
                     onClick={() => {
                       setMobileMenuOpen(false);
-                      setDemoModalOpen(true);
+                      onOpenDemoModal();
                     }}
                     variant="default"
                     className="w-full"
@@ -144,12 +146,6 @@ export function Header() {
           </Sheet>
         </div>
       </header>
-
-      {/* Demo Credentials Modal */}
-      <DemoCredentialsModal
-        open={demoModalOpen}
-        onClose={() => setDemoModalOpen(false)}
-      />
     </>
   );
 }

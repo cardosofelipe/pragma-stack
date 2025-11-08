@@ -4,6 +4,9 @@
  * Showcases features, tech stack, and provides demos for developers
  */
 
+'use client';
+
+import { useState } from 'react';
 import { Header } from '@/components/home/Header';
 import { HeroSection } from '@/components/home/HeroSection';
 import { ContextSection } from '@/components/home/ContextSection';
@@ -15,17 +18,20 @@ import { TechStackSection } from '@/components/home/TechStackSection';
 import { PhilosophySection } from '@/components/home/PhilosophySection';
 import { QuickStartCode } from '@/components/home/QuickStartCode';
 import { CTASection } from '@/components/home/CTASection';
+import { DemoCredentialsModal } from '@/components/home/DemoCredentialsModal';
 
 export default function Home() {
+  const [demoModalOpen, setDemoModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen">
       {/* Header Navigation */}
-      <Header />
+      <Header onOpenDemoModal={() => setDemoModalOpen(true)} />
 
       {/* Main Content */}
       <main>
         {/* Hero Section with CTAs */}
-        <HeroSection />
+        <HeroSection onOpenDemoModal={() => setDemoModalOpen(true)} />
 
         {/* What is this template? */}
         <ContextSection />
@@ -52,7 +58,7 @@ export default function Home() {
         <QuickStartCode />
 
         {/* Final CTA Section */}
-        <CTASection />
+        <CTASection onOpenDemoModal={() => setDemoModalOpen(true)} />
       </main>
 
       {/* Footer */}
@@ -91,6 +97,12 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Shared Demo Credentials Modal */}
+      <DemoCredentialsModal
+        open={demoModalOpen}
+        onClose={() => setDemoModalOpen(false)}
+      />
     </div>
   );
 }

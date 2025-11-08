@@ -5,15 +5,16 @@
 
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Github, Star, Play, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DemoCredentialsModal } from './DemoCredentialsModal';
 
-export function CTASection() {
-  const [demoModalOpen, setDemoModalOpen] = useState(false);
+interface CTASectionProps {
+  onOpenDemoModal: () => void;
+}
+
+export function CTASection({ onOpenDemoModal }: CTASectionProps) {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background">
@@ -66,7 +67,7 @@ export function CTASection() {
               </a>
             </Button>
             <Button
-              onClick={() => setDemoModalOpen(true)}
+              onClick={onOpenDemoModal}
               size="lg"
               variant="outline"
               className="gap-2 text-base group"
@@ -113,12 +114,6 @@ export function CTASection() {
           </motion.div>
         </motion.div>
       </div>
-
-      {/* Demo Credentials Modal */}
-      <DemoCredentialsModal
-        open={demoModalOpen}
-        onClose={() => setDemoModalOpen(false)}
-      />
     </section>
   );
 }

@@ -16,8 +16,12 @@ test.describe('Admin Access Control', () => {
     await setupAuthenticatedMocks(page);
     await loginViaUI(page);
 
-    // Should not see admin link in navigation
-    const adminLinks = page.getByRole('link', { name: /admin/i });
+    // Navigate to authenticated page to test authenticated header (not homepage)
+    await page.goto('/settings');
+    await page.waitForSelector('h1:has-text("Settings")', { timeout: 10000 });
+
+    // Should not see admin link in authenticated header navigation
+    const adminLinks = page.getByRole('link', { name: /^admin$/i });
     const visibleAdminLinks = await adminLinks.count();
     expect(visibleAdminLinks).toBe(0);
   });
