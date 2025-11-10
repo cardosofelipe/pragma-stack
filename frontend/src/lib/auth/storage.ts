@@ -25,7 +25,10 @@ export type StorageMethod = 'cookie' | 'localStorage';
  * This flag is set by E2E tests to skip encryption for easier testing
  */
 function isE2ETestMode(): boolean {
-  return typeof window !== 'undefined' && (window as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ === true;
+  return (
+    typeof window !== 'undefined' &&
+    (window as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ === true
+  );
 }
 
 /**
@@ -162,10 +165,14 @@ export async function getTokens(): Promise<TokenStorage | null> {
       const parsed = JSON.parse(stored);
 
       // Validate structure - must have required fields
-      if (!parsed || typeof parsed !== 'object' ||
-          !('accessToken' in parsed) || !('refreshToken' in parsed) ||
-          (parsed.accessToken !== null && typeof parsed.accessToken !== 'string') ||
-          (parsed.refreshToken !== null && typeof parsed.refreshToken !== 'string')) {
+      if (
+        !parsed ||
+        typeof parsed !== 'object' ||
+        !('accessToken' in parsed) ||
+        !('refreshToken' in parsed) ||
+        (parsed.accessToken !== null && typeof parsed.accessToken !== 'string') ||
+        (parsed.refreshToken !== null && typeof parsed.refreshToken !== 'string')
+      ) {
         throw new Error('Invalid token structure');
       }
 
@@ -177,10 +184,14 @@ export async function getTokens(): Promise<TokenStorage | null> {
     const parsed = JSON.parse(decrypted);
 
     // Validate structure - must have required fields
-    if (!parsed || typeof parsed !== 'object' ||
-        !('accessToken' in parsed) || !('refreshToken' in parsed) ||
-        (parsed.accessToken !== null && typeof parsed.accessToken !== 'string') ||
-        (parsed.refreshToken !== null && typeof parsed.refreshToken !== 'string')) {
+    if (
+      !parsed ||
+      typeof parsed !== 'object' ||
+      !('accessToken' in parsed) ||
+      !('refreshToken' in parsed) ||
+      (parsed.accessToken !== null && typeof parsed.accessToken !== 'string') ||
+      (parsed.refreshToken !== null && typeof parsed.refreshToken !== 'string')
+    ) {
       /* istanbul ignore next - Validation error path */
       throw new Error('Invalid token structure');
     }

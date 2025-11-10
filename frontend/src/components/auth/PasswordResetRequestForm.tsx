@@ -23,10 +23,7 @@ import { getGeneralError, getFieldErrors, isAPIErrorArray } from '@/lib/api/erro
 // ============================================================================
 
 const resetRequestSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
 });
 
 type ResetRequestFormData = z.infer<typeof resetRequestSchema>;
@@ -169,11 +166,7 @@ export function PasswordResetRequestForm({
         </div>
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isSubmitting}
-        >
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Sending...' : 'Send Reset Instructions'}
         </Button>
 

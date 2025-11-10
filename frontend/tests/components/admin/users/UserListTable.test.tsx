@@ -11,9 +11,7 @@ import type { User, PaginationMeta } from '@/lib/api/hooks/useAdmin';
 // Mock UserActionMenu component
 jest.mock('@/components/admin/users/UserActionMenu', () => ({
   UserActionMenu: ({ user, isCurrentUser }: any) => (
-    <button data-testid={`action-menu-${user.id}`}>
-      Actions {isCurrentUser && '(current)'}
-    </button>
+    <button data-testid={`action-menu-${user.id}`}>Actions {isCurrentUser && '(current)'}</button>
   ),
 }));
 
@@ -139,25 +137,15 @@ describe('UserListTable', () => {
   describe('Empty State', () => {
     it('shows empty message when no users', () => {
       render(
-        <UserListTable
-          {...defaultProps}
-          users={[]}
-          pagination={{ ...mockPagination, total: 0 }}
-        />
+        <UserListTable {...defaultProps} users={[]} pagination={{ ...mockPagination, total: 0 }} />
       );
 
-      expect(
-        screen.getByText('No users found. Try adjusting your filters.')
-      ).toBeInTheDocument();
+      expect(screen.getByText('No users found. Try adjusting your filters.')).toBeInTheDocument();
     });
 
     it('does not render pagination when no users', () => {
       render(
-        <UserListTable
-          {...defaultProps}
-          users={[]}
-          pagination={{ ...mockPagination, total: 0 }}
-        />
+        <UserListTable {...defaultProps} users={[]} pagination={{ ...mockPagination, total: 0 }} />
       );
 
       expect(screen.queryByText(/Showing/)).not.toBeInTheDocument();
@@ -168,9 +156,7 @@ describe('UserListTable', () => {
     it('renders search input', () => {
       render(<UserListTable {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText(
-        'Search by name or email...'
-      );
+      const searchInput = screen.getByPlaceholderText('Search by name or email...');
       expect(searchInput).toBeInTheDocument();
     });
 
@@ -178,9 +164,7 @@ describe('UserListTable', () => {
       const user = userEvent.setup();
       render(<UserListTable {...defaultProps} />);
 
-      const searchInput = screen.getByPlaceholderText(
-        'Search by name or email...'
-      );
+      const searchInput = screen.getByPlaceholderText('Search by name or email...');
 
       await user.type(searchInput, 'alice');
 
@@ -222,8 +206,8 @@ describe('UserListTable', () => {
 
       // Find "All Users" in the filter dropdown (not the heading)
       const selectTriggers = screen.getAllByRole('combobox');
-      const userTypeFilter = selectTriggers.find(trigger =>
-        within(trigger).queryByText('All Users') !== null
+      const userTypeFilter = selectTriggers.find(
+        (trigger) => within(trigger).queryByText('All Users') !== null
       );
 
       expect(userTypeFilter).toBeInTheDocument();
@@ -298,11 +282,7 @@ describe('UserListTable', () => {
 
     it('disables select all checkbox when no users', () => {
       render(
-        <UserListTable
-          {...defaultProps}
-          users={[]}
-          pagination={{ ...mockPagination, total: 0 }}
-        />
+        <UserListTable {...defaultProps} users={[]} pagination={{ ...mockPagination, total: 0 }} />
       );
 
       const selectAllCheckbox = screen.getByLabelText('Select all users');
@@ -433,11 +413,7 @@ describe('UserListTable', () => {
 
     it('does not render pagination when no users', () => {
       render(
-        <UserListTable
-          {...defaultProps}
-          users={[]}
-          pagination={{ ...mockPagination, total: 0 }}
-        />
+        <UserListTable {...defaultProps} users={[]} pagination={{ ...mockPagination, total: 0 }} />
       );
 
       expect(screen.queryByText(/Showing/)).not.toBeInTheDocument();

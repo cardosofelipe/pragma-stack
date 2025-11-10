@@ -34,13 +34,10 @@ async function getEncryptionKey(): Promise<CryptoKey> {
   if (storedKey) {
     try {
       const keyData = JSON.parse(storedKey);
-      return await crypto.subtle.importKey(
-        'jwk',
-        keyData,
-        { name: 'AES-GCM', length: 256 },
-        true,
-        ['encrypt', 'decrypt']
-      );
+      return await crypto.subtle.importKey('jwk', keyData, { name: 'AES-GCM', length: 256 }, true, [
+        'encrypt',
+        'decrypt',
+      ]);
     } catch (error) {
       // Corrupted key, regenerate
       console.warn('Failed to import stored key, generating new key:', error);
@@ -49,11 +46,10 @@ async function getEncryptionKey(): Promise<CryptoKey> {
   }
 
   // Generate new key
-  const key = await crypto.subtle.generateKey(
-    { name: 'AES-GCM', length: 256 },
-    true,
-    ['encrypt', 'decrypt']
-  );
+  const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, [
+    'encrypt',
+    'decrypt',
+  ]);
 
   // Store key in sessionStorage
   try {
@@ -86,11 +82,7 @@ export async function encryptData(data: string): Promise<string> {
     const encoder = new TextEncoder();
     const encodedData = encoder.encode(data);
 
-    const encryptedData = await crypto.subtle.encrypt(
-      { name: 'AES-GCM', iv },
-      key,
-      encodedData
-    );
+    const encryptedData = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encodedData);
 
     // Combine IV and encrypted data
     const combined = new Uint8Array(iv.length + encryptedData.byteLength);
@@ -122,17 +114,13 @@ export async function decryptData(encryptedData: string): Promise<string> {
     const key = await getEncryptionKey();
 
     // Decode from base64
-    const combined = Uint8Array.from(atob(encryptedData), c => c.charCodeAt(0));
+    const combined = Uint8Array.from(atob(encryptedData), (c) => c.charCodeAt(0));
 
     // Extract IV and encrypted data
     const iv = combined.slice(0, 12);
     const data = combined.slice(12);
 
-    const decryptedData = await crypto.subtle.decrypt(
-      { name: 'AES-GCM', iv },
-      key,
-      data
-    );
+    const decryptedData = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
 
     const decoder = new TextDecoder();
     return decoder.decode(decryptedData);

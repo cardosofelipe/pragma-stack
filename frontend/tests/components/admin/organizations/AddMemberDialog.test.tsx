@@ -51,13 +51,17 @@ describe('AddMemberDialog', () => {
     render(<AddMemberDialog {...defaultProps} />);
 
     expect(screen.getByRole('heading', { name: 'Add Member' })).toBeInTheDocument();
-    expect(screen.getByText('Add a user to this organization and assign them a role.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Add a user to this organization and assign them a role.')
+    ).toBeInTheDocument();
   });
 
   it('does not render when closed', () => {
     render(<AddMemberDialog {...defaultProps} open={false} />);
 
-    expect(screen.queryByText('Add a user to this organization and assign them a role.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Add a user to this organization and assign them a role.')
+    ).not.toBeInTheDocument();
   });
 
   it('renders user email select field', () => {

@@ -10,37 +10,21 @@ import { FieldError } from 'react-hook-form';
 describe('FormField', () => {
   describe('Basic Rendering', () => {
     it('renders with label and input', () => {
-      render(
-        <FormField
-          label="Email"
-          name="email"
-          type="email"
-        />
-      );
+      render(<FormField label="Email" name="email" type="email" />);
 
       expect(screen.getByLabelText('Email')).toBeInTheDocument();
       expect(screen.getByRole('textbox')).toBeInTheDocument();
     });
 
     it('renders with description', () => {
-      render(
-        <FormField
-          label="Username"
-          name="username"
-          description="Choose a unique username"
-        />
-      );
+      render(<FormField label="Username" name="username" description="Choose a unique username" />);
 
       expect(screen.getByText('Choose a unique username')).toBeInTheDocument();
     });
 
     it('renders children content', () => {
       render(
-        <FormField
-          label="Password"
-          name="password"
-          type="password"
-        >
+        <FormField label="Password" name="password" type="password">
           <p>Password requirements: 8+ characters</p>
         </FormField>
       );
@@ -51,25 +35,13 @@ describe('FormField', () => {
 
   describe('Required Field', () => {
     it('shows asterisk when required is true', () => {
-      render(
-        <FormField
-          label="Email"
-          name="email"
-          required
-        />
-      );
+      render(<FormField label="Email" name="email" required />);
 
       expect(screen.getByText('*')).toBeInTheDocument();
     });
 
     it('does not show asterisk when required is false', () => {
-      render(
-        <FormField
-          label="Email"
-          name="email"
-          required={false}
-        />
-      );
+      render(<FormField label="Email" name="email" required={false} />);
 
       expect(screen.queryByText('*')).not.toBeInTheDocument();
     });
@@ -82,13 +54,7 @@ describe('FormField', () => {
         message: 'Email is required',
       };
 
-      render(
-        <FormField
-          label="Email"
-          name="email"
-          error={error}
-        />
-      );
+      render(<FormField label="Email" name="email" error={error} />);
 
       expect(screen.getByText('Email is required')).toBeInTheDocument();
     });
@@ -99,13 +65,7 @@ describe('FormField', () => {
         message: 'Email is required',
       };
 
-      render(
-        <FormField
-          label="Email"
-          name="email"
-          error={error}
-        />
-      );
+      render(<FormField label="Email" name="email" error={error} />);
 
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('aria-invalid', 'true');
@@ -117,13 +77,7 @@ describe('FormField', () => {
         message: 'Email is required',
       };
 
-      render(
-        <FormField
-          label="Email"
-          name="email"
-          error={error}
-        />
-      );
+      render(<FormField label="Email" name="email" error={error} />);
 
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('aria-describedby', 'email-error');
@@ -135,13 +89,7 @@ describe('FormField', () => {
         message: 'Email is required',
       };
 
-      render(
-        <FormField
-          label="Email"
-          name="email"
-          error={error}
-        />
-      );
+      render(<FormField label="Email" name="email" error={error} />);
 
       const errorElement = screen.getByRole('alert');
       expect(errorElement).toHaveTextContent('Email is required');
@@ -150,12 +98,7 @@ describe('FormField', () => {
 
   describe('Accessibility', () => {
     it('links label to input via htmlFor/id', () => {
-      render(
-        <FormField
-          label="Email"
-          name="email"
-        />
-      );
+      render(<FormField label="Email" name="email" />);
 
       const label = screen.getByText('Email');
       const input = screen.getByRole('textbox');
@@ -165,13 +108,7 @@ describe('FormField', () => {
     });
 
     it('sets aria-describedby with description ID when description exists', () => {
-      render(
-        <FormField
-          label="Username"
-          name="username"
-          description="Choose a unique username"
-        />
-      );
+      render(<FormField label="Username" name="username" description="Choose a unique username" />);
 
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('aria-describedby', 'username-description');
@@ -223,12 +160,7 @@ describe('FormField', () => {
         ref: jest.fn(),
       };
 
-      render(
-        <FormField
-          label="Email"
-          {...registerProps}
-        />
-      );
+      render(<FormField label="Email" {...registerProps} />);
 
       const input = screen.getByRole('textbox');
       expect(input).toBeInTheDocument();
@@ -243,12 +175,7 @@ describe('FormField', () => {
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       expect(() => {
-        render(
-          <FormField
-            label="Email"
-            name={undefined}
-          />
-        );
+        render(<FormField label="Email" name={undefined} />);
       }).toThrow('FormField: name must be provided either explicitly or via register()');
 
       consoleError.mockRestore();
@@ -257,12 +184,7 @@ describe('FormField', () => {
 
   describe('Layout and Styling', () => {
     it('applies correct spacing classes', () => {
-      const { container } = render(
-        <FormField
-          label="Email"
-          name="email"
-        />
-      );
+      const { container } = render(<FormField label="Email" name="email" />);
 
       const wrapper = container.firstChild as HTMLElement;
       expect(wrapper).toHaveClass('space-y-2');
@@ -274,13 +196,7 @@ describe('FormField', () => {
         message: 'Email is required',
       };
 
-      render(
-        <FormField
-          label="Email"
-          name="email"
-          error={error}
-        />
-      );
+      render(<FormField label="Email" name="email" error={error} />);
 
       const errorElement = screen.getByRole('alert');
       expect(errorElement).toHaveClass('text-sm', 'text-destructive');
@@ -288,11 +204,7 @@ describe('FormField', () => {
 
     it('applies correct description styling', () => {
       const { container } = render(
-        <FormField
-          label="Email"
-          name="email"
-          description="We'll never share your email"
-        />
+        <FormField label="Email" name="email" description="We'll never share your email" />
       );
 
       const description = container.querySelector('#email-description');

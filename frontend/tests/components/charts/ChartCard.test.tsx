@@ -9,11 +9,7 @@ describe('ChartCard', () => {
   const mockChildren = <div>Chart Content</div>;
 
   it('renders with title and children', () => {
-    render(
-      <ChartCard title="Test Chart">
-        {mockChildren}
-      </ChartCard>
-    );
+    render(<ChartCard title="Test Chart">{mockChildren}</ChartCard>);
 
     expect(screen.getByText('Test Chart')).toBeInTheDocument();
     expect(screen.getByText('Chart Content')).toBeInTheDocument();
@@ -69,11 +65,7 @@ describe('ChartCard', () => {
   });
 
   it('renders without description when not provided', () => {
-    render(
-      <ChartCard title="Test Chart">
-        {mockChildren}
-      </ChartCard>
-    );
+    render(<ChartCard title="Test Chart">{mockChildren}</ChartCard>);
 
     expect(screen.getByText('Test Chart')).toBeInTheDocument();
     expect(screen.getByText('Chart Content')).toBeInTheDocument();

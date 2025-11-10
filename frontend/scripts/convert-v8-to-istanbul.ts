@@ -94,7 +94,7 @@ async function convertV8ToIstanbul() {
 
   // Read all V8 coverage files
   const files = await fs.readdir(rawDir);
-  const jsonFiles = files.filter(f => f.endsWith('.json'));
+  const jsonFiles = files.filter((f) => f.endsWith('.json'));
 
   if (jsonFiles.length === 0) {
     console.log('⚠️  No coverage files found in:', rawDir);
@@ -122,10 +122,7 @@ async function convertV8ToIstanbul() {
       for (const entry of v8Coverage) {
         try {
           // Skip non-source files
-          if (
-            !entry.url.startsWith('http://localhost') &&
-            !entry.url.startsWith('file://')
-          ) {
+          if (!entry.url.startsWith('http://localhost') && !entry.url.startsWith('file://')) {
             continue;
           }
 
@@ -174,7 +171,6 @@ async function convertV8ToIstanbul() {
           // Merge into combined coverage
           Object.assign(istanbulCoverage, converted);
           totalConverted++;
-
         } catch (error: any) {
           console.log(`   ⚠️  Skipped ${entry.url}: ${error.message}`);
           totalSkipped++;
@@ -198,7 +194,7 @@ async function convertV8ToIstanbul() {
 
   if (totalConverted === 0) {
     console.log('⚠️  No files were converted. Possible reasons:');
-    console.log('   • V8 coverage doesn\'t contain source files from src/');
+    console.log("   • V8 coverage doesn't contain source files from src/");
     console.log('   • Coverage was collected for build artifacts instead of source');
     console.log('   • Source maps are not correctly configured\n');
     console.log('💡 Consider using Istanbul instrumentation instead (see guide)\n');

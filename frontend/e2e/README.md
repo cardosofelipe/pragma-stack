@@ -63,6 +63,7 @@ npm run test:e2e -- --debug
 **Test Results:** 34/43 passing (79% pass rate)
 
 ### Passing Tests ✅
+
 - All AuthGuard tests (8/8)
 - Most Login tests (6/8)
 - Most Registration tests (7/11)
@@ -83,6 +84,7 @@ The 9 failing tests are due to minor validation message text mismatches between 
 ### Recommendations
 
 These failures can be fixed by:
+
 1. Inspecting the actual error messages rendered by forms
 2. Updating test assertions to match exact wording
 3. Adding more specific selectors to avoid strict mode violations
@@ -98,6 +100,7 @@ The core functionality is working - the failures are only assertion mismatches, 
 ## Configuration
 
 See `playwright.config.ts` for:
+
 - Browser targets (Chromium, Firefox, WebKit)
 - Base URL configuration
 - Screenshot and video settings

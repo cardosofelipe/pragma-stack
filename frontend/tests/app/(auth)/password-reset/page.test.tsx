@@ -10,7 +10,9 @@ import PasswordResetPage from '@/app/(auth)/password-reset/page';
 jest.mock('next/dynamic', () => ({
   __esModule: true,
   default: (_importFn: () => Promise<any>, _options?: any) => {
-    const Component = () => <div data-testid="password-reset-form">Mocked PasswordResetRequestForm</div>;
+    const Component = () => (
+      <div data-testid="password-reset-form">Mocked PasswordResetRequestForm</div>
+    );
     Component.displayName = 'PasswordResetRequestForm';
     return Component;
   },

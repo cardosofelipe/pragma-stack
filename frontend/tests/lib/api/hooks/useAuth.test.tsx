@@ -6,11 +6,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  useIsAuthenticated,
-  useCurrentUser,
-  useIsAdmin,
-} from '@/lib/api/hooks/useAuth';
+import { useIsAuthenticated, useCurrentUser, useIsAdmin } from '@/lib/api/hooks/useAuth';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 
 // Mock auth state (Context-injected)
@@ -52,9 +48,7 @@ const createWrapper = () => {
 
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider store={mockStoreHook}>
-        {children}
-      </AuthProvider>
+      <AuthProvider store={mockStoreHook}>{children}</AuthProvider>
     </QueryClientProvider>
   );
 };

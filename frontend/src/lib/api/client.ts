@@ -114,7 +114,10 @@ async function refreshAccessToken(): Promise<string> {
       // Only redirect to login when not already on an auth route
       if (typeof window !== 'undefined') {
         const currentPath = window.location.pathname;
-        const onAuthRoute = currentPath === '/login' || currentPath === '/register' || currentPath.startsWith('/password-reset');
+        const onAuthRoute =
+          currentPath === '/login' ||
+          currentPath === '/register' ||
+          currentPath.startsWith('/password-reset');
         if (!onAuthRoute) {
           const returnUrl = currentPath ? `?returnUrl=${encodeURIComponent(currentPath)}` : '';
           window.location.href = `/login${returnUrl}`;
@@ -144,7 +147,12 @@ client.instance.interceptors.request.use(
 
     // Do not attach Authorization header for auth endpoints
     const url = requestConfig.url || '';
-    const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh') || url.includes('/auth/password') || url.includes('/password');
+    const isAuthEndpoint =
+      url.includes('/auth/login') ||
+      url.includes('/auth/register') ||
+      url.includes('/auth/refresh') ||
+      url.includes('/auth/password') ||
+      url.includes('/password');
 
     // Add Authorization header if token exists and not hitting auth endpoints
     if (accessToken && requestConfig.headers && !isAuthEndpoint) {
@@ -188,7 +196,11 @@ client.instance.interceptors.response.use(
     // Handle 401 Unauthorized - Token expired
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       const url = originalRequest.url || '';
-      const isAuthEndpoint = url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/password') || url.includes('/password');
+      const isAuthEndpoint =
+        url.includes('/auth/login') ||
+        url.includes('/auth/register') ||
+        url.includes('/auth/password') ||
+        url.includes('/password');
 
       // If the 401 is from auth endpoints, do not attempt refresh
       if (isAuthEndpoint) {

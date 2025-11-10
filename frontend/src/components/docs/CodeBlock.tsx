@@ -74,7 +74,9 @@ function extractTextFromChildren(children: React.ReactNode): string {
   }
 
   if (children && typeof children === 'object' && 'props' in children) {
-    return extractTextFromChildren((children as { props: { children: React.ReactNode } }).props.children);
+    return extractTextFromChildren(
+      (children as { props: { children: React.ReactNode } }).props.children
+    );
   }
 
   return '';

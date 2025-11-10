@@ -70,16 +70,16 @@ test.describe('Homepage - Desktop Navigation', () => {
     const header = page.locator('header').first();
     const headerLoginLink = header.getByRole('link', { name: /^Login$/i });
 
-    await Promise.all([
-      page.waitForURL('/login'),
-      headerLoginLink.click()
-    ]);
+    await Promise.all([page.waitForURL('/login'), headerLoginLink.click()]);
 
     await expect(page).toHaveURL('/login');
   });
 
   test.skip('should open demo credentials modal when clicking Try Demo', async ({ page }) => {
-    await page.getByRole('button', { name: /Try Demo/i }).first().click();
+    await page
+      .getByRole('button', { name: /Try Demo/i })
+      .first()
+      .click();
 
     // Dialog should be visible (wait longer for React to render with animations)
     const dialog = page.getByRole('dialog');
@@ -204,10 +204,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
     const loginLink = mobileMenu.getByRole('link', { name: /Login/i });
     await loginLink.waitFor({ state: 'visible' });
 
-    await Promise.all([
-      page.waitForURL('/login'),
-      loginLink.click()
-    ]);
+    await Promise.all([page.waitForURL('/login'), loginLink.click()]);
 
     await expect(page).toHaveURL('/login');
   });
@@ -230,7 +227,9 @@ test.describe('Homepage - Hero Section', () => {
   });
 
   test('should display main headline', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /Everything You Need to Build/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /Everything You Need to Build/i }).first()
+    ).toBeVisible();
     await expect(page.getByText(/Modern Web Applications/i).first()).toBeVisible();
   });
 
@@ -274,7 +273,10 @@ test.describe('Homepage - Demo Credentials Modal', () => {
   });
 
   test.skip('should display regular and admin credentials', async ({ page }) => {
-    await page.getByRole('button', { name: /Try Demo/i }).first().click();
+    await page
+      .getByRole('button', { name: /Try Demo/i })
+      .first()
+      .click();
 
     const dialog = page.getByRole('dialog');
     await dialog.waitFor({ state: 'visible' });
@@ -292,7 +294,10 @@ test.describe('Homepage - Demo Credentials Modal', () => {
     // Grant clipboard permissions
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 
-    await page.getByRole('button', { name: /Try Demo/i }).first().click();
+    await page
+      .getByRole('button', { name: /Try Demo/i })
+      .first()
+      .click();
 
     const dialog = page.getByRole('dialog');
     await dialog.waitFor({ state: 'visible' });
@@ -306,23 +311,26 @@ test.describe('Homepage - Demo Credentials Modal', () => {
   });
 
   test.skip('should navigate to login page from modal', async ({ page }) => {
-    await page.getByRole('button', { name: /Try Demo/i }).first().click();
+    await page
+      .getByRole('button', { name: /Try Demo/i })
+      .first()
+      .click();
 
     const dialog = page.getByRole('dialog');
     await dialog.waitFor({ state: 'visible' });
 
     const loginLink = dialog.getByRole('link', { name: /Go to Login/i });
 
-    await Promise.all([
-      page.waitForURL('/login'),
-      loginLink.click()
-    ]);
+    await Promise.all([page.waitForURL('/login'), loginLink.click()]);
 
     await expect(page).toHaveURL('/login');
   });
 
   test.skip('should close modal when clicking close button', async ({ page }) => {
-    await page.getByRole('button', { name: /Try Demo/i }).first().click();
+    await page
+      .getByRole('button', { name: /Try Demo/i })
+      .first()
+      .click();
 
     const dialog = page.getByRole('dialog');
     await dialog.waitFor({ state: 'visible' });
@@ -343,7 +351,9 @@ test.describe('Homepage - Animated Terminal', () => {
     // Scroll to terminal section
     await page.locator('text=Get Started in Seconds').first().scrollIntoViewIfNeeded();
 
-    await expect(page.getByRole('heading', { name: /Get Started in Seconds/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /Get Started in Seconds/i }).first()
+    ).toBeVisible();
     await expect(page.getByText(/Clone, run, and start building/i).first()).toBeVisible();
   });
 
@@ -434,7 +444,9 @@ test.describe('Homepage - Feature Sections', () => {
   });
 
   test('should display tech stack section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /Modern, Type-Safe, Production-Grade Stack/i })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /Modern, Type-Safe, Production-Grade Stack/i })
+    ).toBeVisible();
 
     // Check for key technologies
     await expect(page.getByText('FastAPI').first()).toBeVisible();

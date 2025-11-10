@@ -145,11 +145,7 @@ describe('AdminUsersPage', () => {
   });
 
   const renderWithProviders = (ui: React.ReactElement) => {
-    return render(
-      <QueryClientProvider client={queryClient}>
-        {ui}
-      </QueryClientProvider>
-    );
+    return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
   };
 
   it('renders page title', () => {
@@ -161,9 +157,7 @@ describe('AdminUsersPage', () => {
   it('renders page description', () => {
     renderWithProviders(<AdminUsersPage />);
 
-    expect(
-      screen.getByText('View, create, and manage user accounts')
-    ).toBeInTheDocument();
+    expect(screen.getByText('View, create, and manage user accounts')).toBeInTheDocument();
   });
 
   it('renders back button link', () => {
@@ -184,9 +178,7 @@ describe('AdminUsersPage', () => {
   it('renders "Manage user accounts and permissions" description', () => {
     renderWithProviders(<AdminUsersPage />);
 
-    expect(
-      screen.getByText('Manage user accounts and permissions')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Manage user accounts and permissions')).toBeInTheDocument();
   });
 
   it('renders create user button', () => {

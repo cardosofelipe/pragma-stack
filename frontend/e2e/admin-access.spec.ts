@@ -4,10 +4,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import {
-  setupAuthenticatedMocks,
-  setupSuperuserMocks,
-} from './helpers/auth';
+import { setupAuthenticatedMocks, setupSuperuserMocks } from './helpers/auth';
 
 test.describe('Admin Access Control', () => {
   test('regular user should not see admin link in header', async ({ page }) => {
@@ -25,9 +22,7 @@ test.describe('Admin Access Control', () => {
     expect(visibleAdminLinks).toBe(0);
   });
 
-  test('regular user should be redirected when accessing admin page directly', async ({
-    page,
-  }) => {
+  test('regular user should be redirected when accessing admin page directly', async ({ page }) => {
     // Set up mocks for regular user
     await setupAuthenticatedMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
@@ -60,9 +55,7 @@ test.describe('Admin Access Control', () => {
     await expect(headerAdminLink).toHaveAttribute('href', '/admin');
   });
 
-  test('superuser should be able to access admin dashboard', async ({
-    page,
-  }) => {
+  test('superuser should be able to access admin dashboard', async ({ page }) => {
     // Set up mocks for superuser
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
@@ -110,23 +103,15 @@ test.describe('Admin Dashboard', () => {
     await expect(statTitles.filter({ hasText: 'Total Users' })).toBeVisible();
     await expect(statTitles.filter({ hasText: 'Active Users' })).toBeVisible();
     await expect(statTitles.filter({ hasText: 'Organizations' })).toBeVisible();
-    await expect(
-      statTitles.filter({ hasText: 'Active Sessions' })
-    ).toBeVisible();
+    await expect(statTitles.filter({ hasText: 'Active Sessions' })).toBeVisible();
   });
 
   test('should display quick action cards', async ({ page }) => {
-    await expect(
-      page.getByRole('heading', { name: 'Quick Actions', exact: true })
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Quick Actions', exact: true })).toBeVisible();
 
     // Should have three action cards (use unique descriptive text to avoid sidebar matches)
-    await expect(
-      page.getByText('View, create, and manage user accounts')
-    ).toBeVisible();
-    await expect(
-      page.getByText('Manage organizations and their members')
-    ).toBeVisible();
+    await expect(page.getByText('View, create, and manage user accounts')).toBeVisible();
+    await expect(page.getByText('Manage organizations and their members')).toBeVisible();
     await expect(page.getByText('Configure system-wide settings')).toBeVisible();
   });
 });
@@ -222,9 +207,7 @@ test.describe('Admin Navigation', () => {
     await expect(page.getByText('Admin Panel')).toBeVisible();
   });
 
-  test('should navigate back to dashboard from users page', async ({
-    page,
-  }) => {
+  test('should navigate back to dashboard from users page', async ({ page }) => {
     await page.goto('/admin/users');
 
     // Click dashboard link in sidebar
@@ -275,10 +258,7 @@ test.describe('Admin Breadcrumbs', () => {
     // Click 'Admin' breadcrumb to go back to dashboard
     const adminBreadcrumb = page.getByTestId('breadcrumb-admin');
 
-    await Promise.all([
-      page.waitForURL('/admin'),
-      adminBreadcrumb.click()
-    ]);
+    await Promise.all([page.waitForURL('/admin'), adminBreadcrumb.click()]);
 
     await expect(page).toHaveURL('/admin');
   });

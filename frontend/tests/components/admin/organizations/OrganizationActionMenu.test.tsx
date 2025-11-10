@@ -6,10 +6,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { OrganizationActionMenu } from '@/components/admin/organizations/OrganizationActionMenu';
-import {
-  useDeleteOrganization,
-  type Organization,
-} from '@/lib/api/hooks/useAdmin';
+import { useDeleteOrganization, type Organization } from '@/lib/api/hooks/useAdmin';
 import { toast } from 'sonner';
 
 // Mock dependencies
@@ -307,9 +304,7 @@ describe('OrganizationActionMenu', () => {
       await user.click(cancelButton);
 
       await waitFor(() => {
-        expect(
-          screen.queryByText(/Are you sure you want to delete/)
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText(/Are you sure you want to delete/)).not.toBeInTheDocument();
       });
     });
 
@@ -421,9 +416,7 @@ describe('OrganizationActionMenu', () => {
       await user.click(confirmButton);
 
       await waitFor(() => {
-        expect(
-          screen.queryByText(/Are you sure you want to delete/)
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText(/Are you sure you want to delete/)).not.toBeInTheDocument();
       });
     });
   });

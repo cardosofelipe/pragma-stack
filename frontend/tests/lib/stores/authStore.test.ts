@@ -51,11 +51,7 @@ describe('Auth Store', () => {
       const invalidUser = createMockUser({ id: '' });
 
       await expect(
-        useAuthStore.getState().setAuth(
-          invalidUser,
-          'valid.access.token',
-          'valid.refresh.token'
-        )
+        useAuthStore.getState().setAuth(invalidUser, 'valid.access.token', 'valid.refresh.token')
       ).rejects.toThrow('Invalid user object');
     });
 
@@ -63,11 +59,7 @@ describe('Auth Store', () => {
       const invalidUser = createMockUser({ id: '   ' });
 
       await expect(
-        useAuthStore.getState().setAuth(
-          invalidUser,
-          'valid.access.token',
-          'valid.refresh.token'
-        )
+        useAuthStore.getState().setAuth(invalidUser, 'valid.access.token', 'valid.refresh.token')
       ).rejects.toThrow('Invalid user object');
     });
 
@@ -75,11 +67,7 @@ describe('Auth Store', () => {
       const invalidUser = createMockUser({ email: '' });
 
       await expect(
-        useAuthStore.getState().setAuth(
-          invalidUser,
-          'valid.access.token',
-          'valid.refresh.token'
-        )
+        useAuthStore.getState().setAuth(invalidUser, 'valid.access.token', 'valid.refresh.token')
       ).rejects.toThrow('Invalid user object');
     });
 
@@ -101,11 +89,9 @@ describe('Auth Store', () => {
       (storage.saveTokens as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        useAuthStore.getState().setAuth(
-          validUser,
-          'header.payload.signature',
-          'header.payload.signature'
-        )
+        useAuthStore
+          .getState()
+          .setAuth(validUser, 'header.payload.signature', 'header.payload.signature')
       ).resolves.not.toThrow();
 
       const state = useAuthStore.getState();
@@ -145,11 +131,9 @@ describe('Auth Store', () => {
       (storage.saveTokens as jest.Mock).mockResolvedValue(undefined);
 
       await expect(
-        useAuthStore.getState().setAuth(
-          validUser,
-          'header.payload.signature',
-          'header.payload.signature'
-        )
+        useAuthStore
+          .getState()
+          .setAuth(validUser, 'header.payload.signature', 'header.payload.signature')
       ).resolves.not.toThrow();
     });
   });
@@ -264,11 +248,9 @@ describe('Auth Store', () => {
       // First set auth
       const validUser = createMockUser();
 
-      await useAuthStore.getState().setAuth(
-        validUser,
-        'header.payload.signature',
-        'header.payload.signature'
-      );
+      await useAuthStore
+        .getState()
+        .setAuth(validUser, 'header.payload.signature', 'header.payload.signature');
 
       expect(useAuthStore.getState().isAuthenticated).toBe(true);
 
@@ -298,20 +280,14 @@ describe('Auth Store', () => {
   describe('setTokens', () => {
     it('should update tokens while preserving user state', async () => {
       // First set initial auth with user
-      await useAuthStore.getState().setAuth(
-        createMockUser({ id: 'user-1' }),
-        'old.access.token',
-        'old.refresh.token'
-      );
+      await useAuthStore
+        .getState()
+        .setAuth(createMockUser({ id: 'user-1' }), 'old.access.token', 'old.refresh.token');
 
       const oldUser = useAuthStore.getState().user;
 
       // Now update just the tokens
-      await useAuthStore.getState().setTokens(
-        'new.access.token',
-        'new.refresh.token',
-        900
-      );
+      await useAuthStore.getState().setTokens('new.access.token', 'new.refresh.token', 900);
 
       const state = useAuthStore.getState();
       expect(state.accessToken).toBe('new.access.token');
@@ -344,16 +320,18 @@ describe('Auth Store', () => {
   describe('setUser', () => {
     it('should update user while preserving auth state', async () => {
       // First set initial auth
-      await useAuthStore.getState().setAuth(
-        createMockUser({ id: 'user-1' }),
-        'valid.access.token',
-        'valid.refresh.token'
-      );
+      await useAuthStore
+        .getState()
+        .setAuth(createMockUser({ id: 'user-1' }), 'valid.access.token', 'valid.refresh.token');
 
       const oldToken = useAuthStore.getState().accessToken;
 
       // Update just the user
-      const newUser = createMockUser({ id: 'user-1', email: 'updated@example.com', is_superuser: true });
+      const newUser = createMockUser({
+        id: 'user-1',
+        email: 'updated@example.com',
+        is_superuser: true,
+      });
       useAuthStore.getState().setUser(newUser);
 
       const state = useAuthStore.getState();
@@ -478,18 +456,11 @@ describe('Auth Store', () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
       await expect(
-        useAuthStore.getState().setAuth(
-          mockUser,
-          'valid.access.token',
-          'valid.refresh.token'
-        )
+        useAuthStore.getState().setAuth(mockUser, 'valid.access.token', 'valid.refresh.token')
       ).rejects.toThrow('Storage error');
 
       // Verify error was logged before throwing
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to save auth state:',
-        expect.any(Error)
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to save auth state:', expect.any(Error));
 
       consoleErrorSpy.mockRestore();
     });

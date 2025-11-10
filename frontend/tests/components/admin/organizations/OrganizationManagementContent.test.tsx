@@ -53,9 +53,7 @@ jest.mock('@/components/admin/organizations/OrganizationFormDialog', () => ({
 }));
 
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>;
-const mockUseSearchParams = useSearchParams as jest.MockedFunction<
-  typeof useSearchParams
->;
+const mockUseSearchParams = useSearchParams as jest.MockedFunction<typeof useSearchParams>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockUseAdminOrganizations = useAdminOrganizations as jest.MockedFunction<
   typeof useAdminOrganizations
@@ -168,9 +166,7 @@ describe('OrganizationManagementContent', () => {
   });
 
   const renderWithProviders = (ui: React.ReactElement) => {
-    return render(
-      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-    );
+    return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
   };
 
   describe('Component Rendering', () => {
@@ -178,17 +174,13 @@ describe('OrganizationManagementContent', () => {
       renderWithProviders(<OrganizationManagementContent />);
 
       expect(screen.getByText('All Organizations')).toBeInTheDocument();
-      expect(
-        screen.getByText('Manage organizations and their members')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Manage organizations and their members')).toBeInTheDocument();
     });
 
     it('renders create organization button', () => {
       renderWithProviders(<OrganizationManagementContent />);
 
-      expect(
-        screen.getByRole('button', { name: /Create Organization/i })
-      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Create Organization/i })).toBeInTheDocument();
     });
 
     it('renders OrganizationListTable component', () => {
@@ -200,9 +192,7 @@ describe('OrganizationManagementContent', () => {
     it('does not render dialog initially', () => {
       renderWithProviders(<OrganizationManagementContent />);
 
-      expect(
-        screen.queryByTestId('organization-form-dialog')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('organization-form-dialog')).not.toBeInTheDocument();
     });
   });
 
@@ -233,9 +223,7 @@ describe('OrganizationManagementContent', () => {
       await user.click(closeButton);
 
       await waitFor(() => {
-        expect(
-          screen.queryByTestId('organization-form-dialog')
-        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId('organization-form-dialog')).not.toBeInTheDocument();
       });
     });
   });
@@ -264,9 +252,7 @@ describe('OrganizationManagementContent', () => {
       await user.click(closeButton);
 
       await waitFor(() => {
-        expect(
-          screen.queryByTestId('organization-form-dialog')
-        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId('organization-form-dialog')).not.toBeInTheDocument();
       });
     });
   });

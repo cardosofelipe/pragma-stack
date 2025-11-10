@@ -21,9 +21,7 @@ jest.mock('sonner', () => ({
   },
 }));
 
-const mockUseBulkUserAction = useBulkUserAction as jest.MockedFunction<
-  typeof useBulkUserAction
->;
+const mockUseBulkUserAction = useBulkUserAction as jest.MockedFunction<typeof useBulkUserAction>;
 
 describe('BulkActionToolbar', () => {
   const mockBulkActionMutate = jest.fn();
@@ -50,9 +48,7 @@ describe('BulkActionToolbar', () => {
         />
       );
 
-      expect(
-        screen.queryByTestId('bulk-action-toolbar')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('bulk-action-toolbar')).not.toBeInTheDocument();
     });
 
     it('renders when one user is selected', () => {
@@ -163,9 +159,7 @@ describe('BulkActionToolbar', () => {
         />
       );
 
-      expect(
-        screen.getByRole('button', { name: /Activate/ })
-      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Activate/ })).toBeInTheDocument();
     });
 
     it('renders deactivate button', () => {
@@ -177,9 +171,7 @@ describe('BulkActionToolbar', () => {
         />
       );
 
-      expect(
-        screen.getByRole('button', { name: /Deactivate/ })
-      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Deactivate/ })).toBeInTheDocument();
     });
 
     it('renders delete button', () => {
@@ -191,9 +183,7 @@ describe('BulkActionToolbar', () => {
         />
       );
 
-      expect(
-        screen.getByRole('button', { name: /Delete/ })
-      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Delete/ })).toBeInTheDocument();
     });
 
     it('disables buttons when action is pending', () => {
@@ -258,9 +248,7 @@ describe('BulkActionToolbar', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Activate Users')).toBeInTheDocument();
-        expect(
-          screen.getByText(/Are you sure you want to activate 3 users\?/)
-        ).toBeInTheDocument();
+        expect(screen.getByText(/Are you sure you want to activate 3 users\?/)).toBeInTheDocument();
       });
     });
 
@@ -302,9 +290,7 @@ describe('BulkActionToolbar', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Delete Users')).toBeInTheDocument();
-        expect(
-          screen.getByText(/Are you sure you want to delete 5 users\?/)
-        ).toBeInTheDocument();
+        expect(screen.getByText(/Are you sure you want to delete 5 users\?/)).toBeInTheDocument();
       });
     });
 
@@ -322,9 +308,7 @@ describe('BulkActionToolbar', () => {
       await user.click(activateButton);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/Are you sure you want to activate 1 user\?/)
-        ).toBeInTheDocument();
+        expect(screen.getByText(/Are you sure you want to activate 1 user\?/)).toBeInTheDocument();
       });
     });
   });
@@ -372,9 +356,7 @@ describe('BulkActionToolbar', () => {
         />
       );
 
-      expect(
-        screen.queryByTestId('bulk-action-toolbar')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('bulk-action-toolbar')).not.toBeInTheDocument();
     });
 
     it('handles large selection counts', () => {
@@ -382,9 +364,7 @@ describe('BulkActionToolbar', () => {
         <BulkActionToolbar
           selectedCount={100}
           onClearSelection={mockOnClearSelection}
-          selectedUserIds={Array.from({ length: 100 }, (_, i) =>
-            String(i + 1)
-          )}
+          selectedUserIds={Array.from({ length: 100 }, (_, i) => String(i + 1))}
         />
       );
 

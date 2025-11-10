@@ -6,26 +6,26 @@
 
 export const CHART_COLORS = {
   // Primary blue palette - vibrant and professional
-  primary: '#3b82f6',     // Blue 500
+  primary: '#3b82f6', // Blue 500
   primaryLight: '#60a5fa', // Blue 400
-  primaryDark: '#2563eb',  // Blue 600
+  primaryDark: '#2563eb', // Blue 600
 
   // Secondary accent colors - complementary palette
-  accent1: '#8b5cf6',     // Violet 500
-  accent2: '#ec4899',     // Pink 500
-  accent3: '#f59e0b',     // Amber 500
-  accent4: '#10b981',     // Emerald 500
-  accent5: '#06b6d4',     // Cyan 500
+  accent1: '#8b5cf6', // Violet 500
+  accent2: '#ec4899', // Pink 500
+  accent3: '#f59e0b', // Amber 500
+  accent4: '#10b981', // Emerald 500
+  accent5: '#06b6d4', // Cyan 500
 
   // Status colors
-  success: '#10b981',     // Emerald 500
-  warning: '#f59e0b',     // Amber 500
-  error: '#ef4444',       // Red 500
-  info: '#3b82f6',        // Blue 500
+  success: '#10b981', // Emerald 500
+  warning: '#f59e0b', // Amber 500
+  error: '#ef4444', // Red 500
+  info: '#3b82f6', // Blue 500
 
   // Neutral colors for supporting elements
-  muted: '#94a3b8',       // Slate 400
-  mutedDark: '#64748b',   // Slate 500
+  muted: '#94a3b8', // Slate 400
+  mutedDark: '#64748b', // Slate 500
 };
 
 // Chart-specific color palettes for different chart types
@@ -40,12 +40,7 @@ export const CHART_PALETTES = {
   area: [CHART_COLORS.primary, CHART_COLORS.accent5],
 
   // Pie chart palette - 4-5 distinct colors
-  pie: [
-    CHART_COLORS.primary,
-    CHART_COLORS.accent1,
-    CHART_COLORS.accent3,
-    CHART_COLORS.accent4,
-  ],
+  pie: [CHART_COLORS.primary, CHART_COLORS.accent1, CHART_COLORS.accent3, CHART_COLORS.accent4],
 
   // Multi-series palette - for charts with many data series
   multi: [
@@ -73,6 +68,8 @@ export const CHART_GRADIENTS = {
 // Helper function to get color with opacity
 export function withOpacity(color: string, opacity: number): string {
   // Convert opacity (0-1) to hex (00-FF)
-  const hex = Math.round(opacity * 255).toString(16).padStart(2, '0');
+  const hex = Math.round(opacity * 255)
+    .toString(16)
+    .padStart(2, '0');
   return `${color}${hex}`;
 }

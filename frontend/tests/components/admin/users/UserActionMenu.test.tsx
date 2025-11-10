@@ -28,12 +28,8 @@ jest.mock('sonner', () => ({
   },
 }));
 
-const mockUseActivateUser = useActivateUser as jest.MockedFunction<
-  typeof useActivateUser
->;
-const mockUseDeactivateUser = useDeactivateUser as jest.MockedFunction<
-  typeof useDeactivateUser
->;
+const mockUseActivateUser = useActivateUser as jest.MockedFunction<typeof useActivateUser>;
+const mockUseDeactivateUser = useDeactivateUser as jest.MockedFunction<typeof useDeactivateUser>;
 const mockUseDeleteUser = useDeleteUser as jest.MockedFunction<typeof useDeleteUser>;
 
 describe('UserActionMenu', () => {
@@ -76,13 +72,7 @@ describe('UserActionMenu', () => {
 
   describe('Menu Rendering', () => {
     it('renders menu trigger button', () => {
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -92,13 +82,7 @@ describe('UserActionMenu', () => {
 
     it('shows menu items when opened', async () => {
       const user = userEvent.setup();
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -110,13 +94,7 @@ describe('UserActionMenu', () => {
 
     it('shows deactivate option for active user', async () => {
       const user = userEvent.setup();
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -131,13 +109,7 @@ describe('UserActionMenu', () => {
       const user = userEvent.setup();
       const inactiveUser = { ...mockUser, is_active: false };
 
-      render(
-        <UserActionMenu
-          user={inactiveUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={inactiveUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -150,13 +122,7 @@ describe('UserActionMenu', () => {
 
     it('shows delete option', async () => {
       const user = userEvent.setup();
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -172,13 +138,7 @@ describe('UserActionMenu', () => {
       const user = userEvent.setup();
       const mockOnEdit = jest.fn();
 
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={mockOnEdit}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={mockOnEdit} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -195,13 +155,7 @@ describe('UserActionMenu', () => {
       const user = userEvent.setup();
       const mockOnEdit = jest.fn();
 
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={mockOnEdit}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={mockOnEdit} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -222,13 +176,7 @@ describe('UserActionMenu', () => {
       const user = userEvent.setup();
       const inactiveUser = { ...mockUser, is_active: false };
 
-      render(
-        <UserActionMenu
-          user={inactiveUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={inactiveUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -247,13 +195,7 @@ describe('UserActionMenu', () => {
       const user = userEvent.setup();
       const inactiveUser = { ...mockUser, is_active: false };
 
-      render(
-        <UserActionMenu
-          user={inactiveUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={inactiveUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -264,9 +206,7 @@ describe('UserActionMenu', () => {
       await user.click(activateButton);
 
       await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith(
-          'Test User has been activated successfully.'
-        );
+        expect(toast.success).toHaveBeenCalledWith('Test User has been activated successfully.');
       });
     });
 
@@ -276,13 +216,7 @@ describe('UserActionMenu', () => {
 
       mockActivateMutate.mockRejectedValueOnce(new Error('Network error'));
 
-      render(
-        <UserActionMenu
-          user={inactiveUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={inactiveUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -302,13 +236,7 @@ describe('UserActionMenu', () => {
     it('shows confirmation dialog when deactivate is clicked', async () => {
       const user = userEvent.setup();
 
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -320,22 +248,14 @@ describe('UserActionMenu', () => {
 
       expect(screen.getByText('Deactivate User')).toBeInTheDocument();
       expect(
-        screen.getByText(
-          /Are you sure you want to deactivate Test User\?/
-        )
+        screen.getByText(/Are you sure you want to deactivate Test User\?/)
       ).toBeInTheDocument();
     });
 
     it('shows confirmation dialog when deactivate is clicked', async () => {
       const user = userEvent.setup();
 
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -357,13 +277,7 @@ describe('UserActionMenu', () => {
     it('disables deactivate option for current user', async () => {
       const user = userEvent.setup();
 
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={true}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={true} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -380,13 +294,7 @@ describe('UserActionMenu', () => {
     it('shows confirmation dialog when delete is clicked', async () => {
       const user = userEvent.setup();
 
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -397,24 +305,14 @@ describe('UserActionMenu', () => {
       await user.click(deleteButton);
 
       expect(screen.getByText('Delete User')).toBeInTheDocument();
-      expect(
-        screen.getByText(/Are you sure you want to delete Test User\?/)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/This action cannot be undone\./)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Are you sure you want to delete Test User\?/)).toBeInTheDocument();
+      expect(screen.getByText(/This action cannot be undone\./)).toBeInTheDocument();
     });
 
     it('deletes user when confirmed', async () => {
       const user = userEvent.setup();
 
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -435,13 +333,7 @@ describe('UserActionMenu', () => {
     it('cancels deletion when cancel is clicked', async () => {
       const user = userEvent.setup();
 
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -460,13 +352,7 @@ describe('UserActionMenu', () => {
     it('shows success toast on deletion', async () => {
       const user = userEvent.setup();
 
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -480,22 +366,14 @@ describe('UserActionMenu', () => {
       await user.click(confirmButton);
 
       await waitFor(() => {
-        expect(toast.success).toHaveBeenCalledWith(
-          'Test User has been deleted successfully.'
-        );
+        expect(toast.success).toHaveBeenCalledWith('Test User has been deleted successfully.');
       });
     });
 
     it('disables delete option for current user', async () => {
       const user = userEvent.setup();
 
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={true}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={true} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -510,13 +388,7 @@ describe('UserActionMenu', () => {
 
   describe('User Name Display', () => {
     it('displays full name when last name is provided', async () => {
-      render(
-        <UserActionMenu
-          user={mockUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={mockUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -528,11 +400,7 @@ describe('UserActionMenu', () => {
       const userWithoutLastName = { ...mockUser, last_name: null };
 
       render(
-        <UserActionMenu
-          user={userWithoutLastName}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
+        <UserActionMenu user={userWithoutLastName} isCurrentUser={false} onEdit={jest.fn()} />
       );
 
       const menuButton = screen.getByRole('button', {
@@ -549,13 +417,7 @@ describe('UserActionMenu', () => {
 
       mockActivateMutate.mockRejectedValueOnce(new Error('Custom error'));
 
-      render(
-        <UserActionMenu
-          user={inactiveUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={inactiveUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',
@@ -576,13 +438,7 @@ describe('UserActionMenu', () => {
 
       mockActivateMutate.mockRejectedValueOnce('String error');
 
-      render(
-        <UserActionMenu
-          user={inactiveUser}
-          isCurrentUser={false}
-          onEdit={jest.fn()}
-        />
-      );
+      render(<UserActionMenu user={inactiveUser} isCurrentUser={false} onEdit={jest.fn()} />);
 
       const menuButton = screen.getByRole('button', {
         name: 'Actions for Test User',

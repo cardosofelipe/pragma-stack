@@ -15,7 +15,9 @@ test.describe('Admin Organization Members - Navigation from Organizations List',
     await page.waitForSelector('table tbody tr');
   });
 
-  test('should navigate to members page when clicking view members in action menu', async ({ page }) => {
+  test('should navigate to members page when clicking view members in action menu', async ({
+    page,
+  }) => {
     // Click first organization's action menu
     const actionButton = page.getByRole('button', { name: /Actions for/i }).first();
     await actionButton.click();
@@ -23,7 +25,7 @@ test.describe('Admin Organization Members - Navigation from Organizations List',
     // Click "View Members"
     await Promise.all([
       page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
-      page.getByText('View Members').click()
+      page.getByText('View Members').click(),
     ]);
 
     // Should be on members page
@@ -38,7 +40,7 @@ test.describe('Admin Organization Members - Navigation from Organizations List',
     // Click on member count
     await Promise.all([
       page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
-      memberButton.click()
+      memberButton.click(),
     ]);
 
     // Should be on members page
@@ -59,7 +61,7 @@ test.describe('Admin Organization Members - Page Structure', () => {
 
     await Promise.all([
       page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
-      page.getByText('View Members').click()
+      page.getByText('View Members').click(),
     ]);
   });
 
@@ -74,7 +76,9 @@ test.describe('Admin Organization Members - Page Structure', () => {
   });
 
   test('should display page description', async ({ page }) => {
-    await expect(page.getByText('Manage members and their roles within the organization')).toBeVisible();
+    await expect(
+      page.getByText('Manage members and their roles within the organization')
+    ).toBeVisible();
   });
 
   test('should display add member button', async ({ page }) => {
@@ -86,7 +90,6 @@ test.describe('Admin Organization Members - Page Structure', () => {
     const backButton = page.getByRole('link', { name: /Back to Organizations/i });
     await expect(backButton).toBeVisible();
   });
-
 
   test('should have proper heading hierarchy', async ({ page }) => {
     // Wait for page to load
@@ -129,7 +132,7 @@ test.describe('Admin Organization Members - AddMemberDialog E2E Tests', () => {
 
     await Promise.all([
       page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
-      page.getByText('View Members').click()
+      page.getByText('View Members').click(),
     ]);
 
     // Open Add Member dialog
@@ -150,7 +153,9 @@ test.describe('Admin Organization Members - AddMemberDialog E2E Tests', () => {
   });
 
   test('should display dialog description', async ({ page }) => {
-    await expect(page.getByText(/Add a user to this organization and assign them a role/i)).toBeVisible();
+    await expect(
+      page.getByText(/Add a user to this organization and assign them a role/i)
+    ).toBeVisible();
   });
 
   test('should display user email select field', async ({ page }) => {

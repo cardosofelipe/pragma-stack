@@ -10,9 +10,7 @@ describe('ForbiddenPage', () => {
   it('renders page heading', () => {
     render(<ForbiddenPage />);
 
-    expect(
-      screen.getByRole('heading', { name: /403 - Access Forbidden/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /403 - Access Forbidden/i })).toBeInTheDocument();
   });
 
   it('renders permission denied message', () => {
@@ -26,9 +24,7 @@ describe('ForbiddenPage', () => {
   it('renders admin privileges message', () => {
     render(<ForbiddenPage />);
 
-    expect(
-      screen.getByText(/This page requires administrator privileges/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/This page requires administrator privileges/)).toBeInTheDocument();
   });
 
   it('renders link to dashboard', () => {

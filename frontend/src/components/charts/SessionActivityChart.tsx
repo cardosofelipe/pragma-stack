@@ -5,7 +5,16 @@
 
 'use client';
 
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import { ChartCard } from './ChartCard';
 import { format, subDays } from 'date-fns';
 import { CHART_PALETTES } from '@/lib/chart-colors';

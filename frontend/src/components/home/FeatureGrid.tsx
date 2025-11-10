@@ -95,7 +95,8 @@ export function FeatureGrid() {
           Comprehensive Features, No Assembly Required
         </h2>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Everything you need to build production-grade web applications. Clone, customize, and ship.
+          Everything you need to build production-grade web applications. Clone, customize, and
+          ship.
         </p>
       </motion.div>
 

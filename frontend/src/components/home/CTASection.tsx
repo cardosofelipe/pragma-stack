@@ -15,7 +15,6 @@ interface CTASectionProps {
 }
 
 export function CTASection({ onOpenDemoModal }: CTASectionProps) {
-
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-background">
       {/* Background Pattern */}
@@ -48,11 +47,7 @@ export function CTASection({ onOpenDemoModal }: CTASectionProps) {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Button
-              asChild
-              size="lg"
-              className="gap-2 text-base group"
-            >
+            <Button asChild size="lg" className="gap-2 text-base group">
               <a
                 href="https://github.com/your-org/fast-next-template"
                 target="_blank"
@@ -72,22 +67,23 @@ export function CTASection({ onOpenDemoModal }: CTASectionProps) {
               variant="outline"
               className="gap-2 text-base group"
             >
-              <Play className="h-5 w-5 group-hover:scale-110 transition-transform" aria-hidden="true" />
+              <Play
+                className="h-5 w-5 group-hover:scale-110 transition-transform"
+                aria-hidden="true"
+              />
               Try Live Demo
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="ghost"
-              className="gap-2 text-base group"
-            >
+            <Button asChild size="lg" variant="ghost" className="gap-2 text-base group">
               <a
                 href="https://github.com/your-org/fast-next-template#documentation"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 Read Documentation
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                <ArrowRight
+                  className="h-4 w-4 group-hover:translate-x-1 transition-transform"
+                  aria-hidden="true"
+                />
               </a>
             </Button>
           </div>
@@ -104,8 +100,8 @@ export function CTASection({ onOpenDemoModal }: CTASectionProps) {
               Need help getting started? Check out the{' '}
               <Link href="/dev" className="text-primary hover:underline">
                 component showcase
-              </Link>
-              {' '}or explore the{' '}
+              </Link>{' '}
+              or explore the{' '}
               <Link href="/admin" className="text-primary hover:underline">
                 admin dashboard demo
               </Link>

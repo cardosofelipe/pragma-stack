@@ -13,8 +13,12 @@ jest.mock('@/lib/api/hooks/useAdmin');
 // Mock chart components
 jest.mock('@/components/charts', () => ({
   UserGrowthChart: () => <div data-testid="user-growth-chart">User Growth Chart</div>,
-  OrganizationDistributionChart: () => <div data-testid="org-distribution-chart">Org Distribution Chart</div>,
-  SessionActivityChart: () => <div data-testid="session-activity-chart">Session Activity Chart</div>,
+  OrganizationDistributionChart: () => (
+    <div data-testid="org-distribution-chart">Org Distribution Chart</div>
+  ),
+  SessionActivityChart: () => (
+    <div data-testid="session-activity-chart">Session Activity Chart</div>
+  ),
   UserStatusChart: () => <div data-testid="user-status-chart">User Status Chart</div>,
 }));
 
@@ -66,27 +70,21 @@ describe('AdminPage', () => {
     renderWithMockedStats();
 
     expect(screen.getByText('User Management')).toBeInTheDocument();
-    expect(
-      screen.getByText('View, create, and manage user accounts')
-    ).toBeInTheDocument();
+    expect(screen.getByText('View, create, and manage user accounts')).toBeInTheDocument();
   });
 
   it('renders organizations card', () => {
     renderWithMockedStats();
 
     // Check for the quick actions card (not the stat card)
-    expect(
-      screen.getByText('Manage organizations and their members')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Manage organizations and their members')).toBeInTheDocument();
   });
 
   it('renders system settings card', () => {
     renderWithMockedStats();
 
     expect(screen.getByText('System Settings')).toBeInTheDocument();
-    expect(
-      screen.getByText('Configure system-wide settings')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Configure system-wide settings')).toBeInTheDocument();
   });
 
   it('renders quick actions in grid layout', () => {

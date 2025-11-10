@@ -21,9 +21,7 @@ export function AuthLayoutClient({ children }: AuthLayoutClientProps) {
 
       {/* Auth card */}
       <div className="w-full max-w-md">
-        <div className="rounded-lg border bg-card p-8 shadow-sm">
-          {children}
-        </div>
+        <div className="rounded-lg border bg-card p-8 shadow-sm">{children}</div>
       </div>
     </div>
   );

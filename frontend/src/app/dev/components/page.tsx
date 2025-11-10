@@ -11,7 +11,9 @@ import dynamic from 'next/dynamic';
 const ComponentShowcase = dynamic(
   () => import('@/components/dev/ComponentShowcase').then((mod) => mod.ComponentShowcase),
   {
-    loading: () => <div className="p-8 text-center text-muted-foreground">Loading components...</div>,
+    loading: () => (
+      <div className="p-8 text-center text-muted-foreground">Loading components...</div>
+    ),
   }
 );
 

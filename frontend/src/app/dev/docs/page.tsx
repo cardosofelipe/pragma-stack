@@ -5,7 +5,17 @@
  */
 
 import Link from 'next/link';
-import { BookOpen, Sparkles, Layout, Palette, Code2, FileCode, Accessibility, Lightbulb, Search } from 'lucide-react';
+import {
+  BookOpen,
+  Sparkles,
+  Layout,
+  Palette,
+  Code2,
+  FileCode,
+  Accessibility,
+  Lightbulb,
+  Search,
+} from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -106,9 +116,7 @@ export default function DocsHub() {
       <section className="border-b bg-gradient-to-b from-background to-muted/20 py-12">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-4xl font-bold tracking-tight mb-4">
-              Design System Documentation
-            </h2>
+            <h2 className="text-4xl font-bold tracking-tight mb-4">Design System Documentation</h2>
             <p className="text-lg text-muted-foreground mb-8">
               Comprehensive guides, best practices, and references for building consistent,
               accessible, and maintainable user interfaces with the FastNext design system.
@@ -170,9 +178,7 @@ export default function DocsHub() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <CardDescription className="text-base">
-                        {doc.description}
-                      </CardDescription>
+                      <CardDescription className="text-base">{doc.description}</CardDescription>
                     </CardContent>
                   </Card>
                 </Link>
@@ -203,9 +209,7 @@ export default function DocsHub() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <CardDescription>
-                        {doc.description}
-                      </CardDescription>
+                      <CardDescription>{doc.description}</CardDescription>
                     </CardContent>
                   </Card>
                 </Link>
@@ -243,9 +247,7 @@ export default function DocsHub() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <CardDescription className="text-base">
-                        {doc.description}
-                      </CardDescription>
+                      <CardDescription className="text-base">{doc.description}</CardDescription>
                     </CardContent>
                   </Card>
                 </Link>
@@ -254,7 +256,6 @@ export default function DocsHub() {
           </section>
         </div>
       </main>
-
     </div>
   );
 }

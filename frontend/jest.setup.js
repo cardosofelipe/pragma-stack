@@ -1,5 +1,5 @@
 // Learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
 import 'whatwg-fetch'; // Polyfill fetch API
 import { Crypto } from '@peculiar/webcrypto';
 

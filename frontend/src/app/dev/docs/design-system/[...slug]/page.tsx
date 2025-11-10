@@ -21,9 +21,9 @@ export async function generateStaticParams() {
 
   try {
     const files = await fs.readdir(docsDir);
-    const mdFiles = files.filter(file => file.endsWith('.md'));
+    const mdFiles = files.filter((file) => file.endsWith('.md'));
 
-    return mdFiles.map(file => ({
+    return mdFiles.map((file) => ({
       slug: [file.replace(/\.md$/, '')],
     }));
   } catch {
@@ -63,12 +63,7 @@ export default async function DocPage({ params }: DocPageProps) {
   return (
     <div className="bg-background">
       {/* Breadcrumbs */}
-      <DevBreadcrumbs
-        items={[
-          { label: 'Documentation', href: '/dev/docs' },
-          { label: title }
-        ]}
-      />
+      <DevBreadcrumbs items={[{ label: 'Documentation', href: '/dev/docs' }, { label: title }]} />
 
       <div className="container mx-auto px-4 py-12">
         <div className="mx-auto max-w-4xl">

@@ -22,6 +22,7 @@
 **80% of the time, you should COMPOSE existing shadcn/ui components.**
 
 Only create custom components when:
+
 1. ✅ You're reusing the same composition 3+ times
 2. ✅ The pattern has complex business logic
 3. ✅ You need variants beyond what shadcn/ui provides
@@ -74,6 +75,7 @@ Do you need a UI element?
 ```
 
 **Why this is good:**
+
 - Simple and direct
 - Easy to customize per use case
 - No abstraction overhead
@@ -103,10 +105,11 @@ function ContentCard({ title, description, content, actionLabel, onAction }: Pro
 }
 
 // Used once... why did we create this?
-<ContentCard title="..." description="..." content="..." />
+<ContentCard title="..." description="..." content="..." />;
 ```
 
 **Problems:**
+
 - ❌ Created before knowing if pattern is reused
 - ❌ Inflexible (what if we need 2 buttons?)
 - ❌ Unclear what it renders (abstraction hides structure)
@@ -148,6 +151,7 @@ function DashboardMetricCard({
 ```
 
 **Why this works:**
+
 - ✅ Pattern validated (used 3+ times)
 - ✅ Specific purpose (dashboard metrics)
 - ✅ Consistent structure across uses
@@ -171,22 +175,23 @@ interface MyComponentProps {
 
 export function MyComponent({ className, children }: MyComponentProps) {
   return (
-    <div className={cn(
-      "base-classes-here",  // Base styles
-      className              // Allow overrides
-    )}>
+    <div
+      className={cn(
+        'base-classes-here', // Base styles
+        className // Allow overrides
+      )}
+    >
       {children}
     </div>
   );
 }
 
 // Usage
-<MyComponent className="custom-overrides">
-  Content
-</MyComponent>
+<MyComponent className="custom-overrides">Content</MyComponent>;
 ```
 
 **Key points:**
+
 - Always accept `className` prop
 - Use `cn()` utility for merging
 - Base classes first, overrides last
@@ -203,24 +208,24 @@ import { cn } from '@/lib/utils';
 
 const componentVariants = cva(
   // Base classes (always applied)
-  "inline-flex items-center justify-center rounded-lg font-medium transition-colors",
+  'inline-flex items-center justify-center rounded-lg font-medium transition-colors',
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
       },
       size: {
-        sm: "h-8 px-3 text-xs",
-        default: "h-10 px-4 text-sm",
-        lg: "h-12 px-6 text-base",
+        sm: 'h-8 px-3 text-xs',
+        default: 'h-10 px-4 text-sm',
+        lg: 'h-12 px-6 text-base',
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: 'default',
+      size: 'default',
     },
   }
 );
@@ -231,25 +236,18 @@ interface MyComponentProps
   // Additional props here
 }
 
-export function MyComponent({
-  variant,
-  size,
-  className,
-  ...props
-}: MyComponentProps) {
-  return (
-    <div
-      className={cn(componentVariants({ variant, size, className }))}
-      {...props}
-    />
-  );
+export function MyComponent({ variant, size, className, ...props }: MyComponentProps) {
+  return <div className={cn(componentVariants({ variant, size, className }))} {...props} />;
 }
 
 // Usage
-<MyComponent variant="outline" size="lg">Content</MyComponent>
+<MyComponent variant="outline" size="lg">
+  Content
+</MyComponent>;
 ```
 
 **Key points:**
+
 - Use CVA for complex variant logic
 - Always provide `defaultVariants`
 - Extend `React.HTMLAttributes` for standard HTML props
@@ -273,13 +271,7 @@ interface StatCardProps {
   className?: string;
 }
 
-export function StatCard({
-  title,
-  value,
-  description,
-  icon,
-  className,
-}: StatCardProps) {
+export function StatCard({ title, value, description, icon, className }: StatCardProps) {
   return (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -288,9 +280,7 @@ export function StatCard({
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        {description && (
-          <p className="text-xs text-muted-foreground">{description}</p>
-        )}
+        {description && <p className="text-xs text-muted-foreground">{description}</p>}
       </CardContent>
     </Card>
   );
@@ -302,10 +292,11 @@ export function StatCard({
   value="1,234"
   description="+12% from last month"
   icon={<Users className="h-4 w-4 text-muted-foreground" />}
-/>
+/>;
 ```
 
 **Key points:**
+
 - Compose from shadcn/ui primitives
 - Keep structure consistent
 - Optional props with `?`
@@ -354,14 +345,17 @@ export function Toggle({
 }
 
 // Uncontrolled usage
-<Toggle defaultValue={false}>Auto-save</Toggle>
+<Toggle defaultValue={false}>Auto-save</Toggle>;
 
 // Controlled usage
 const [enabled, setEnabled] = useState(false);
-<Toggle value={enabled} onChange={setEnabled}>Auto-save</Toggle>
+<Toggle value={enabled} onChange={setEnabled}>
+  Auto-save
+</Toggle>;
 ```
 
 **Key points:**
+
 - Support both controlled and uncontrolled modes
 - Use `defaultValue` for initial uncontrolled value
 - Use `value` + `onChange` for controlled mode
@@ -376,6 +370,7 @@ const [enabled, setEnabled] = useState(false);
 **class-variance-authority** (CVA) is a utility for creating component variants with Tailwind CSS.
 
 **Why use CVA?**
+
 - ✅ Type-safe variant props
 - ✅ Compound variants (combinations)
 - ✅ Default variants
@@ -390,24 +385,23 @@ import { cva } from 'class-variance-authority';
 
 const alertVariants = cva(
   // Base classes (always applied)
-  "relative w-full rounded-lg border p-4",
+  'relative w-full rounded-lg border p-4',
   {
     variants: {
       variant: {
-        default: "bg-background text-foreground",
-        destructive: "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        default: 'bg-background text-foreground',
+        destructive:
+          'border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive',
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: 'default',
     },
   }
 );
 
 // Usage
-<div className={alertVariants({ variant: "destructive" })}>
-  Alert content
-</div>
+<div className={alertVariants({ variant: 'destructive' })}>Alert content</div>;
 ```
 
 ---
@@ -416,32 +410,32 @@ const alertVariants = cva(
 
 ```tsx
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-md font-medium transition-colors",
+  'inline-flex items-center justify-center rounded-md font-medium transition-colors',
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input bg-background hover:bg-accent",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+        outline: 'border border-input bg-background hover:bg-accent',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
       },
       size: {
-        sm: "h-8 px-3 text-xs",
-        default: "h-10 px-4 text-sm",
-        lg: "h-12 px-6 text-base",
+        sm: 'h-8 px-3 text-xs',
+        default: 'h-10 px-4 text-sm',
+        lg: 'h-12 px-6 text-base',
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: 'default',
+      size: 'default',
     },
   }
 );
 
 // Usage
-<button className={buttonVariants({ variant: "outline", size: "lg" })}>
+<button className={buttonVariants({ variant: 'outline', size: 'lg' })}>
   Large Outline Button
-</button>
+</button>;
 ```
 
 ---
@@ -451,28 +445,28 @@ const buttonVariants = cva(
 **Use case**: Different classes when specific variant combinations are used
 
 ```tsx
-const buttonVariants = cva("base-classes", {
+const buttonVariants = cva('base-classes', {
   variants: {
     variant: {
-      default: "bg-primary",
-      destructive: "bg-destructive",
+      default: 'bg-primary',
+      destructive: 'bg-destructive',
     },
     size: {
-      sm: "h-8",
-      lg: "h-12",
+      sm: 'h-8',
+      lg: 'h-12',
     },
   },
   // Compound variants: specific combinations
   compoundVariants: [
     {
-      variant: "destructive",
-      size: "lg",
-      class: "text-lg font-bold",  // Applied when BOTH are true
+      variant: 'destructive',
+      size: 'lg',
+      class: 'text-lg font-bold', // Applied when BOTH are true
     },
   ],
   defaultVariants: {
-    variant: "default",
-    size: "sm",
+    variant: 'default',
+    size: 'sm',
   },
 });
 ```
@@ -484,6 +478,7 @@ const buttonVariants = cva("base-classes", {
 ### Prop Naming Conventions
 
 **DO**:
+
 ```tsx
 // ✅ Descriptive, semantic names
 interface UserCardProps {
@@ -495,6 +490,7 @@ interface UserCardProps {
 ```
 
 **DON'T**:
+
 ```tsx
 // ❌ Generic, unclear names
 interface CardProps {
@@ -510,6 +506,7 @@ interface CardProps {
 ### Required vs Optional Props
 
 **Guidelines:**
+
 - Required: Core functionality depends on it
 - Optional: Nice-to-have, has sensible default
 
@@ -531,7 +528,7 @@ interface AlertProps {
 
 export function Alert({
   children,
-  variant = 'default',  // Default for optional prop
+  variant = 'default', // Default for optional prop
   onClose,
   icon,
   className,
@@ -545,6 +542,7 @@ export function Alert({
 ### Prop Type Patterns
 
 **Enum props** (limited options):
+
 ```tsx
 interface ButtonProps {
   variant: 'default' | 'destructive' | 'outline';
@@ -553,6 +551,7 @@ interface ButtonProps {
 ```
 
 **Boolean flags**:
+
 ```tsx
 interface CardProps {
   isLoading?: boolean;
@@ -562,6 +561,7 @@ interface CardProps {
 ```
 
 **Callback props**:
+
 ```tsx
 interface FormProps {
   onSubmit: (data: FormData) => void;
@@ -571,6 +571,7 @@ interface FormProps {
 ```
 
 **Render props** (advanced customization):
+
 ```tsx
 interface ListProps<T> {
   items: T[];
@@ -583,7 +584,7 @@ interface ListProps<T> {
   items={users}
   renderItem={(user, i) => <UserCard key={i} user={user} />}
   renderEmpty={() => <EmptyState />}
-/>
+/>;
 ```
 
 ---
@@ -593,6 +594,7 @@ interface ListProps<T> {
 Before shipping a custom component, verify:
 
 ### Visual Testing
+
 - [ ] **Light mode** - Component looks correct
 - [ ] **Dark mode** - Component looks correct (toggle theme)
 - [ ] **All variants** - Test each variant works
@@ -602,6 +604,7 @@ Before shipping a custom component, verify:
 - [ ] **Empty state** - Handles no data gracefully
 
 ### Accessibility Testing
+
 - [ ] **Keyboard navigation** - Can be focused and activated with Tab/Enter
 - [ ] **Focus indicators** - Visible focus ring (`:focus-visible`)
 - [ ] **Screen reader** - ARIA labels and roles present
@@ -609,6 +612,7 @@ Before shipping a custom component, verify:
 - [ ] **Semantic HTML** - Using correct HTML elements (button, nav, etc.)
 
 ### Functional Testing
+
 - [ ] **Props work** - All props apply correctly
 - [ ] **className override** - Can override styles with className prop
 - [ ] **Controlled/uncontrolled** - Both modes work (if applicable)
@@ -616,6 +620,7 @@ Before shipping a custom component, verify:
 - [ ] **TypeScript** - No type errors, props autocomplete
 
 ### Code Quality
+
 - [ ] **No console errors** - Check browser console
 - [ ] **No warnings** - React warnings, a11y warnings
 - [ ] **Performance** - No unnecessary re-renders
@@ -644,13 +649,7 @@ interface StatCardProps {
   className?: string;
 }
 
-export function StatCard({
-  title,
-  value,
-  change,
-  icon: Icon,
-  className,
-}: StatCardProps) {
+export function StatCard({ title, value, change, icon: Icon, className }: StatCardProps) {
   return (
     <Card className={className}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -660,11 +659,9 @@ export function StatCard({
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
         {change !== undefined && (
-          <p className={cn(
-            "text-xs",
-            change >= 0 ? "text-green-600" : "text-destructive"
-          )}>
-            {change >= 0 ? '+' : ''}{change}% from last month
+          <p className={cn('text-xs', change >= 0 ? 'text-green-600' : 'text-destructive')}>
+            {change >= 0 ? '+' : ''}
+            {change}% from last month
           </p>
         )}
       </CardContent>
@@ -678,10 +675,11 @@ export function StatCard({
   <StatCard title="Subscriptions" value="+2350" change={12.5} icon={Users} />
   <StatCard title="Sales" value="+12,234" change={19} icon={CreditCard} />
   <StatCard title="Active Now" value="+573" change={-2.1} icon={Activity} />
-</div>
+</div>;
 ```
 
 **Why this works:**
+
 - Specific purpose (dashboard metrics)
 - Reused 8+ times
 - Consistent structure
@@ -747,18 +745,10 @@ export function ConfirmDialog({
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
             {cancelLabel}
           </Button>
-          <Button
-            variant={variant}
-            onClick={handleConfirm}
-            disabled={isLoading}
-          >
+          <Button variant={variant} onClick={handleConfirm} disabled={isLoading}>
             {isLoading ? 'Processing...' : confirmLabel}
           </Button>
         </DialogFooter>
@@ -781,10 +771,11 @@ const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     await deleteUser(user.id);
     toast.success('User deleted');
   }}
-/>
+/>;
 ```
 
 **Why this works:**
+
 - Common pattern (confirmations)
 - Handles loading states automatically
 - Consistent UX across app
@@ -808,19 +799,12 @@ interface PageHeaderProps {
   className?: string;
 }
 
-export function PageHeader({
-  title,
-  description,
-  action,
-  className,
-}: PageHeaderProps) {
+export function PageHeader({ title, description, action, className }: PageHeaderProps) {
   return (
-    <div className={cn("flex items-center justify-between", className)}>
+    <div className={cn('flex items-center justify-between', className)}>
       <div className="space-y-1">
         <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-        {description && (
-          <p className="text-muted-foreground">{description}</p>
-        )}
+        {description && <p className="text-muted-foreground">{description}</p>}
       </div>
       {action && <div>{action}</div>}
     </div>
@@ -837,7 +821,7 @@ export function PageHeader({
       Create User
     </Button>
   }
-/>
+/>;
 ```
 
 ---
@@ -866,6 +850,7 @@ Before creating a custom component, ask:
 ---
 
 **Related Documentation:**
+
 - [Components](./02-components.md) - shadcn/ui component library
 - [AI Guidelines](./08-ai-guidelines.md) - Component templates for AI
 - [Forms](./06-forms.md) - Form component patterns

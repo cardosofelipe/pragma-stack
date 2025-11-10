@@ -69,8 +69,7 @@ export function useCreateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateUserDto) =>
-      AdminService.createUser({ requestBody: data }),
+    mutationFn: (data: CreateUserDto) => AdminService.createUser({ requestBody: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('User created successfully');
@@ -106,8 +105,7 @@ export function useDeleteUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (userId: string) =>
-      AdminService.deleteUser({ userId }),
+    mutationFn: (userId: string) => AdminService.deleteUser({ userId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('User deleted successfully');
@@ -145,7 +143,7 @@ export function useBulkUserAction() {
   return useMutation({
     mutationFn: ({ action, userIds }: { action: string; userIds: string[] }) =>
       AdminService.bulkUserAction({
-        requestBody: { action, user_ids: userIds }
+        requestBody: { action, user_ids: userIds },
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -592,6 +590,7 @@ export default function NewUserPage() {
 ### Testing the Feature
 
 **Test the user management flow:**
+
 1. Navigate to `/admin/users`
 2. Search for users
 3. Click "Create User" and fill the form
@@ -630,8 +629,7 @@ export function useRevokeSession() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (sessionId: string) =>
-      SessionsService.revokeSession({ sessionId }),
+    mutationFn: (sessionId: string) => SessionsService.revokeSession({ sessionId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sessions'] });
       toast.success('Session revoked successfully');
@@ -1041,11 +1039,13 @@ export default function AdminDashboardPage() {
 ## Conclusion
 
 These examples demonstrate:
+
 1. **Complete CRUD operations** (User Management)
 2. **Real-time data with polling** (Session Management)
 3. **Data visualization** (Admin Dashboard Charts)
 
 Each example follows the established patterns:
+
 - API hooks for data fetching
 - Reusable components
 - Proper error handling
@@ -1053,6 +1053,7 @@ Each example follows the established patterns:
 - Type safety with TypeScript
 
 For more patterns and best practices, refer to:
+
 - **ARCHITECTURE.md**: System design
 - **CODING_STANDARDS.md**: Code style
 - **COMPONENT_GUIDE.md**: Component usage

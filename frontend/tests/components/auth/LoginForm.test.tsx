@@ -56,9 +56,7 @@ const createWrapper = () => {
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
@@ -235,7 +233,9 @@ describe('LoginForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(screen.getByText('An unexpected error occurred. Please try again.')).toBeInTheDocument();
+        expect(
+          screen.getByText('An unexpected error occurred. Please try again.')
+        ).toBeInTheDocument();
       });
     });
 

@@ -65,14 +65,14 @@ describe('DemoCredentialsModal', () => {
     render(<DemoCredentialsModal open={true} onClose={mockOnClose} />);
 
     const copyButtons = screen.getAllByRole('button');
-    const regularCopyButton = copyButtons.find(btn => btn.textContent?.includes('Copy'));
+    const regularCopyButton = copyButtons.find((btn) => btn.textContent?.includes('Copy'));
 
     fireEvent.click(regularCopyButton!);
 
     await waitFor(() => {
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('demo@example.com\nDemo123!');
       const copiedButtons = screen.getAllByRole('button');
-      const copiedButton = copiedButtons.find(btn => btn.textContent?.includes('Copied!'));
+      const copiedButton = copiedButtons.find((btn) => btn.textContent?.includes('Copied!'));
       expect(copiedButton).toBeInTheDocument();
     });
   });
@@ -81,14 +81,14 @@ describe('DemoCredentialsModal', () => {
     render(<DemoCredentialsModal open={true} onClose={mockOnClose} />);
 
     const copyButtons = screen.getAllByRole('button');
-    const adminCopyButton = copyButtons.filter(btn => btn.textContent?.includes('Copy'))[1];
+    const adminCopyButton = copyButtons.filter((btn) => btn.textContent?.includes('Copy'))[1];
 
     fireEvent.click(adminCopyButton!);
 
     await waitFor(() => {
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('admin@example.com\nAdmin123!');
       const copiedButtons = screen.getAllByRole('button');
-      const copiedButton = copiedButtons.find(btn => btn.textContent?.includes('Copied!'));
+      const copiedButton = copiedButtons.find((btn) => btn.textContent?.includes('Copied!'));
       expect(copiedButton).toBeInTheDocument();
     });
   });
@@ -98,12 +98,12 @@ describe('DemoCredentialsModal', () => {
     render(<DemoCredentialsModal open={true} onClose={mockOnClose} />);
 
     const copyButtons = screen.getAllByRole('button');
-    const copyButton = copyButtons.find(btn => btn.textContent?.includes('Copy'));
+    const copyButton = copyButtons.find((btn) => btn.textContent?.includes('Copy'));
     fireEvent.click(copyButton!);
 
     await waitFor(() => {
       const copiedButtons = screen.getAllByRole('button');
-      const copiedButton = copiedButtons.find(btn => btn.textContent?.includes('Copied!'));
+      const copiedButton = copiedButtons.find((btn) => btn.textContent?.includes('Copied!'));
       expect(copiedButton).toBeInTheDocument();
     });
 
@@ -111,7 +111,7 @@ describe('DemoCredentialsModal', () => {
 
     await waitFor(() => {
       const buttons = screen.getAllByRole('button');
-      const copiedButton = buttons.find(btn => btn.textContent?.includes('Copied!'));
+      const copiedButton = buttons.find((btn) => btn.textContent?.includes('Copied!'));
       expect(copiedButton).toBeUndefined();
     });
 
@@ -129,7 +129,7 @@ describe('DemoCredentialsModal', () => {
     render(<DemoCredentialsModal open={true} onClose={mockOnClose} />);
 
     const copyButtons = screen.getAllByRole('button');
-    const copyButton = copyButtons.find(btn => btn.textContent?.includes('Copy'));
+    const copyButton = copyButtons.find((btn) => btn.textContent?.includes('Copy'));
     fireEvent.click(copyButton!);
 
     await waitFor(() => {
@@ -144,8 +144,8 @@ describe('DemoCredentialsModal', () => {
 
     // Find the "Close" button (filter to get the one that's visible and is the footer button)
     const closeButtons = screen.getAllByRole('button', { name: 'Close' });
-    const footerCloseButton = closeButtons.find(btn =>
-      btn.textContent === 'Close' && !btn.querySelector('.sr-only')
+    const footerCloseButton = closeButtons.find(
+      (btn) => btn.textContent === 'Close' && !btn.querySelector('.sr-only')
     );
     fireEvent.click(footerCloseButton!);
 

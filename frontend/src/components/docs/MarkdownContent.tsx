@@ -101,7 +101,10 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
             </ul>
           ),
           ol: ({ children, ...props }) => (
-            <ol className="my-6 ml-6 list-decimal space-y-3 marker:text-primary/60 marker:font-semibold" {...props}>
+            <ol
+              className="my-6 ml-6 list-decimal space-y-3 marker:text-primary/60 marker:font-semibold"
+              {...props}
+            >
               {children}
             </ol>
           ),
@@ -112,7 +115,12 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
           ),
 
           // Code blocks - enhanced with copy button and better styling
-          code: ({ inline, className, children, ...props }: {
+          code: ({
+            inline,
+            className,
+            children,
+            ...props
+          }: {
             inline?: boolean;
             className?: string;
             children?: React.ReactNode;
@@ -128,22 +136,12 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
               );
             }
             return (
-              <code
-                className={cn(
-                  'block font-mono text-sm leading-relaxed',
-                  className
-                )}
-                {...props}
-              >
+              <code className={cn('block font-mono text-sm leading-relaxed', className)} {...props}>
                 {children}
               </code>
             );
           },
-          pre: ({ children, ...props }) => (
-            <CodeBlock {...props}>
-              {children}
-            </CodeBlock>
-          ),
+          pre: ({ children, ...props }) => <CodeBlock {...props}>{children}</CodeBlock>,
 
           // Blockquotes - enhanced callout styling
           blockquote: ({ children, ...props }) => (
@@ -158,10 +156,7 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
           // Tables - improved styling with better borders and hover states
           table: ({ children, ...props }) => (
             <div className="my-8 w-full overflow-x-auto rounded-lg border">
-              <table
-                className="w-full border-collapse text-sm"
-                {...props}
-              >
+              <table className="w-full border-collapse text-sm" {...props}>
                 {children}
               </table>
             </div>
@@ -172,7 +167,9 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
             </thead>
           ),
           tbody: ({ children, ...props }) => (
-            <tbody className="divide-y divide-border" {...props}>{children}</tbody>
+            <tbody className="divide-y divide-border" {...props}>
+              {children}
+            </tbody>
           ),
           tr: ({ children, ...props }) => (
             <tr className="transition-colors hover:bg-muted/40" {...props}>
@@ -197,9 +194,7 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
           ),
 
           // Horizontal rule - more prominent
-          hr: ({ ...props }) => (
-            <hr className="my-12 border-t-2 border-border/50" {...props} />
-          ),
+          hr: ({ ...props }) => <hr className="my-12 border-t-2 border-border/50" {...props} />,
 
           // Images - optimized with Next.js Image component
           img: ({ src, alt }) => {

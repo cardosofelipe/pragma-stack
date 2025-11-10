@@ -21,6 +21,7 @@
 These 5 rules eliminate 90% of spacing inconsistencies:
 
 ### Rule 1: Parent Controls Children
+
 **Children don't add their own margins. The parent controls spacing between siblings.**
 
 ```tsx
@@ -40,6 +41,7 @@ These 5 rules eliminate 90% of spacing inconsistencies:
 ```
 
 **Why this matters:**
+
 - Eliminates "last child" edge cases
 - Makes components reusable (they work in any context)
 - Changes propagate from one place (parent)
@@ -48,6 +50,7 @@ These 5 rules eliminate 90% of spacing inconsistencies:
 ---
 
 ### Rule 2: Use Gap for Siblings
+
 **For flex and grid layouts, use `gap-*` to space siblings.**
 
 ```tsx
@@ -73,6 +76,7 @@ These 5 rules eliminate 90% of spacing inconsistencies:
 ---
 
 ### Rule 3: Use Padding for Internal Spacing
+
 **Padding is for spacing _inside_ a component, between the border and content.**
 
 ```tsx
@@ -91,6 +95,7 @@ These 5 rules eliminate 90% of spacing inconsistencies:
 ---
 
 ### Rule 4: Use space-y for Vertical Stacks
+
 **For vertical stacks (not flex/grid), use `space-y-*` utility.**
 
 ```tsx
@@ -110,6 +115,7 @@ These 5 rules eliminate 90% of spacing inconsistencies:
 ```
 
 **How space-y works:**
+
 ```css
 /* space-y-4 applies margin-top to all children except first */
 .space-y-4 > * + * {
@@ -120,6 +126,7 @@ These 5 rules eliminate 90% of spacing inconsistencies:
 ---
 
 ### Rule 5: Margins Only for Exceptions
+
 **Use margin only when a specific child needs different spacing from its siblings.**
 
 ```tsx
@@ -151,18 +158,19 @@ When children control their own margins:
 ```tsx
 // ❌ ANTI-PATTERN
 function TodoItem({ className }: { className?: string }) {
-  return <div className={cn("mb-4", className)}>Todo</div>;
+  return <div className={cn('mb-4', className)}>Todo</div>;
 }
 
 // Usage
 <div>
-  <TodoItem />  {/* Has mb-4 */}
-  <TodoItem />  {/* Has mb-4 */}
-  <TodoItem />  {/* Has mb-4 - unwanted margin at bottom! */}
-</div>
+  <TodoItem /> {/* Has mb-4 */}
+  <TodoItem /> {/* Has mb-4 */}
+  <TodoItem /> {/* Has mb-4 - unwanted margin at bottom! */}
+</div>;
 ```
 
 **Problems:**
+
 1. ❌ Last item has unwanted margin
 2. ❌ Can't change spacing without modifying component
 3. ❌ Margin collapsing creates unpredictable spacing
@@ -199,6 +207,7 @@ function TodoItem({ className }: { className?: string }) {
 ```
 
 **Benefits:**
+
 1. ✅ No edge cases (last child, first child, only child)
 2. ✅ Spacing controlled in one place
 3. ✅ Component works in any layout context
@@ -265,6 +274,7 @@ Use this flowchart to choose the right spacing method:
 ```
 
 **Spacing breakdown:**
+
 - `space-y-4` on form: 16px between field groups
 - `space-y-2` on field group: 8px between label and input
 - No margins on children
@@ -288,6 +298,7 @@ Use this flowchart to choose the right spacing method:
 ```
 
 **Why gap over space-x:**
+
 - Works with `flex-wrap`
 - Works with `flex-col` (changes direction)
 - Consistent spacing in all directions
@@ -306,6 +317,7 @@ Use this flowchart to choose the right spacing method:
 ```
 
 **Why gap:**
+
 - Consistent spacing between rows and columns
 - Works with responsive grid changes
 - No edge cases (first row, last column, etc.)
@@ -332,6 +344,7 @@ Use this flowchart to choose the right spacing method:
 ```
 
 **Spacing breakdown:**
+
 - `p-6` on Card: 24px internal padding
 - `space-y-4` on CardContent: 16px between paragraphs
 - `pt-4` on CardFooter: Additional top padding for visual separation
@@ -364,6 +377,7 @@ Use this flowchart to choose the right spacing method:
 ```
 
 **Spacing breakdown:**
+
 - `px-4`: Horizontal padding (prevents edge touching)
 - `py-8`: Vertical padding (top and bottom spacing)
 - `space-y-6`: 24px between sections
@@ -376,25 +390,28 @@ Use this flowchart to choose the right spacing method:
 ### Example 1: Button Group
 
 #### ❌ Before (Child-Controlled)
+
 ```tsx
 function ActionButton({ children, className }: Props) {
-  return <Button className={cn("mr-4", className)}>{children}</Button>;
+  return <Button className={cn('mr-4', className)}>{children}</Button>;
 }
 
 // Usage
 <div className="flex">
   <ActionButton>Cancel</ActionButton>
   <ActionButton>Save</ActionButton>
-  <ActionButton>Delete</ActionButton>  {/* Unwanted mr-4 */}
-</div>
+  <ActionButton>Delete</ActionButton> {/* Unwanted mr-4 */}
+</div>;
 ```
 
 **Problems:**
+
 - Last button has unwanted margin
 - Can't change spacing without modifying component
 - Hard to use in vertical layout
 
 #### ✅ After (Parent-Controlled)
+
 ```tsx
 function ActionButton({ children, className }: Props) {
   return <Button className={className}>{children}</Button>;
@@ -415,6 +432,7 @@ function ActionButton({ children, className }: Props) {
 ```
 
 **Benefits:**
+
 - No edge cases
 - Reusable in any layout
 - Easy to change spacing
@@ -424,6 +442,7 @@ function ActionButton({ children, className }: Props) {
 ### Example 2: List Items
 
 #### ❌ Before (Child-Controlled)
+
 ```tsx
 function ListItem({ title, description }: Props) {
   return (
@@ -437,16 +456,18 @@ function ListItem({ title, description }: Props) {
 <div>
   <ListItem title="Item 1" description="..." />
   <ListItem title="Item 2" description="..." />
-  <ListItem title="Item 3" description="..." />  {/* Unwanted mb-6 */}
-</div>
+  <ListItem title="Item 3" description="..." /> {/* Unwanted mb-6 */}
+</div>;
 ```
 
 **Problems:**
+
 - Last item has unwanted bottom margin
 - Can't change list spacing without modifying component
 - Internal `mb-2` hard to override
 
 #### ✅ After (Parent-Controlled)
+
 ```tsx
 function ListItem({ title, description }: Props) {
   return (
@@ -473,6 +494,7 @@ function ListItem({ title, description }: Props) {
 ```
 
 **Benefits:**
+
 - No unwanted margins
 - Internal spacing controlled by `space-y-2`
 - Reusable with different spacings
@@ -482,6 +504,7 @@ function ListItem({ title, description }: Props) {
 ### Example 3: Form Fields
 
 #### ❌ Before (Mixed Strategy)
+
 ```tsx
 <form>
   <div className="mb-4">
@@ -494,16 +517,20 @@ function ListItem({ title, description }: Props) {
     <Input id="email" className="mt-2" />
   </div>
 
-  <Button type="submit" className="mt-6">Submit</Button>
+  <Button type="submit" className="mt-6">
+    Submit
+  </Button>
 </form>
 ```
 
 **Problems:**
+
 - Spacing scattered across children
 - Hard to change consistently
 - Have to remember `mt-6` for button
 
 #### ✅ After (Parent-Controlled)
+
 ```tsx
 <form className="space-y-4">
   <div className="space-y-2">
@@ -516,11 +543,14 @@ function ListItem({ title, description }: Props) {
     <Input id="email" />
   </div>
 
-  <Button type="submit" className="mt-2">Submit</Button>
+  <Button type="submit" className="mt-2">
+    Submit
+  </Button>
 </form>
 ```
 
 **Benefits:**
+
 - Spacing controlled in 2 places: form (`space-y-4`) and field groups (`space-y-2`)
 - Easy to change all field spacing at once
 - Consistent and predictable
@@ -533,18 +563,20 @@ function ListItem({ title, description }: Props) {
 
 ```tsx
 // ❌ WRONG
-{items.map((item, index) => (
-  <Card key={item.id} className={index < items.length - 1 ? "mb-4" : ""}>
-    {item.name}
-  </Card>
-))}
+{
+  items.map((item, index) => (
+    <Card key={item.id} className={index < items.length - 1 ? 'mb-4' : ''}>
+      {item.name}
+    </Card>
+  ));
+}
 
 // ✅ CORRECT
 <div className="space-y-4">
-  {items.map(item => (
+  {items.map((item) => (
     <Card key={item.id}>{item.name}</Card>
   ))}
-</div>
+</div>;
 ```
 
 ---
@@ -564,6 +596,7 @@ function ListItem({ title, description }: Props) {
 ```
 
 **Why negative margins are bad:**
+
 - Indicates broken spacing strategy
 - Hard to maintain
 - Creates coupling between components
@@ -618,26 +651,26 @@ function ListItem({ title, description }: Props) {
 
 ### Spacing Method Cheat Sheet
 
-| Use Case | Method | Example |
-|----------|--------|---------|
-| **Flex siblings** | `gap-*` | `flex gap-4` |
-| **Grid siblings** | `gap-*` | `grid gap-6` |
-| **Vertical stack** | `space-y-*` | `space-y-4` |
-| **Horizontal stack** | `space-x-*` | `space-x-2` |
-| **Inside component** | `p-*` | `p-6` |
-| **One child exception** | `m-*` | `mt-8` |
+| Use Case                | Method      | Example      |
+| ----------------------- | ----------- | ------------ |
+| **Flex siblings**       | `gap-*`     | `flex gap-4` |
+| **Grid siblings**       | `gap-*`     | `grid gap-6` |
+| **Vertical stack**      | `space-y-*` | `space-y-4`  |
+| **Horizontal stack**    | `space-x-*` | `space-x-2`  |
+| **Inside component**    | `p-*`       | `p-6`        |
+| **One child exception** | `m-*`       | `mt-8`       |
 
 ### Common Spacing Values
 
-| Class | Pixels | Usage |
-|-------|--------|-------|
-| `gap-2` or `space-y-2` | 8px | Tight (label + input) |
-| `gap-4` or `space-y-4` | 16px | Standard (form fields) |
-| `gap-6` or `space-y-6` | 24px | Sections (cards) |
-| `gap-8` or `space-y-8` | 32px | Large gaps |
-| `p-4` | 16px | Standard padding |
-| `p-6` | 24px | Card padding |
-| `px-4 py-8` | 16px / 32px | Page padding |
+| Class                  | Pixels      | Usage                  |
+| ---------------------- | ----------- | ---------------------- |
+| `gap-2` or `space-y-2` | 8px         | Tight (label + input)  |
+| `gap-4` or `space-y-4` | 16px        | Standard (form fields) |
+| `gap-6` or `space-y-6` | 24px        | Sections (cards)       |
+| `gap-8` or `space-y-8` | 32px        | Large gaps             |
+| `p-4`                  | 16px        | Standard padding       |
+| `p-6`                  | 24px        | Card padding           |
+| `px-4 py-8`            | 16px / 32px | Page padding           |
 
 ### Decision Flowchart (Simplified)
 
@@ -682,7 +715,7 @@ Need spacing?
 Before implementing spacing, verify:
 
 - [ ] **Parent controls children?** Using gap or space-y/x?
-- [ ] **No child margins?** Components don't have mb-* or mr-*?
+- [ ] **No child margins?** Components don't have mb-_ or mr-_?
 - [ ] **Consistent method?** Not mixing gap + child margins?
 - [ ] **Reusable components?** Work in different contexts?
 - [ ] **No edge cases?** No last-child or first-child special handling?
@@ -700,6 +733,7 @@ Before implementing spacing, verify:
 ---
 
 **Related Documentation:**
+
 - [Layouts](./03-layouts.md) - When to use Grid vs Flex
 - [Foundations](./01-foundations.md) - Spacing scale tokens
 - [Component Creation](./05-component-creation.md) - Building reusable components

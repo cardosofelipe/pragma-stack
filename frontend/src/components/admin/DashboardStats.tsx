@@ -26,10 +26,7 @@ export function DashboardStats() {
   }
 
   return (
-    <div
-      className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
-      data-testid="dashboard-stats"
-    >
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="dashboard-stats">
       <StatCard
         title="Total Users"
         value={stats?.totalUsers ?? 0}

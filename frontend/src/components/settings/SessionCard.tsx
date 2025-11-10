@@ -61,7 +61,9 @@ export function SessionCard({ session, onRevoke, isRevoking = false }: SessionCa
   const DeviceIcon = Monitor;
 
   // Format location string
-  const location = [session.location_city, session.location_country].filter(Boolean).join(', ') || 'Unknown location';
+  const location =
+    [session.location_city, session.location_country].filter(Boolean).join(', ') ||
+    'Unknown location';
 
   // Format device string
   const deviceInfo = session.device_name || 'Unknown device';
@@ -145,8 +147,8 @@ export function SessionCard({ session, onRevoke, isRevoking = false }: SessionCa
           <DialogHeader>
             <DialogTitle>Revoke Session?</DialogTitle>
             <DialogDescription>
-              This will sign out this device and you&apos;ll need to sign in again to access your account
-              from it. This action cannot be undone.
+              This will sign out this device and you&apos;ll need to sign in again to access your
+              account from it. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">

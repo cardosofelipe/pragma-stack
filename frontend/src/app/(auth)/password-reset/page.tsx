@@ -8,9 +8,10 @@ import dynamic from 'next/dynamic';
 // Code-split PasswordResetRequestForm
 const PasswordResetRequestForm = dynamic(
   /* istanbul ignore next - Next.js dynamic import, tested via component */
-  () => import('@/components/auth/PasswordResetRequestForm').then((mod) => ({
-    default: mod.PasswordResetRequestForm
-  })),
+  () =>
+    import('@/components/auth/PasswordResetRequestForm').then((mod) => ({
+      default: mod.PasswordResetRequestForm,
+    })),
   {
     loading: () => (
       <div className="space-y-4">
@@ -25,9 +26,7 @@ export default function PasswordResetPage() {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold tracking-tight">
-          Reset your password
-        </h2>
+        <h2 className="text-3xl font-bold tracking-tight">Reset your password</h2>
         <p className="mt-2 text-muted-foreground">
           We&apos;ll send you an email with instructions to reset your password
         </p>

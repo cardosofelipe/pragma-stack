@@ -44,7 +44,9 @@ describe('StatsSection', () => {
   it('displays stat descriptions', () => {
     render(<StatsSection />);
 
-    expect(screen.getByText(/Comprehensive testing across backend and frontend/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Comprehensive testing across backend and frontend/i)
+    ).toBeInTheDocument();
     expect(screen.getByText(/Backend, frontend unit, and E2E tests/i)).toBeInTheDocument();
     expect(screen.getByText(/Production-stable test suite/i)).toBeInTheDocument();
     expect(screen.getByText(/Fully documented with OpenAPI/i)).toBeInTheDocument();
@@ -100,14 +102,9 @@ describe('StatsSection', () => {
     it('has descriptive labels for stats', () => {
       render(<StatsSection />);
 
-      const statLabels = [
-        'Test Coverage',
-        'Passing Tests',
-        'Flaky Tests',
-        'API Endpoints',
-      ];
+      const statLabels = ['Test Coverage', 'Passing Tests', 'Flaky Tests', 'API Endpoints'];
 
-      statLabels.forEach(label => {
+      statLabels.forEach((label) => {
         expect(screen.getByText(label)).toBeInTheDocument();
       });
     });

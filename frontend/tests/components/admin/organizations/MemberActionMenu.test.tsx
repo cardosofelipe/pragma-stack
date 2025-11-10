@@ -87,7 +87,9 @@ describe('MemberActionMenu', () => {
     await user.click(removeOption);
 
     await waitFor(() => {
-      expect(screen.getByText(/Are you sure you want to remove.*John Doe.*from this organization/)).toBeVisible();
+      expect(
+        screen.getByText(/Are you sure you want to remove.*John Doe.*from this organization/)
+      ).toBeVisible();
     });
   });
 

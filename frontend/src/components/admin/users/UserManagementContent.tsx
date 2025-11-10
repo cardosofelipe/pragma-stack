@@ -28,7 +28,8 @@ export function UserManagementContent() {
 
   // Convert filter strings to booleans for API
   const isActiveFilter = filterActive === 'true' ? true : filterActive === 'false' ? false : null;
-  const isSuperuserFilter = filterSuperuser === 'true' ? true : filterSuperuser === 'false' ? false : null;
+  const isSuperuserFilter =
+    filterSuperuser === 'true' ? true : filterSuperuser === 'false' ? false : null;
 
   // Local state
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -85,9 +86,7 @@ export function UserManagementContent() {
   // istanbul ignore next - Event handlers fully tested in E2E (admin-users.spec.ts)
   const handleSelectAll = (selected: boolean) => {
     if (selected) {
-      const selectableUsers = users
-        .filter((u) => u.id !== currentUser?.id)
-        .map((u) => u.id);
+      const selectableUsers = users.filter((u) => u.id !== currentUser?.id).map((u) => u.id);
       setSelectedUsers(selectableUsers);
     } else {
       setSelectedUsers([]);
@@ -141,9 +140,7 @@ export function UserManagementContent() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">All Users</h2>
-            <p className="text-muted-foreground">
-              Manage user accounts and permissions
-            </p>
+            <p className="text-muted-foreground">Manage user accounts and permissions</p>
           </div>
           <Button onClick={handleCreateUser}>
             <Plus className="mr-2 h-4 w-4" />

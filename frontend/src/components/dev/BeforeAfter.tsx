@@ -61,19 +61,12 @@ export function BeforeAfter({
       {(title || description) && (
         <div className="space-y-2">
           {title && <h3 className="text-xl font-semibold">{title}</h3>}
-          {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          )}
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
         </div>
       )}
 
       {/* Comparison Grid */}
-      <div
-        className={cn(
-          'grid gap-4',
-          vertical ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'
-        )}
-      >
+      <div className={cn('grid gap-4', vertical ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2')}>
         {/* Before (Anti-pattern) */}
         <Card className="border-destructive/50">
           <CardHeader className="space-y-2 pb-4">
@@ -94,9 +87,7 @@ export function BeforeAfter({
             </div>
             {/* Caption */}
             {before.caption && (
-              <p className="text-xs text-muted-foreground italic">
-                {before.caption}
-              </p>
+              <p className="text-xs text-muted-foreground italic">{before.caption}</p>
             )}
           </CardContent>
         </Card>
@@ -124,9 +115,7 @@ export function BeforeAfter({
             </div>
             {/* Caption */}
             {after.caption && (
-              <p className="text-xs text-muted-foreground italic">
-                {after.caption}
-              </p>
+              <p className="text-xs text-muted-foreground italic">{after.caption}</p>
             )}
           </CardContent>
         </Card>

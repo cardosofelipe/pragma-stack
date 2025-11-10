@@ -20,9 +20,7 @@ jest.mock('next/link', () => ({
 // Mock OrganizationMembersContent component
 jest.mock('@/components/admin/organizations/OrganizationMembersContent', () => ({
   OrganizationMembersContent: ({ organizationId }: { organizationId: string }) => (
-    <div data-testid="organization-members-content">
-      Organization ID: {organizationId}
-    </div>
+    <div data-testid="organization-members-content">Organization ID: {organizationId}</div>
   ),
 }));
 

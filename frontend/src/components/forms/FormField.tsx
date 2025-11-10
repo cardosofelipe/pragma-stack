@@ -60,7 +60,7 @@ export function FormField({
 }: FormFieldProps) {
   // Extract name from inputProps (from register()) or use explicit name
   // register() adds a name property that may not be in the type
-  const registerName = ('name' in inputProps) ? (inputProps as { name: string }).name : undefined;
+  const registerName = 'name' in inputProps ? (inputProps as { name: string }).name : undefined;
   const name = explicitName || registerName;
 
   if (!name) {
@@ -84,12 +84,7 @@ export function FormField({
           {description}
         </p>
       )}
-      <Input
-        id={name}
-        aria-invalid={!!error}
-        aria-describedby={ariaDescribedBy}
-        {...inputProps}
-      />
+      <Input id={name} aria-invalid={!!error} aria-describedby={ariaDescribedBy} {...inputProps} />
       {error && (
         <p id={errorId} className="text-sm text-destructive" role="alert">
           {error.message}

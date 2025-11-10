@@ -16,9 +16,7 @@ describe('AdminSettingsPage', () => {
   it('renders page description', () => {
     render(<AdminSettingsPage />);
 
-    expect(
-      screen.getByText('Configure system-wide settings and preferences')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Configure system-wide settings and preferences')).toBeInTheDocument();
   });
 
   it('renders back button link', () => {
@@ -31,29 +29,17 @@ describe('AdminSettingsPage', () => {
   it('renders coming soon message', () => {
     render(<AdminSettingsPage />);
 
-    expect(
-      screen.getByText('System Settings Coming Soon')
-    ).toBeInTheDocument();
+    expect(screen.getByText('System Settings Coming Soon')).toBeInTheDocument();
   });
 
   it('renders feature list', () => {
     render(<AdminSettingsPage />);
 
-    expect(
-      screen.getByText(/General system configuration/)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Email and notification settings/)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Security and authentication options/)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/API and integration settings/)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Maintenance and backup tools/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/General system configuration/)).toBeInTheDocument();
+    expect(screen.getByText(/Email and notification settings/)).toBeInTheDocument();
+    expect(screen.getByText(/Security and authentication options/)).toBeInTheDocument();
+    expect(screen.getByText(/API and integration settings/)).toBeInTheDocument();
+    expect(screen.getByText(/Maintenance and backup tools/)).toBeInTheDocument();
   });
 
   it('renders with proper container structure', () => {

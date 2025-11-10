@@ -23,21 +23,14 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert } from '@/components/ui/alert';
 import { toast } from 'sonner';
-import {
-  useCreateUser,
-  useUpdateUser,
-  type User,
-} from '@/lib/api/hooks/useAdmin';
+import { useCreateUser, useUpdateUser, type User } from '@/lib/api/hooks/useAdmin';
 
 // ============================================================================
 // Validation Schema
 // ============================================================================
 
 const userFormSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
   first_name: z
     .string()
     .min(1, 'First name is required')
@@ -66,12 +59,7 @@ interface UserFormDialogProps {
   mode: 'create' | 'edit';
 }
 
-export function UserFormDialog({
-  open,
-  onOpenChange,
-  user,
-  mode,
-}: UserFormDialogProps) {
+export function UserFormDialog({ open, onOpenChange, user, mode }: UserFormDialogProps) {
   const isEdit = mode === 'edit' && user;
   const createUser = useCreateUser();
   const updateUser = useUpdateUser();
@@ -130,7 +118,9 @@ export function UserFormDialog({
           return;
         }
         if (!/[A-Z]/.test(data.password)) {
-          form.setError('password', { message: 'Password must contain at least one uppercase letter' });
+          form.setError('password', {
+            message: 'Password must contain at least one uppercase letter',
+          });
           return;
         }
       }
@@ -147,7 +137,9 @@ export function UserFormDialog({
             return;
           }
           if (!/[A-Z]/.test(data.password)) {
-            form.setError('password', { message: 'Password must contain at least one uppercase letter' });
+            form.setError('password', {
+              message: 'Password must contain at least one uppercase letter',
+            });
             return;
           }
         }
@@ -305,10 +297,7 @@ export function UserFormDialog({
                 onCheckedChange={(checked) => setValue('is_active', checked as boolean)}
                 disabled={isSubmitting}
               />
-              <Label
-                htmlFor="is_active"
-                className="text-sm font-normal cursor-pointer"
-              >
+              <Label htmlFor="is_active" className="text-sm font-normal cursor-pointer">
                 Active (user can log in)
               </Label>
             </div>
@@ -320,10 +309,7 @@ export function UserFormDialog({
                 onCheckedChange={(checked) => setValue('is_superuser', checked as boolean)}
                 disabled={isSubmitting}
               />
-              <Label
-                htmlFor="is_superuser"
-                className="text-sm font-normal cursor-pointer"
-              >
+              <Label htmlFor="is_superuser" className="text-sm font-normal cursor-pointer">
                 Superuser (admin privileges)
               </Label>
             </div>
@@ -335,8 +321,8 @@ export function UserFormDialog({
               {createUser.isError && createUser.error instanceof Error
                 ? createUser.error.message
                 : updateUser.error instanceof Error
-                ? updateUser.error.message
-                : 'An error occurred'}
+                  ? updateUser.error.message
+                  : 'An error occurred'}
             </Alert>
           )}
 
@@ -355,8 +341,8 @@ export function UserFormDialog({
                   ? 'Updating...'
                   : 'Creating...'
                 : isEdit
-                ? 'Update User'
-                : 'Create User'}
+                  ? 'Update User'
+                  : 'Create User'}
             </Button>
           </DialogFooter>
         </form>

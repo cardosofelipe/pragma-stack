@@ -27,9 +27,7 @@ export default function AdminSettingsPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              System Settings
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight">System Settings</h1>
             <p className="mt-2 text-muted-foreground">
               Configure system-wide settings and preferences
             </p>
@@ -38,16 +36,12 @@ export default function AdminSettingsPage() {
 
         {/* Placeholder Content */}
         <div className="rounded-lg border bg-card p-12 text-center">
-          <h3 className="text-xl font-semibold mb-2">
-            System Settings Coming Soon
-          </h3>
+          <h3 className="text-xl font-semibold mb-2">System Settings Coming Soon</h3>
           <p className="text-muted-foreground max-w-md mx-auto">
-            This page will allow you to configure system-wide settings,
-            preferences, and advanced options.
+            This page will allow you to configure system-wide settings, preferences, and advanced
+            options.
           </p>
-          <p className="text-sm text-muted-foreground mt-4">
-            Features will include:
-          </p>
+          <p className="text-sm text-muted-foreground mt-4">Features will include:</p>
           <ul className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto text-left">
             <li>• General system configuration</li>
             <li>• Email and notification settings</li>

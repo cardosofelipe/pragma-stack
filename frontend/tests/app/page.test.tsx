@@ -126,9 +126,18 @@ describe('HomePage', () => {
 
     it('has CTAs for each feature', () => {
       render(<Home />);
-      expect(screen.getByRole('link', { name: /View Auth Flow/i })).toHaveAttribute('href', '/login');
-      expect(screen.getByRole('link', { name: /See Organizations/i })).toHaveAttribute('href', '/admin/organizations');
-      expect(screen.getByRole('link', { name: /Try Admin Panel/i })).toHaveAttribute('href', '/admin');
+      expect(screen.getByRole('link', { name: /View Auth Flow/i })).toHaveAttribute(
+        'href',
+        '/login'
+      );
+      expect(screen.getByRole('link', { name: /See Organizations/i })).toHaveAttribute(
+        'href',
+        '/admin/organizations'
+      );
+      expect(screen.getByRole('link', { name: /Try Admin Panel/i })).toHaveAttribute(
+        'href',
+        '/admin'
+      );
     });
   });
 
@@ -218,19 +227,19 @@ describe('HomePage', () => {
     it('has login link', () => {
       render(<Home />);
       const loginLinks = screen.getAllByRole('link', { name: /Login/i });
-      expect(loginLinks.some(link => link.getAttribute('href') === '/login')).toBe(true);
+      expect(loginLinks.some((link) => link.getAttribute('href') === '/login')).toBe(true);
     });
 
     it('has component showcase link', () => {
       render(<Home />);
       const devLinks = screen.getAllByRole('link', { name: /Component/i });
-      expect(devLinks.some(link => link.getAttribute('href') === '/dev')).toBe(true);
+      expect(devLinks.some((link) => link.getAttribute('href') === '/dev')).toBe(true);
     });
 
     it('has admin demo link', () => {
       render(<Home />);
       const adminLinks = screen.getAllByRole('link', { name: /Admin/i });
-      expect(adminLinks.some(link => link.getAttribute('href') === '/admin')).toBe(true);
+      expect(adminLinks.some((link) => link.getAttribute('href') === '/admin')).toBe(true);
     });
   });
 
@@ -245,7 +254,7 @@ describe('HomePage', () => {
     it('has external links with proper attributes', () => {
       render(<Home />);
       const githubLinks = screen.getAllByRole('link', { name: /GitHub/i });
-      const externalLink = githubLinks.find(link =>
+      const externalLink = githubLinks.find((link) =>
         link.getAttribute('href')?.includes('github.com')
       );
       expect(externalLink).toHaveAttribute('target', '_blank');

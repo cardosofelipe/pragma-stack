@@ -36,9 +36,7 @@ jest.mock('@/lib/api/hooks/useAdmin', () => ({
 jest.mock('@/components/admin/users/UserListTable', () => ({
   UserListTable: ({ onEditUser, onSelectUser, selectedUsers }: any) => (
     <div data-testid="user-list-table">
-      <button onClick={() => onEditUser({ id: '1', first_name: 'Test' })}>
-        Edit User
-      </button>
+      <button onClick={() => onEditUser({ id: '1', first_name: 'Test' })}>Edit User</button>
       <button onClick={() => onSelectUser('1')}>Select User 1</button>
       <div data-testid="selected-count">{selectedUsers.length}</div>
     </div>
@@ -67,13 +65,9 @@ jest.mock('@/components/admin/users/BulkActionToolbar', () => ({
 }));
 
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>;
-const mockUseSearchParams = useSearchParams as jest.MockedFunction<
-  typeof useSearchParams
->;
+const mockUseSearchParams = useSearchParams as jest.MockedFunction<typeof useSearchParams>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
-const mockUseAdminUsers = useAdminUsers as jest.MockedFunction<
-  typeof useAdminUsers
->;
+const mockUseAdminUsers = useAdminUsers as jest.MockedFunction<typeof useAdminUsers>;
 
 // Import mutation hooks for mocking
 const {
@@ -207,9 +201,7 @@ describe('UserManagementContent', () => {
   });
 
   const renderWithProviders = (ui: React.ReactElement) => {
-    return render(
-      <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-    );
+    return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
   };
 
   describe('Component Rendering', () => {
@@ -217,17 +209,13 @@ describe('UserManagementContent', () => {
       renderWithProviders(<UserManagementContent />);
 
       expect(screen.getByText('All Users')).toBeInTheDocument();
-      expect(
-        screen.getByText('Manage user accounts and permissions')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Manage user accounts and permissions')).toBeInTheDocument();
     });
 
     it('renders create user button', () => {
       renderWithProviders(<UserManagementContent />);
 
-      expect(
-        screen.getByRole('button', { name: /Create User/i })
-      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Create User/i })).toBeInTheDocument();
     });
 
     it('renders UserListTable component', () => {
@@ -239,17 +227,13 @@ describe('UserManagementContent', () => {
     it('does not render dialog initially', () => {
       renderWithProviders(<UserManagementContent />);
 
-      expect(
-        screen.queryByTestId('user-form-dialog')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('user-form-dialog')).not.toBeInTheDocument();
     });
 
     it('does not render bulk toolbar initially', () => {
       renderWithProviders(<UserManagementContent />);
 
-      expect(
-        screen.queryByTestId('bulk-action-toolbar')
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('bulk-action-toolbar')).not.toBeInTheDocument();
     });
   });
 
@@ -280,9 +264,7 @@ describe('UserManagementContent', () => {
       await user.click(closeButton);
 
       await waitFor(() => {
-        expect(
-          screen.queryByTestId('user-form-dialog')
-        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId('user-form-dialog')).not.toBeInTheDocument();
       });
     });
   });
@@ -311,9 +293,7 @@ describe('UserManagementContent', () => {
       await user.click(closeButton);
 
       await waitFor(() => {
-        expect(
-          screen.queryByTestId('user-form-dialog')
-        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId('user-form-dialog')).not.toBeInTheDocument();
       });
     });
   });
@@ -338,9 +318,7 @@ describe('UserManagementContent', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('bulk-action-toolbar')).toBeInTheDocument();
-        expect(screen.getByTestId('bulk-selected-count')).toHaveTextContent(
-          '1'
-        );
+        expect(screen.getByTestId('bulk-selected-count')).toHaveTextContent('1');
       });
     });
 
@@ -362,9 +340,7 @@ describe('UserManagementContent', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('selected-count')).toHaveTextContent('0');
-        expect(
-          screen.queryByTestId('bulk-action-toolbar')
-        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId('bulk-action-toolbar')).not.toBeInTheDocument();
       });
     });
 
@@ -521,9 +497,7 @@ describe('UserManagementContent', () => {
       await user.click(selectButton);
 
       await waitFor(() => {
-        expect(screen.getByTestId('bulk-selected-count')).toHaveTextContent(
-          '1'
-        );
+        expect(screen.getByTestId('bulk-selected-count')).toHaveTextContent('1');
       });
     });
   });

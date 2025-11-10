@@ -110,6 +110,7 @@ src/lib/api/generated/
 ### 2.3 When to Regenerate
 
 Regenerate the API client when:
+
 - Backend API changes (new endpoints, updated models)
 - After pulling backend changes from git
 - When types don't match backend responses
@@ -122,6 +123,7 @@ Regenerate the API client when:
 ### 3.1 Using Generated Services
 
 **Example: Fetching users**
+
 ```typescript
 import { UsersService } from '@/lib/api/generated';
 
@@ -129,19 +131,20 @@ async function getUsers() {
   const users = await UsersService.getUsers({
     page: 1,
     pageSize: 20,
-    search: 'john'
+    search: 'john',
   });
   return users;
 }
 ```
 
 **Example: Creating a user**
+
 ```typescript
 import { AdminService } from '@/lib/api/generated';
 
 async function createUser(data: CreateUserDto) {
   const newUser = await AdminService.createUser({
-    requestBody: data
+    requestBody: data,
   });
   return newUser;
 }
@@ -156,19 +159,19 @@ import { apiClient } from '@/lib/api/client';
 
 // GET request
 const response = await apiClient.get<User[]>('/users', {
-  params: { page: 1, search: 'john' }
+  params: { page: 1, search: 'john' },
 });
 
 // POST request
 const response = await apiClient.post<User>('/admin/users', {
   email: 'user@example.com',
   first_name: 'John',
-  password: 'secure123'
+  password: 'secure123',
 });
 
 // PATCH request
 const response = await apiClient.patch<User>(`/users/${userId}`, {
-  first_name: 'Jane'
+  first_name: 'Jane',
 });
 
 // DELETE request
@@ -178,27 +181,30 @@ await apiClient.delete(`/users/${userId}`);
 ### 3.3 Request Configuration
 
 **Timeouts:**
+
 ```typescript
 const response = await apiClient.get('/users', {
-  timeout: 5000 // 5 seconds
+  timeout: 5000, // 5 seconds
 });
 ```
 
 **Custom Headers:**
+
 ```typescript
 const response = await apiClient.post('/users', data, {
   headers: {
-    'X-Custom-Header': 'value'
-  }
+    'X-Custom-Header': 'value',
+  },
 });
 ```
 
 **Request Cancellation:**
+
 ```typescript
 const controller = new AbortController();
 
 const response = await apiClient.get('/users', {
-  signal: controller.signal
+  signal: controller.signal,
 });
 
 // Cancel the request
@@ -215,15 +221,13 @@ The Axios client automatically adds the Authorization header to all requests:
 
 ```typescript
 // src/lib/api/client.ts
-apiClient.interceptors.request.use(
-  (config) => {
-    const token = useAuthStore.getState().accessToken;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+apiClient.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().accessToken;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+  return config;
+});
 ```
 
 You don't need to manually add auth headers - they're added automatically!
@@ -246,7 +250,7 @@ apiClient.interceptors.response.use(
         // Refresh tokens
         const refreshToken = getRefreshToken();
         const { access_token, refresh_token } = await AuthService.refreshToken({
-          requestBody: { refresh_token: refreshToken }
+          requestBody: { refresh_token: refreshToken },
         });
 
         // Update stored tokens
@@ -255,7 +259,6 @@ apiClient.interceptors.response.use(
         // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${access_token}`;
         return apiClient.request(originalRequest);
-
       } catch (refreshError) {
         // Refresh failed - logout user
         useAuthStore.getState().clearAuth();
@@ -278,14 +281,11 @@ import { useAuthStore } from '@/stores/authStore';
 async function login(email: string, password: string) {
   try {
     const response = await AuthService.login({
-      requestBody: { email, password }
+      requestBody: { email, password },
     });
 
     // Store tokens and user
-    useAuthStore.getState().setTokens(
-      response.access_token,
-      response.refresh_token
-    );
+    useAuthStore.getState().setTokens(response.access_token, response.refresh_token);
     useAuthStore.getState().setUser(response.user);
 
     return response.user;
@@ -319,6 +319,7 @@ The backend returns structured errors:
 ### 5.2 Parsing Errors
 
 **Error Parser** (`src/lib/api/errors.ts`):
+
 ```typescript
 import type { AxiosError } from 'axios';
 
@@ -341,80 +342,93 @@ export function parseAPIError(error: AxiosError<APIErrorResponse>): APIError[] {
 
   // Network errors
   if (!error.response) {
-    return [{
-      code: 'NETWORK_ERROR',
-      message: 'Network error. Please check your connection.',
-    }];
+    return [
+      {
+        code: 'NETWORK_ERROR',
+        message: 'Network error. Please check your connection.',
+      },
+    ];
   }
 
   // HTTP status errors
   const status = error.response.status;
   if (status === 403) {
-    return [{
-      code: 'FORBIDDEN',
-      message: "You don't have permission to perform this action.",
-    }];
+    return [
+      {
+        code: 'FORBIDDEN',
+        message: "You don't have permission to perform this action.",
+      },
+    ];
   }
 
   if (status === 404) {
-    return [{
-      code: 'NOT_FOUND',
-      message: 'The requested resource was not found.',
-    }];
+    return [
+      {
+        code: 'NOT_FOUND',
+        message: 'The requested resource was not found.',
+      },
+    ];
   }
 
   if (status === 429) {
-    return [{
-      code: 'RATE_LIMIT',
-      message: 'Too many requests. Please slow down.',
-    }];
+    return [
+      {
+        code: 'RATE_LIMIT',
+        message: 'Too many requests. Please slow down.',
+      },
+    ];
   }
 
   if (status >= 500) {
-    return [{
-      code: 'SERVER_ERROR',
-      message: 'A server error occurred. Please try again later.',
-    }];
+    return [
+      {
+        code: 'SERVER_ERROR',
+        message: 'A server error occurred. Please try again later.',
+      },
+    ];
   }
 
   // Fallback
-  return [{
-    code: 'UNKNOWN',
-    message: error.message || 'An unexpected error occurred.',
-  }];
+  return [
+    {
+      code: 'UNKNOWN',
+      message: error.message || 'An unexpected error occurred.',
+    },
+  ];
 }
 ```
 
 ### 5.3 Error Code Mapping
 
 **Error Messages** (`src/lib/api/errorMessages.ts`):
+
 ```typescript
 export const ERROR_MESSAGES: Record<string, string> = {
   // Authentication errors (AUTH_xxx)
-  'AUTH_001': 'Invalid email or password',
-  'AUTH_002': 'Account is inactive',
-  'AUTH_003': 'Invalid or expired token',
+  AUTH_001: 'Invalid email or password',
+  AUTH_002: 'Account is inactive',
+  AUTH_003: 'Invalid or expired token',
 
   // User errors (USER_xxx)
-  'USER_001': 'User not found',
-  'USER_002': 'This email is already registered',
-  'USER_003': 'Invalid user data',
+  USER_001: 'User not found',
+  USER_002: 'This email is already registered',
+  USER_003: 'Invalid user data',
 
   // Validation errors (VAL_xxx)
-  'VAL_001': 'Invalid input. Please check your data.',
-  'VAL_002': 'Email format is invalid',
-  'VAL_003': 'Password does not meet requirements',
+  VAL_001: 'Invalid input. Please check your data.',
+  VAL_002: 'Email format is invalid',
+  VAL_003: 'Password does not meet requirements',
 
   // Organization errors (ORG_xxx)
-  'ORG_001': 'Organization name already exists',
-  'ORG_002': 'Organization not found',
+  ORG_001: 'Organization name already exists',
+  ORG_002: 'Organization not found',
 
   // Permission errors (PERM_xxx)
-  'PERM_001': 'Insufficient permissions',
-  'PERM_002': 'Admin access required',
+  PERM_001: 'Insufficient permissions',
+  PERM_002: 'Admin access required',
 
   // Rate limiting (RATE_xxx)
-  'RATE_001': 'Too many requests. Please try again later.',
+  RATE_001: 'Too many requests. Please try again later.',
 };
 
 export function getErrorMessage(code: string): string {
@@ -425,6 +439,7 @@ export function getErrorMessage(code: string): string {
 ### 5.4 Displaying Errors
 
 **In React Query:**
+
 ```typescript
 import { toast } from 'sonner';
 import { parseAPIError, getErrorMessage } from '@/lib/api/errors';
@@ -442,6 +457,7 @@ export function useUpdateUser() {
 ```
 
 **In Forms:**
+
 ```typescript
 const onSubmit = async (data: FormData) => {
   try {
@@ -459,9 +475,9 @@ const onSubmit = async (data: FormData) => {
     });
 
     // Set general error
-    if (errors.some(err => !err.field)) {
+    if (errors.some((err) => !err.field)) {
       form.setError('root', {
-        message: errors.find(err => !err.field)?.message || 'An error occurred',
+        message: errors.find((err) => !err.field)?.message || 'An error occurred',
       });
     }
   }
@@ -505,8 +521,7 @@ export function useCreateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateUserDto) =>
-      AdminService.createUser({ requestBody: data }),
+    mutationFn: (data: CreateUserDto) => AdminService.createUser({ requestBody: data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('User created successfully');
@@ -542,8 +557,7 @@ export function useDeleteUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (userId: string) =>
-      AdminService.deleteUser({ userId }),
+    mutationFn: (userId: string) => AdminService.deleteUser({ userId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       toast.success('User deleted successfully');
@@ -614,7 +628,7 @@ export function useToggleUserActive() {
     mutationFn: ({ userId, isActive }: { userId: string; isActive: boolean }) =>
       AdminService.updateUser({
         userId,
-        requestBody: { is_active: isActive }
+        requestBody: { is_active: isActive },
       }),
     onMutate: async ({ userId, isActive }) => {
       // Cancel outgoing refetches
@@ -687,9 +701,7 @@ export const handlers = [
   }),
 
   rest.delete('/api/v1/admin/users/:userId', (req, res, ctx) => {
-    return res(
-      ctx.json({ success: true, message: 'User deleted' })
-    );
+    return res(ctx.json({ success: true, message: 'User deleted' }));
   }),
 ];
 ```
@@ -844,6 +856,7 @@ function UserDetail({ userId }: { userId: string }) {
 **Symptom**: `Access-Control-Allow-Origin` error in console
 
 **Solution**: Ensure backend CORS is configured for frontend URL:
+
 ```python
 # backend/app/main.py
 BACKEND_CORS_ORIGINS = ["http://localhost:3000"]
@@ -854,12 +867,14 @@ BACKEND_CORS_ORIGINS = ["http://localhost:3000"]
 **Symptom**: All API calls return 401
 
 **Possible Causes**:
+
 1. No token in store: Check `useAuthStore.getState().accessToken`
 2. Token expired: Check token expiration
 3. Token invalid: Try logging in again
 4. Interceptor not working: Check interceptor configuration
 
 **Debug**:
+
 ```typescript
 // Log token in interceptor
 apiClient.interceptors.request.use((config) => {
@@ -877,6 +892,7 @@ apiClient.interceptors.request.use((config) => {
 **Symptom**: TypeScript errors about response types
 
 **Solution**: Regenerate API client to sync with backend
+
 ```bash
 npm run generate:api
 ```
@@ -886,10 +902,11 @@ npm run generate:api
 **Symptom**: UI shows old data after mutation
 
 **Solution**: Invalidate queries after mutations
+
 ```typescript
 onSuccess: () => {
   queryClient.invalidateQueries({ queryKey: ['users'] });
-}
+};
 ```
 
 ### 9.5 Network Timeout
@@ -897,6 +914,7 @@ onSuccess: () => {
 **Symptom**: Requests timeout
 
 **Solution**: Increase timeout or check backend performance
+
 ```typescript
 const apiClient = axios.create({
   timeout: 60000, // 60 seconds
@@ -908,6 +926,7 @@ const apiClient = axios.create({
 ## Conclusion
 
 This guide covers the essential patterns for integrating with the FastAPI backend. For more advanced use cases, refer to:
+
 - [TanStack Query Documentation](https://tanstack.com/query/latest)
 - [Axios Documentation](https://axios-http.com/)
 - Backend API documentation at `/docs` endpoint

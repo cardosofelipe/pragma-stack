@@ -38,9 +38,7 @@ jest.mock('next/dynamic', () => ({
 
 // Mock Alert component
 jest.mock('@/components/ui/alert', () => ({
-  Alert: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="alert">{children}</div>
-  ),
+  Alert: ({ children }: { children: React.ReactNode }) => <div data-testid="alert">{children}</div>,
 }));
 
 describe('PasswordResetConfirmContent', () => {
@@ -144,7 +142,9 @@ describe('PasswordResetConfirmContent', () => {
     it('shows error message', () => {
       render(<PasswordResetConfirmContent />);
 
-      expect(screen.getByText(/this password reset link is invalid or has expired/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/this password reset link is invalid or has expired/i)
+      ).toBeInTheDocument();
     });
 
     it('shows link to request new reset', () => {

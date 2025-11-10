@@ -70,7 +70,8 @@ export function TechStackSection() {
           Modern, Type-Safe, Production-Grade Stack
         </h2>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Built with the best tools for full-stack development. Async architecture, type safety, and developer experience.
+          Built with the best tools for full-stack development. Async architecture, type safety, and
+          developer experience.
         </p>
       </motion.div>
 
@@ -87,7 +88,9 @@ export function TechStackSection() {
           >
             <div className="h-full flex flex-col items-center justify-center rounded-lg border bg-card p-6 text-center hover:shadow-lg transition-all">
               {/* Tech Badge */}
-              <div className={`inline-block rounded-full bg-gradient-to-r ${tech.color} px-4 py-2 text-white font-semibold text-sm mb-2`}>
+              <div
+                className={`inline-block rounded-full bg-gradient-to-r ${tech.color} px-4 py-2 text-white font-semibold text-sm mb-2`}
+              >
                 {tech.name}
               </div>
 

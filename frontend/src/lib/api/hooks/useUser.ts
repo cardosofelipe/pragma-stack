@@ -34,11 +34,7 @@ export function useUpdateProfile(onSuccess?: (message: string) => void) {
   const setUser = useAuth((state) => state.setUser);
 
   return useMutation({
-    mutationFn: async (data: {
-      first_name?: string;
-      last_name?: string;
-      email?: string;
-    }) => {
+    mutationFn: async (data: { first_name?: string; last_name?: string; email?: string }) => {
       const response = await updateCurrentUser({
         body: data,
         throwOnError: false,
@@ -52,11 +48,7 @@ export function useUpdateProfile(onSuccess?: (message: string) => void) {
       const responseData = (response as { data: unknown }).data;
 
       // Validate response is a user object
-      if (
-        typeof responseData !== 'object' ||
-        responseData === null ||
-        !('id' in responseData)
-      ) {
+      if (typeof responseData !== 'object' || responseData === null || !('id' in responseData)) {
         throw new Error('Invalid profile update response: missing user data');
       }
 

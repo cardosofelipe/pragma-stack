@@ -17,11 +17,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard requireAdmin>
       <a

@@ -54,7 +54,8 @@ export function DemoSection() {
       >
         <h2 className="text-3xl md:text-4xl font-bold mb-4">See It In Action</h2>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Explore the template&apos;s capabilities with live demos. Login with demo credentials to test features.
+          Explore the template&apos;s capabilities with live demos. Login with demo credentials to
+          test features.
         </p>
       </motion.div>
 
@@ -75,9 +76,7 @@ export function DemoSection() {
             </div>
 
             <h3 className="text-xl font-semibold mb-2">{demo.title}</h3>
-            <p className="text-muted-foreground mb-4 leading-relaxed flex-1">
-              {demo.description}
-            </p>
+            <p className="text-muted-foreground mb-4 leading-relaxed flex-1">{demo.description}</p>
 
             {demo.credentials && (
               <div className="mb-4 p-3 rounded-md bg-muted font-mono text-xs border">

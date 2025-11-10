@@ -47,9 +47,7 @@ const createWrapper = () => {
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
@@ -68,9 +66,7 @@ describe('PasswordResetConfirmForm', () => {
 
     expect(screen.getByLabelText(/new password/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /reset password/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /reset password/i })).toBeInTheDocument();
   });
 
   it('shows validation errors for required fields', async () => {
@@ -84,9 +80,7 @@ describe('PasswordResetConfirmForm', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/new password is required/i)).toBeInTheDocument();
-      expect(
-        screen.getByText(/please confirm your password/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/please confirm your password/i)).toBeInTheDocument();
     });
   });
 
@@ -119,9 +113,7 @@ describe('PasswordResetConfirmForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/password must be at least 8 characters/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/password must be at least 8 characters/i)).toBeInTheDocument();
     });
   });
 
@@ -149,9 +141,7 @@ describe('PasswordResetConfirmForm', () => {
       wrapper: createWrapper(),
     });
 
-    expect(
-      screen.getByText(/enter your new password below/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/enter your new password below/i)).toBeInTheDocument();
   });
 
   it('shows login link when enabled', () => {
@@ -160,9 +150,7 @@ describe('PasswordResetConfirmForm', () => {
     });
 
     expect(screen.getByText(/remember your password/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: /back to login/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /back to login/i })).toBeInTheDocument();
   });
 
   it('marks required fields with asterisk', () => {
@@ -175,10 +163,9 @@ describe('PasswordResetConfirmForm', () => {
   });
 
   it('uses provided token in form', () => {
-    const { container } = render(
-      <PasswordResetConfirmForm token={mockToken} />,
-      { wrapper: createWrapper() }
-    );
+    const { container } = render(<PasswordResetConfirmForm token={mockToken} />, {
+      wrapper: createWrapper(),
+    });
 
     const hiddenInput = container.querySelector('input[type="hidden"]');
     expect(hiddenInput).toHaveValue(mockToken);
@@ -341,7 +328,9 @@ describe('PasswordResetConfirmForm', () => {
       await user.click(screen.getByRole('button', { name: /reset password/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('An unexpected error occurred. Please try again.')).toBeInTheDocument();
+        expect(
+          screen.getByText('An unexpected error occurred. Please try again.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -372,7 +361,9 @@ describe('PasswordResetConfirmForm', () => {
       await user.click(screen.getByRole('button', { name: /reset password/i }));
 
       await waitFor(() => {
-        expect(screen.queryByText(/your password has been successfully reset/i)).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/your password has been successfully reset/i)
+        ).not.toBeInTheDocument();
         expect(screen.getByText('Invalid or expired token')).toBeInTheDocument();
       });
     });

@@ -130,7 +130,9 @@ describe('Storage Module', () => {
       };
 
       // When setItem throws, isLocalStorageAvailable() returns false
-      await expect(saveTokens(tokens)).rejects.toThrow('localStorage not available - cannot save tokens');
+      await expect(saveTokens(tokens)).rejects.toThrow(
+        'localStorage not available - cannot save tokens'
+      );
 
       Storage.prototype.setItem = originalSetItem;
     });
@@ -171,7 +173,6 @@ describe('Storage Module', () => {
 
       localStorage.removeItem = originalRemoveItem;
     });
-
   });
 
   describe('Storage method handling', () => {

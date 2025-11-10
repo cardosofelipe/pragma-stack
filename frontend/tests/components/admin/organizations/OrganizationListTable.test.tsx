@@ -11,9 +11,7 @@ import type { Organization, PaginationMeta } from '@/lib/api/hooks/useAdmin';
 // Mock OrganizationActionMenu component
 jest.mock('@/components/admin/organizations/OrganizationActionMenu', () => ({
   OrganizationActionMenu: ({ organization }: any) => (
-    <button data-testid={`action-menu-${organization.id}`}>
-      Actions
-    </button>
+    <button data-testid={`action-menu-${organization.id}`}>Actions</button>
   ),
 }));
 
@@ -141,9 +139,7 @@ describe('OrganizationListTable', () => {
         />
       );
 
-      expect(
-        screen.getByText('No organizations found.')
-      ).toBeInTheDocument();
+      expect(screen.getByText('No organizations found.')).toBeInTheDocument();
     });
 
     it('does not render pagination when empty', () => {
@@ -177,12 +173,7 @@ describe('OrganizationListTable', () => {
 
     it('does not call onViewMembers when handler is undefined', async () => {
       const user = userEvent.setup();
-      render(
-        <OrganizationListTable
-          {...defaultProps}
-          onViewMembers={undefined}
-        />
-      );
+      render(<OrganizationListTable {...defaultProps} onViewMembers={undefined} />);
 
       const memberButton = screen.getByText('15').closest('button');
       expect(memberButton).not.toBeNull();
@@ -198,9 +189,7 @@ describe('OrganizationListTable', () => {
     it('renders pagination info correctly', () => {
       render(<OrganizationListTable {...defaultProps} />);
 
-      expect(
-        screen.getByText('Showing 1 to 2 of 2 organizations')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Showing 1 to 2 of 2 organizations')).toBeInTheDocument();
     });
 
     it('calculates pagination range correctly for page 2', () => {
@@ -218,9 +207,7 @@ describe('OrganizationListTable', () => {
         />
       );
 
-      expect(
-        screen.getByText('Showing 21 to 40 of 50 organizations')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Showing 21 to 40 of 50 organizations')).toBeInTheDocument();
     });
 
     it('renders pagination buttons', () => {

@@ -134,9 +134,7 @@ describe('SessionCard', () => {
   });
 
   it('highlights current session with border', () => {
-    const { container } = render(
-      <SessionCard session={currentSession} onRevoke={mockOnRevoke} />
-    );
+    const { container } = render(<SessionCard session={currentSession} onRevoke={mockOnRevoke} />);
 
     const card = container.querySelector('.border-primary');
     expect(card).toBeInTheDocument();

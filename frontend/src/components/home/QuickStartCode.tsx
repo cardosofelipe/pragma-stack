@@ -58,12 +58,7 @@ export function QuickStartCode() {
               <span className="inline-block h-2 w-2 rounded-full bg-green-500" aria-hidden="true" />
               <span>bash</span>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={copyToClipboard}
-              className="gap-2"
-            >
+            <Button variant="ghost" size="sm" onClick={copyToClipboard} className="gap-2">
               {copied ? (
                 <>
                   <Check className="h-4 w-4 text-green-600" aria-hidden="true" />

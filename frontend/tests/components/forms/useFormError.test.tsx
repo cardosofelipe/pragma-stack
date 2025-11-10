@@ -70,9 +70,7 @@ describe('useFormError', () => {
     it('handles API error with general error message', () => {
       const { result } = renderHook(() => useTestForm());
 
-      const apiError = [
-        { code: 'AUTH_001', message: 'Invalid credentials' },
-      ];
+      const apiError = [{ code: 'AUTH_001', message: 'Invalid credentials' }];
 
       act(() => {
         result.current.formError.handleFormError(apiError);
@@ -98,9 +96,7 @@ describe('useFormError', () => {
     });
 
     it('handles API errors with field-specific errors without crashing', () => {
-      const { result } = renderHook(() =>
-        useTestForm({ email: '', password: '', username: '' })
-      );
+      const { result } = renderHook(() => useTestForm({ email: '', password: '', username: '' }));
 
       const apiError = [
         { code: 'VAL_004', message: 'Email is required', field: 'email' },
@@ -129,7 +125,9 @@ describe('useFormError', () => {
         result.current.formError.handleFormError(unexpectedError);
       });
 
-      expect(result.current.formError.serverError).toBe('An unexpected error occurred. Please try again.');
+      expect(result.current.formError.serverError).toBe(
+        'An unexpected error occurred. Please try again.'
+      );
     });
 
     it('handles string errors', () => {
@@ -139,7 +137,9 @@ describe('useFormError', () => {
         result.current.formError.handleFormError('Some error string');
       });
 
-      expect(result.current.formError.serverError).toBe('An unexpected error occurred. Please try again.');
+      expect(result.current.formError.serverError).toBe(
+        'An unexpected error occurred. Please try again.'
+      );
     });
 
     it('handles null errors', () => {
@@ -149,7 +149,9 @@ describe('useFormError', () => {
         result.current.formError.handleFormError(null);
       });
 
-      expect(result.current.formError.serverError).toBe('An unexpected error occurred. Please try again.');
+      expect(result.current.formError.serverError).toBe(
+        'An unexpected error occurred. Please try again.'
+      );
     });
 
     it('handles undefined errors', () => {
@@ -159,7 +161,9 @@ describe('useFormError', () => {
         result.current.formError.handleFormError(undefined);
       });
 
-      expect(result.current.formError.serverError).toBe('An unexpected error occurred. Please try again.');
+      expect(result.current.formError.serverError).toBe(
+        'An unexpected error occurred. Please try again.'
+      );
     });
   });
 
@@ -179,9 +183,7 @@ describe('useFormError', () => {
     });
 
     it('clears form errors', () => {
-      const { result } = renderHook(() =>
-        useTestForm({ email: '', password: '', username: '' })
-      );
+      const { result } = renderHook(() => useTestForm({ email: '', password: '', username: '' }));
 
       // Set field errors
       act(() => {
@@ -199,9 +201,7 @@ describe('useFormError', () => {
     });
 
     it('clears both server and form errors', () => {
-      const { result } = renderHook(() =>
-        useTestForm({ email: '', password: '', username: '' })
-      );
+      const { result } = renderHook(() => useTestForm({ email: '', password: '', username: '' }));
 
       act(() => {
         result.current.formError.setServerError('Server error');
@@ -219,14 +219,10 @@ describe('useFormError', () => {
 
   describe('Integration Scenarios', () => {
     it('handles typical login flow with API error', () => {
-      const { result } = renderHook(() =>
-        useTestForm({ email: '', password: '', username: '' })
-      );
+      const { result } = renderHook(() => useTestForm({ email: '', password: '', username: '' }));
 
       // Simulate API error response
-      const apiError = [
-        { code: 'AUTH_001', message: 'Invalid email or password' },
-      ];
+      const apiError = [{ code: 'AUTH_001', message: 'Invalid email or password' }];
 
       act(() => {
         result.current.formError.handleFormError(apiError);

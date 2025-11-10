@@ -31,8 +31,7 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
           <Link href="/" className="font-bold text-xl hover:opacity-80 transition-opacity">
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               FastNext
-            </span>
-            {' '}
+            </span>{' '}
             <span className="text-foreground">Template</span>
           </Link>
 
@@ -64,18 +63,10 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
             </a>
 
             {/* CTAs */}
-            <Button
-              onClick={onOpenDemoModal}
-              variant="default"
-              size="sm"
-            >
+            <Button onClick={onOpenDemoModal} variant="default" size="sm">
               Try Demo
             </Button>
-            <Button
-              asChild
-              variant="outline"
-              size="sm"
-            >
+            <Button asChild variant="outline" size="sm">
               <Link href="/login">Login</Link>
             </Button>
           </nav>
@@ -131,11 +122,7 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
                   >
                     Try Demo
                   </Button>
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="w-full"
-                  >
+                  <Button asChild variant="outline" className="w-full">
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                       Login
                     </Link>

@@ -47,9 +47,7 @@ const createWrapper = () => {
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
@@ -63,9 +61,7 @@ describe('PasswordResetRequestForm', () => {
     render(<PasswordResetRequestForm />, { wrapper: createWrapper() });
 
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /send reset instructions/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /send reset instructions/i })).toBeInTheDocument();
   });
 
   it('shows validation error for empty email', async () => {
@@ -99,9 +95,7 @@ describe('PasswordResetRequestForm', () => {
     });
 
     expect(screen.getByText(/remember your password/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: /back to login/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /back to login/i })).toBeInTheDocument();
   });
 
   it('marks email field as required with asterisk', () => {
@@ -222,7 +216,9 @@ describe('PasswordResetRequestForm', () => {
       await user.click(screen.getByRole('button', { name: /send reset instructions/i }));
 
       await waitFor(() => {
-        expect(screen.getByText('An unexpected error occurred. Please try again.')).toBeInTheDocument();
+        expect(
+          screen.getByText('An unexpected error occurred. Please try again.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -248,7 +244,9 @@ describe('PasswordResetRequestForm', () => {
       await user.click(screen.getByRole('button', { name: /send reset instructions/i }));
 
       await waitFor(() => {
-        expect(screen.queryByText(/password reset instructions have been sent/i)).not.toBeInTheDocument();
+        expect(
+          screen.queryByText(/password reset instructions have been sent/i)
+        ).not.toBeInTheDocument();
         expect(screen.getByText('User not found')).toBeInTheDocument();
       });
     });

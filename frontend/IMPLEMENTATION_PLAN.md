@@ -20,6 +20,7 @@ Build a production-ready Next.js 15 frontend with full authentication, admin das
 ## Implementation Directives (MUST FOLLOW)
 
 ### Documentation-First Approach
+
 - Phase 0 created `/docs` folder with all architecture, standards, and guides ✅
 - ALL subsequent phases MUST reference and follow patterns in `/docs`
 - **If context is lost, `/docs` + this file + `frontend-requirements.md` are sufficient to resume**
@@ -27,6 +28,7 @@ Build a production-ready Next.js 15 frontend with full authentication, admin das
 ### Quality Assurance Protocol
 
 **1. Per-Task Quality Standards (MANDATORY):**
+
 - **Quality over Speed:** Each task developed carefully, no rushing
 - **Review Cycles:** Minimum 3 review-fix cycles per task before completion
 - **Test Coverage:** Maintain >80% coverage at all times
@@ -37,6 +39,7 @@ Build a production-ready Next.js 15 frontend with full authentication, admin das
 - **Standards Compliance:** Zero violations of `/docs/CODING_STANDARDS.md`
 
 **2. After Each Task:**
+
 - [ ] All tests passing (100% pass rate)
 - [ ] Coverage >80% for new code
 - [ ] TypeScript: 0 errors
@@ -49,6 +52,7 @@ Build a production-ready Next.js 15 frontend with full authentication, admin das
 
 **3. After Each Phase:**
 Launch multi-agent deep review to:
+
 - Verify phase objectives met
 - Check integration with previous phases
 - Identify critical issues requiring immediate fixes
@@ -57,6 +61,7 @@ Launch multi-agent deep review to:
 - **Generate phase review report** (e.g., `PHASE_X_REVIEW.md`)
 
 **4. Testing Requirements:**
+
 - Write tests alongside feature code (not after)
 - Unit tests: All hooks, utilities, services
 - Component tests: All reusable components
@@ -67,6 +72,7 @@ Launch multi-agent deep review to:
 - Use Jest + React Testing Library + Playwright
 
 **5. Context Preservation:**
+
 - Update `/docs` with implementation decisions
 - Document deviations from requirements in `ARCHITECTURE.md`
 - Keep `frontend-requirements.md` updated if backend changes
@@ -80,6 +86,7 @@ Launch multi-agent deep review to:
 ### ✅ What's Implemented
 
 **Project Infrastructure:**
+
 - Next.js 15 with App Router
 - TypeScript strict mode enabled
 - Tailwind CSS 4 configured
@@ -87,6 +94,7 @@ Launch multi-agent deep review to:
 - Path aliases configured (@/)
 
 **Authentication System:**
+
 - `src/lib/auth/crypto.ts` - AES-GCM encryption (82% coverage)
 - `src/lib/auth/storage.ts` - Secure token storage (72.85% coverage)
 - `src/stores/authStore.ts` - Zustand auth store (92.59% coverage)
@@ -94,12 +102,14 @@ Launch multi-agent deep review to:
 - SSR-safe implementations throughout
 
 **API Integration:**
+
 - `src/lib/api/client.ts` - Axios wrapper with interceptors (to be replaced)
 - `src/lib/api/errors.ts` - Error parsing utilities (to be replaced)
 - `scripts/generate-api-client.sh` - OpenAPI generation script
 - **NOTE:** Manual client files marked for replacement with generated client
 
 **Testing Infrastructure:**
+
 - Jest configured with Next.js integration
 - 66 tests passing (100%)
 - 81.6% code coverage (exceeds 70% target)
@@ -107,6 +117,7 @@ Launch multi-agent deep review to:
 - No mocks for security-critical code
 
 **Documentation:**
+
 - `/docs/ARCHITECTURE.md` - System design ✅
 - `/docs/CODING_STANDARDS.md` - Code standards ✅
 - `/docs/COMPONENT_GUIDE.md` - Component patterns ✅
@@ -134,6 +145,7 @@ stores                         |   92.59 |    97.91 |     100 |  93.87
 **E2E Tests:** 56 passed, 1 skipped, 57 total (7 test files)
 
 **Coverage Exclusions (Properly Configured):**
+
 - Auto-generated API client (`src/lib/api/generated/**`)
 - Manual API client (to be replaced)
 - Third-party UI components (`src/components/ui/**`)
@@ -219,16 +231,19 @@ frontend/
 ### ⚠️ Technical Improvements (Post-Phase 3 Enhancements)
 
 **Priority: HIGH**
+
 - Add React Error Boundary component
 - Add skip navigation links for accessibility
 
 **Priority: MEDIUM**
+
 - Add Content Security Policy (CSP) headers
 - Verify WCAG AA color contrast ratios
 - Add session timeout warnings
 - Add `lang="en"` to HTML root
 
 **Priority: LOW (Nice to Have)**
+
 - Add error tracking (Sentry/LogRocket)
 - Add password strength meter UI
 - Add offline detection/handling
@@ -246,6 +261,7 @@ frontend/
 **Completed:** October 31, 2025
 
 ### Task 0.1: Update Requirements Document ✅
+
 - ✅ Updated `frontend-requirements.md` with API corrections
 - ✅ Added Section 4.5 (Session Management UI)
 - ✅ Added Section 15 (API Endpoint Reference)
@@ -253,6 +269,7 @@ frontend/
 - ✅ Added missing User/Organization model fields
 
 ### Task 0.2: Create Architecture Documentation ✅
+
 - ✅ Created `docs/ARCHITECTURE.md`
 - ✅ System overview (Next.js App Router, TanStack Query, Zustand)
 - ✅ Technology stack rationale
@@ -261,6 +278,7 @@ frontend/
 - ✅ Design patterns documented
 
 ### Task 0.3: Create Coding Standards Documentation ✅
+
 - ✅ Created `docs/CODING_STANDARDS.md`
 - ✅ TypeScript standards (strict mode, no any)
 - ✅ React component patterns
@@ -271,6 +289,7 @@ frontend/
 - ✅ Testing standards
 
 ### Task 0.4: Create Component & Feature Guides ✅
+
 - ✅ Created `docs/COMPONENT_GUIDE.md`
 - ✅ Created `docs/FEATURE_EXAMPLES.md`
 - ✅ Created `docs/API_INTEGRATION.md`
@@ -287,10 +306,12 @@ frontend/
 **Completed:** October 31, 2025
 
 ### Task 1.1: Dependency Installation & Configuration ✅
+
 **Status:** COMPLETE
 **Blockers:** None
 
 **Installed Dependencies:**
+
 ```bash
 # Core
 @tanstack/react-query@5, zustand@4, axios@1
@@ -311,6 +332,7 @@ jest, @testing-library/react, @testing-library/jest-dom
 ```
 
 **Configuration:**
+
 - ✅ `components.json` for shadcn/ui
 - ✅ `tsconfig.json` with path aliases
 - ✅ Tailwind configured for dark mode
@@ -319,10 +341,12 @@ jest, @testing-library/react, @testing-library/jest-dom
 - ✅ `jest.setup.js` with global mocks
 
 ### Task 1.2: OpenAPI Client Generation Setup ✅
+
 **Status:** COMPLETE
 **Can run parallel with:** 1.3, 1.4
 
 **Completed:**
+
 - ✅ Created `scripts/generate-api-client.sh` using `@hey-api/openapi-ts`
 - ✅ Configured output to `src/lib/api/generated/`
 - ✅ Added npm script: `"generate:api": "./scripts/generate-api-client.sh"`
@@ -332,6 +356,7 @@ jest, @testing-library/react, @testing-library/jest-dom
 - ✅ TypeScript compilation passes with generated types
 
 **Generated Files:**
+
 - `src/lib/api/generated/index.ts` - Main exports
 - `src/lib/api/generated/types.gen.ts` - TypeScript types (35KB)
 - `src/lib/api/generated/sdk.gen.ts` - API functions (29KB)
@@ -340,15 +365,18 @@ jest, @testing-library/react, @testing-library/jest-dom
 - `src/lib/api/generated/core/` - Core utilities
 
 **To Regenerate (When Backend Changes):**
+
 ```bash
 npm run generate:api
 ```
 
 ### Task 1.3: Axios Client & Interceptors ✅
+
 **Status:** COMPLETE (needs replacement in Phase 2)
 **Can run parallel with:** 1.2, 1.4
 
 **Completed:**
+
 - ✅ Created `src/lib/api/client.ts` - Axios wrapper
   - Request interceptor: Add Authorization header
   - Response interceptor: Handle 401, 403, 429, 500
@@ -361,18 +389,22 @@ npm run generate:api
 **⚠️ Note:** This is a manual implementation. Will be replaced with generated client + thin interceptor wrapper once backend API is generated.
 
 ### Task 1.4: Folder Structure Creation ✅
+
 **Status:** COMPLETE
 **Can run parallel with:** 1.2, 1.3
 
 **Completed:**
+
 - ✅ All directories created per requirements
 - ✅ Placeholder index.ts files for exports
 - ✅ Structure matches `docs/ARCHITECTURE.md`
 
 ### Task 1.5: Authentication Core Implementation ✅
+
 **Status:** COMPLETE (additional work beyond original plan)
 
 **Completed:**
+
 - ✅ `src/lib/auth/crypto.ts` - AES-GCM encryption with random IVs
 - ✅ `src/lib/auth/storage.ts` - Encrypted token storage with localStorage
 - ✅ `src/stores/authStore.ts` - Complete Zustand auth store
@@ -383,6 +415,7 @@ npm run generate:api
 - ✅ Real crypto testing (no mocks)
 
 **Security Features:**
+
 - AES-GCM encryption with 256-bit keys
 - Random IV per encryption
 - Key stored in sessionStorage (per-session)
@@ -400,6 +433,7 @@ npm run generate:api
 **Critical Issues Fixed:** 5 ✅
 
 **Issues Resolved:**
+
 1. ✅ TypeScript compilation error (unused @ts-expect-error)
 2. ✅ Duplicate configuration files
 3. ✅ Test mocks didn't match real implementation
@@ -407,12 +441,14 @@ npm run generate:api
 5. ✅ API client exclusions documented
 
 **Final Metrics:**
+
 - Tests: 66/66 passing (100%)
 - Coverage: 81.6% (exceeds 70% target)
 - TypeScript: 0 errors
 - Security: No vulnerabilities
 
 **Audit Documents:**
+
 - `/tmp/AUDIT_SUMMARY.txt` - Executive summary
 - `/tmp/AUDIT_COMPLETE.md` - Full report
 - `/tmp/COVERAGE_CONFIG.md` - Coverage configuration
@@ -432,6 +468,7 @@ npm run generate:api
 Phase 2 delivered a complete, production-ready authentication system with exceptional quality. All authentication flows are fully functional and comprehensively tested. The codebase demonstrates professional-grade quality with 97.6% test coverage, zero build/lint/type errors, and strong security practices.
 
 **Quality Metrics (Post Deep Review):**
+
 - **Tests:** 234/234 passing (100%) ✅
 - **Coverage:** 97.6% (far exceeds 90% target) ⭐
 - **TypeScript:** 0 errors ✅
@@ -443,6 +480,7 @@ Phase 2 delivered a complete, production-ready authentication system with except
 - **Bundle Size:** 107-173 kB (excellent) ✅
 
 **What Was Accomplished:**
+
 - Complete authentication UI (login, register, password reset)
 - Route protection with AuthGuard
 - Comprehensive React Query hooks
@@ -459,9 +497,11 @@ Phase 2 delivered a complete, production-ready authentication system with except
 Phase 1 already implemented core authentication infrastructure (crypto, storage, auth store). Phase 2 built the UI layer and achieved exceptional test coverage through systematic testing of all components and edge cases.
 
 ### Task 2.1: Token Storage & Auth Store ✅ (Done in Phase 1)
+
 **Status:** COMPLETE (already done)
 
 This was completed as part of Phase 1 infrastructure:
+
 - ✅ `src/lib/auth/crypto.ts` - AES-GCM encryption
 - ✅ `src/lib/auth/storage.ts` - Token storage utilities
 - ✅ `src/stores/authStore.ts` - Complete Zustand store
@@ -471,11 +511,13 @@ This was completed as part of Phase 1 infrastructure:
 **Skip this task - move to 2.2**
 
 ### Task 2.2: Auth Interceptor Integration ✅
+
 **Status:** COMPLETE
 **Completed:** November 1, 2025
 **Depends on:** 2.1 ✅ (already complete)
 
 **Completed:**
+
 - ✅ `src/lib/api/client.ts` - Manual axios client with interceptors
   - Request interceptor adds Authorization header
   - Response interceptor handles 401, 403, 429, 500 errors
@@ -491,6 +533,7 @@ This was completed as part of Phase 1 infrastructure:
 - ✅ No infinite refresh loops (separate client for auth endpoints)
 
 **Architecture Decision:**
+
 - Using manual axios client for Phase 2 (proven, working)
 - Generated client prepared but not integrated (future migration)
 - See `docs/API_CLIENT_ARCHITECTURE.md` for full details and migration path
@@ -498,10 +541,12 @@ This was completed as part of Phase 1 infrastructure:
 **Reference:** `docs/API_CLIENT_ARCHITECTURE.md`, Requirements Section 5.2
 
 ### Task 2.3: Auth Hooks & Components ✅
+
 **Status:** COMPLETE
 **Completed:** October 31, 2025
 
 **Completed:**
+
 - ✅ `src/lib/api/hooks/useAuth.ts` - Complete React Query hooks
   - `useLogin` - Login mutation
   - `useRegister` - Register mutation
@@ -532,6 +577,7 @@ This was completed as part of Phase 1 infrastructure:
   - Link to login
 
 **Testing:**
+
 - ✅ Component tests created (9 passing)
 - ✅ Validates form fields
 - ✅ Tests password strength indicators
@@ -539,16 +585,19 @@ This was completed as part of Phase 1 infrastructure:
 - Note: 4 async tests need API mocking (low priority)
 
 ### Task 2.4: Login & Registration Pages ✅
+
 **Status:** COMPLETE
 **Completed:** October 31, 2025
 
 **Completed:**
 
 Forms (✅ Done in Task 2.3):
+
 - ✅ `src/components/auth/LoginForm.tsx`
 - ✅ `src/components/auth/RegisterForm.tsx`
 
 Pages:
+
 - ✅ `src/app/(auth)/layout.tsx` - Centered auth layout with responsive design
 - ✅ `src/app/(auth)/login/page.tsx` - Login page with title and description
 - ✅ `src/app/(auth)/register/page.tsx` - Registration page
@@ -556,11 +605,13 @@ Pages:
 - ✅ `src/app/layout.tsx` - Updated to include Providers
 
 **API Integration:**
+
 - ✅ Using manual client.ts for auth endpoints (with token refresh)
 - ✅ Generated SDK available in `src/lib/api/generated/sdk.gen.ts`
 - ✅ Wrapper at `src/lib/api/client-config.ts` configures both
 
 **Testing:**
+
 - [ ] Form validation tests
 - [ ] Submission success/error
 - [ ] E2E login flow
@@ -570,20 +621,24 @@ Pages:
 **Reference:** `docs/COMPONENT_GUIDE.md` (form patterns), Requirements Section 8.1
 
 ### Task 2.5: Password Reset Flow ✅
+
 **Status:** COMPLETE
 **Completed:** November 1, 2025
 
 **Completed Components:**
 
 Pages created:
+
 - ✅ `src/app/(auth)/password-reset/page.tsx` - Request reset page
 - ✅ `src/app/(auth)/password-reset/confirm/page.tsx` - Confirm reset with token
 
 Forms created:
+
 - ✅ `src/components/auth/PasswordResetRequestForm.tsx` - Email input form with validation
 - ✅ `src/components/auth/PasswordResetConfirmForm.tsx` - New password form with strength indicator
 
 **Implementation Details:**
+
 - ✅ Email validation with HTML5 + Zod
 - ✅ Password strength indicator (matches RegisterForm pattern)
 - ✅ Password confirmation matching
@@ -596,12 +651,14 @@ Forms created:
 - ✅ User-friendly error messages
 
 **API Integration:**
+
 - ✅ Uses `usePasswordResetRequest` hook
 - ✅ Uses `usePasswordResetConfirm` hook
 - ✅ POST `/api/v1/auth/password-reset/request` - Request reset email
 - ✅ POST `/api/v1/auth/password-reset/confirm` - Reset with token
 
 **Testing:**
+
 - ✅ PasswordResetRequestForm: 7 tests (100% passing)
 - ✅ PasswordResetConfirmForm: 10 tests (100% passing)
 - ✅ Form validation (required fields, email format, password requirements)
@@ -612,6 +669,7 @@ Forms created:
 - ✅ Accessibility attributes
 
 **Quality Assurance:**
+
 - ✅ 3 review-fix cycles completed
 - ✅ TypeScript: 0 errors
 - ✅ Lint: Clean (all files)
@@ -621,6 +679,7 @@ Forms created:
 - ✅ Memory leak prevention (timeout cleanup)
 
 **Security Implemented:**
+
 - ✅ Token passed via URL (standard practice)
 - ✅ Passwords use autocomplete="new-password"
 - ✅ No sensitive data logged
@@ -632,6 +691,7 @@ Forms created:
 ### Phase 2 Review Checklist ✅
 
 **Functionality:**
+
 - [x] All auth pages functional
 - [x] Forms have proper validation
 - [x] Error messages are user-friendly
@@ -641,6 +701,7 @@ Forms created:
 - [x] SSR-safe implementations
 
 **Quality Assurance:**
+
 - [x] Tests: 234/234 passing (100%)
 - [x] Coverage: 97.6% (far exceeds target)
 - [x] TypeScript: 0 errors
@@ -651,17 +712,20 @@ Forms created:
 - [x] Code quality audit: 9.5/10 score
 
 **Documentation:**
+
 - [x] Implementation plan updated
 - [x] Technical improvements documented
 - [x] Deep review report completed
 - [x] Architecture documented
 
 **Beyond Phase 2:**
+
 - [x] E2E tests (43 tests, 79% passing) - ✅ Setup complete!
 - [ ] Manual viewport testing (Phase 11)
 - [ ] Dark mode testing (Phase 11)
 
 **E2E Testing (Added November 1 Evening):**
+
 - [x] Playwright configured
 - [x] 43 E2E tests created across 4 test files
 - [x] 34/43 tests passing (79% pass rate)
@@ -686,6 +750,7 @@ After completing Phase 2 authentication, a critical UX issue was discovered: the
 ### Design System Selection
 
 **Research & Decision Process:**
+
 - Evaluated modern design system approaches (shadcn/ui, Radix Themes, tweakcn.com)
 - Selected **Modern Minimal** preset from tweakcn.com
 - Color palette: Blue (primary) + Zinc (neutral)
@@ -693,6 +758,7 @@ After completing Phase 2 authentication, a critical UX issue was discovered: the
 - Theme modes: Light, Dark, and System preference detection
 
 **Implementation:**
+
 - ✅ Generated complete theme CSS from tweakcn.com
 - ✅ Applied semantic color tokens (--primary, --background, --muted, etc.)
 - ✅ Updated `components.json` for Tailwind v4 and zinc base
@@ -702,6 +768,7 @@ After completing Phase 2 authentication, a critical UX issue was discovered: the
 **Completed Components:**
 
 **ThemeProvider** (`src/components/theme/ThemeProvider.tsx`):
+
 - React Context-based theme management
 - localStorage persistence of theme preference
 - System preference detection via `prefers-color-scheme`
@@ -710,6 +777,7 @@ After completing Phase 2 authentication, a critical UX issue was discovered: the
 - 16 comprehensive unit tests
 
 **ThemeToggle** (`src/components/theme/ThemeToggle.tsx`):
+
 - Dropdown menu with Light/Dark/System options
 - Visual indicators (Sun/Moon/Monitor icons)
 - Active theme checkmark display
@@ -717,12 +785,14 @@ After completing Phase 2 authentication, a critical UX issue was discovered: the
 - 13 comprehensive unit tests
 
 **E2E Theme Tests** (`e2e/theme-toggle.spec.ts`):
+
 - Theme application on public pages
 - Theme persistence across navigation
 - Programmatic theme switching
 - 6 E2E tests (100% passing)
 
 **Testing:**
+
 - ✅ ThemeProvider: 16 tests (localStorage, system preference, theme application)
 - ✅ ThemeToggle: 13 tests (dropdown menu, theme selection, active indicators)
 - ✅ E2E: 6 tests (persistence, navigation, programmatic control)
@@ -730,6 +800,7 @@ After completing Phase 2 authentication, a critical UX issue was discovered: the
 ### Task 2.5.2: Layout Components ✅
 
 **Header Component** (`src/components/layout/Header.tsx`):
+
 - Logo and navigation links
 - Theme toggle integration
 - User avatar with initials
@@ -739,17 +810,20 @@ After completing Phase 2 authentication, a critical UX issue was discovered: the
 - 16 comprehensive unit tests
 
 **Footer Component** (`src/components/layout/Footer.tsx`):
+
 - Copyright and links
 - Semantic color tokens
 - 3 unit tests
 
 **AuthInitializer** (`src/components/auth/AuthInitializer.tsx`):
+
 - **Critical Bug Fix:** Solved infinite loading on /settings page
 - Calls `authStore.loadAuthFromStorage()` on app mount
 - Ensures tokens are loaded from encrypted storage
 - 2 unit tests
 
 **Testing:**
+
 - ✅ Header: 16 tests (navigation, user menu, logout, admin access)
 - ✅ Footer: 3 tests (rendering, links)
 - ✅ AuthInitializer: 2 tests (loading auth from storage)
@@ -757,6 +831,7 @@ After completing Phase 2 authentication, a critical UX issue was discovered: the
 ### Task 2.5.3: Consistency Sweep ✅
 
 **Updated All Existing Pages:**
+
 - Replaced hardcoded colors with semantic tokens
 - Updated auth forms (LoginForm, RegisterForm, PasswordResetForms)
 - Updated settings layout and placeholder pages
@@ -764,22 +839,25 @@ After completing Phase 2 authentication, a critical UX issue was discovered: the
 - Ensured consistent design language throughout
 
 **Before:**
+
 ```tsx
-className="bg-gray-900 dark:bg-gray-700"
-className="text-gray-600 dark:text-gray-400"
-className="bg-white dark:bg-gray-900"
+className = 'bg-gray-900 dark:bg-gray-700';
+className = 'text-gray-600 dark:text-gray-400';
+className = 'bg-white dark:bg-gray-900';
 ```
 
 **After:**
+
 ```tsx
-className="bg-primary text-primary-foreground"
-className="text-muted-foreground"
-className="bg-background"
+className = 'bg-primary text-primary-foreground';
+className = 'text-muted-foreground';
+className = 'bg-background';
 ```
 
 ### Task 2.5.4: Component Showcase ✅
 
 **ComponentShowcase** (`src/components/dev/ComponentShowcase.tsx`):
+
 - Comprehensive demo of all design system components
 - Organized by category (Buttons, Forms, Cards, etc.)
 - Live theme switching demonstration
@@ -787,6 +865,7 @@ className="bg-background"
 - Accessible at `/dev/components`
 
 **Purpose:**
+
 - Visual reference for developers
 - Component documentation
 - Theme testing playground
@@ -795,6 +874,7 @@ className="bg-background"
 ### Task 2.5.5: Documentation ✅
 
 **DESIGN_SYSTEM.md** (`docs/DESIGN_SYSTEM.md`):
+
 - Complete 500+ line design system documentation
 - Color system with semantic tokens
 - Typography scale and usage
@@ -805,6 +885,7 @@ className="bg-background"
 - Code examples and best practices
 
 **Coverage:**
+
 - Colors (primary, secondary, accent, neutral)
 - Typography (font families, sizes, weights, line heights)
 - Spacing (consistent 4px base scale)
@@ -817,6 +898,7 @@ className="bg-background"
 ### Quality Achievements
 
 **Testing:**
+
 - ✅ 48 new unit tests created
 - ✅ 6 new E2E tests created
 - ✅ All 282 unit tests passing (100%)
@@ -824,6 +906,7 @@ className="bg-background"
 - ✅ Coverage improved: 78.61% → 97.57%
 
 **Code Quality:**
+
 - ✅ TypeScript: 0 errors
 - ✅ ESLint: 0 warnings
 - ✅ Build: PASSING
@@ -831,6 +914,7 @@ className="bg-background"
 - ✅ SSR-safe implementations
 
 **User Experience:**
+
 - ✅ Professional theme with OKLCH colors
 - ✅ Smooth theme transitions
 - ✅ Persistent theme preference
@@ -839,6 +923,7 @@ className="bg-background"
 - ✅ WCAG AA compliance
 
 **Documentation:**
+
 - ✅ Comprehensive DESIGN_SYSTEM.md
 - ✅ Component usage examples
 - ✅ Color and typography reference
@@ -847,28 +932,33 @@ className="bg-background"
 ### Issues Discovered & Fixed
 
 **Bug: Infinite Loading on /settings**
+
 - **Problem:** Page showed "Loading..." indefinitely
 - **Root Cause:** `authStore.loadAuthFromStorage()` never called
 - **Solution:** Created AuthInitializer component
 - **Result:** Auth state properly loaded on app mount
 
 **Issue: Broken Dropdown Menu**
+
 - **Problem:** Transparent dropdown background
 - **Root Cause:** Hardcoded colors incompatible with dark mode
 - **Solution:** Comprehensive design system with semantic tokens
 - **Result:** All UI components now theme-aware
 
 **Issue: User Type Mismatch**
+
 - **Problem:** Frontend had `full_name`, backend returns `first_name/last_name`
 - **Solution:** Updated User interface in authStore
 - **Result:** Type safety restored, all tests passing
 
 **Issue: Test Coverage Drop**
+
 - **Problem:** Coverage dropped from 97.6% to 78.61% with new components
 - **Solution:** Created 48 comprehensive unit tests
 - **Result:** Coverage restored to 97.57%
 
 **Issue: E2E Test Failures**
+
 - **Problem:** 34 E2E test failures with 30s timeouts
 - **Root Cause:** authenticated-navigation.spec.ts tried real backend login
 - **Solution:** Removed redundant tests, added theme tests
@@ -877,6 +967,7 @@ className="bg-background"
 ### Phase 2.5 Review Checklist ✅
 
 **Functionality:**
+
 - [x] Theme system fully functional (light/dark/system)
 - [x] Theme persists across page navigation
 - [x] Theme toggle accessible and intuitive
@@ -886,6 +977,7 @@ className="bg-background"
 - [x] AuthInitializer fixes infinite loading bug
 
 **Quality Assurance:**
+
 - [x] Tests: 282/282 passing (100%)
 - [x] E2E Tests: 92/92 passing (100%)
 - [x] Coverage: 97.57% (exceeds 90% target)
@@ -895,6 +987,7 @@ className="bg-background"
 - [x] Accessibility: WCAG AA compliant
 
 **Documentation:**
+
 - [x] DESIGN_SYSTEM.md comprehensive and accurate
 - [x] Component usage documented
 - [x] Implementation plan updated
@@ -918,6 +1011,7 @@ Comprehensive performance and architecture optimization phase. Achieved exceptio
 ### Final State (Completed Nov 2, 2025)
 
 **✅ ALL TASKS COMPLETED (9/9):**
+
 1. ✅ AuthInitializer optimized - working efficiently, Lighthouse 100% (Task 3.1.1)
 2. ✅ Theme FOUC fixed - inline script in layout.tsx (Task 3.1.2)
 3. ✅ React Query optimized - refetchOnWindowFocus disabled, staleTime added (Task 3.1.3)
@@ -929,6 +1023,7 @@ Comprehensive performance and architecture optimization phase. Achieved exceptio
 9. ✅ Medium severity issues - all resolved (Task 3.3.2)
 
 **Final Metrics:**
+
 - **Test Coverage:** 98.63% ⬆️ (improved from 97.57%)
 - **Unit Tests:** 381/381 passing (100%)
 - **E2E Tests:** 92/92 passing (100%)
@@ -942,6 +1037,7 @@ Comprehensive performance and architecture optimization phase. Achieved exceptio
 **Estimated Impact:** +20-25 Lighthouse points, 300-500ms faster load times
 
 #### Task 3.1.1: AuthInitializer Performance ✅ COMPLETE
+
 **Status:** ✅ COMPLETE (Optimized and performing excellently)
 **Impact:** Authentication loads efficiently, no performance issues
 **Complexity:** Resolved through multiple optimization iterations
@@ -949,6 +1045,7 @@ Comprehensive performance and architecture optimization phase. Achieved exceptio
 **Completed:** November 2, 2025
 
 **Current Implementation:**
+
 ```typescript
 useEffect(() => {
   loadAuthFromStorage(); // Optimized, fast, reliable
@@ -956,6 +1053,7 @@ useEffect(() => {
 ```
 
 **Performance Metrics:**
+
 - ✅ Lighthouse Performance: **100%** (perfect score)
 - ✅ All 473 tests passing (381 unit + 92 E2E)
 - ✅ Test coverage: 98.63%
@@ -964,23 +1062,27 @@ useEffect(() => {
 - ✅ Production-ready and stable
 
 **Optimization History:**
+
 - Multiple optimization iterations completed
 - Current implementation balances performance, reliability, and maintainability
 - No further optimization needed given perfect Lighthouse score
 
 #### Task 3.1.2: Fix Theme FOUC ✅ COMPLETE
+
 **Status:** ✅ COMPLETE (Implemented in Phase 2.5)
 **Impact:** -50-100ms FOUC eliminated, CLS removed
 **Completed:** November 2, 2025
 
 **Implementation:**
 Inline `<script>` added to `src/app/layout.tsx` (lines 33-56):
+
 - Reads localStorage before React hydration
 - Applies theme class immediately
 - No flash of wrong theme
 - ThemeProvider now reads from DOM, doesn't write
 
 **Verification:**
+
 ```html
 <!-- In app/layout.tsx <head> -->
 <script dangerouslySetInnerHTML={{__html: `
@@ -997,22 +1099,26 @@ Inline `<script>` added to `src/app/layout.tsx` (lines 33-56):
 ```
 
 **Files to Change:**
+
 - `src/app/layout.tsx` - Add inline script
 - `src/components/theme/ThemeProvider.tsx` - Simplify to read-only
 - `tests/components/theme/ThemeProvider.test.tsx` - Update tests
 
 **Testing Required:**
+
 - Verify no FOUC on page load
 - Verify SSR compatibility
 - Test localStorage edge cases
 - Update E2E tests
 
 #### Task 3.1.3: Optimize React Query Config ✅ COMPLETE
+
 **Status:** ✅ COMPLETE (Implemented in Phase 2.5)
 **Impact:** -40-60% unnecessary network calls eliminated
 **Completed:** November 2, 2025
 
 **Implementation in `src/app/providers.tsx`:**
+
 ```typescript
 new QueryClient({
   defaultOptions: {
@@ -1021,12 +1127,13 @@ new QueryClient({
       retry: 1,
       refetchOnWindowFocus: false, // ✅ Disabled
       refetchOnReconnect: true, // ✅ Kept for session data
-    }
-  }
-})
+    },
+  },
+});
 ```
 
 **Verification:**
+
 - ✅ Reduced unnecessary refetches
 - ✅ Session data still updates on reconnect
 - ✅ All tests passing
@@ -1036,6 +1143,7 @@ new QueryClient({
 **Estimated Impact:** Better maintainability, -30KB bundle size
 
 #### Task 3.2.1: Fix Stores Location ✅ COMPLETE
+
 **Status:** ✅ COMPLETE (Already implemented)
 **Impact:** Architecture compliance
 **Complexity:** Low
@@ -1044,12 +1152,14 @@ new QueryClient({
 
 **Implementation:**
 Stores are already in the correct location: `src/lib/stores/authStore.ts`
+
 - ✅ All imports use `@/lib/stores/authStore`
 - ✅ Architecture guidelines compliance verified
 - ✅ All tests passing
 - ✅ TypeScript compilation clean
 
 **Verification:**
+
 ```bash
 # Verified via file system check
 ls src/lib/stores/  # authStore.ts exists
@@ -1057,6 +1167,7 @@ ls src/stores/      # Directory doesn't exist
 ```
 
 **Files Using Correct Path:**
+
 - `src/components/auth/AuthGuard.tsx` - uses `@/lib/stores/authStore`
 - `src/components/auth/LoginForm.tsx` - uses `@/lib/stores/authStore`
 - `src/components/layout/Header.tsx` - uses `@/lib/stores/authStore`
@@ -1064,6 +1175,7 @@ ls src/stores/      # Directory doesn't exist
 - All test files - correct paths verified
 
 #### Task 3.2.2: Extract Shared Form Components ✅ COMPLETE
+
 **Status:** ✅ COMPLETE (Already implemented)
 **Impact:** -150 lines of duplication, better maintainability
 **Complexity:** Medium
@@ -1072,6 +1184,7 @@ ls src/stores/      # Directory doesn't exist
 
 **Implementation:**
 Shared form components already created:
+
 - ✅ `src/components/forms/FormField.tsx` - Reusable field with label, error, accessibility
 - ✅ `src/hooks/useFormError.ts` - Shared error handling hook
 - ✅ All auth forms using shared components
@@ -1079,6 +1192,7 @@ Shared form components already created:
 - ✅ Accessibility attributes (aria-required, aria-invalid, aria-describedby)
 
 **Verification:**
+
 ```typescript
 // FormField props interface
 export interface FormFieldProps {
@@ -1092,17 +1206,20 @@ export interface FormFieldProps {
 ```
 
 **Forms Using Shared Components:**
+
 - `src/components/auth/LoginForm.tsx` - uses FormField
 - `src/components/auth/RegisterForm.tsx` - uses FormField
 - `src/components/auth/PasswordResetRequestForm.tsx` - uses FormField
 - `src/components/auth/PasswordResetConfirmForm.tsx` - uses FormField
 
 **Testing:**
+
 - ✅ FormField: 13 tests (rendering, error display, accessibility)
 - ✅ All auth form tests passing
 - ✅ Coverage maintained at 97.57%
 
 #### Task 3.2.3: Code Split Heavy Components ✅ COMPLETE
+
 **Status:** ✅ COMPLETE (Already implemented)
 **Impact:** -30KB initial bundle
 **Complexity:** Medium
@@ -1111,12 +1228,14 @@ export interface FormFieldProps {
 
 **Implementation:**
 All auth pages already use code splitting with dynamic imports:
+
 - ✅ `src/app/(auth)/login/page.tsx` - LoginForm dynamically imported
 - ✅ `src/app/(auth)/register/page.tsx` - RegisterForm dynamically imported
 - ✅ `src/app/(auth)/password-reset/page.tsx` - PasswordResetRequestForm dynamically imported
 - ✅ `src/app/(auth)/password-reset/confirm/page.tsx` - PasswordResetConfirmForm dynamically imported
 
 **Verification:**
+
 ```typescript
 // Example from login/page.tsx
 const LoginForm = dynamic(
@@ -1133,6 +1252,7 @@ const LoginForm = dynamic(
 ```
 
 **Benefits:**
+
 - Reduced initial bundle size
 - Improved Time to Interactive (TTI)
 - Skeleton loading states provide visual feedback
@@ -1140,6 +1260,7 @@ const LoginForm = dynamic(
 - All E2E tests passing
 
 **Testing:**
+
 - ✅ Bundle size verified with `npm run build`
 - ✅ Loading states functional
 - ✅ 92/92 E2E tests passing
@@ -1150,6 +1271,7 @@ const LoginForm = dynamic(
 **Estimated Impact:** Production-ready code, zero known issues
 
 #### Task 3.3.1: Fix Token Refresh Race Condition ✅ COMPLETE
+
 **Status:** ✅ COMPLETE (Fixed TOCTOU race condition)
 **Impact:** Prevents rare authentication failures
 **Complexity:** Low
@@ -1158,26 +1280,30 @@ const LoginForm = dynamic(
 
 **Problem Identified:**
 TIME-OF-CHECK TO TIME-OF-USE (TOCTOU) race condition:
+
 ```typescript
 // BEFORE (had race condition):
 let isRefreshing = false;
 let refreshPromise: Promise<string> | null = null;
 
-if (isRefreshing && refreshPromise) {  // ← Check
+if (isRefreshing && refreshPromise) {
+  // ← Check
   return refreshPromise;
 }
 
-isRefreshing = true;  // ← Set (NOT ATOMIC!)
+isRefreshing = true; // ← Set (NOT ATOMIC!)
 // Race window here - two requests could both pass the check
 ```
 
 **Solution Implemented:**
 Removed redundant `isRefreshing` flag, use `refreshPromise` as atomic lock:
+
 ```typescript
 // AFTER (race condition fixed):
 let refreshPromise: Promise<string> | null = null;
 
-if (refreshPromise) {  // ← Atomic check
+if (refreshPromise) {
+  // ← Atomic check
   return refreshPromise;
 }
 
@@ -1190,15 +1316,18 @@ return refreshPromise;
 ```
 
 **Testing:**
+
 - ✅ All 381 unit tests passing
 - ✅ All 92 E2E tests passing
 - ✅ TypeScript: 0 errors
 - ✅ No regressions detected
 
 **Files Modified:**
+
 - `src/lib/api/client.ts` - Removed `isRefreshing`, simplified logic
 
 #### Task 3.3.2: Fix Medium Severity Issues ✅ COMPLETE
+
 **Status:** ✅ COMPLETE (Already fixed)
 **Impact:** Code quality, maintainability
 **Complexity:** Low
@@ -1206,12 +1335,14 @@ return refreshPromise;
 **Completed:** November 2, 2025 (During Phase 2.5)
 
 **Issues Fixed:**
+
 1. ✅ setTimeout cleanup - Proper cleanup in password reset forms
 2. ✅ AuthInitializer dependency array - Correctly implemented with [loadAuthFromStorage]
 3. ✅ ESLint warnings - Zero warnings in production build
 4. ✅ Type assertions - All type-safe, no unsafe assertions
 
 **Verification:**
+
 ```bash
 # ESLint check
 npm run lint
@@ -1227,17 +1358,20 @@ npm run build
 ```
 
 **Files Verified:**
+
 - `src/lib/api/hooks/useAuth.ts` - No memory leaks, proper cleanup
 - `src/components/auth/AuthInitializer.tsx` - Dependency array correct
 - `src/components/auth/PasswordResetConfirmForm.tsx` - setTimeout cleanup implemented
 
 **Testing:**
+
 - ✅ All 282 unit tests passing
 - ✅ All 92 E2E tests passing
 - ✅ No memory leaks detected
 - ✅ Zero lint warnings
 
 #### Task 3.3.3: Remove console.log in Production ✅ COMPLETE
+
 **Status:** ✅ COMPLETE (All 6 statements production-safe)
 **Impact:** Clean console, smaller bundle
 **Complexity:** Low
@@ -1249,17 +1383,21 @@ All console.log statements properly conditionalized for production safety.
 
 **Production Code (4 statements - FIXED):**
 `src/lib/api/client.ts` - All wrapped in `config.debug.api` check:
+
 ```typescript
 if (config.debug.api) {
   console.log('[API Client] Refreshing access token...');
 }
 ```
+
 Where `config.debug.api = parseBool(ENV.DEBUG_API, false) && ENV.NODE_ENV === 'development'`
+
 - Defaults to `false` in production ✅
 - Only enabled if explicitly set AND in development mode ✅
 
 **Demo Code (2 statements - FIXED):**
 `src/app/dev/forms/page.tsx` - Wrapped in NODE_ENV check:
+
 ```typescript
 if (process.env.NODE_ENV === 'development') {
   console.log('Login form data:', data);
@@ -1267,6 +1405,7 @@ if (process.env.NODE_ENV === 'development') {
 ```
 
 **Verification:**
+
 - ✅ All 381 unit tests passing
 - ✅ All 92 E2E tests passing
 - ✅ TypeScript: 0 errors
@@ -1274,17 +1413,20 @@ if (process.env.NODE_ENV === 'development') {
 - ✅ Development mode: Logging works correctly
 
 **Files Modified:**
+
 - `src/app/dev/forms/page.tsx` - Added 2 conditionals
 
 ### Phase 3 Testing Strategy
 
 **Test Coverage Requirements:**
+
 - Maintain 97.57% coverage minimum
 - All new code must have tests
 - Refactored code must maintain existing tests
 - E2E tests: 92/92 passing (100%)
 
 **Regression Testing:**
+
 - Run full test suite after each priority
 - Verify no TypeScript errors
 - Verify no ESLint warnings
@@ -1292,6 +1434,7 @@ if (process.env.NODE_ENV === 'development') {
 - Manual smoke test of critical flows
 
 **Performance Testing:**
+
 - Lighthouse reports before/after each week
 - Bundle size analysis (npm run build)
 - Network tab monitoring (API calls)
@@ -1300,6 +1443,7 @@ if (process.env.NODE_ENV === 'development') {
 ### Success Criteria - ACHIEVED ✅
 
 **Task 3.1 Results:**
+
 - [✅] AuthInitializer optimized - COMPLETE (stable, Lighthouse 100%)
 - [✅] Theme FOUC eliminated - COMPLETE (inline script)
 - [✅] React Query refetch reduced by 40-60% - COMPLETE (refetchOnWindowFocus: false)
@@ -1308,6 +1452,7 @@ if (process.env.NODE_ENV === 'development') {
 - [✅] Lighthouse Performance: 100% ⭐ - **EXCEEDED TARGET** (user confirmed)
 
 **Task 3.2 Results:**
+
 - [✅] Stores moved to `src/lib/stores/` - COMPLETE
 - [✅] Shared form components extracted - COMPLETE (FormField, useFormError)
 - [✅] Bundle size reduced by 30KB - COMPLETE (code splitting verified)
@@ -1316,6 +1461,7 @@ if (process.env.NODE_ENV === 'development') {
 - [✅] Code duplication reduced by 60% - COMPLETE
 
 **Task 3.3 Results:**
+
 - [✅] Token refresh race condition FIXED - COMPLETE (TOCTOU bug fixed)
 - [✅] All medium severity issues resolved - COMPLETE
 - [✅] console.log production-safe - COMPLETE (all 6 conditionalized)
@@ -1324,6 +1470,7 @@ if (process.env.NODE_ENV === 'development') {
 - [✅] Production-ready code - COMPLETE
 
 **Phase 3 Final Results:**
+
 - [✅] 9/9 tasks completed - **ALL TASKS COMPLETE**
 - [✅] Tests: 381 passing (100%) - **INCREASED from 282**
 - [✅] E2E: 92 passing (100%)
@@ -1338,6 +1485,7 @@ if (process.env.NODE_ENV === 'development') {
 **Final Verdict:** ✅ PHASE 3 COMPLETE - **OUTSTANDING PROJECT DELIVERED** - All 9 tasks successfully completed
 
 **Key Achievements:**
+
 - 🎯 Lighthouse Performance: 100% (exceeded all targets)
 - 📈 Test Coverage: 98.63% (improved by 1.06%)
 - 🧪 473 Total Tests: 100% passing (381 unit + 92 E2E)
@@ -1364,6 +1512,7 @@ Complete user settings functionality implemented including profile management, p
 **Focus:** Fixed all failing tests to achieve 100% pass rate
 
 **Test Fixes Completed:**
+
 1. ✅ **useUser.test.tsx** - Fixed error message assertion (expected "An unexpected error occurred" instead of "Update failed")
 2. ✅ **SessionCard.test.tsx** - Fixed location test (component conditionally hides "Unknown location", not displays it)
 3. ✅ **SessionsManager.test.tsx (bulk revoke)** - Fixed button selection using `buttons.find()` instead of array index
@@ -1372,6 +1521,7 @@ Complete user settings functionality implemented including profile management, p
 6. ✅ **useSession.test.tsx (sessions not loaded)** - Changed from unrealistic edge case to realistic empty array scenario
 
 **Final Metrics:**
+
 - **Unit Tests:** 451/451 passing (100% pass rate) ⭐
 - **Test Suites:** 40/40 passing
 - **Coverage:** 98.38% overall (far exceeds 90% target) ⭐⭐
@@ -1384,18 +1534,21 @@ Complete user settings functionality implemented including profile management, p
 - **Build:** PASSING ✅
 
 **Coverage Exclusions (Properly Documented):**
+
 - PasswordChangeForm.tsx: Form submission logic excluded with istanbul ignore comments
 - ProfileSettingsForm.tsx: Form submission logic excluded with istanbul ignore comments
 - Reason: react-hook-form's isDirty state doesn't update synchronously in unit tests
 - E2E tests created to cover these flows ✅
 
 **Key Learnings:**
+
 - Test assertions must match actual implementation behavior (error parsers return generic messages)
 - Component conditional rendering requires testing for absence, not presence
 - Button selection needs precise regex to avoid false matches
 - Test scenarios should be realistic (empty arrays, not undefined caches)
 
 **Available SDK Functions:**
+
 - `getCurrentUserProfile` - GET /users/me
 - `updateCurrentUser` - PATCH /users/me
 - `changeCurrentUserPassword` - POST /users/me/password
@@ -1403,6 +1556,7 @@ Complete user settings functionality implemented including profile management, p
 - `revokeSession` - DELETE /sessions/{id}
 
 **Existing Infrastructure:**
+
 - ✅ Settings layout with tabbed navigation (`/settings/layout.tsx`)
 - ✅ Placeholder pages for profile, password, sessions, preferences
 - ✅ `usePasswordChange` hook already exists
@@ -1420,6 +1574,7 @@ Complete user settings functionality implemented including profile management, p
 **Implementation Completed:**
 
 ✅ **Hook:** `src/lib/api/hooks/useUser.ts` (84 lines)
+
 - `useUpdateProfile` mutation hook
 - Integrates with authStore to update user in global state
 - Invalidates auth queries on success
@@ -1427,6 +1582,7 @@ Complete user settings functionality implemented including profile management, p
 - Comprehensive error handling with parseAPIError
 
 ✅ **Component:** `src/components/settings/ProfileSettingsForm.tsx` (226 lines)
+
 - Fields: first_name (required), last_name (optional), email (read-only)
 - Zod validation schema with proper constraints
 - Server error display with Alert component
@@ -1436,17 +1592,20 @@ Complete user settings functionality implemented including profile management, p
 - Auto-populated with current user data via useEffect
 
 ✅ **Page:** `src/app/(authenticated)/settings/profile/page.tsx` (26 lines)
+
 - Clean client component
 - Imports and renders ProfileSettingsForm
 - Proper page header with description
 
 **Testing Complete:**
+
 - ✅ Unit test useUpdateProfile hook (195 lines, 5 test cases)
 - ✅ Unit test ProfileSettingsForm component (comprehensive)
 - ✅ Coverage: 96.15% for ProfileSettingsForm
 - ⚠️ E2E test profile update flow (recommended for future)
 
 **Quality Metrics:**
+
 - Professional code with JSDoc comments
 - Type-safe throughout
 - SSR-safe (client components)
@@ -1465,11 +1624,13 @@ Complete user settings functionality implemented including profile management, p
 **Implementation Completed:**
 
 ✅ **Hook:** `usePasswordChange` from `src/lib/api/hooks/useAuth.ts`
+
 - Already implemented in Phase 2
 - Mutation hook for password changes
 - Form auto-reset on success
 
 ✅ **Component:** `src/components/settings/PasswordChangeForm.tsx` (216 lines)
+
 - Fields: current_password, new_password, confirm_password
 - Strong password validation (min 8 chars, uppercase, lowercase, number, special char)
 - Password confirmation matching with Zod refine
@@ -1480,16 +1641,19 @@ Complete user settings functionality implemented including profile management, p
 - Cancel button for undo
 
 ✅ **Page:** `src/app/(authenticated)/settings/password/page.tsx` (26 lines)
+
 - Clean client component
 - Imports and renders PasswordChangeForm
 - Proper page header with description
 
 **Testing Complete:**
+
 - ✅ Unit test PasswordChangeForm component (comprehensive)
 - ✅ Coverage: 91.3% for PasswordChangeForm
 - ⚠️ E2E test password change flow (recommended for future)
 
 **Quality Metrics:**
+
 - Strong password requirements enforced
 - Security-focused (autocomplete="new-password")
 - User-friendly error messages
@@ -1507,6 +1671,7 @@ Complete user settings functionality implemented including profile management, p
 **Implementation Completed:**
 
 ✅ **Hooks:** `src/lib/api/hooks/useSession.ts` (178 lines)
+
 - `useListSessions` query hook
 - `useRevokeSession` mutation hook
 - `useRevokeAllOtherSessions` mutation hook (bulk revocation)
@@ -1515,6 +1680,7 @@ Complete user settings functionality implemented including profile management, p
 - 30s staleTime for performance
 
 ✅ **Component:** `src/components/settings/SessionCard.tsx` (182 lines)
+
 - Individual session display
 - Device icon (Monitor)
 - Session information: device name, IP, location, last activity
@@ -1525,6 +1691,7 @@ Complete user settings functionality implemented including profile management, p
 - date-fns for relative timestamps
 
 ✅ **Component:** `src/components/settings/SessionsManager.tsx` (243 lines)
+
 - Session list manager
 - Lists all active sessions with SessionCard components
 - Loading skeleton state
@@ -1535,10 +1702,12 @@ Complete user settings functionality implemented including profile management, p
 - Security tip displayed at bottom
 
 ✅ **Page:** `src/app/(authenticated)/settings/sessions/page.tsx` (26 lines)
+
 - Clean client component
 - Imports and renders SessionsManager
 
 **Testing Complete:**
+
 - ✅ Unit test useListSessions hook (339 lines, 11 test cases)
 - ✅ Unit test useRevokeSession hook (included in useSession.test.tsx)
 - ✅ Unit test SessionCard component (comprehensive)
@@ -1547,6 +1716,7 @@ Complete user settings functionality implemented including profile management, p
 - ⚠️ E2E test session revocation flow (recommended for future)
 
 **Quality Metrics:**
+
 - Comprehensive error handling
 - Loading states everywhere
 - User-friendly empty states
@@ -1560,12 +1730,14 @@ Complete user settings functionality implemented including profile management, p
 **Reason:** Not critical for MVP, theme already working
 
 **Future Implementation:**
+
 - Theme preference (already working via ThemeProvider)
 - Email notification preferences
 - Timezone selection
 - Language selection
 
 **Current State:**
+
 - Placeholder page exists
 - Can be implemented in future phase if needed
 
@@ -1578,6 +1750,7 @@ Complete user settings functionality implemented including profile management, p
 **Risk:** Low
 
 **Requirements Met:**
+
 - ✅ All unit tests passing (451/451 tests, 100% pass rate) ⭐
 - ✅ All test suites passing (40/40, 100% pass rate) ⭐
 - ⚠️ E2E tests for settings pages (recommended for future)
@@ -1588,6 +1761,7 @@ Complete user settings functionality implemented including profile management, p
 - ✅ Manual testing completed (all settings flows functional)
 
 **Test Coverage Achieved:**
+
 - ProfileSettingsForm: 96.15% coverage (form submission excluded with istanbul ignore)
 - PasswordChangeForm: 91.3% coverage (form submission excluded with istanbul ignore)
 - SessionsManager: 90.62% coverage
@@ -1595,12 +1769,14 @@ Complete user settings functionality implemented including profile management, p
 - All hooks: 100% coverage ⭐
 
 **Coverage Exclusions (Documented):**
+
 - Form submission logic in ProfileSettingsForm and PasswordChangeForm
 - Reason: react-hook-form's isDirty state doesn't update synchronously in unit tests
 - Properly documented with istanbul ignore comments
 - E2E tests recommended to cover these flows
 
 **E2E Test Status:**
+
 - ⚠️ Settings-specific E2E tests not yet created
 - Recommended scenarios for future:
   1. Update profile (first name, last name)
@@ -1612,6 +1788,7 @@ Complete user settings functionality implemented including profile management, p
 ### Success Criteria ✅ ALL MET
 
 **Task 4.1 Complete ✅:**
+
 - [x] useUpdateProfile hook implemented and tested
 - [x] ProfileSettingsForm component complete with validation
 - [x] Profile page functional (view + edit)
@@ -1619,6 +1796,7 @@ Complete user settings functionality implemented including profile management, p
 - [x] User can update first_name and last_name
 
 **Task 4.2 Complete ✅:**
+
 - [x] PasswordChangeForm component complete
 - [x] Password page functional
 - [x] Unit tests passing (91.3% coverage)
@@ -1626,6 +1804,7 @@ Complete user settings functionality implemented including profile management, p
 - [x] Error handling for wrong current password
 
 **Task 4.3 Complete ✅:**
+
 - [x] useListSessions and useRevokeSession hooks implemented
 - [x] SessionsManager component displays all sessions
 - [x] Session revocation works correctly
@@ -1634,6 +1813,7 @@ Complete user settings functionality implemented including profile management, p
 - [x] Bulk revocation supported
 
 **Phase 4 Complete ✅:**
+
 - [x] All tasks 4.1, 4.2, 4.3, 4.5 complete (4.4 deferred)
 - [x] Tests: 451 unit tests passing (100% pass rate) ⭐
 - [x] E2E Tests: 45 settings tests added ⭐
@@ -1664,6 +1844,7 @@ Component library and development tools already implemented via `/dev` routes. I
 **What Was Implemented:**
 
 ### Dev Routes & Tools ✅
+
 - ✅ `/dev` - Development hub with navigation
 - ✅ `/dev/components` - ComponentShowcase with all shadcn/ui components
 - ✅ `/dev/docs` - Design system documentation integration
@@ -1673,6 +1854,7 @@ Component library and development tools already implemented via `/dev` routes. I
 - ✅ `/dev/forms` - Form patterns and examples
 
 ### Dev Components ✅
+
 - ✅ `DevLayout.tsx` - Consistent dev section layout
 - ✅ `DevBreadcrumbs.tsx` - Navigation breadcrumbs
 - ✅ `ComponentShowcase.tsx` - Comprehensive component gallery
@@ -1681,6 +1863,7 @@ Component library and development tools already implemented via `/dev` routes. I
 - ✅ `CodeSnippet.tsx` - Syntax-highlighted code blocks
 
 ### Design System Documentation ✅
+
 - ✅ `docs/design-system/` - Complete design system guide
   - 00-quick-start.md - 5-minute crash course
   - 01-foundations.md - Colors, typography, spacing
@@ -1694,7 +1877,9 @@ Component library and development tools already implemented via `/dev` routes. I
   - 99-reference.md - Quick reference cheat sheet
 
 ### Component Library ✅
+
 All shadcn/ui components installed and configured:
+
 - ✅ Button, Card, Input, Label, Form, Select, Table
 - ✅ Dialog, Toast, Tabs, Dropdown Menu, Popover, Sheet
 - ✅ Avatar, Badge, Separator, Skeleton, Alert
@@ -1703,6 +1888,7 @@ All shadcn/ui components installed and configured:
 - ✅ Full accessibility support (WCAG AA)
 
 **Quality Metrics:**
+
 - Dev routes excluded from coverage (demo pages)
 - ComponentShowcase excluded from coverage (visual demo)
 - All reusable components included in coverage (98.38%)
@@ -1732,12 +1918,14 @@ Implement admin dashboard foundation with layout, navigation, and basic structur
 **Implementation:**
 
 **Step 1: Create Admin Layout** (`src/app/admin/layout.tsx`)
+
 - Separate layout from authenticated layout
 - Sidebar navigation for admin sections
 - Breadcrumbs for admin navigation
 - Admin-only route protection (requires `is_superuser: true`)
 
 **Step 2: Create Admin Sidebar Component** (`src/components/admin/AdminSidebar.tsx`)
+
 - Navigation links:
   - Dashboard (overview)
   - Users (user management)
@@ -1748,6 +1936,7 @@ Implement admin dashboard foundation with layout, navigation, and basic structur
 - User info at bottom
 
 **Step 3: Create Admin Dashboard Page** (`src/app/admin/page.tsx`)
+
 - Overview statistics:
   - Total users
   - Active users (last 30 days)
@@ -1757,17 +1946,20 @@ Implement admin dashboard foundation with layout, navigation, and basic structur
 - Quick actions (placeholder)
 
 **Step 4: Admin Route Protection**
+
 - Use `AuthGuard` with `requireAdmin` prop
 - Redirect non-admins to home page
 - Show error message for unauthorized access
 
 **Testing:**
+
 - [ ] Unit test AdminSidebar component
 - [ ] Unit test admin layout
 - [ ] E2E test admin access (superuser can access)
 - [ ] E2E test admin denial (regular user gets 403)
 
 **Files to Create:**
+
 - `src/app/admin/layout.tsx` - Admin layout
 - `src/app/admin/page.tsx` - Dashboard overview
 - `src/components/admin/AdminSidebar.tsx` - Navigation sidebar
@@ -1784,6 +1976,7 @@ Implement admin dashboard foundation with layout, navigation, and basic structur
 **Implementation:**
 
 **Step 1: Create Stats Hooks** (`src/lib/api/hooks/useAdmin.ts`)
+
 ```typescript
 export function useAdminStats() {
   return useQuery({
@@ -1795,29 +1988,34 @@ export function useAdminStats() {
 ```
 
 **Step 2: Create Stat Card Component** (`src/components/admin/StatCard.tsx`)
+
 - Display stat value with label
 - Trend indicator (up/down/neutral)
 - Icon for each stat type
 - Loading skeleton state
 
 **Step 3: Create Dashboard Stats Grid** (`src/components/admin/DashboardStats.tsx`)
+
 - Grid of StatCard components
 - Responsive layout (1-2-4 columns)
 - Loading state for all cards
 - Error state with retry
 
 **Step 4: Update Dashboard Page**
+
 - Render DashboardStats component
 - Add recent activity section (placeholder)
 - Add quick actions section (placeholder)
 
 **Testing:**
+
 - [ ] Unit test useAdminStats hook
 - [ ] Unit test StatCard component
 - [ ] Unit test DashboardStats component
 - [ ] E2E test dashboard rendering
 
 **Files to Create:**
+
 - `src/lib/api/hooks/useAdmin.ts` - Admin data hooks
 - `src/components/admin/StatCard.tsx` - Stat display card
 - `src/components/admin/DashboardStats.tsx` - Stats grid
@@ -1835,19 +2033,23 @@ export function useAdminStats() {
 **Implementation:**
 
 **Step 1: Create Users Page** (`src/app/admin/users/page.tsx`)
+
 - Placeholder for user list
 - Page header with title
 - "User Management coming in Phase 7" message
 
 **Step 2: Add to Sidebar**
+
 - Link to `/admin/users`
 - Active state highlighting
 
 **Testing:**
+
 - [ ] E2E test navigation to users page
 - [ ] E2E test placeholder content displays
 
 **Files to Create:**
+
 - `src/app/admin/users/page.tsx` - Users list page (placeholder)
 
 ### Task 6.4: Organizations Section Structure (Priority 2)
@@ -1860,24 +2062,29 @@ export function useAdminStats() {
 **Implementation:**
 
 **Step 1: Create Organizations Page** (`src/app/admin/organizations/page.tsx`)
+
 - Placeholder for org list
 - Page header with title
 - "Organization Management coming in Phase 8" message
 
 **Step 2: Add to Sidebar**
+
 - Link to `/admin/organizations`
 - Active state highlighting
 
 **Testing:**
+
 - [ ] E2E test navigation to organizations page
 - [ ] E2E test placeholder content displays
 
 **Files to Create:**
+
 - `src/app/admin/organizations/page.tsx` - Orgs list page (placeholder)
 
 ### Success Criteria
 
 **Task 6.1 Complete When:**
+
 - [ ] Admin layout created with sidebar
 - [ ] Admin sidebar navigation functional
 - [ ] Admin dashboard page displays
@@ -1886,6 +2093,7 @@ export function useAdminStats() {
 - [ ] Non-admin users cannot access admin routes
 
 **Task 6.2 Complete When:**
+
 - [ ] useAdminStats hook implemented
 - [ ] StatCard component complete
 - [ ] DashboardStats displays stats grid
@@ -1894,12 +2102,14 @@ export function useAdminStats() {
 - [ ] Dashboard shows real stats from API
 
 **Task 6.3 & 6.4 Complete When:**
+
 - [ ] Users and Organizations pages created (placeholders)
 - [ ] Sidebar navigation includes both sections
 - [ ] E2E tests for navigation passing
 - [ ] Placeholder content displays correctly
 
 **Phase 6 Complete When:**
+
 - [ ] All tasks 6.1, 6.2, 6.3, 6.4 complete
 - [ ] Tests: All new tests passing (100%)
 - [ ] E2E: Admin access tests passing
@@ -1915,6 +2125,7 @@ export function useAdminStats() {
 **Final Verdict:** ✅ Phase 6 COMPLETE - Admin foundation established successfully
 
 **Completion Summary (Nov 6, 2025):**
+
 - ✅ Admin layout with sidebar navigation implemented (`src/app/admin/layout.tsx`)
 - ✅ AdminSidebar component with collapsible navigation (`src/components/admin/AdminSidebar.tsx`)
 - ✅ Breadcrumbs component for navigation trail (`src/components/admin/Breadcrumbs.tsx`)
@@ -1934,6 +2145,7 @@ export function useAdminStats() {
 - ✅ Route protection with AuthGuard requiring `is_superuser: true`
 
 **Known Issues:**
+
 - E2E tests have some flakiness with `loginViaUI` helper timeouts - related to test infrastructure, not production code
 - Admin sessions stat shows 0 (backend endpoint `/api/v1/admin/sessions` not yet implemented)
 
@@ -1953,6 +2165,7 @@ Complete admin user management system with full CRUD operations, advanced filter
 ### Implementation Completed
 
 **Hooks** (`src/lib/api/hooks/useAdmin.tsx`):
+
 - ✅ `useAdminUsers` - List users with pagination and filtering
 - ✅ `useCreateUser` - Create new user with validation
 - ✅ `useUpdateUser` - Update user details
@@ -1962,6 +2175,7 @@ Complete admin user management system with full CRUD operations, advanced filter
 - ✅ `useBulkUserAction` - Bulk operations (activate, deactivate, delete)
 
 **Components** (`src/components/admin/users/`):
+
 - ✅ **UserManagementContent.tsx** - Main container with state management
   - URL-based state for filters (search, active, superuser, page)
   - User selection state for bulk operations
@@ -1996,6 +2210,7 @@ Complete admin user management system with full CRUD operations, advanced filter
   - Clear selection
 
 **Features Implemented:**
+
 - ✅ User list with pagination (20 per page)
 - ✅ Advanced filtering:
   - Search by name or email (debounced)
@@ -2013,6 +2228,7 @@ Complete admin user management system with full CRUD operations, advanced filter
 ### Testing Complete
 
 **Unit Tests** (134 tests, 5 test suites):
+
 - ✅ `UserFormDialog.test.tsx` - Form validation, dialog states
 - ✅ `BulkActionToolbar.test.tsx` - Bulk actions, confirmations
 - ✅ `UserManagementContent.test.tsx` - State management, URL params
@@ -2020,6 +2236,7 @@ Complete admin user management system with full CRUD operations, advanced filter
 - ✅ `UserListTable.test.tsx` - Table rendering, selection
 
 **E2E Tests** (51 tests in admin-users.spec.ts):
+
 - ✅ User list rendering and pagination
 - ✅ Search functionality (debounced)
 - ✅ Filter by active status
@@ -2031,6 +2248,7 @@ Complete admin user management system with full CRUD operations, advanced filter
 - ✅ Accessibility features (headings, labels, ARIA)
 
 **Coverage:**
+
 - Overall: 97.22% statements
 - Components: All admin/users components 90%+
 - E2E: All critical flows covered
@@ -2038,6 +2256,7 @@ Complete admin user management system with full CRUD operations, advanced filter
 ### Quality Metrics
 
 **Final Metrics:**
+
 - ✅ Unit Tests: 745/745 passing (100%)
 - ✅ E2E Tests: 51/51 admin user tests passing
 - ✅ Coverage: 97.22% (exceeds 90% target)
@@ -2047,6 +2266,7 @@ Complete admin user management system with full CRUD operations, advanced filter
 - ✅ All features functional and tested
 
 **User Experience:**
+
 - Professional UI with consistent design system
 - Responsive on all screen sizes
 - Clear feedback for all actions
@@ -2069,6 +2289,7 @@ Complete admin organization management system implemented following the same pat
 ### Implementation Completed ✅
 
 **Backend API Endpoints Integrated:**
+
 - ✅ `GET /api/v1/admin/organizations` - List organizations with pagination
 - ✅ `POST /api/v1/admin/organizations` - Create organization
 - ✅ `GET /api/v1/admin/organizations/{id}` - Get organization details
@@ -2082,6 +2303,7 @@ Complete admin organization management system implemented following the same pat
 ### Task 8.1: Organization Hooks & Components ✅
 
 **Hooks Implemented** (`src/lib/api/hooks/useAdmin.tsx`):
+
 - ✅ `useAdminOrganizations` - List organizations with pagination/filtering
 - ✅ `useCreateOrganization` - Create new organization
 - ✅ `useUpdateOrganization` - Update organization details
@@ -2092,6 +2314,7 @@ Complete admin organization management system implemented following the same pat
 - ✅ `useUpdateMemberRole` - Change member role (owner/admin/member)
 
 **Components Created** (`src/components/admin/organizations/`):
+
 - ✅ `OrganizationManagementContent.tsx` - Main container
 - ✅ `OrganizationListTable.tsx` - Data table with org list
 - ✅ `OrganizationFormDialog.tsx` - Create/edit organization
@@ -2104,6 +2327,7 @@ Complete admin organization management system implemented following the same pat
 ### Task 8.2: Organization Features ✅
 
 **Core Features Delivered:**
+
 - ✅ Organization list with pagination
 - ✅ Search by organization name
 - ✅ Filter by member count
@@ -2118,6 +2342,7 @@ Complete admin organization management system implemented following the same pat
 - ✅ Loading states and toast notifications
 
 **Business Rules Enforced:**
+
 - ✅ Organizations with members cannot be deleted (safety)
 - ✅ Organization must have at least one owner
 - ✅ Owners can manage all members
@@ -2127,6 +2352,7 @@ Complete admin organization management system implemented following the same pat
 ### Task 8.3: Testing Results ✅
 
 **Unit Tests Delivered:**
+
 - ✅ All hooks tested (organization CRUD, member management)
 - ✅ All components tested (table, dialogs, menus)
 - ✅ Form validation tested
@@ -2134,6 +2360,7 @@ Complete admin organization management system implemented following the same pat
 - ✅ **Result: 921 tests passing (100% pass rate)**
 
 **E2E Tests Delivered:**
+
 - ✅ `e2e/admin-organizations.spec.ts` (29 tests)
   - Organization list table and pagination
   - Create organization dialog and functionality
@@ -2157,6 +2384,7 @@ Complete admin organization management system implemented following the same pat
 ### Success Criteria - ALL MET ✅
 
 **Task 8.1 Complete:**
+
 - ✅ All hooks implemented and tested
 - ✅ All components created with proper styling
 - ✅ Organization CRUD functional
@@ -2166,6 +2394,7 @@ Complete admin organization management system implemented following the same pat
 - ✅ ESLint: 0 warnings
 
 **Task 8.2 Complete:**
+
 - ✅ All features functional
 - ✅ Business rules enforced
 - ✅ Permission system working
@@ -2174,12 +2403,14 @@ Complete admin organization management system implemented following the same pat
 - ✅ Loading states everywhere
 
 **Task 8.3 Complete:**
+
 - ✅ Unit tests: 100% pass rate (921 passing)
 - ✅ E2E tests: All critical flows covered (49 tests)
 - ✅ Coverage: 96.92% overall (exceeds target)
 - ✅ No regressions in existing features
 
 **Phase 8 Complete:**
+
 - ✅ All tasks 8.1, 8.2, 8.3 complete
 - ✅ Tests: All new tests passing (100%)
 - ✅ Coverage: 96.92% (exceeds 95% target)
@@ -2193,6 +2424,7 @@ Complete admin organization management system implemented following the same pat
 ### Quality Metrics
 
 **Test Results:**
+
 - Unit Tests: 921 passed (100%)
 - E2E Tests: 173 passed, 1 skipped
 - Coverage: 96.92%
@@ -2201,11 +2433,13 @@ Complete admin organization management system implemented following the same pat
 - Build: SUCCESS
 
 **Components Created:**
+
 - 8 new components (all tested)
 - 8 new hooks (all tested)
 - 2 new E2E test files (49 tests)
 
 **Code Quality:**
+
 - Zero regressions
 - Follows established design patterns
 - Comprehensive error handling
@@ -2224,6 +2458,7 @@ Complete admin organization management system implemented following the same pat
 ### Components Created
 
 **Chart Components** (`src/components/charts/`):
+
 1. ✅ **ChartCard.tsx** - Base wrapper component for all charts with consistent styling, loading states, and error handling
 2. ✅ **UserGrowthChart.tsx** - Line chart displaying total and active users over 30 days
 3. ✅ **OrganizationDistributionChart.tsx** - Bar chart showing member distribution across organizations
@@ -2234,6 +2469,7 @@ Complete admin organization management system implemented following the same pat
 ### Dashboard Integration
 
 ✅ Updated `/admin/page.tsx` to include:
+
 - Analytics Overview section with chart grid
 - All 4 charts displayed in responsive 2-column grid
 - Consistent spacing and layout with existing dashboard sections
@@ -2241,6 +2477,7 @@ Complete admin organization management system implemented following the same pat
 ### Testing
 
 **Unit Tests** (`tests/components/charts/`):
+
 - ✅ ChartCard.test.tsx - 8 tests covering loading, error, and content states
 - ✅ UserGrowthChart.test.tsx - 6 tests covering all chart states
 - ✅ OrganizationDistributionChart.test.tsx - 6 tests
@@ -2249,6 +2486,7 @@ Complete admin organization management system implemented following the same pat
 - **Total:** 32 new unit tests, all passing
 
 **E2E Tests** (`e2e/`):
+
 - ✅ admin-dashboard.spec.ts - 16 tests covering:
   - Dashboard page load and title
   - Statistics cards display
@@ -2258,6 +2496,7 @@ Complete admin organization management system implemented following the same pat
   - Accessibility (heading hierarchy, accessible links)
 
 **Unit Tests Updated:**
+
 - ✅ tests/app/admin/page.test.tsx - Added chart component mocks and 2 new tests
 
 ### Success Criteria
@@ -2277,6 +2516,7 @@ Complete admin organization management system implemented following the same pat
 ### Quality Metrics
 
 **Test Results:**
+
 - Unit Tests: 954 passed (100%) - Added 32 new tests
 - E2E Tests: 173+ tests (existing suite + 16 new dashboard tests)
 - Coverage: 95.6% overall
@@ -2285,11 +2525,13 @@ Complete admin organization management system implemented following the same pat
 - Build: SUCCESS
 
 **Components Created:**
+
 - 5 new chart components (all tested)
 - 5 new unit test files (32 tests)
 - 1 new E2E test file (16 tests)
 
 **Code Quality:**
+
 - Zero regressions
 - Follows established design patterns
 - Comprehensive error handling
@@ -2298,6 +2540,7 @@ Complete admin organization management system implemented following the same pat
 - Responsive layouts
 
 **Technical Implementation:**
+
 - Recharts library (already installed)
 - date-fns for date formatting
 - CSS variables for theming (already configured)
@@ -2313,6 +2556,7 @@ Complete admin organization management system implemented following the same pat
 **Status:** TODO 📋
 
 **Remaining Phases:**
+
 - **Phase 10:** Testing & Quality Assurance (3-4 days)
 - **Phase 11:** Documentation & Dev Tools (2-3 days)
 - **Phase 12:** Production Readiness & Final Optimization (2-3 days)
@@ -2326,28 +2570,29 @@ Complete admin organization management system implemented following the same pat
 
 ### Overall Progress Dashboard
 
-| Phase | Status | Started | Completed | Duration | Key Deliverables |
-|-------|--------|---------|-----------|----------|------------------|
-| 0: Foundation Docs | ✅ Complete | Oct 29 | Oct 29 | 1 day | 5 documentation files |
-| 1: Infrastructure | ✅ Complete | Oct 29 | Oct 31 | 3 days | Setup + auth core + tests |
-| 2: Auth System | ✅ Complete | Oct 31 | Nov 1 | 2 days | Login, register, reset flows |
-| 2.5: Design System | ✅ Complete | Nov 2 | Nov 2 | 1 day | Theme, layout, 48 tests |
-| 3: Optimization | ✅ Complete | Nov 2 | Nov 2 | <1 day | Performance fixes, race condition fix |
-| 4: User Settings | ✅ Complete | Nov 2 | Nov 3 | 1 day | Profile, password, sessions (451 tests, 98.38% coverage) |
-| 5: Component Library | ✅ Complete | Nov 2 | Nov 2 | With Phase 2.5 | /dev routes, docs, showcase (done with design system) |
-| 6: Admin Foundation | ✅ Complete | Nov 6 | Nov 6 | 1 day | Admin layout, dashboard, stats, navigation (557 tests, 97.25% coverage) |
-| 7: User Management | ✅ Complete | Nov 6 | Nov 6 | 1 day | Full CRUD, filters, bulk ops (745 tests, 97.22% coverage, 51 E2E tests) |
-| 8: Org Management | ✅ Complete | Nov 7 | Nov 7 | 1 day | Admin org CRUD + member management (921 tests, 96.92% coverage, 49 E2E tests) |
-| 9: Charts & Analytics | ✅ Complete | Nov 7 | Nov 7 | 1 day | 5 chart components, dashboard integration (954 tests, 95.6% coverage, 16 E2E tests) |
-| 10: Testing | 📋 TODO | - | - | 3-4 days | Comprehensive test suite |
-| 11: Documentation | 📋 TODO | - | - | 2-3 days | Final docs |
-| 12: Production Prep | 📋 TODO | - | - | 2-3 days | Final optimization, security |
-| 13: Handoff | 📋 TODO | - | - | 1-2 days | Final validation |
+| Phase                 | Status      | Started | Completed | Duration       | Key Deliverables                                                                    |
+| --------------------- | ----------- | ------- | --------- | -------------- | ----------------------------------------------------------------------------------- |
+| 0: Foundation Docs    | ✅ Complete | Oct 29  | Oct 29    | 1 day          | 5 documentation files                                                               |
+| 1: Infrastructure     | ✅ Complete | Oct 29  | Oct 31    | 3 days         | Setup + auth core + tests                                                           |
+| 2: Auth System        | ✅ Complete | Oct 31  | Nov 1     | 2 days         | Login, register, reset flows                                                        |
+| 2.5: Design System    | ✅ Complete | Nov 2   | Nov 2     | 1 day          | Theme, layout, 48 tests                                                             |
+| 3: Optimization       | ✅ Complete | Nov 2   | Nov 2     | <1 day         | Performance fixes, race condition fix                                               |
+| 4: User Settings      | ✅ Complete | Nov 2   | Nov 3     | 1 day          | Profile, password, sessions (451 tests, 98.38% coverage)                            |
+| 5: Component Library  | ✅ Complete | Nov 2   | Nov 2     | With Phase 2.5 | /dev routes, docs, showcase (done with design system)                               |
+| 6: Admin Foundation   | ✅ Complete | Nov 6   | Nov 6     | 1 day          | Admin layout, dashboard, stats, navigation (557 tests, 97.25% coverage)             |
+| 7: User Management    | ✅ Complete | Nov 6   | Nov 6     | 1 day          | Full CRUD, filters, bulk ops (745 tests, 97.22% coverage, 51 E2E tests)             |
+| 8: Org Management     | ✅ Complete | Nov 7   | Nov 7     | 1 day          | Admin org CRUD + member management (921 tests, 96.92% coverage, 49 E2E tests)       |
+| 9: Charts & Analytics | ✅ Complete | Nov 7   | Nov 7     | 1 day          | 5 chart components, dashboard integration (954 tests, 95.6% coverage, 16 E2E tests) |
+| 10: Testing           | 📋 TODO     | -       | -         | 3-4 days       | Comprehensive test suite                                                            |
+| 11: Documentation     | 📋 TODO     | -       | -         | 2-3 days       | Final docs                                                                          |
+| 12: Production Prep   | 📋 TODO     | -       | -         | 2-3 days       | Final optimization, security                                                        |
+| 13: Handoff           | 📋 TODO     | -       | -         | 1-2 days       | Final validation                                                                    |
 
 **Current:** Phase 9 Complete (Charts & Analytics) ✅
 **Next:** Phase 10 - Testing & Quality Assurance
 
 ### Task Status Legend
+
 - ✅ **Complete** - Finished and reviewed
 - ⚙ **In Progress** - Currently being worked on
 - 📋 **TODO** - Not started
@@ -2371,24 +2616,31 @@ Complete admin organization management system implemented following the same pat
 ### Parallelization Opportunities
 
 **Within Phase 2 (After Task 2.2):**
+
 - Tasks 2.3, 2.4, 2.5 can run in parallel (3 agents)
 
 **Within Phase 3:**
+
 - Tasks 3.1, 3.2, 3.3 should run sequentially (dependencies on each other)
 
 **Within Phase 4 (After Task 4.1):**
+
 - Tasks 4.2, 4.3, 4.4, 4.5 can run in parallel (4 agents)
 
 **Within Phase 5:**
+
 - All tasks 5.1, 5.2, 5.3 can run in parallel (3 agents)
 
 **Within Phase 6 (After Task 6.1):**
+
 - Tasks 6.2, 6.3, 6.4 can run in parallel (3 agents)
 
 **Phase 10 (Testing):**
+
 - All testing tasks can run in parallel (4 agents)
 
 **Estimated Timeline:**
+
 - **With 4 parallel agents:** 8-10 weeks
 - **With 2 parallel agents:** 12-14 weeks
 - **With 1 agent (sequential):** 18-20 weeks
@@ -2416,6 +2668,7 @@ Complete admin organization management system implemented following the same pat
 ### Per-Phase Success Criteria
 
 **Each phase must meet these before proceeding:**
+
 - [ ] All tasks complete
 - [ ] Tests written and passing
 - [ ] Code reviewed (self + multi-agent)
@@ -2481,12 +2734,14 @@ npm audit                    # Check for vulnerabilities
 ### Environment Variables
 
 **Required:**
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 NEXT_PUBLIC_APP_NAME=Template Project
 ```
 
 **Optional:**
+
 ```env
 NEXT_PUBLIC_API_TIMEOUT=30000
 NEXT_PUBLIC_TOKEN_REFRESH_THRESHOLD=300000
@@ -2498,6 +2753,7 @@ See `.env.example` for complete list.
 ### Current Technical State
 
 **What Works:**
+
 - ✅ Authentication core (crypto, storage, store)
 - ✅ Configuration management
 - ✅ Test infrastructure
@@ -2508,12 +2764,14 @@ See `.env.example` for complete list.
 - ✅ Auth hooks (useAuth, useLogin, useRegister, etc.)
 
 **What's Needed Next:**
+
 - [ ] User profile management (Phase 3)
 - [ ] Password change UI (Phase 3)
 - [ ] Session management UI (Phase 3)
 - [ ] Authenticated layout (Phase 3)
 
 **Technical Debt:**
+
 - API mutation testing requires MSW (Phase 9)
 - Generated client lint errors (auto-generated, cannot fix)
 - API client architecture decision deferred to Phase 3
@@ -2525,6 +2783,7 @@ See `.env.example` for complete list.
 ### Always Reference During Implementation
 
 **Primary Documents:**
+
 - `IMPLEMENTATION_PLAN.md` (this file) - Implementation roadmap
 - `frontend-requirements.md` - Detailed requirements
 - `docs/ARCHITECTURE.md` - System design and patterns
@@ -2534,11 +2793,13 @@ See `.env.example` for complete list.
 - `docs/API_INTEGRATION.md` - Backend API integration
 
 **Backend References:**
+
 - `../backend/docs/ARCHITECTURE.md` - Backend patterns to mirror
 - `../backend/docs/CODING_STANDARDS.md` - Backend conventions
 - Backend OpenAPI spec: `http://localhost:8000/api/v1/openapi.json`
 
 **Testing References:**
+
 - `jest.config.js` - Test configuration
 - `jest.setup.js` - Global test setup
 - `tests/` directory - Existing test patterns
@@ -2546,6 +2807,7 @@ See `.env.example` for complete list.
 ### Audit & Quality Reports
 
 **Available in `/tmp/`:**
+
 - `AUDIT_SUMMARY.txt` - Quick reference
 - `AUDIT_COMPLETE.md` - Full audit results
 - `COVERAGE_CONFIG.md` - Coverage explanation
@@ -2555,15 +2817,15 @@ See `.env.example` for complete list.
 
 ## Version History
 
-| Version | Date | Changes | Author |
-|---------|------|---------|--------|
-| 1.0 | Oct 29, 2025 | Initial plan created | Claude |
-| 1.1 | Oct 31, 2025 | Phase 0 complete, updated structure | Claude |
-| 1.2 | Oct 31, 2025 | Phase 1 complete, comprehensive audit | Claude |
-| 1.3 | Oct 31, 2025 | **Major Update:** Reformatted as self-contained document | Claude |
-| 1.4 | Nov 1, 2025 | Phase 2 complete with accurate status and metrics | Claude |
-| 1.5 | Nov 1, 2025 | **Deep Review Update:** 97.6% coverage, 9.3/10 score, production-ready | Claude |
-| 1.6 | Nov 2, 2025 | **Design System + Optimization Plan:** Phase 2.5 complete, Phase 3.0 detailed | Claude |
+| Version | Date         | Changes                                                                       | Author |
+| ------- | ------------ | ----------------------------------------------------------------------------- | ------ |
+| 1.0     | Oct 29, 2025 | Initial plan created                                                          | Claude |
+| 1.1     | Oct 31, 2025 | Phase 0 complete, updated structure                                           | Claude |
+| 1.2     | Oct 31, 2025 | Phase 1 complete, comprehensive audit                                         | Claude |
+| 1.3     | Oct 31, 2025 | **Major Update:** Reformatted as self-contained document                      | Claude |
+| 1.4     | Nov 1, 2025  | Phase 2 complete with accurate status and metrics                             | Claude |
+| 1.5     | Nov 1, 2025  | **Deep Review Update:** 97.6% coverage, 9.3/10 score, production-ready        | Claude |
+| 1.6     | Nov 2, 2025  | **Design System + Optimization Plan:** Phase 2.5 complete, Phase 3.0 detailed | Claude |
 
 ---
 
@@ -2572,6 +2834,7 @@ See `.env.example` for complete list.
 ### Phase 3 Completed (November 2, 2025) ✅
 
 **Achievements:**
+
 - 🎯 Lighthouse Performance: 100% (perfect score)
 - 📈 Test Coverage: 98.63% (improved from 97.57%)
 - 🧪 473 Total Tests: 100% passing (381 unit + 92 E2E)
@@ -2580,6 +2843,7 @@ See `.env.example` for complete list.
 - ⏸️ Deferred: AuthInitializer optimization (stable, Lighthouse 100%)
 
 **Key Decisions:**
+
 - AuthInitializer optimization deferred due to previous failure and current perfect performance
 - Focus on stability over theoretical gains
 - All console.log statements conditionalized (config.debug.api + NODE_ENV checks)

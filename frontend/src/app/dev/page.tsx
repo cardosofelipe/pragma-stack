@@ -6,23 +6,9 @@
 
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import {
-  Palette,
-  Layout,
-  Ruler,
-  FileText,
-  BookOpen,
-  ArrowRight,
-  Sparkles,
-} from 'lucide-react';
+import { Palette, Layout, Ruler, FileText, BookOpen, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
@@ -98,13 +84,11 @@ export default function DesignSystemHub() {
           <div className="space-y-4 max-w-3xl">
             <div className="flex items-center gap-2">
               <Sparkles className="h-8 w-8 text-primary" />
-              <h1 className="text-4xl font-bold tracking-tight">
-                Design System Hub
-              </h1>
+              <h1 className="text-4xl font-bold tracking-tight">Design System Hub</h1>
             </div>
             <p className="text-lg text-muted-foreground">
-              Interactive demonstrations, live examples, and comprehensive documentation for
-              the FastNext design system. Built with shadcn/ui + Tailwind CSS 4.
+              Interactive demonstrations, live examples, and comprehensive documentation for the
+              FastNext design system. Built with shadcn/ui + Tailwind CSS 4.
             </p>
           </div>
         </div>
@@ -116,9 +100,7 @@ export default function DesignSystemHub() {
           {/* Demo Pages Grid */}
           <section className="space-y-6">
             <div>
-              <h2 className="text-2xl font-semibold tracking-tight">
-                Interactive Demonstrations
-              </h2>
+              <h2 className="text-2xl font-semibold tracking-tight">Interactive Demonstrations</h2>
               <p className="text-sm text-muted-foreground mt-2">
                 Explore live examples with copy-paste code snippets
               </p>
@@ -143,9 +125,7 @@ export default function DesignSystemHub() {
                             New
                           </Badge>
                         )}
-                        {page.status === 'enhanced' && (
-                          <Badge variant="secondary">Enhanced</Badge>
-                        )}
+                        {page.status === 'enhanced' && <Badge variant="secondary">Enhanced</Badge>}
                       </div>
                       <CardTitle className="mt-4">{page.title}</CardTitle>
                       <CardDescription>{page.description}</CardDescription>
@@ -190,19 +170,13 @@ export default function DesignSystemHub() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {documentationLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="group"
-                >
+                <Link key={link.href} href={link.href} className="group">
                   <Card className="h-full transition-all hover:border-primary/50 hover:bg-accent/50">
                     <CardHeader className="space-y-1">
                       <CardTitle className="text-base group-hover:text-primary transition-colors">
                         {link.title}
                       </CardTitle>
-                      <CardDescription className="text-xs">
-                        {link.description}
-                      </CardDescription>
+                      <CardDescription className="text-xs">{link.description}</CardDescription>
                     </CardHeader>
                   </Card>
                 </Link>
@@ -214,9 +188,7 @@ export default function DesignSystemHub() {
 
           {/* Key Features */}
           <section className="space-y-6">
-            <h2 className="text-2xl font-semibold tracking-tight">
-              Key Features
-            </h2>
+            <h2 className="text-2xl font-semibold tracking-tight">Key Features</h2>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <Card>

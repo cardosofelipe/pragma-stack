@@ -11,9 +11,7 @@ test.describe('AuthGuard - Route Protection', () => {
     });
   });
 
-  test('should redirect to login when accessing protected route without auth', async ({
-    page,
-  }) => {
+  test('should redirect to login when accessing protected route without auth', async ({ page }) => {
     // Try to access a protected route (if you have one)
     // For now, we'll test the root if it's protected
     // Adjust the route based on your actual protected routes

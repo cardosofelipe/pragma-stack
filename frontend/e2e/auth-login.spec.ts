@@ -162,10 +162,7 @@ test.describe('Login Flow', () => {
     // Click forgot password link - use Promise.all to wait for navigation
     const forgotLink = page.getByRole('link', { name: 'Forgot password?' });
 
-    await Promise.all([
-      page.waitForURL('/password-reset'),
-      forgotLink.click()
-    ]);
+    await Promise.all([page.waitForURL('/password-reset'), forgotLink.click()]);
 
     // Should be on password reset page
     await expect(page).toHaveURL('/password-reset');
@@ -176,10 +173,7 @@ test.describe('Login Flow', () => {
     // Click sign up link - use Promise.all to wait for navigation
     const signupLink = page.getByRole('link', { name: 'Sign up' });
 
-    await Promise.all([
-      page.waitForURL('/register'),
-      signupLink.click()
-    ]);
+    await Promise.all([page.waitForURL('/register'), signupLink.click()]);
 
     // Should be on register page
     await expect(page).toHaveURL('/register');

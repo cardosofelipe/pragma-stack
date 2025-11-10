@@ -31,6 +31,7 @@
 ### 1.1 General Principles
 
 **✅ DO:**
+
 - Enable strict mode in `tsconfig.json`
 - Define explicit types for all function parameters and return values
 - Use TypeScript's type inference where obvious
@@ -38,6 +39,7 @@
 - Use generics for reusable, type-safe components and functions
 
 **❌ DON'T:**
+
 - Use `any` (use `unknown` if type is truly unknown)
 - Use `as any` casts (refactor to proper types)
 - Use `@ts-ignore` or `@ts-nocheck` (fix the underlying issue)
@@ -46,6 +48,7 @@
 ### 1.2 Interfaces vs Types
 
 **Use `interface` for object shapes:**
+
 ```typescript
 // ✅ Good
 interface User {
@@ -63,6 +66,7 @@ interface UserFormProps {
 ```
 
 **Use `type` for unions, intersections, and primitives:**
+
 ```typescript
 // ✅ Good
 type UserRole = 'admin' | 'user' | 'guest';
@@ -74,6 +78,7 @@ type UserWithPermissions = User & { permissions: string[] };
 ### 1.3 Function Signatures
 
 **Always type function parameters and return values:**
+
 ```typescript
 // ✅ Good
 function formatUserName(user: User): string {
@@ -86,7 +91,8 @@ async function fetchUser(id: string): Promise<User> {
 }
 
 // ❌ Bad
-function formatUserName(user) {  // Implicit any
+function formatUserName(user) {
+  // Implicit any
   return `${user.firstName} ${user.lastName}`;
 }
 ```
@@ -94,6 +100,7 @@ function formatUserName(user) {  // Implicit any
 ### 1.4 Generics
 
 **Use generics for reusable, type-safe code:**
+
 ```typescript
 // ✅ Good: Generic data table
 interface DataTableProps<T> {
@@ -113,6 +120,7 @@ export function DataTable<T>({ data, columns, onRowClick }: DataTableProps<T>) {
 ### 1.5 Unknown vs Any
 
 **Use `unknown` for truly unknown types:**
+
 ```typescript
 // ✅ Good: Force type checking
 function parseJSON(jsonString: string): unknown {
@@ -134,15 +142,11 @@ function parseJSON(jsonString: string): any {
 ### 1.6 Type Guards
 
 **Create type guards for runtime type checking:**
+
 ```typescript
 // ✅ Good
 function isUser(value: unknown): value is User {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'id' in value &&
-    'email' in value
-  );
+  return typeof value === 'object' && value !== null && 'id' in value && 'email' in value;
 }
 
 // Usage
@@ -155,6 +159,7 @@ if (isUser(data)) {
 ### 1.7 Utility Types
 
 **Use TypeScript utility types:**
+
 ```typescript
 // Partial - make all properties optional
 type UserUpdate = Partial<User>;
@@ -182,6 +187,7 @@ type NonAdminRole = Exclude<UserRole, 'admin'>;
 ### 2.1 Component Structure
 
 **Standard component template:**
+
 ```typescript
 // 1. Imports (React, external libs, internal, types, styles)
 'use client';  // If client component
@@ -240,6 +246,7 @@ export function UserList({
 ### 2.2 Server Components vs Client Components
 
 **Server Components by default:**
+
 ```typescript
 // ✅ Good: Server Component (default)
 // app/(authenticated)/users/page.tsx
@@ -255,6 +262,7 @@ export default async function UsersPage() {
 ```
 
 **Client Components only when needed:**
+
 ```typescript
 // ✅ Good: Client Component (interactive)
 'use client';
@@ -276,6 +284,7 @@ export function UserList() {
 ```
 
 **When to use Client Components:**
+
 - Using React hooks (useState, useEffect, etc.)
 - Event handlers (onClick, onChange, etc.)
 - Browser APIs (window, document, localStorage)
@@ -284,6 +293,7 @@ export function UserList() {
 ### 2.3 Props
 
 **Always type props explicitly:**
+
 ```typescript
 // ✅ Good: Explicit interface
 interface ButtonProps {
@@ -300,13 +310,14 @@ export function Button({
   onClick,
   variant = 'primary',
   disabled = false,
-  className
+  className,
 }: ButtonProps) {
   // Implementation
 }
 ```
 
 **Destructure props in function signature:**
+
 ```typescript
 // ✅ Good
 function UserCard({ user, onEdit }: UserCardProps) {
@@ -320,6 +331,7 @@ function UserCard(props: UserCardProps) {
 ```
 
 **Allow className override:**
+
 ```typescript
 // ✅ Good: Allow consumers to add classes
 interface CardProps {
@@ -339,6 +351,7 @@ export function Card({ title, className }: CardProps) {
 ### 2.4 Composition Over Prop Drilling
 
 **Use composition patterns:**
+
 ```typescript
 // ✅ Good: Composition
 <Card>
@@ -366,6 +379,7 @@ export function Card({ title, className }: CardProps) {
 ### 2.5 Named Exports vs Default Exports
 
 **Prefer named exports:**
+
 ```typescript
 // ✅ Good: Named export
 export function UserList() {
@@ -385,6 +399,7 @@ import WhateverName from './UserList';
 ```
 
 **Exception: Next.js pages must use default export**
+
 ```typescript
 // pages and route handlers require default export
 export default function UsersPage() {
@@ -395,6 +410,7 @@ export default function UsersPage() {
 ### 2.6 Custom Hooks
 
 **Extract reusable logic:**
+
 ```typescript
 // ✅ Good: Custom hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -425,15 +441,16 @@ function SearchInput() {
 ```
 
 **Hook naming: Always prefix with "use":**
+
 ```typescript
 // ✅ Good
-function useAuth() { }
-function useUsers() { }
-function useDebounce() { }
+function useAuth() {}
+function useUsers() {}
+function useDebounce() {}
 
 // ❌ Bad
-function auth() { }
-function getUsers() { }
+function auth() {}
+function getUsers() {}
 ```
 
 ---
@@ -442,20 +459,21 @@ function getUsers() { }
 
 ### 3.1 Files and Directories
 
-| Type | Convention | Example |
-|------|------------|---------|
-| Components | PascalCase | `UserTable.tsx`, `LoginForm.tsx` |
-| Hooks | camelCase with `use` prefix | `useAuth.ts`, `useDebounce.ts` |
-| Utilities | camelCase | `formatDate.ts`, `parseError.ts` |
-| Types | camelCase | `user.ts`, `api.ts` |
-| Constants | camelCase or UPPER_SNAKE_CASE | `constants.ts`, `API_ENDPOINTS.ts` |
-| Stores | camelCase with `Store` suffix | `authStore.ts`, `uiStore.ts` |
-| Services | camelCase with `Service` suffix | `authService.ts`, `adminService.ts` |
-| Pages (Next.js) | lowercase | `page.tsx`, `layout.tsx`, `loading.tsx` |
+| Type            | Convention                      | Example                                 |
+| --------------- | ------------------------------- | --------------------------------------- |
+| Components      | PascalCase                      | `UserTable.tsx`, `LoginForm.tsx`        |
+| Hooks           | camelCase with `use` prefix     | `useAuth.ts`, `useDebounce.ts`          |
+| Utilities       | camelCase                       | `formatDate.ts`, `parseError.ts`        |
+| Types           | camelCase                       | `user.ts`, `api.ts`                     |
+| Constants       | camelCase or UPPER_SNAKE_CASE   | `constants.ts`, `API_ENDPOINTS.ts`      |
+| Stores          | camelCase with `Store` suffix   | `authStore.ts`, `uiStore.ts`            |
+| Services        | camelCase with `Service` suffix | `authService.ts`, `adminService.ts`     |
+| Pages (Next.js) | lowercase                       | `page.tsx`, `layout.tsx`, `loading.tsx` |
 
 ### 3.2 Variables and Functions
 
 **Variables:**
+
 ```typescript
 // ✅ Good: camelCase
 const userName = 'John';
@@ -463,36 +481,39 @@ const isAuthenticated = true;
 const userList = [];
 
 // ❌ Bad
-const UserName = 'John';  // PascalCase for variable
+const UserName = 'John'; // PascalCase for variable
 const user_name = 'John'; // snake_case
 ```
 
 **Functions:**
+
 ```typescript
 // ✅ Good: camelCase, descriptive verb + noun
-function getUserById(id: string): User { }
-function formatDate(date: Date): string { }
-function handleSubmit(data: FormData): void { }
+function getUserById(id: string): User {}
+function formatDate(date: Date): string {}
+function handleSubmit(data: FormData): void {}
 
 // ❌ Bad
-function User(id: string) { }      // Looks like a class
-function get_user(id: string) { }  // snake_case
-function gub(id: string) { }       // Not descriptive
+function User(id: string) {} // Looks like a class
+function get_user(id: string) {} // snake_case
+function gub(id: string) {} // Not descriptive
 ```
 
 **Event Handlers:**
+
 ```typescript
 // ✅ Good: handle + EventName
-const handleClick = () => { };
-const handleSubmit = () => { };
-const handleInputChange = () => { };
+const handleClick = () => {};
+const handleSubmit = () => {};
+const handleInputChange = () => {};
 
 // ❌ Bad
-const onClick = () => { };  // Confusing with prop name
-const submit = () => { };
+const onClick = () => {}; // Confusing with prop name
+const submit = () => {};
 ```
 
 **Boolean Variables:**
+
 ```typescript
 // ✅ Good: is/has/should prefix
 const isLoading = true;
@@ -508,6 +529,7 @@ const error = false;
 ### 3.3 Constants
 
 **Use UPPER_SNAKE_CASE for true constants:**
+
 ```typescript
 // ✅ Good
 const MAX_RETRY_ATTEMPTS = 3;
@@ -525,16 +547,17 @@ const USER_ROLES = {
 ### 3.4 Types and Interfaces
 
 **PascalCase for types and interfaces:**
+
 ```typescript
 // ✅ Good
-interface User { }
-interface UserFormProps { }
+interface User {}
+interface UserFormProps {}
 type UserId = string;
 type UserRole = 'admin' | 'user';
 
 // ❌ Bad
-interface user { }
-interface user_form_props { }
+interface user {}
+interface user_form_props {}
 type userId = string;
 ```
 
@@ -545,6 +568,7 @@ type userId = string;
 ### 4.1 Import Order
 
 **Organize imports in this order:**
+
 ```typescript
 // 1. React and Next.js
 import { useState, useEffect } from 'react';
@@ -576,6 +600,7 @@ import styles from './Component.module.css';
 ### 4.2 Co-location
 
 **Group related files together:**
+
 ```
 components/admin/
 ├── UserTable/
@@ -587,6 +612,7 @@ components/admin/
 ```
 
 **Or flat structure for simpler components:**
+
 ```
 components/admin/
 ├── UserTable.tsx
@@ -598,6 +624,7 @@ components/admin/
 ### 4.3 Barrel Exports
 
 **Use index.ts for clean imports:**
+
 ```typescript
 // components/ui/index.ts
 export { Button } from './button';
@@ -615,6 +642,7 @@ import { Button, Card, Input } from '@/components/ui';
 ### 5.1 State Placement
 
 **Keep state as local as possible:**
+
 ```typescript
 // ✅ Good: Local state
 function UserFilter() {
@@ -629,6 +657,7 @@ function UserFilter() {
 ### 5.2 TanStack Query Usage
 
 **Standard query pattern:**
+
 ```typescript
 // lib/api/hooks/useUsers.ts
 export function useUsers(filters?: UserFilters) {
@@ -651,6 +680,7 @@ function UserList() {
 ```
 
 **Standard mutation pattern:**
+
 ```typescript
 // lib/api/hooks/useUsers.ts
 export function useUpdateUser() {
@@ -691,22 +721,21 @@ function UserForm({ userId }: { userId: string }) {
 ```
 
 **Query key structure:**
+
 ```typescript
 // ✅ Good: Consistent query keys
-['users']                              // List all
-['users', userId]                      // Single user
-['users', { search: 'john', page: 1 }] // Filtered list
-['organizations', orgId, 'members']    // Nested resource
-
-// ❌ Bad: Inconsistent
-['userList']
-['user-' + userId]
-['getUsersBySearch', 'john']
+['users'][('users', userId)][('users', { search: 'john', page: 1 })][ // List all // Single user // Filtered list
+  ('organizations', orgId, 'members')
+][ // Nested resource
+  // ❌ Bad: Inconsistent
+  'userList'
+]['user-' + userId][('getUsersBySearch', 'john')];
 ```
 
 ### 5.3 Zustand Store Pattern
 
 **Auth store example:**
+
 ```typescript
 // stores/authStore.ts
 import { create } from 'zustand';
@@ -757,6 +786,7 @@ function UserAvatar() {
 ```
 
 **UI store example:**
+
 ```typescript
 // stores/uiStore.ts
 interface UIStore {
@@ -790,6 +820,7 @@ export const useUIStore = create<UIStore>()(
 ### 6.1 API Client Structure
 
 **Axios instance configuration:**
+
 ```typescript
 // lib/api/client.ts
 import axios from 'axios';
@@ -837,6 +868,7 @@ apiClient.interceptors.response.use(
 ### 6.2 Error Handling
 
 **Parse API errors:**
+
 ```typescript
 // lib/api/errors.ts
 export interface APIError {
@@ -850,18 +882,20 @@ export function parseAPIError(error: AxiosError): APIError[] {
     return error.response.data.errors;
   }
 
-  return [{
-    code: 'UNKNOWN',
-    message: error.message || 'An unexpected error occurred',
-  }];
+  return [
+    {
+      code: 'UNKNOWN',
+      message: error.message || 'An unexpected error occurred',
+    },
+  ];
 }
 
 // Error code mapping
 export const ERROR_MESSAGES: Record<string, string> = {
-  'AUTH_001': 'Invalid email or password',
-  'USER_002': 'This email is already registered',
-  'VAL_001': 'Please check your input',
-  'ORG_001': 'Organization name already exists',
+  AUTH_001: 'Invalid email or password',
+  USER_002: 'This email is already registered',
+  VAL_001: 'Please check your input',
+  ORG_001: 'Organization name already exists',
 };
 
 export function getErrorMessage(code: string): string {
@@ -872,18 +906,19 @@ export function getErrorMessage(code: string): string {
 ### 6.3 Hook Organization
 
 **One hook file per resource:**
+
 ```typescript
 // lib/api/hooks/useUsers.ts
-export function useUsers(filters?: UserFilters) { }
-export function useUser(userId: string) { }
-export function useCreateUser() { }
-export function useUpdateUser() { }
-export function useDeleteUser() { }
+export function useUsers(filters?: UserFilters) {}
+export function useUser(userId: string) {}
+export function useCreateUser() {}
+export function useUpdateUser() {}
+export function useDeleteUser() {}
 
 // lib/api/hooks/useOrganizations.ts
-export function useOrganizations() { }
-export function useOrganization(orgId: string) { }
-export function useCreateOrganization() { }
+export function useOrganizations() {}
+export function useOrganization(orgId: string) {}
+export function useCreateOrganization() {}
 // ...
 ```
 
@@ -894,6 +929,7 @@ export function useCreateOrganization() { }
 ### 7.1 Form Pattern with react-hook-form + Zod
 
 **Standard form implementation:**
+
 ```typescript
 // components/auth/LoginForm.tsx
 'use client';
@@ -961,30 +997,34 @@ export function LoginForm() {
 ### 7.2 Form Validation
 
 **Complex validation with Zod:**
+
 ```typescript
-const userSchema = z.object({
-  email: z.string().email('Invalid email'),
-  password: z
-    .string()
-    .min(8, 'Min 8 characters')
-    .regex(/[A-Z]/, 'Must contain uppercase')
-    .regex(/[0-9]/, 'Must contain number'),
-  confirmPassword: z.string(),
-  firstName: z.string().min(1, 'Required'),
-  lastName: z.string().optional(),
-  phoneNumber: z
-    .string()
-    .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number')
-    .optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-});
+const userSchema = z
+  .object({
+    email: z.string().email('Invalid email'),
+    password: z
+      .string()
+      .min(8, 'Min 8 characters')
+      .regex(/[A-Z]/, 'Must contain uppercase')
+      .regex(/[0-9]/, 'Must contain number'),
+    confirmPassword: z.string(),
+    firstName: z.string().min(1, 'Required'),
+    lastName: z.string().optional(),
+    phoneNumber: z
+      .string()
+      .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number')
+      .optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 ```
 
 ### 7.3 Form Accessibility
 
 **Always include labels and error messages:**
+
 ```typescript
 <div>
   <Label htmlFor="email">Email</Label>
@@ -1009,6 +1049,7 @@ const userSchema = z.object({
 ### 8.1 Tailwind CSS Usage
 
 **Use utility classes:**
+
 ```typescript
 // ✅ Good
 <button className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
@@ -1022,6 +1063,7 @@ const userSchema = z.object({
 ```
 
 **Use cn() for conditional classes:**
+
 ```typescript
 import { cn } from '@/lib/utils/cn';
 
@@ -1036,6 +1078,7 @@ import { cn } from '@/lib/utils/cn';
 ### 8.2 Responsive Design
 
 **Mobile-first approach:**
+
 ```typescript
 <div className="
   w-full p-4           /* Mobile */
@@ -1050,6 +1093,7 @@ import { cn } from '@/lib/utils/cn';
 ### 8.3 Dark Mode
 
 **Use dark mode classes:**
+
 ```typescript
 <div className="
   bg-white text-black
@@ -1079,6 +1123,7 @@ src/
 ### 10.2 Test Naming
 
 **Use descriptive test names:**
+
 ```typescript
 // ✅ Good
 test('displays user list when data is loaded', async () => {});
@@ -1095,6 +1140,7 @@ test('renders', () => {});
 ### 10.3 Component Testing
 
 **Test user interactions, not implementation:**
+
 ```typescript
 // UserTable.test.tsx
 import { render, screen, userEvent } from '@testing-library/react';
@@ -1115,6 +1161,7 @@ test('allows user to search for users', async () => {
 ### 10.4 Accessibility Testing
 
 **Test with accessibility queries:**
+
 ```typescript
 // Prefer getByRole over getByTestId
 const button = screen.getByRole('button', { name: 'Submit' });
@@ -1156,6 +1203,7 @@ const textbox = screen.getByRole('textbox', { name: 'Email' });
 ### 11.2 ARIA Labels
 
 **Use ARIA when semantic HTML isn't enough:**
+
 ```typescript
 <button aria-label="Close dialog">
   <X className="w-4 h-4" />
@@ -1169,6 +1217,7 @@ const textbox = screen.getByRole('textbox', { name: 'Email' });
 ### 11.3 Keyboard Navigation
 
 **Ensure all interactive elements are keyboard accessible:**
+
 ```typescript
 <div
   role="button"
@@ -1191,6 +1240,7 @@ const textbox = screen.getByRole('textbox', { name: 'Email' });
 ### 12.1 Code Splitting
 
 **Dynamic imports for heavy components:**
+
 ```typescript
 import dynamic from 'next/dynamic';
 
@@ -1203,6 +1253,7 @@ const HeavyChart = dynamic(() => import('./HeavyChart'), {
 ### 12.2 Memoization
 
 **Use React.memo for expensive renders:**
+
 ```typescript
 export const UserCard = React.memo(function UserCard({ user }: UserCardProps) {
   return <div>{user.name}</div>;
@@ -1210,6 +1261,7 @@ export const UserCard = React.memo(function UserCard({ user }: UserCardProps) {
 ```
 
 **Use useMemo for expensive calculations:**
+
 ```typescript
 const sortedUsers = useMemo(() => {
   return users.sort((a, b) => a.name.localeCompare(b.name));
@@ -1219,6 +1271,7 @@ const sortedUsers = useMemo(() => {
 ### 12.3 Image Optimization
 
 **Always use Next.js Image component:**
+
 ```typescript
 import Image from 'next/image';
 
@@ -1238,6 +1291,7 @@ import Image from 'next/image';
 ### 13.1 Input Sanitization
 
 **Never render raw HTML:**
+
 ```typescript
 // ✅ Good: React escapes by default
 <div>{userInput}</div>
@@ -1249,6 +1303,7 @@ import Image from 'next/image';
 ### 13.2 Environment Variables
 
 **Never commit secrets:**
+
 ```typescript
 // ✅ Good: Use env variables
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -1258,6 +1313,7 @@ const apiUrl = 'https://api.example.com';
 ```
 
 **Public vs Private:**
+
 - `NEXT_PUBLIC_*`: Exposed to browser
 - Other vars: Server-side only
 
@@ -1266,6 +1322,7 @@ const apiUrl = 'https://api.example.com';
 ## 14. Code Review Checklist
 
 **Before submitting PR:**
+
 - [ ] All tests pass
 - [ ] No TypeScript errors
 - [ ] ESLint passes
@@ -1285,6 +1342,7 @@ const apiUrl = 'https://api.example.com';
 These standards ensure consistency, maintainability, and quality across the codebase. Follow them rigorously, and update this document as the project evolves.
 
 For specific patterns and examples, refer to:
+
 - **ARCHITECTURE.md**: System design and patterns
 - **COMPONENT_GUIDE.md**: Component usage and examples
 - **FEATURE_EXAMPLES.md**: Step-by-step implementation guides

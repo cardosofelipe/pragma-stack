@@ -8,7 +8,9 @@ import AdminOrganizationsPage from '@/app/admin/organizations/page';
 
 // Mock the entire OrganizationManagementContent component
 jest.mock('@/components/admin/organizations/OrganizationManagementContent', () => ({
-  OrganizationManagementContent: () => <div data-testid="organization-management">Organization Management</div>,
+  OrganizationManagementContent: () => (
+    <div data-testid="organization-management">Organization Management</div>
+  ),
 }));
 
 describe('AdminOrganizationsPage', () => {

@@ -34,9 +34,7 @@ const profileSchema = z.object({
     .max(50, 'Last name must not exceed 50 characters')
     .optional()
     .or(z.literal('')),
-  email: z
-    .string()
-    .email('Invalid email address'),
+  email: z.string().email('Invalid email address'),
 });
 
 type ProfileFormData = z.infer<typeof profileSchema>;
@@ -68,10 +66,7 @@ interface ProfileSettingsFormProps {
  * <ProfileSettingsForm onSuccess={() => console.log('Profile updated')} />
  * ```
  */
-export function ProfileSettingsForm({
-  onSuccess,
-  className,
-}: ProfileSettingsFormProps) {
+export function ProfileSettingsForm({ onSuccess, className }: ProfileSettingsFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
   const currentUser = useCurrentUser();
   const updateProfileMutation = useUpdateProfile((message) => {
@@ -201,19 +196,12 @@ export function ProfileSettingsForm({
 
           {/* Submit Button */}
           <div className="flex items-center gap-4">
-            <Button
-              type="submit"
-              disabled={isSubmitting || !isDirty}
-            >
+            <Button type="submit" disabled={isSubmitting || !isDirty}>
               {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
             {/* istanbul ignore next - Reset button requires isDirty state, tested in E2E */}
             {isDirty && !isSubmitting && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => form.reset()}
-              >
+              <Button type="button" variant="outline" onClick={() => form.reset()}>
                 Reset
               </Button>
             )}

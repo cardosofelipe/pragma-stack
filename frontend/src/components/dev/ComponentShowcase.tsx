@@ -9,11 +9,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Mail, User,
-  Settings, LogOut, Shield, AlertCircle, Info,
-  Trash2
-} from 'lucide-react';
+import { Mail, User, Settings, LogOut, Shield, AlertCircle, Info, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -281,7 +277,11 @@ export function ComponentShowcase() {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="terms" checked={checked} onCheckedChange={(value) => setChecked(value as boolean)} />
+                  <Checkbox
+                    id="terms"
+                    checked={checked}
+                    onCheckedChange={(value) => setChecked(value as boolean)}
+                  />
                   <Label htmlFor="terms" className="text-sm font-normal cursor-pointer">
                     Accept terms and conditions
                   </Label>
@@ -357,11 +357,7 @@ export function ComponentShowcase() {
           </ExampleSection>
 
           {/* Badges */}
-          <ExampleSection
-            id="badges"
-            title="Badges"
-            description="Status indicators and labels"
-          >
+          <ExampleSection id="badges" title="Badges" description="Status indicators and labels">
             <Example
               title="Badge Variants"
               code={`<Badge>Default</Badge>
@@ -411,11 +407,7 @@ export function ComponentShowcase() {
           </ExampleSection>
 
           {/* Alerts */}
-          <ExampleSection
-            id="alerts"
-            title="Alerts"
-            description="Contextual feedback messages"
-          >
+          <ExampleSection id="alerts" title="Alerts" description="Contextual feedback messages">
             <div className="space-y-4">
               <Example
                 title="Alert Variants"
@@ -439,17 +431,13 @@ export function ComponentShowcase() {
                   <Alert>
                     <Info className="h-4 w-4" />
                     <AlertTitle>Information</AlertTitle>
-                    <AlertDescription>
-                      This is an informational alert message.
-                    </AlertDescription>
+                    <AlertDescription>This is an informational alert message.</AlertDescription>
                   </Alert>
 
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>
-                      Something went wrong. Please try again.
-                    </AlertDescription>
+                    <AlertDescription>Something went wrong. Please try again.</AlertDescription>
                   </Alert>
                 </div>
               </Example>
@@ -545,8 +533,8 @@ export function ComponentShowcase() {
                   <DialogHeader>
                     <DialogTitle>Are you sure?</DialogTitle>
                     <DialogDescription>
-                      This action cannot be undone. This will permanently delete your account
-                      and remove your data from our servers.
+                      This action cannot be undone. This will permanently delete your account and
+                      remove your data from our servers.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
@@ -594,9 +582,7 @@ export function ComponentShowcase() {
                   </div>
                 </TabsContent>
                 <TabsContent value="password" className="space-y-4 mt-4">
-                  <p className="text-sm text-muted-foreground">
-                    Change your password here.
-                  </p>
+                  <p className="text-sm text-muted-foreground">Change your password here.</p>
                   <div className="space-y-2">
                     <Label htmlFor="current">Current Password</Label>
                     <Input id="current" type="password" />
@@ -607,11 +593,7 @@ export function ComponentShowcase() {
           </ExampleSection>
 
           {/* Table */}
-          <ExampleSection
-            id="table"
-            title="Table"
-            description="Data tables with headers and cells"
-          >
+          <ExampleSection id="table" title="Table" description="Data tables with headers and cells">
             <Example
               title="Table Example"
               code={`<Table>

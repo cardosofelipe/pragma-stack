@@ -28,18 +28,23 @@ jest.mock('next/link', () => ({
 
 // Mock DemoCredentialsModal
 jest.mock('@/components/home/DemoCredentialsModal', () => ({
-  DemoCredentialsModal: ({ open, onClose }: any) => (
-    open ? <div data-testid="demo-modal">
-      <button onClick={onClose}>Close Modal</button>
-    </div> : null
-  ),
+  DemoCredentialsModal: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="demo-modal">
+        <button onClick={onClose}>Close Modal</button>
+      </div>
+    ) : null,
 }));
 
 describe('HeroSection', () => {
   it('renders badge with key highlights', () => {
-    render(<HeroSection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <HeroSection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     expect(screen.getByText('MIT Licensed')).toBeInTheDocument();
     expect(screen.getAllByText('97% Test Coverage')[0]).toBeInTheDocument();
@@ -47,36 +52,52 @@ describe('HeroSection', () => {
   });
 
   it('renders main headline', () => {
-    render(<HeroSection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <HeroSection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     expect(screen.getAllByText(/Everything You Need to Build/i)[0]).toBeInTheDocument();
     expect(screen.getAllByText(/Modern Web Applications/i)[0]).toBeInTheDocument();
   });
 
   it('renders subheadline with key messaging', () => {
-    render(<HeroSection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <HeroSection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     expect(screen.getByText(/Production-ready FastAPI \+ Next.js template/i)).toBeInTheDocument();
     expect(screen.getByText(/Start building features on day one/i)).toBeInTheDocument();
   });
 
   it('renders Try Live Demo button', () => {
-    render(<HeroSection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <HeroSection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     const demoButton = screen.getByRole('button', { name: /try live demo/i });
     expect(demoButton).toBeInTheDocument();
   });
 
   it('renders View on GitHub link', () => {
-    render(<HeroSection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <HeroSection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     const githubLink = screen.getByRole('link', { name: /view on github/i });
     expect(githubLink).toHaveAttribute('href', 'https://github.com/your-org/fast-next-template');
@@ -85,18 +106,26 @@ describe('HeroSection', () => {
   });
 
   it('renders Explore Components link', () => {
-    render(<HeroSection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <HeroSection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     const componentsLink = screen.getByRole('link', { name: /explore components/i });
     expect(componentsLink).toHaveAttribute('href', '/dev');
   });
 
   it('displays test coverage stats', () => {
-    render(<HeroSection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <HeroSection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     const coverageTexts = screen.getAllByText('97%');
     expect(coverageTexts.length).toBeGreaterThan(0);
@@ -121,18 +150,26 @@ describe('HeroSection', () => {
 
   describe('Accessibility', () => {
     it('has proper heading hierarchy', () => {
-      render(<HeroSection onOpenDemoModal={function(): void {
-          throw new Error("Function not implemented.");
-      } } />);
+      render(
+        <HeroSection
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       const heading = screen.getAllByRole('heading', { level: 1 })[0];
       expect(heading).toBeInTheDocument();
     });
 
     it('has proper external link attributes', () => {
-      render(<HeroSection onOpenDemoModal={function(): void {
-          throw new Error("Function not implemented.");
-      } } />);
+      render(
+        <HeroSection
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       const githubLink = screen.getByRole('link', { name: /view on github/i });
       expect(githubLink).toHaveAttribute('target', '_blank');

@@ -25,10 +25,7 @@ import config from '@/config/app.config';
 
 const registerSchema = z
   .object({
-    email: z
-      .string()
-      .min(1, 'Email is required')
-      .email('Please enter a valid email address'),
+    email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
     first_name: z
       .string()
       .min(1, 'First name is required')
@@ -45,9 +42,7 @@ const registerSchema = z
       .min(8, 'Password must be at least 8 characters')
       .regex(/[0-9]/, 'Password must contain at least one number')
       .regex(/[A-Z]/, 'Password must contain at least one uppercase letter'),
-    confirmPassword: z
-      .string()
-      .min(1, 'Please confirm your password'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
@@ -88,11 +83,7 @@ interface RegisterFormProps {
  * />
  * ```
  */
-export function RegisterForm({
-  onSuccess,
-  showLoginLink = true,
-  className,
-}: RegisterFormProps) {
+export function RegisterForm({ onSuccess, showLoginLink = true, className }: RegisterFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
   const registerMutation = useRegister();
 
@@ -242,7 +233,11 @@ export function RegisterForm({
             disabled={isSubmitting}
             {...form.register('password')}
             aria-invalid={!!form.formState.errors.password}
-            aria-describedby={form.formState.errors.password ? 'password-error password-requirements' : 'password-requirements'}
+            aria-describedby={
+              form.formState.errors.password
+                ? 'password-error password-requirements'
+                : 'password-requirements'
+            }
           />
           {form.formState.errors.password && (
             <p id="password-error" className="text-sm text-destructive">
@@ -253,13 +248,25 @@ export function RegisterForm({
           {/* Password Strength Indicator */}
           {password.length > 0 && !form.formState.errors.password && (
             <div id="password-requirements" className="space-y-1 text-xs">
-              <p className={hasMinLength ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}>
+              <p
+                className={
+                  hasMinLength ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
+                }
+              >
                 {hasMinLength ? '✓' : '○'} At least 8 characters
               </p>
-              <p className={hasNumber ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}>
+              <p
+                className={
+                  hasNumber ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
+                }
+              >
                 {hasNumber ? '✓' : '○'} Contains a number
               </p>
-              <p className={hasUppercase ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}>
+              <p
+                className={
+                  hasUppercase ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
+                }
+              >
                 {hasUppercase ? '✓' : '○'} Contains an uppercase letter
               </p>
             </div>
@@ -279,7 +286,9 @@ export function RegisterForm({
             disabled={isSubmitting}
             {...form.register('confirmPassword')}
             aria-invalid={!!form.formState.errors.confirmPassword}
-            aria-describedby={form.formState.errors.confirmPassword ? 'confirmPassword-error' : undefined}
+            aria-describedby={
+              form.formState.errors.confirmPassword ? 'confirmPassword-error' : undefined
+            }
           />
           {form.formState.errors.confirmPassword && (
             <p id="confirmPassword-error" className="text-sm text-destructive">
@@ -289,11 +298,7 @@ export function RegisterForm({
         </div>
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isSubmitting}
-        >
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Creating account...' : 'Create account'}
         </Button>
 

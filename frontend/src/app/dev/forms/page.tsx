@@ -14,12 +14,7 @@ import { z } from 'zod';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DevBreadcrumbs } from '@/components/dev/DevBreadcrumbs';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -109,9 +104,8 @@ export default function FormsPage() {
           {/* Introduction */}
           <div className="max-w-3xl space-y-4">
             <p className="text-muted-foreground">
-              Complete form implementations using react-hook-form for state management
-              and Zod for validation. Includes error handling, loading states, and
-              accessibility features.
+              Complete form implementations using react-hook-form for state management and Zod for
+              validation. Includes error handling, loading states, and accessibility features.
             </p>
             <div className="flex flex-wrap gap-2">
               <Badge variant="outline">react-hook-form</Badge>
@@ -170,16 +164,10 @@ const { register, handleSubmit, formState: { errors } } = useForm({
                       placeholder="you@example.com"
                       {...registerLogin('email')}
                       aria-invalid={!!errorsLogin.email}
-                      aria-describedby={
-                        errorsLogin.email ? 'login-email-error' : undefined
-                      }
+                      aria-describedby={errorsLogin.email ? 'login-email-error' : undefined}
                     />
                     {errorsLogin.email && (
-                      <p
-                        id="login-email-error"
-                        className="text-sm text-destructive"
-                        role="alert"
-                      >
+                      <p id="login-email-error" className="text-sm text-destructive" role="alert">
                         {errorsLogin.email.message}
                       </p>
                     )}
@@ -194,9 +182,7 @@ const { register, handleSubmit, formState: { errors } } = useForm({
                       placeholder="••••••••"
                       {...registerLogin('password')}
                       aria-invalid={!!errorsLogin.password}
-                      aria-describedby={
-                        errorsLogin.password ? 'login-password-error' : undefined
-                      }
+                      aria-describedby={errorsLogin.password ? 'login-password-error' : undefined}
                     />
                     {errorsLogin.password && (
                       <p
@@ -277,10 +263,7 @@ const { register, handleSubmit, formState: { errors } } = useForm({
 </form>`}
             >
               <div className="max-w-md mx-auto">
-                <form
-                  onSubmit={handleSubmitContact(onSubmitContact)}
-                  className="space-y-4"
-                >
+                <form onSubmit={handleSubmitContact(onSubmitContact)} className="space-y-4">
                   {/* Name */}
                   <div className="space-y-2">
                     <Label htmlFor="contact-name">Name</Label>
@@ -317,9 +300,7 @@ const { register, handleSubmit, formState: { errors } } = useForm({
                   {/* Category */}
                   <div className="space-y-2">
                     <Label htmlFor="contact-category">Category</Label>
-                    <Select
-                      onValueChange={(value) => setValueContact('category', value)}
-                    >
+                    <Select onValueChange={(value) => setValueContact('category', value)}>
                       <SelectTrigger id="contact-category">
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
@@ -364,9 +345,7 @@ const { register, handleSubmit, formState: { errors } } = useForm({
                     <Alert className="border-green-500 text-green-600 dark:border-green-400 dark:text-green-400">
                       <CheckCircle2 className="h-4 w-4" />
                       <AlertTitle>Success!</AlertTitle>
-                      <AlertDescription>
-                        Your message has been sent successfully.
-                      </AlertDescription>
+                      <AlertDescription>Your message has been sent successfully.</AlertDescription>
                     </Alert>
                   )}
                 </form>
@@ -384,7 +363,7 @@ const { register, handleSubmit, formState: { errors } } = useForm({
               title="Error State Best Practices"
               description="Use aria-invalid and aria-describedby for accessibility"
               before={{
-                caption: "No ARIA attributes, poor accessibility",
+                caption: 'No ARIA attributes, poor accessibility',
                 content: (
                   <div className="space-y-2 rounded-lg border p-4">
                     <div className="text-sm font-medium">Email</div>
@@ -394,7 +373,7 @@ const { register, handleSubmit, formState: { errors } } = useForm({
                 ),
               }}
               after={{
-                caption: "With ARIA, screen reader accessible",
+                caption: 'With ARIA, screen reader accessible',
                 content: (
                   <div className="space-y-2 rounded-lg border p-4">
                     <div className="text-sm font-medium">Email</div>
@@ -422,15 +401,21 @@ const { register, handleSubmit, formState: { errors } } = useForm({
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
-                    <span>Add <code className="text-xs">aria-invalid=true</code> to invalid inputs</span>
+                    <span>
+                      Add <code className="text-xs">aria-invalid=true</code> to invalid inputs
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
-                    <span>Link errors with <code className="text-xs">aria-describedby</code></span>
+                    <span>
+                      Link errors with <code className="text-xs">aria-describedby</code>
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
-                    <span>Add <code className="text-xs">role=&quot;alert&quot;</code> to error messages</span>
+                    <span>
+                      Add <code className="text-xs">role=&quot;alert&quot;</code> to error messages
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
@@ -536,9 +521,7 @@ const { register, handleSubmit, formState: { errors } } = useForm({
 
                 <div className="space-y-2">
                   <div className="font-medium text-sm">Optional Field</div>
-                  <code className="block rounded bg-muted p-2 text-xs">
-                    z.string().optional()
-                  </code>
+                  <code className="block rounded bg-muted p-2 text-xs">z.string().optional()</code>
                 </div>
 
                 <div className="space-y-2">

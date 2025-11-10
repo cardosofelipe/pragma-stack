@@ -132,10 +132,13 @@ test.describe('Admin User Management - Search and Filters', () => {
     await searchInput.fill('admin');
 
     // Wait for debounce and URL to update
-    await page.waitForFunction(() => {
-      const url = new URL(window.location.href);
-      return url.searchParams.has('search');
-    }, { timeout: 2000 });
+    await page.waitForFunction(
+      () => {
+        const url = new URL(window.location.href);
+        return url.searchParams.has('search');
+      },
+      { timeout: 2000 }
+    );
 
     // Check that URL contains search parameter
     expect(page.url()).toContain('search=admin');
@@ -144,51 +147,66 @@ test.describe('Admin User Management - Search and Filters', () => {
   // Note: Active status filter URL parameter behavior is tested in the unit tests
   // (UserManagementContent.test.tsx). Skipping E2E test due to flaky URL timing.
 
-  test('should filter users by inactive status (adds active=false param to URL)', async ({ page }) => {
+  test('should filter users by inactive status (adds active=false param to URL)', async ({
+    page,
+  }) => {
     const statusFilter = page.getByRole('combobox').first();
     await statusFilter.click();
 
     // Click on "Inactive" option and wait for URL update
     await Promise.all([
-      page.waitForFunction(() => {
-        const url = new URL(window.location.href);
-        return url.searchParams.get('active') === 'false';
-      }, { timeout: 2000 }),
-      page.getByRole('option', { name: 'Inactive' }).click()
+      page.waitForFunction(
+        () => {
+          const url = new URL(window.location.href);
+          return url.searchParams.get('active') === 'false';
+        },
+        { timeout: 2000 }
+      ),
+      page.getByRole('option', { name: 'Inactive' }).click(),
     ]);
 
     // Check that URL contains active=false parameter
     expect(page.url()).toContain('active=false');
   });
 
-  test('should filter users by superuser status (adds superuser param to URL)', async ({ page }) => {
+  test('should filter users by superuser status (adds superuser param to URL)', async ({
+    page,
+  }) => {
     const userTypeFilter = page.getByRole('combobox').nth(1);
     await userTypeFilter.click();
 
     // Click on "Superusers" option and wait for URL update
     await Promise.all([
-      page.waitForFunction(() => {
-        const url = new URL(window.location.href);
-        return url.searchParams.get('superuser') === 'true';
-      }, { timeout: 2000 }),
-      page.getByRole('option', { name: 'Superusers' }).click()
+      page.waitForFunction(
+        () => {
+          const url = new URL(window.location.href);
+          return url.searchParams.get('superuser') === 'true';
+        },
+        { timeout: 2000 }
+      ),
+      page.getByRole('option', { name: 'Superusers' }).click(),
     ]);
 
     // Check that URL contains superuser parameter
     expect(page.url()).toContain('superuser=true');
   });
 
-  test('should filter users by regular user status (adds superuser=false param to URL)', async ({ page }) => {
+  test('should filter users by regular user status (adds superuser=false param to URL)', async ({
+    page,
+  }) => {
     const userTypeFilter = page.getByRole('combobox').nth(1);
     await userTypeFilter.click();
 
     // Click on "Regular" option and wait for URL update
     await Promise.all([
-      page.waitForFunction(() => {
-        const url = new URL(window.location.href);
-        return url.searchParams.get('superuser') === 'false';
-      }, { timeout: 2000 }),
-      page.getByRole('option', { name: 'Regular' }).click()
+      page.waitForFunction(
+        () => {
+          const url = new URL(window.location.href);
+          return url.searchParams.get('superuser') === 'false';
+        },
+        { timeout: 2000 }
+      ),
+      page.getByRole('option', { name: 'Regular' }).click(),
     ]);
 
     // Check that URL contains superuser=false parameter
@@ -208,10 +226,13 @@ test.describe('Admin User Management - Search and Filters', () => {
     const searchInput = page.getByPlaceholder(/Search by name or email/i);
     await searchInput.fill('test');
 
-    await page.waitForFunction(() => {
-      const url = new URL(window.location.href);
-      return url.searchParams.has('search');
-    }, { timeout: 2000 });
+    await page.waitForFunction(
+      () => {
+        const url = new URL(window.location.href);
+        return url.searchParams.has('search');
+      },
+      { timeout: 2000 }
+    );
 
     // URL should have page=1 or no page param (defaults to 1)
     const newUrl = page.url();
@@ -502,9 +523,7 @@ test.describe('Admin User Management - Edit User Dialog', () => {
     await page.getByText('Edit User').click();
 
     // Password field should indicate it's optional
-    await expect(
-      page.getByLabel(/Password.*\(leave blank to keep current\)/i)
-    ).toBeVisible();
+    await expect(page.getByLabel(/Password.*\(leave blank to keep current\)/i)).toBeVisible();
   });
 
   test('should have placeholder for password in edit mode', async ({ page }) => {

@@ -61,12 +61,8 @@ export function CodeSnippet({
       {(title || language) && (
         <div className="flex items-center justify-between rounded-t-lg border border-b-0 bg-muted/50 px-4 py-2">
           <div className="flex items-center gap-2">
-            {title && (
-              <span className="text-sm font-medium text-foreground">{title}</span>
-            )}
-            {language && (
-              <span className="text-xs text-muted-foreground">({language})</span>
-            )}
+            {title && <span className="text-sm font-medium text-foreground">{title}</span>}
+            {language && <span className="text-xs text-muted-foreground">({language})</span>}
           </div>
           <Button
             variant="ghost"
@@ -139,8 +135,7 @@ export function CodeSnippet({
                       key={idx}
                       className={cn(
                         'leading-6',
-                        highlightLines.includes(idx + 1) &&
-                          'bg-accent/20 -mx-4 px-4'
+                        highlightLines.includes(idx + 1) && 'bg-accent/20 -mx-4 px-4'
                       )}
                     >
                       {line || ' '}

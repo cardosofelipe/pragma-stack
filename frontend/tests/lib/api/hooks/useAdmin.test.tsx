@@ -34,7 +34,9 @@ jest.mock('@/lib/api/client');
 jest.mock('@/lib/auth/AuthContext');
 
 const mockAdminListUsers = adminListUsers as jest.MockedFunction<typeof adminListUsers>;
-const mockAdminListOrganizations = adminListOrganizations as jest.MockedFunction<typeof adminListOrganizations>;
+const mockAdminListOrganizations = adminListOrganizations as jest.MockedFunction<
+  typeof adminListOrganizations
+>;
 const mockAdminListSessions = adminListSessions as jest.MockedFunction<typeof adminListSessions>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
@@ -53,19 +55,13 @@ describe('useAdmin hooks', () => {
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
   describe('useAdminStats', () => {
     const mockUsersData = {
       data: {
-        data: [
-          { is_active: true },
-          { is_active: true },
-          { is_active: false },
-        ],
+        data: [{ is_active: true }, { is_active: true }, { is_active: false }],
         pagination: { total: 3, page: 1, limit: 10000 },
       },
     };
@@ -358,7 +354,7 @@ describe('useAdmin hooks', () => {
             limit: 20,
             search: 'admin',
             is_active: true,
-            is_superuser: false
+            is_superuser: false,
           },
           throwOnError: false,
         });
@@ -476,7 +472,15 @@ describe('useAdmin hooks', () => {
     it('creates a user successfully', async () => {
       const mockCreateUser = adminCreateUser as jest.MockedFunction<typeof adminCreateUser>;
       mockCreateUser.mockResolvedValue({
-        data: { id: '1', email: 'newuser@example.com', first_name: 'New', last_name: 'User', is_active: true, is_superuser: false, created_at: '2025-01-01T00:00:00Z' },
+        data: {
+          id: '1',
+          email: 'newuser@example.com',
+          first_name: 'New',
+          last_name: 'User',
+          is_active: true,
+          is_superuser: false,
+          created_at: '2025-01-01T00:00:00Z',
+        },
       } as any);
 
       const { result } = renderHook(() => useCreateUser(), { wrapper });
@@ -524,7 +528,15 @@ describe('useAdmin hooks', () => {
     it('updates a user successfully', async () => {
       const mockUpdateUser = adminUpdateUser as jest.MockedFunction<typeof adminUpdateUser>;
       mockUpdateUser.mockResolvedValue({
-        data: { id: '1', email: 'updated@example.com', first_name: 'Updated', last_name: 'User', is_active: true, is_superuser: false, created_at: '2025-01-01T00:00:00Z' },
+        data: {
+          id: '1',
+          email: 'updated@example.com',
+          first_name: 'Updated',
+          last_name: 'User',
+          is_active: true,
+          is_superuser: false,
+          created_at: '2025-01-01T00:00:00Z',
+        },
       } as any);
 
       const { result } = renderHook(() => useUpdateUser(), { wrapper });
@@ -618,7 +630,9 @@ describe('useAdmin hooks', () => {
 
   describe('useDeactivateUser', () => {
     it('deactivates a user successfully', async () => {
-      const mockDeactivateUser = adminDeactivateUser as jest.MockedFunction<typeof adminDeactivateUser>;
+      const mockDeactivateUser = adminDeactivateUser as jest.MockedFunction<
+        typeof adminDeactivateUser
+      >;
       mockDeactivateUser.mockResolvedValue({ data: { success: true } } as any);
 
       const { result } = renderHook(() => useDeactivateUser(), { wrapper });
@@ -634,7 +648,9 @@ describe('useAdmin hooks', () => {
     });
 
     it('handles deactivate error', async () => {
-      const mockDeactivateUser = adminDeactivateUser as jest.MockedFunction<typeof adminDeactivateUser>;
+      const mockDeactivateUser = adminDeactivateUser as jest.MockedFunction<
+        typeof adminDeactivateUser
+      >;
       mockDeactivateUser.mockResolvedValue({ error: 'Deactivate failed' } as any);
 
       const { result } = renderHook(() => useDeactivateUser(), { wrapper });

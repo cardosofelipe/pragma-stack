@@ -89,9 +89,7 @@ export function OrganizationManagementContent() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">All Organizations</h2>
-            <p className="text-muted-foreground">
-              Manage organizations and their members
-            </p>
+            <p className="text-muted-foreground">Manage organizations and their members</p>
           </div>
           <Button onClick={handleCreateOrganization}>
             <Plus className="mr-2 h-4 w-4" />

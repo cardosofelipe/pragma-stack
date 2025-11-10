@@ -57,8 +57,7 @@ function calculatePasswordStrength(password: string): {
   const hasNumber = /[0-9]/.test(password);
   const hasUppercase = /[A-Z]/.test(password);
 
-  const strength =
-    (hasMinLength ? 33 : 0) + (hasNumber ? 33 : 0) + (hasUppercase ? 34 : 0);
+  const strength = (hasMinLength ? 33 : 0) + (hasNumber ? 33 : 0) + (hasUppercase ? 34 : 0);
 
   return { hasMinLength, hasNumber, hasUppercase, strength };
 }
@@ -208,9 +207,7 @@ export function PasswordResetConfirmForm({
             {...form.register('new_password')}
             aria-invalid={!!form.formState.errors.new_password}
             aria-describedby={
-              form.formState.errors.new_password
-                ? 'new-password-error'
-                : 'password-requirements'
+              form.formState.errors.new_password ? 'new-password-error' : 'password-requirements'
             }
             aria-required="true"
           />
@@ -261,8 +258,7 @@ export function PasswordResetConfirmForm({
                       : 'text-muted-foreground'
                   }
                 >
-                  {passwordStrength.hasUppercase ? '✓' : '○'} Contains an uppercase
-                  letter
+                  {passwordStrength.hasUppercase ? '✓' : '○'} Contains an uppercase letter
                 </li>
               </ul>
             </div>
@@ -283,9 +279,7 @@ export function PasswordResetConfirmForm({
             {...form.register('confirm_password')}
             aria-invalid={!!form.formState.errors.confirm_password}
             aria-describedby={
-              form.formState.errors.confirm_password
-                ? 'confirm-password-error'
-                : undefined
+              form.formState.errors.confirm_password ? 'confirm-password-error' : undefined
             }
             aria-required="true"
           />

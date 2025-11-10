@@ -222,10 +222,7 @@ test.describe('Registration Flow', () => {
     const loginLink = page.getByRole('link', { name: 'Sign in' });
 
     // Use Promise.all to wait for navigation
-    await Promise.all([
-      page.waitForURL('/login'),
-      loginLink.click()
-    ]);
+    await Promise.all([page.waitForURL('/login'), loginLink.click()]);
 
     // Should be on login page
     await expect(page).toHaveURL('/login');

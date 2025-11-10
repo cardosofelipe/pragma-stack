@@ -123,9 +123,7 @@ describe('SessionsManager', () => {
 
     renderWithProvider(<SessionsManager />);
 
-    expect(
-      screen.queryByRole('button', { name: /revoke all others/i })
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /revoke all others/i })).not.toBeInTheDocument();
   });
 
   it('opens bulk revoke dialog', async () => {
@@ -161,7 +159,7 @@ describe('SessionsManager', () => {
 
     // Find the destructive button in the dialog (not the "Cancel" button)
     const buttons = screen.getAllByRole('button');
-    const confirmButton = buttons.find(btn => btn.textContent === 'Revoke All Others');
+    const confirmButton = buttons.find((btn) => btn.textContent === 'Revoke All Others');
 
     if (confirmButton) {
       fireEvent.click(confirmButton);
@@ -214,9 +212,7 @@ describe('SessionsManager', () => {
 
     renderWithProvider(<SessionsManager />);
 
-    expect(
-      screen.getByText(/you're viewing your only active session/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/you're viewing your only active session/i)).toBeInTheDocument();
   });
 
   it('shows security tip', () => {
@@ -229,9 +225,7 @@ describe('SessionsManager', () => {
     renderWithProvider(<SessionsManager />);
 
     expect(screen.getByText(/security tip/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/if you see a session you don't recognize/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/if you see a session you don't recognize/i)).toBeInTheDocument();
   });
 
   it('closes bulk revoke dialog on cancel', async () => {

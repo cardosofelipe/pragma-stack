@@ -24,6 +24,7 @@
 We use **[shadcn/ui](https://ui.shadcn.com)**, a collection of accessible, customizable components built on **Radix UI primitives**.
 
 **Key features:**
+
 - ✅ **Accessible** - WCAG AA compliant, keyboard navigation, screen reader support
 - ✅ **Customizable** - Components are copied into your project (not npm dependencies)
 - ✅ **Composable** - Build complex UIs from simple primitives
@@ -41,6 +42,7 @@ npx shadcn@latest add
 ```
 
 **Installed components** (in `/src/components/ui/`):
+
 - alert, avatar, badge, button, card, checkbox, dialog
 - dropdown-menu, input, label, popover, select, separator
 - sheet, skeleton, table, tabs, textarea, toast
@@ -82,16 +84,17 @@ import { Button } from '@/components/ui/button';
 
 **When to use each variant:**
 
-| Variant | Use Case | Example |
-|---------|----------|---------|
-| `default` | Primary actions, CTAs | Save, Submit, Create |
-| `secondary` | Secondary actions | Cancel, Back |
-| `outline` | Alternative actions | View Details, Edit |
-| `ghost` | Subtle actions in lists | Icon buttons in table rows |
-| `link` | In-text actions | Read more, Learn more |
-| `destructive` | Delete, remove actions | Delete Account, Remove |
+| Variant       | Use Case                | Example                    |
+| ------------- | ----------------------- | -------------------------- |
+| `default`     | Primary actions, CTAs   | Save, Submit, Create       |
+| `secondary`   | Secondary actions       | Cancel, Back               |
+| `outline`     | Alternative actions     | View Details, Edit         |
+| `ghost`       | Subtle actions in lists | Icon buttons in table rows |
+| `link`        | In-text actions         | Read more, Learn more      |
+| `destructive` | Delete, remove actions  | Delete Account, Remove     |
 
 **Accessibility**:
+
 - Always add `aria-label` for icon-only buttons
 - Use `disabled` for unavailable actions (not hidden)
 - Loading state prevents double-submission
@@ -162,6 +165,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 ```
 
 **Pattern: User menu**:
+
 ```tsx
 <DropdownMenu>
   <DropdownMenuTrigger>
@@ -323,6 +327,7 @@ import { Label } from '@/components/ui/label';
 ```
 
 **Input types:**
+
 - `text` - Default text input
 - `email` - Email address
 - `password` - Password field
@@ -530,6 +535,7 @@ import { AlertCircle, CheckCircle, Info } from 'lucide-react';
 ```
 
 **When to use:**
+
 - ✅ Form-level errors
 - ✅ Important warnings
 - ✅ Success confirmations (inline)
@@ -557,14 +563,11 @@ toast.info('Processing your request...');
 toast.warning('This action cannot be undone');
 
 // Loading (with promise)
-toast.promise(
-  saveChanges(),
-  {
-    loading: 'Saving changes...',
-    success: 'Changes saved!',
-    error: 'Failed to save changes',
-  }
-);
+toast.promise(saveChanges(), {
+  loading: 'Saving changes...',
+  success: 'Changes saved!',
+  error: 'Failed to save changes',
+});
 
 // Custom with action
 toast('Event has been created', {
@@ -580,6 +583,7 @@ toast.dismiss();
 ```
 
 **When to use:**
+
 - ✅ Action confirmations (saved, deleted)
 - ✅ Background task updates
 - ✅ Temporary errors
@@ -629,12 +633,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 ```
 
 **Pattern: Loading states**:
+
 ```tsx
-{isLoading ? (
-  <Skeleton className="h-48 w-full" />
-) : (
-  <div>{content}</div>
-)}
+{
+  isLoading ? <Skeleton className="h-48 w-full" /> : <div>{content}</div>;
+}
 ```
 
 ---
@@ -654,7 +657,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogTrigger,
-  DialogClose
+  DialogClose,
 } from '@/components/ui/dialog';
 
 // Basic dialog
@@ -678,7 +681,7 @@ import {
       </Button>
     </DialogFooter>
   </DialogContent>
-</Dialog>
+</Dialog>;
 
 // Controlled dialog
 const [isOpen, setIsOpen] = useState(false);
@@ -695,10 +698,11 @@ const [isOpen, setIsOpen] = useState(false);
       }}
     />
   </DialogContent>
-</Dialog>
+</Dialog>;
 ```
 
 **Accessibility:**
+
 - Escape key closes dialog
 - Focus trapped inside dialog
 - Returns focus to trigger on close
@@ -916,7 +920,7 @@ import {
   TableHead,
   TableRow,
   TableCell,
-  TableCaption
+  TableCaption,
 } from '@/components/ui/table';
 
 <Table>
@@ -945,7 +949,7 @@ import {
       <TableCell className="text-right">$2,500.00</TableCell>
     </TableRow>
   </TableFooter>
-</Table>
+</Table>;
 ```
 
 **For advanced tables** (sorting, filtering, pagination), use **TanStack Table** with react-hook-form.
@@ -1014,12 +1018,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
         </TableRow>
       </TableHeader>
       <TableBody>
-        {users.map(user => (
+        {users.map((user) => (
           <TableRow key={user.id}>
             <TableCell>{user.name}</TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell>
-              <Button variant="ghost" size="sm">Edit</Button>
+              <Button variant="ghost" size="sm">
+                Edit
+              </Button>
             </TableCell>
           </TableRow>
         ))}
@@ -1041,9 +1047,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
   <DialogContent>
     <DialogHeader>
       <DialogTitle>Create New User</DialogTitle>
-      <DialogDescription>
-        Add a new user to the system
-      </DialogDescription>
+      <DialogDescription>Add a new user to the system</DialogDescription>
     </DialogHeader>
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
@@ -1113,7 +1117,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 ```tsx
 <Table>
   <TableBody>
-    {users.map(user => (
+    {users.map((user) => (
       <TableRow key={user.id}>
         <TableCell>{user.name}</TableCell>
         <TableCell>{user.email}</TableCell>
@@ -1134,10 +1138,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
                 View Details
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => handleDelete(user)}
-                className="text-destructive"
-              >
+              <DropdownMenuItem onClick={() => handleDelete(user)} className="text-destructive">
                 <Trash className="mr-2 h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -1187,6 +1188,7 @@ Need switchable panels? → Tabs
 ### Component Variants Quick Reference
 
 **Button**:
+
 - `default` - Primary action
 - `secondary` - Secondary action
 - `outline` - Alternative action
@@ -1195,12 +1197,14 @@ Need switchable panels? → Tabs
 - `destructive` - Delete/remove
 
 **Badge**:
+
 - `default` - Blue (new, active)
 - `secondary` - Gray (draft, inactive)
 - `outline` - Bordered (pending)
 - `destructive` - Red (critical, error)
 
 **Alert**:
+
 - `default` - Info
 - `destructive` - Error
 
@@ -1216,12 +1220,14 @@ Need switchable panels? → Tabs
 ---
 
 **Related Documentation:**
+
 - [Quick Start](./00-quick-start.md) - Essential patterns
 - [Foundations](./01-foundations.md) - Colors, typography, spacing
 - [Layouts](./03-layouts.md) - Layout patterns
 - [Forms](./06-forms.md) - Form validation and patterns
 
 **External Resources:**
+
 - [shadcn/ui Documentation](https://ui.shadcn.com)
 - [Radix UI Primitives](https://www.radix-ui.com)
 

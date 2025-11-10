@@ -9,19 +9,22 @@
 ### ALWAYS Do
 
 1. ✅ **Import from `@/components/ui/*`**
+
    ```tsx
    import { Button } from '@/components/ui/button';
    import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
    ```
 
 2. ✅ **Use semantic color tokens**
+
    ```tsx
-   className="bg-primary text-primary-foreground"
-   className="text-destructive"
-   className="bg-muted text-muted-foreground"
+   className = 'bg-primary text-primary-foreground';
+   className = 'text-destructive';
+   className = 'bg-muted text-muted-foreground';
    ```
 
 3. ✅ **Use `cn()` utility for className merging**
+
    ```tsx
    import { cn } from '@/lib/utils';
 
@@ -29,11 +32,13 @@
    ```
 
 4. ✅ **Follow spacing scale** (multiples of 4: 0, 1, 2, 3, 4, 6, 8, 12, 16)
+
    ```tsx
-   className="p-4 space-y-6 mb-8"
+   className = 'p-4 space-y-6 mb-8';
    ```
 
 5. ✅ **Add accessibility attributes**
+
    ```tsx
    <Label htmlFor="email">Email</Label>
    <Input
@@ -44,12 +49,14 @@
    ```
 
 6. ✅ **Use component variants**
+
    ```tsx
    <Button variant="destructive">Delete</Button>
    <Alert variant="destructive">Error message</Alert>
    ```
 
 7. ✅ **Compose from shadcn/ui primitives**
+
    ```tsx
    // Don't create custom card components
    // Use Card + CardHeader + CardTitle + CardContent
@@ -57,8 +64,8 @@
 
 8. ✅ **Use mobile-first responsive design**
    ```tsx
-   className="text-2xl sm:text-3xl lg:text-4xl"
-   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+   className = 'text-2xl sm:text-3xl lg:text-4xl';
+   className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
    ```
 
 ---
@@ -66,24 +73,27 @@
 ### NEVER Do
 
 1. ❌ **NO arbitrary colors**
+
    ```tsx
    // ❌ WRONG
-   className="bg-blue-500 text-white"
+   className = 'bg-blue-500 text-white';
 
    // ✅ CORRECT
-   className="bg-primary text-primary-foreground"
+   className = 'bg-primary text-primary-foreground';
    ```
 
 2. ❌ **NO arbitrary spacing values**
+
    ```tsx
    // ❌ WRONG
-   className="p-[13px] mb-[17px]"
+   className = 'p-[13px] mb-[17px]';
 
    // ✅ CORRECT
-   className="p-4 mb-4"
+   className = 'p-4 mb-4';
    ```
 
 3. ❌ **NO inline styles**
+
    ```tsx
    // ❌ WRONG
    style={{ margin: '10px', color: '#3b82f6' }}
@@ -93,6 +103,7 @@
    ```
 
 4. ❌ **NO custom CSS classes** (use Tailwind utilities)
+
    ```tsx
    // ❌ WRONG
    <div className="my-custom-class">
@@ -102,6 +113,7 @@
    ```
 
 5. ❌ **NO mixing component libraries**
+
    ```tsx
    // ❌ WRONG - Don't use Material-UI, Ant Design, etc.
    import { Button } from '@mui/material';
@@ -111,6 +123,7 @@
    ```
 
 6. ❌ **NO skipping accessibility**
+
    ```tsx
    // ❌ WRONG
    <button><X /></button>
@@ -122,6 +135,7 @@
    ```
 
 7. ❌ **NO creating custom variants without CVA**
+
    ```tsx
    // ❌ WRONG
    <Button className={type === 'danger' ? 'bg-red-500' : 'bg-blue-500'}>
@@ -138,9 +152,7 @@
 
 ```tsx
 <div className="container mx-auto px-4 py-8">
-  <div className="max-w-4xl mx-auto space-y-6">
-    {/* Content */}
-  </div>
+  <div className="max-w-4xl mx-auto space-y-6">{/* Content */}</div>
 </div>
 ```
 
@@ -148,7 +160,9 @@
 
 ```tsx
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {items.map(item => <Card key={item.id}>...</Card>)}
+  {items.map((item) => (
+    <Card key={item.id}>...</Card>
+  ))}
 </div>
 ```
 
@@ -160,9 +174,7 @@
     <CardTitle>Form Title</CardTitle>
   </CardHeader>
   <CardContent>
-    <form className="space-y-4">
-      {/* Form fields */}
-    </form>
+    <form className="space-y-4">{/* Form fields */}</form>
   </CardContent>
 </Card>
 ```
@@ -170,9 +182,7 @@
 ### Centered Content
 
 ```tsx
-<div className="max-w-2xl mx-auto px-4">
-  {/* Readable content width */}
-</div>
+<div className="max-w-2xl mx-auto px-4">{/* Readable content width */}</div>
 ```
 
 ---
@@ -191,17 +201,15 @@ interface MyComponentProps {
   children: React.ReactNode;
 }
 
-export function MyComponent({
-  variant = 'default',
-  className,
-  children
-}: MyComponentProps) {
+export function MyComponent({ variant = 'default', className, children }: MyComponentProps) {
   return (
-    <Card className={cn(
-      "p-4", // base styles
-      variant === 'compact' && "p-2",
-      className // allow overrides
-    )}>
+    <Card
+      className={cn(
+        'p-4', // base styles
+        variant === 'compact' && 'p-2',
+        className // allow overrides
+      )}
+    >
       {children}
     </Card>
   );
@@ -215,22 +223,22 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const componentVariants = cva(
-  "base-classes-here", // base
+  'base-classes-here', // base
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground",
-        destructive: "bg-destructive text-destructive-foreground",
+        default: 'bg-primary text-primary-foreground',
+        destructive: 'bg-destructive text-destructive-foreground',
       },
       size: {
-        sm: "h-8 px-3 text-xs",
-        default: "h-10 px-4 text-sm",
-        lg: "h-12 px-6 text-base",
+        sm: 'h-8 px-3 text-xs',
+        default: 'h-10 px-4 text-sm',
+        lg: 'h-12 px-6 text-base',
       },
     },
     defaultVariants: {
-      variant: "default",
-      size: "default",
+      variant: 'default',
+      size: 'default',
     },
   }
 );
@@ -240,9 +248,7 @@ interface ComponentProps
     VariantProps<typeof componentVariants> {}
 
 export function Component({ variant, size, className, ...props }: ComponentProps) {
-  return (
-    <div className={cn(componentVariants({ variant, size, className }))} {...props} />
-  );
+  return <div className={cn(componentVariants({ variant, size, className }))} {...props} />;
 }
 ```
 
@@ -313,18 +319,18 @@ export function MyForm() {
 
 **Always use these semantic tokens:**
 
-| Token | Usage |
-|-------|-------|
-| `bg-primary text-primary-foreground` | Primary buttons, CTAs |
-| `bg-secondary text-secondary-foreground` | Secondary actions |
-| `bg-destructive text-destructive-foreground` | Delete, errors |
-| `bg-muted text-muted-foreground` | Disabled states |
-| `bg-accent text-accent-foreground` | Hover states |
-| `bg-card text-card-foreground` | Card backgrounds |
-| `text-foreground` | Body text |
-| `text-muted-foreground` | Secondary text |
-| `border-border` | Borders |
-| `ring-ring` | Focus rings |
+| Token                                        | Usage                 |
+| -------------------------------------------- | --------------------- |
+| `bg-primary text-primary-foreground`         | Primary buttons, CTAs |
+| `bg-secondary text-secondary-foreground`     | Secondary actions     |
+| `bg-destructive text-destructive-foreground` | Delete, errors        |
+| `bg-muted text-muted-foreground`             | Disabled states       |
+| `bg-accent text-accent-foreground`           | Hover states          |
+| `bg-card text-card-foreground`               | Card backgrounds      |
+| `text-foreground`                            | Body text             |
+| `text-muted-foreground`                      | Secondary text        |
+| `border-border`                              | Borders               |
+| `ring-ring`                                  | Focus rings           |
 
 ---
 
@@ -332,14 +338,14 @@ export function MyForm() {
 
 **Use these spacing values (multiples of 4px):**
 
-| Class | Value | Pixels | Usage |
-|-------|-------|--------|-------|
-| `2` | 0.5rem | 8px | Tight spacing |
-| `4` | 1rem | 16px | Standard spacing |
-| `6` | 1.5rem | 24px | Section spacing |
-| `8` | 2rem | 32px | Large gaps |
-| `12` | 3rem | 48px | Section dividers |
-| `16` | 4rem | 64px | Page sections |
+| Class | Value  | Pixels | Usage            |
+| ----- | ------ | ------ | ---------------- |
+| `2`   | 0.5rem | 8px    | Tight spacing    |
+| `4`   | 1rem   | 16px   | Standard spacing |
+| `6`   | 1.5rem | 24px   | Section spacing  |
+| `8`   | 2rem   | 32px   | Large gaps       |
+| `12`  | 3rem   | 48px   | Section dividers |
+| `16`  | 4rem   | 64px   | Page sections    |
 
 ---
 
@@ -428,7 +434,7 @@ function MyCard({ title, children }) {
     <CardTitle>{title}</CardTitle>
   </CardHeader>
   <CardContent>{children}</CardContent>
-</Card>
+</Card>;
 ```
 
 ### ❌ Mistake 5: Not using cn() utility
@@ -497,7 +503,7 @@ Add to `.github/copilot-instructions.md`:
 ```markdown
 # Component Guidelines
 
-- Import from @/components/ui/*
+- Import from @/components/ui/\*
 - Use semantic colors: bg-primary, text-destructive
 - Spacing: multiples of 4 (p-4, mb-6, gap-8)
 - Use cn() for className merging
@@ -525,20 +531,20 @@ interface DashboardCardProps {
 
 export function DashboardCard({ title, value, trend, className }: DashboardCardProps) {
   return (
-    <Card className={cn("p-6", className)}>
+    <Card className={cn('p-6', className)}>
       <CardHeader>
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
         {trend && (
-          <p className={cn(
-            "text-xs",
-            trend === 'up' && "text-green-600",
-            trend === 'down' && "text-destructive"
-          )}>
+          <p
+            className={cn(
+              'text-xs',
+              trend === 'up' && 'text-green-600',
+              trend === 'down' && 'text-destructive'
+            )}
+          >
             {trend === 'up' ? '↑' : '↓'} Trend
           </p>
         )}
@@ -549,6 +555,7 @@ export function DashboardCard({ title, value, trend, className }: DashboardCardP
 ```
 
 **Why it's good:**
+
 - ✅ Imports from `@/components/ui/*`
 - ✅ Uses semantic tokens
 - ✅ Uses `cn()` utility

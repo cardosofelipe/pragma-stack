@@ -48,7 +48,6 @@ export function Example({
   centered = false,
   tags,
 }: ExampleProps) {
-
   // Compact variant - no card wrapper
   if (variant === 'compact') {
     return (
@@ -68,9 +67,7 @@ export function Example({
                 </div>
               )}
             </div>
-            {description && (
-              <p className="text-sm text-muted-foreground">{description}</p>
-            )}
+            {description && <p className="text-sm text-muted-foreground">{description}</p>}
           </div>
         )}
 
@@ -178,9 +175,7 @@ export function ExampleGrid({
     3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
   }[cols];
 
-  return (
-    <div className={cn('grid gap-6', colsClass, className)}>{children}</div>
-  );
+  return <div className={cn('grid gap-6', colsClass, className)}>{children}</div>;
 }
 
 /**
@@ -208,9 +203,7 @@ export function ExampleSection({
     <section id={id} className={cn('space-y-6', className)}>
       <div className="space-y-2">
         <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
-        {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        )}
+        {description && <p className="text-sm text-muted-foreground">{description}</p>}
       </div>
       {children}
     </section>

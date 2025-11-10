@@ -11,31 +11,31 @@
 
 'use client';
 
-import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-    type AddMemberRequest,
-    adminActivateUser,
-    adminAddOrganizationMember,
-    adminBulkUserAction,
-    adminCreateOrganization,
-    adminCreateUser,
-    adminDeactivateUser,
-    adminDeleteOrganization,
-    adminDeleteUser,
-    adminGetOrganization,
-    adminListOrganizationMembers,
-    adminListOrganizations,
-    adminListSessions,
-    adminListUsers,
-    adminRemoveOrganizationMember,
-    adminUpdateOrganization,
-    adminUpdateUser,
-    type OrganizationCreate,
-    type OrganizationUpdate,
-    type UserCreate,
-    type UserUpdate,
+  type AddMemberRequest,
+  adminActivateUser,
+  adminAddOrganizationMember,
+  adminBulkUserAction,
+  adminCreateOrganization,
+  adminCreateUser,
+  adminDeactivateUser,
+  adminDeleteOrganization,
+  adminDeleteUser,
+  adminGetOrganization,
+  adminListOrganizationMembers,
+  adminListOrganizations,
+  adminListSessions,
+  adminListUsers,
+  adminRemoveOrganizationMember,
+  adminUpdateOrganization,
+  adminUpdateUser,
+  type OrganizationCreate,
+  type OrganizationUpdate,
+  type UserCreate,
+  type UserUpdate,
 } from '@/lib/api/client';
-import {useAuth} from '@/lib/auth/AuthContext';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 /**
  * Constants for admin hooks
@@ -81,7 +81,11 @@ export function useAdminStats() {
       }
 
       // Type assertion: if no error, response has data
-      const usersData = (usersResponse as { data: { data: Array<{ is_active: boolean }>; pagination: { total: number } } }).data;
+      const usersData = (
+        usersResponse as {
+          data: { data: Array<{ is_active: boolean }>; pagination: { total: number } };
+        }
+      ).data;
       const users = usersData?.data || [];
       const totalUsers = usersData?.pagination?.total || 0;
       const activeUsers = users.filter((u) => u.is_active).length;
@@ -282,13 +286,7 @@ export function useUpdateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      userId,
-      userData,
-    }: {
-      userId: string;
-      userData: UserUpdate;
-    }) => {
+    mutationFn: async ({ userId, userData }: { userId: string; userData: UserUpdate }) => {
       const response = await adminUpdateUser({
         path: { user_id: userId },
         body: userData,
@@ -509,13 +507,7 @@ export function useUpdateOrganization() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      orgId,
-      orgData,
-    }: {
-      orgId: string;
-      orgData: OrganizationUpdate;
-    }) => {
+    mutationFn: async ({ orgId, orgData }: { orgId: string; orgData: OrganizationUpdate }) => {
       const response = await adminUpdateOrganization({
         path: { org_id: orgId },
         body: orgData,
@@ -603,11 +595,7 @@ export function useGetOrganization(orgId: string | null) {
  * @param limit - Number of records per page
  * @returns Paginated list of organization members
  */
-export function useOrganizationMembers(
-  orgId: string | null,
-  page = 1,
-  limit = DEFAULT_PAGE_LIMIT
-) {
+export function useOrganizationMembers(orgId: string | null, page = 1, limit = DEFAULT_PAGE_LIMIT) {
   const { user } = useAuth();
 
   return useQuery({
@@ -642,13 +630,7 @@ export function useAddOrganizationMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      orgId,
-      memberData,
-    }: {
-      orgId: string;
-      memberData: AddMemberRequest;
-    }) => {
+    mutationFn: async ({ orgId, memberData }: { orgId: string; memberData: AddMemberRequest }) => {
       const response = await adminAddOrganizationMember({
         path: { org_id: orgId },
         body: memberData,
@@ -681,13 +663,7 @@ export function useRemoveOrganizationMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({
-      orgId,
-      userId,
-    }: {
-      orgId: string;
-      userId: string;
-    }) => {
+    mutationFn: async ({ orgId, userId }: { orgId: string; userId: string }) => {
       const response = await adminRemoveOrganizationMember({
         path: { org_id: orgId, user_id: userId },
         throwOnError: false,

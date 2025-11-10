@@ -24,10 +24,7 @@ interface DevBreadcrumbsProps {
 
 export function DevBreadcrumbs({ items, className }: DevBreadcrumbsProps) {
   return (
-    <nav
-      className={cn('bg-muted/30 border-b', className)}
-      aria-label="Breadcrumb"
-    >
+    <nav className={cn('bg-muted/30 border-b', className)} aria-label="Breadcrumb">
       <div className="container mx-auto px-4 py-3">
         <ol className="flex items-center gap-2 text-sm">
           {/* Home link */}

@@ -93,12 +93,14 @@ npm run coverage:view
 ### Pros & Cons
 
 **Pros:**
+
 - ✅ Native browser coverage (most accurate)
 - ✅ No build instrumentation needed (faster)
 - ✅ Works with source maps
 - ✅ Zero performance overhead
 
 **Cons:**
+
 - ❌ Chromium only (V8 engine specific)
 - ❌ Requires v8-to-istanbul conversion
 
@@ -168,11 +170,13 @@ This generates: `coverage-combined/index.html`
 ### Pros & Cons
 
 **Pros:**
+
 - ✅ Works on all browsers (Firefox, Safari, etc.)
 - ✅ Industry standard tooling
 - ✅ No conversion needed
 
 **Cons:**
+
 - ❌ Requires code instrumentation (slower builds)
 - ❌ More complex setup
 - ❌ Slight test performance overhead
@@ -196,11 +200,9 @@ module.exports = {
   presets: ['next/babel'],
   env: {
     test: {
-      plugins: [
-        process.env.E2E_COVERAGE && 'istanbul'
-      ].filter(Boolean)
-    }
-  }
+      plugins: [process.env.E2E_COVERAGE && 'istanbul'].filter(Boolean),
+    },
+  },
 };
 ```
 
@@ -442,12 +444,14 @@ Add to your CI pipeline (e.g., `.github/workflows/test.yml`):
 ### Problem: No coverage files generated
 
 **Symptoms:**
+
 ```bash
 npm run coverage:convert
 # ❌ No V8 coverage found at: coverage-e2e/raw
 ```
 
 **Solutions:**
+
 1. Verify `E2E_COVERAGE=true` is set when running tests
 2. Check coverage helpers are imported: `import { withCoverage } from './helpers/coverage'`
 3. Verify `beforeEach` and `afterEach` hooks are added
@@ -456,12 +460,14 @@ npm run coverage:convert
 ### Problem: V8 conversion fails
 
 **Symptoms:**
+
 ```bash
 npm run coverage:convert
 # ❌ v8-to-istanbul not installed
 ```
 
 **Solution:**
+
 ```bash
 npm install -D v8-to-istanbul
 ```
@@ -469,6 +475,7 @@ npm install -D v8-to-istanbul
 ### Problem: Coverage lower than expected
 
 **Symptoms:**
+
 ```
 Combined: 85% (expected 99%)
 ```
@@ -490,12 +497,14 @@ Combined: 85% (expected 99%)
 ### Problem: Istanbul coverage is empty
 
 **Symptoms:**
+
 ```typescript
 await saveIstanbulCoverage(page, testName);
 // ⚠️  No Istanbul coverage found
 ```
 
 **Solutions:**
+
 1. Verify `babel-plugin-istanbul` is configured
 2. Check `window.__coverage__` exists:
    ```typescript
@@ -507,12 +516,14 @@ await saveIstanbulCoverage(page, testName);
 ### Problem: Merge script fails
 
 **Symptoms:**
+
 ```bash
 npm run coverage:merge
 # ❌ Error: Cannot find module 'istanbul-lib-coverage'
 ```
 
 **Solution:**
+
 ```bash
 npm install -D istanbul-lib-coverage istanbul-lib-report istanbul-reports
 ```
@@ -524,11 +535,13 @@ npm install -D istanbul-lib-coverage istanbul-lib-report istanbul-reports
 ### Q: Should I use V8 or Istanbul coverage?
 
 **A: V8 coverage (Approach 1)** if:
+
 - ✅ You only test in Chromium
 - ✅ You want zero instrumentation overhead
 - ✅ You want the most accurate coverage
 
 **Istanbul (Approach 2)** if:
+
 - ✅ You need cross-browser coverage
 - ✅ You already use Istanbul tooling
 - ✅ You need complex coverage transformations
@@ -545,6 +558,7 @@ npm install -D istanbul-lib-coverage istanbul-lib-report istanbul-reports
 ### Q: Can I run coverage only for specific tests?
 
 **Yes:**
+
 ```bash
 # Single file
 E2E_COVERAGE=true npx playwright test homepage.spec.ts
@@ -559,10 +573,7 @@ Edit `.nycrc.json` and add to `exclude` array:
 
 ```json
 {
-  "exclude": [
-    "src/app/dev/**",
-    "src/lib/utils/debug.ts"
-  ]
+  "exclude": ["src/app/dev/**", "src/lib/utils/debug.ts"]
 }
 ```
 
@@ -571,6 +582,7 @@ Edit `.nycrc.json` and add to `exclude` array:
 Not directly in the HTML report, but you can:
 
 1. Generate separate reports:
+
    ```bash
    npx nyc report --reporter=html --report-dir=coverage-unit --temp-dir=coverage/.nyc_output
    npx nyc report --reporter=html --report-dir=coverage-e2e-only --temp-dir=coverage-e2e/.nyc_output
@@ -581,6 +593,7 @@ Not directly in the HTML report, but you can:
 ### Q: What's the performance impact on CI?
 
 Typical impact:
+
 - V8 coverage: +2-3 minutes (conversion time)
 - Istanbul coverage: +5-7 minutes (build instrumentation)
 - Merge step: ~10 seconds
@@ -594,6 +607,7 @@ Total CI time increase: **3-8 minutes**
 ### After Phase 1 (Infrastructure - DONE ✅)
 
 You've completed:
+
 - ✅ `.nycrc.json` configuration
 - ✅ Merge script (`scripts/merge-coverage.ts`)
 - ✅ Conversion script (`scripts/convert-v8-to-istanbul.ts`)
@@ -603,6 +617,7 @@ You've completed:
 ### Phase 2: Activation (When Ready)
 
 1. **Install dependencies:**
+
    ```bash
    npm install -D v8-to-istanbul istanbul-lib-coverage istanbul-lib-report istanbul-reports
    ```

@@ -99,10 +99,7 @@ export default function Home() {
       </footer>
 
       {/* Shared Demo Credentials Modal */}
-      <DemoCredentialsModal
-        open={demoModalOpen}
-        onClose={() => setDemoModalOpen(false)}
-      />
+      <DemoCredentialsModal open={demoModalOpen} onClose={() => setDemoModalOpen(false)} />
     </div>
   );
 }

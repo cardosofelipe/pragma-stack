@@ -26,36 +26,49 @@ jest.mock('next/link', () => ({
 
 // Mock DemoCredentialsModal
 jest.mock('@/components/home/DemoCredentialsModal', () => ({
-  DemoCredentialsModal: ({ open, onClose }: any) => (
-    open ? <div data-testid="demo-modal">
-      <button onClick={onClose}>Close Modal</button>
-    </div> : null
-  ),
+  DemoCredentialsModal: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="demo-modal">
+        <button onClick={onClose}>Close Modal</button>
+      </div>
+    ) : null,
 }));
 
 describe('CTASection', () => {
   it('renders main headline', () => {
-    render(<CTASection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <CTASection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     expect(screen.getByText(/Start Building,/i)).toBeInTheDocument();
     expect(screen.getByText(/Not Boilerplating/i)).toBeInTheDocument();
   });
 
   it('renders subtext with key messaging', () => {
-    render(<CTASection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <CTASection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     expect(screen.getByText(/Clone the repository, read the docs/i)).toBeInTheDocument();
     expect(screen.getByText(/Free forever, MIT licensed/i)).toBeInTheDocument();
   });
 
   it('renders GitHub CTA button', () => {
-    render(<CTASection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <CTASection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     const githubLink = screen.getByRole('link', { name: /get started on github/i });
     expect(githubLink).toHaveAttribute('href', 'https://github.com/your-org/fast-next-template');
@@ -64,29 +77,44 @@ describe('CTASection', () => {
   });
 
   it('renders Try Live Demo button', () => {
-    render(<CTASection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <CTASection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     const demoButton = screen.getByRole('button', { name: /try live demo/i });
     expect(demoButton).toBeInTheDocument();
   });
 
   it('renders Read Documentation link', () => {
-    render(<CTASection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <CTASection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     const docsLink = screen.getByRole('link', { name: /read documentation/i });
-    expect(docsLink).toHaveAttribute('href', 'https://github.com/your-org/fast-next-template#documentation');
+    expect(docsLink).toHaveAttribute(
+      'href',
+      'https://github.com/your-org/fast-next-template#documentation'
+    );
     expect(docsLink).toHaveAttribute('target', '_blank');
     expect(docsLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
   it('renders help text with internal links', () => {
-    render(<CTASection onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <CTASection
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     expect(screen.getByText(/Need help getting started\?/i)).toBeInTheDocument();
 
@@ -109,25 +137,33 @@ describe('CTASection', () => {
 
   describe('Accessibility', () => {
     it('has proper external link attributes', () => {
-      render(<CTASection onOpenDemoModal={function(): void {
-          throw new Error("Function not implemented.");
-      } } />);
+      render(
+        <CTASection
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       const externalLinks = [
         screen.getByRole('link', { name: /get started on github/i }),
         screen.getByRole('link', { name: /read documentation/i }),
       ];
 
-      externalLinks.forEach(link => {
+      externalLinks.forEach((link) => {
         expect(link).toHaveAttribute('target', '_blank');
         expect(link).toHaveAttribute('rel', 'noopener noreferrer');
       });
     });
 
     it('has descriptive button text', () => {
-      render(<CTASection onOpenDemoModal={function(): void {
-          throw new Error("Function not implemented.");
-      } } />);
+      render(
+        <CTASection
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       expect(screen.getByRole('button', { name: /try live demo/i })).toBeInTheDocument();
     });

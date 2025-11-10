@@ -80,9 +80,7 @@ export function Header() {
         {/* Logo */}
         <div className="flex items-center space-x-8">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-foreground">
-              FastNext
-            </span>
+            <span className="text-xl font-bold text-foreground">FastNext</span>
           </Link>
 
           {/* Navigation Links */}
@@ -90,11 +88,7 @@ export function Header() {
             <NavLink href="/" exact>
               Home
             </NavLink>
-            {user?.is_superuser && (
-              <NavLink href="/admin">
-                Admin
-              </NavLink>
-            )}
+            {user?.is_superuser && <NavLink href="/admin">Admin</NavLink>}
           </nav>
         </div>
 
@@ -117,9 +111,7 @@ export function Header() {
                   <p className="text-sm font-medium">
                     {user?.first_name} {user?.last_name}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {user?.email}
-                  </p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

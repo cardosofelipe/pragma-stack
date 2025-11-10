@@ -56,9 +56,7 @@ describe('API Error Handling', () => {
       const errorsWithField: APIError[] = [
         { code: 'VAL_001', message: 'Invalid input', field: 'email' },
       ];
-      const errorsWithoutField: APIError[] = [
-        { code: 'AUTH_001', message: 'Invalid credentials' },
-      ];
+      const errorsWithoutField: APIError[] = [{ code: 'AUTH_001', message: 'Invalid credentials' }];
 
       expect(isAPIErrorArray(errorsWithField)).toBe(true);
       expect(isAPIErrorArray(errorsWithoutField)).toBe(true);
@@ -110,9 +108,7 @@ describe('API Error Handling', () => {
 
       it('should handle strings', () => {
         const result = parseAPIError('some error string');
-        expect(result).toEqual([
-          { code: 'UNKNOWN', message: ERROR_MESSAGES['UNKNOWN'] },
-        ]);
+        expect(result).toEqual([{ code: 'UNKNOWN', message: ERROR_MESSAGES['UNKNOWN'] }]);
       });
     });
 
@@ -448,9 +444,7 @@ describe('API Error Handling', () => {
           response: {
             status: 401,
             data: {
-              errors: [
-                { code: 'CUSTOM_ERROR', message: 'Custom structured error' },
-              ],
+              errors: [{ code: 'CUSTOM_ERROR', message: 'Custom structured error' }],
             },
             statusText: 'Unauthorized',
             headers: {},
@@ -461,9 +455,7 @@ describe('API Error Handling', () => {
         const result = parseAPIError(axiosError);
 
         // Should return structured error, not the 401 default
-        expect(result).toEqual([
-          { code: 'CUSTOM_ERROR', message: 'Custom structured error' },
-        ]);
+        expect(result).toEqual([{ code: 'CUSTOM_ERROR', message: 'Custom structured error' }]);
       });
     });
   });
@@ -554,9 +546,7 @@ describe('API Error Handling', () => {
     });
 
     it('should use error code message if message is missing', () => {
-      const errors: APIError[] = [
-        { code: 'VAL_002', message: '', field: 'email' },
-      ];
+      const errors: APIError[] = [{ code: 'VAL_002', message: '', field: 'email' }];
 
       const result = getFieldErrors(errors);
 
@@ -605,9 +595,7 @@ describe('API Error Handling', () => {
     });
 
     it('should use error code message if message is missing', () => {
-      const errors: APIError[] = [
-        { code: 'AUTH_001', message: '' },
-      ];
+      const errors: APIError[] = [{ code: 'AUTH_001', message: '' }];
 
       const result = getGeneralError(errors);
 

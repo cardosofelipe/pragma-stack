@@ -182,5 +182,4 @@ describe('ThemeToggle', () => {
       expect(systemOption).toHaveTextContent('✓');
     });
   });
-
 });

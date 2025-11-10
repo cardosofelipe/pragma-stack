@@ -1,4 +1,5 @@
 # Frontend Requirements Document
+
 ## Next.js + FastAPI Template Project
 
 ---
@@ -10,6 +11,7 @@ This document specifies the requirements for a production-ready Next.js frontend
 ### 1.1 Purpose
 
 Provide a robust, scalable, and maintainable frontend foundation that:
+
 - Integrates seamlessly with the existing FastAPI backend
 - Follows modern React and Next.js best practices
 - Implements a clear and consistent architecture
@@ -19,6 +21,7 @@ Provide a robust, scalable, and maintainable frontend foundation that:
 ### 1.2 Scope
 
 The frontend encompasses:
+
 - User authentication and session management
 - User and organization administration interfaces
 - Reusable component library
@@ -33,6 +36,7 @@ The frontend encompasses:
 ### 2.1 Core Framework
 
 **Next.js (Latest Version)**
+
 - App Router architecture (not Pages Router)
 - Server Components by default, Client Components where interactivity is needed
 - TypeScript throughout the entire codebase
@@ -41,12 +45,14 @@ The frontend encompasses:
 ### 2.2 Styling
 
 **Tailwind CSS (Latest Version)**
+
 - Custom configuration for project-specific design tokens
 - Dark mode support (class-based strategy)
 - Responsive design utilities
 - Custom utilities as needed for common patterns
 
 **shadcn/ui (Latest)**
+
 - Component system built on Radix UI primitives
 - Customizable and accessible components
 - Components copied into project (not npm dependency)
@@ -55,6 +61,7 @@ The frontend encompasses:
 ### 2.3 Data Fetching & State Management
 
 **TanStack Query (React Query v5)**
+
 - Server state management
 - Automatic background refetching
 - Cache management and invalidation
@@ -63,6 +70,7 @@ The frontend encompasses:
 - Pagination and infinite query support
 
 **Zustand (Latest Version)**
+
 - Client-side application state (non-server state)
 - Authentication state
 - UI state (modals, sidebars, preferences)
@@ -72,6 +80,7 @@ The frontend encompasses:
 ### 2.4 Data Visualization
 
 **Recharts (Latest Version)**
+
 - Chart components for admin dashboards
 - Responsive charts
 - Customizable with Tailwind theme colors
@@ -79,6 +88,7 @@ The frontend encompasses:
 ### 2.5 API Client Generation
 
 **OpenAPI TypeScript Codegen**
+
 - Generator: `openapi-typescript-codegen` (or `@hey-api/openapi-ts` as modern alternative)
 - Output: TypeScript types and Axios-based API client
 - Generation source: Backend OpenAPI spec endpoint
@@ -89,6 +99,7 @@ The frontend encompasses:
 ### 2.6 HTTP Client
 
 **Axios (Latest Version)**
+
 - Used by generated API client
 - Interceptors for:
   - Authentication token injection
@@ -277,6 +288,7 @@ root/
 ### 4.1 Authentication Flow
 
 **Requirements:**
+
 - Integration with FastAPI backend authentication endpoints
 - JWT-based authentication (access token + refresh token pattern)
 - Secure token storage strategy:
@@ -289,6 +301,7 @@ root/
 - Per-device session tracking with backend
 
 **Login Flow:**
+
 1. User submits credentials via `LoginForm`
 2. API client calls backend `/api/v1/auth/login` endpoint
 3. Backend returns access token and refresh token
@@ -300,6 +313,7 @@ root/
 9. Axios interceptor adds `Authorization: Bearer {accessToken}` to all requests
 
 **Token Refresh Flow:**
+
 1. Axios interceptor detects 401 response
 2. Attempts token refresh via `/api/v1/auth/refresh` endpoint with refresh token
 3. Backend validates refresh token JTI (JWT ID) against active session in database
@@ -309,6 +323,7 @@ root/
 7. Old refresh token is invalidated (cannot be reused)
 
 **Logout Flow:**
+
 1. User initiates logout
 2. API client calls backend `/api/v1/auth/logout` endpoint with refresh token
 3. Backend deactivates the specific session (device) using the refresh token's JTI
@@ -319,6 +334,7 @@ root/
 8. Redirect to login or home page
 
 **Logout All Devices Flow:**
+
 1. User selects "Logout All Devices" (from session management or security page)
 2. API client calls backend `/api/v1/auth/logout-all` endpoint
 3. Backend deactivates all sessions for the current user
@@ -328,12 +344,14 @@ root/
 ### 4.2 Protected Routes
 
 **Route Guard Implementation:**
+
 - Middleware or layout-based protection for authenticated routes
 - Server-side session validation where possible
 - Client-side auth state checks for immediate UI updates
 - Graceful handling of unauthenticated access (redirect to login with return URL)
 
 **Permission Levels:**
+
 - Public routes: accessible to all (home, login, register)
 - Authenticated routes: require valid session
 - Admin routes: require authenticated user with admin role
@@ -342,6 +360,7 @@ root/
 ### 4.3 Auth Components
 
 **LoginForm**
+
 - Username/email and password fields
 - Form validation with react-hook-form and zod
 - Error handling with user-friendly messages
@@ -350,12 +369,14 @@ root/
 - Link to registration and password reset
 
 **RegisterForm**
+
 - User registration fields (as required by backend)
 - Client-side validation matching backend requirements
 - Terms of service acceptance
 - Email verification flow (if applicable)
 
 **AuthGuard**
+
 - HOC or component for protecting routes
 - Handles loading state during auth check
 - Redirects if unauthorized
@@ -364,6 +385,7 @@ root/
 ### 4.3 Password Reset Flow
 
 **Password Reset Request:**
+
 1. User provides email on reset form
 2. API client calls `/api/v1/auth/password-reset/request` with email
 3. Backend sends email with reset token (if email exists)
@@ -372,6 +394,7 @@ root/
 6. User receives email with password reset link containing token parameter
 
 **Password Reset Confirmation:**
+
 1. User clicks email link with token parameter (e.g., `/password-reset/confirm?token=...`)
 2. Frontend validates token parameter is present
 3. User enters new password (with confirmation)
@@ -382,6 +405,7 @@ root/
 8. User can now login with new password
 
 **Password Change (Authenticated Users):**
+
 1. User navigates to password settings page
 2. User provides current password and new password
 3. API client calls `/api/v1/users/me/password` with current and new passwords
@@ -392,6 +416,7 @@ root/
 ### 4.4 Auth State Management
 
 **Zustand Store Requirements:**
+
 ```typescript
 interface AuthStore {
   // State
@@ -403,18 +428,19 @@ interface AuthStore {
 
   // Authentication actions
   login: (credentials: LoginCredentials) => Promise<void>;
-  logout: () => Promise<void>;            // Logout current device
-  logoutAll: () => Promise<void>;         // Logout all devices
-  refreshTokens: () => Promise<void>;     // Refresh access token
-  checkAuth: () => Promise<void>;         // Verify current session
+  logout: () => Promise<void>; // Logout current device
+  logoutAll: () => Promise<void>; // Logout all devices
+  refreshTokens: () => Promise<void>; // Refresh access token
+  checkAuth: () => Promise<void>; // Verify current session
 
   // Token management
   setTokens: (accessToken: string, refreshToken: string) => void;
-  clearAuth: () => void;                  // Clear all auth state
+  clearAuth: () => void; // Clear all auth state
 }
 ```
 
 **TanStack Query Integration:**
+
 - `useAuth` hook wrapping auth operations
 - Automatic user data refetching on window focus
 - Cache invalidation on logout
@@ -425,24 +451,26 @@ interface AuthStore {
 The backend implements comprehensive per-device session tracking. Users can view active sessions across all devices and manage them individually.
 
 **Session Data Model:**
+
 ```typescript
 interface UserSession {
-  id: UUID;                          // Session identifier
-  device_name: string | null;         // "iPhone 14", "Chrome on MacBook"
-  device_id: string | null;           // Persistent device identifier
-  ip_address: string | null;          // Last known IP address
-  location_city: string | null;       // Geolocation city
-  location_country: string | null;    // Geolocation country
-  last_used_at: datetime;             // Last activity timestamp
-  created_at: datetime;               // Session creation time
-  expires_at: datetime;               // Session expiration time
-  is_current: boolean;                // Is this the current session?
+  id: UUID; // Session identifier
+  device_name: string | null; // "iPhone 14", "Chrome on MacBook"
+  device_id: string | null; // Persistent device identifier
+  ip_address: string | null; // Last known IP address
+  location_city: string | null; // Geolocation city
+  location_country: string | null; // Geolocation country
+  last_used_at: datetime; // Last activity timestamp
+  created_at: datetime; // Session creation time
+  expires_at: datetime; // Session expiration time
+  is_current: boolean; // Is this the current session?
 }
 ```
 
 **Session Management UI Requirements:**
 
 **Session List Page** (`/settings/sessions`):
+
 - Display all active sessions for the current user
 - Show device name, location, last used time, and created date
 - Highlight the current session with "This device" or "Current session" badge
@@ -452,6 +480,7 @@ interface UserSession {
 - Auto-refresh session list periodically
 
 **Session Information Display:**
+
 - Device icon based on device type (desktop, mobile, tablet)
 - Location display: "San Francisco, United States" (if available)
 - Time display: "Last used 2 hours ago" (relative time with date-fns)
@@ -459,6 +488,7 @@ interface UserSession {
 - "This device" badge for current session (different style, cannot revoke)
 
 **Session API Integration:**
+
 - `GET /api/v1/sessions/me` - List all active sessions with pagination
 - `DELETE /api/v1/sessions/{session_id}` - Revoke specific session (not current)
 - `POST /api/v1/auth/logout` - Logout current device
@@ -466,6 +496,7 @@ interface UserSession {
 - `DELETE /api/v1/sessions/me/expired` - Cleanup expired sessions (optional, admin-only)
 
 **Component Requirements:**
+
 - `SessionList.tsx` - Display active sessions table or card grid
 - `SessionCard.tsx` - Individual session display with device info
 - `RevokeSessionDialog.tsx` - Confirmation dialog before revoking
@@ -473,6 +504,7 @@ interface UserSession {
 - Empty state: "No other active sessions"
 
 **User Experience Considerations:**
+
 - Prevent revoking the current session via the session list (only via logout button)
 - Show loading state when revoking sessions
 - Show success toast: "Session revoked successfully"
@@ -489,6 +521,7 @@ interface UserSession {
 **Generation Scripts:**
 
 **Frontend Script** (`frontend/scripts/generate-api-client.sh`):
+
 - Fetches OpenAPI spec from backend at `/api/v1/openapi.json`
   - Development: `http://localhost:8000/api/v1/openapi.json`
   - Docker: `http://backend:8000/api/v1/openapi.json`
@@ -497,12 +530,14 @@ interface UserSession {
 - Can be run independently for frontend-only development
 
 **Root Script** (`root/scripts/generate-frontend-api.sh`):
+
 - Orchestrates generation for multi-module setup
 - Ensures backend is available (or uses spec file)
 - Navigates to frontend directory and runs generation
 - Useful for CI/CD and monorepo workflows
 
 **Generator Configuration:**
+
 - Tool: `@hey-api/openapi-ts` (modern, actively maintained)
 - Output language: TypeScript
 - HTTP client: Axios
@@ -529,11 +564,11 @@ interface UserSession {
 ```
 
 **Interceptor Responsibilities:**
+
 - **Request Interceptor:**
   - Add `Authorization: Bearer {token}` header
   - Add common headers (Content-Type, etc.)
   - Log requests in development
-  
 - **Response Interceptor:**
   - Handle 401 errors (trigger token refresh)
   - Handle 403 errors (insufficient permissions)
@@ -550,14 +585,15 @@ The backend returns structured error responses that must be properly parsed:
 interface APIErrorResponse {
   success: false;
   errors: Array<{
-    code: string;      // e.g., "AUTH_001", "USER_002", "VAL_001"
-    message: string;   // Human-readable error message
-    field?: string;    // Field that caused the error (for form validation)
+    code: string; // e.g., "AUTH_001", "USER_002", "VAL_001"
+    message: string; // Human-readable error message
+    field?: string; // Field that caused the error (for form validation)
   }>;
 }
 ```
 
 **Error Handling Requirements:**
+
 - Extract error messages from `errors` array
 - Display field-specific errors in forms (match `field` property to form fields)
 - Map error codes to user-friendly messages (create error code dictionary)
@@ -571,13 +607,14 @@ interface APIErrorResponse {
 - Never expose sensitive error details to users (stack traces, internal paths, etc.)
 
 **Error Code Mapping Example:**
+
 ```typescript
 const ERROR_MESSAGES: Record<string, string> = {
-  'AUTH_001': 'Invalid email or password',
-  'USER_002': 'This email is already registered',
-  'USER_003': 'User not found',
-  'VAL_001': 'Please check your input',
-  'ORG_001': 'Organization name already exists',
+  AUTH_001: 'Invalid email or password',
+  USER_002: 'This email is already registered',
+  USER_003: 'User not found',
+  VAL_001: 'Please check your input',
+  ORG_001: 'Organization name already exists',
   // ... map all backend error codes
 };
 ```
@@ -585,6 +622,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 ### 5.3 TanStack Query Integration
 
 **Query Configuration** (`src/config/queryClient.ts`):
+
 ```typescript
 - Default staleTime: 60000 (1 minute)
 - Default cacheTime: 300000 (5 minutes)
@@ -649,6 +687,7 @@ export function useDeleteUser() {
 ```
 
 **Hook Organization:**
+
 - One file per resource/entity (users, organizations, etc.)
 - Query hooks for GET operations
 - Mutation hooks for POST/PUT/PATCH/DELETE operations
@@ -663,6 +702,7 @@ export function useDeleteUser() {
 ### 6.1 State Management Philosophy
 
 **Pragmatic Approach:**
+
 - Use TanStack Query for all server state (primary state management)
 - Use Zustand sparingly for client-only state
 - Avoid prop drilling with minimal context providers
@@ -703,6 +743,7 @@ export function useDeleteUser() {
 ### 6.2 Zustand Stores
 
 **Auth Store** (`src/stores/authStore.ts`):
+
 ```typescript
 interface AuthStore {
   user: User | null;
@@ -714,6 +755,7 @@ interface AuthStore {
 ```
 
 **UI Store** (`src/stores/uiStore.ts`):
+
 ```typescript
 interface UIStore {
   sidebarOpen: boolean;
@@ -725,6 +767,7 @@ interface UIStore {
 ```
 
 **Store Guidelines:**
+
 - Keep stores small and focused
 - Avoid duplicating server state
 - Use selectors for computed values
@@ -734,11 +777,13 @@ interface UIStore {
 ### 6.3 Context Providers (Minimal Usage)
 
 **When to Use Contexts:**
+
 - Wrapping app with TanStack Query provider
 - Theme provider (if not using Zustand)
 - Providing deeply nested utilities (rare)
 
 **When NOT to Use Contexts:**
+
 - Server state (use TanStack Query)
 - Auth state (use Zustand)
 - Component props that can be passed directly
@@ -746,6 +791,7 @@ interface UIStore {
 ### 6.4 Custom Hooks
 
 **Custom Hook Requirements:**
+
 - Abstract common patterns
 - Compose other hooks when needed
 - Return consistent interfaces
@@ -753,6 +799,7 @@ interface UIStore {
 - Include proper TypeScript types
 
 **Example Custom Hooks:**
+
 - `useAuth()`: Wraps auth store and operations
 - `useUser()`: Gets current user with loading state
 - `useDebounce()`: Debounce input values
@@ -766,6 +813,7 @@ interface UIStore {
 ### 7.1 shadcn/ui Components
 
 **Core Components Required:**
+
 - Button
 - Card
 - Dialog / Modal
@@ -785,12 +833,14 @@ interface UIStore {
 - Progress
 
 **Admin Components:**
+
 - DataTable (enhanced table with sorting, filtering, pagination)
 - Calendar
 - Date Picker
 - Multi-select
 
 **Installation:**
+
 - Install via shadcn CLI: `npx shadcn-ui@latest add [component]`
 - Customize theme in `tailwind.config.ts`
 - Document customizations in `COMPONENT_GUIDE.md`
@@ -800,6 +850,7 @@ interface UIStore {
 **Layout Components** (`src/components/layout/`):
 
 **Header.tsx**
+
 - App logo/title
 - Navigation links
 - User menu dropdown
@@ -807,17 +858,20 @@ interface UIStore {
 - Mobile menu button
 
 **Footer.tsx**
+
 - Copyright information
 - Links to docs, support
 - Social media links (if applicable)
 
 **Sidebar.tsx**
+
 - Navigation menu for authenticated users
 - Collapsible sections
 - Active route highlighting
 - Responsive (drawer on mobile)
 
 **PageContainer.tsx**
+
 - Consistent page padding
 - Max-width container
 - Responsive layout
@@ -825,6 +879,7 @@ interface UIStore {
 **Admin Components** (`src/components/admin/`):
 
 **UserTable.tsx**
+
 - Display users in data table
 - Sortable columns: name, email, role, created date
 - Filterable by role, status
@@ -834,6 +889,7 @@ interface UIStore {
 - Row selection for bulk operations
 
 **UserForm.tsx**
+
 - Create/edit user form
 - Fields: name, email, role, status, organization assignment
 - Validation with react-hook-form + zod
@@ -841,6 +897,7 @@ interface UIStore {
 - Loading and error states
 
 **OrganizationTable.tsx**
+
 - Display organizations in data table
 - Sortable columns: name, member count, created date
 - Searchable by name
@@ -848,23 +905,27 @@ interface UIStore {
 - Pagination
 
 **OrganizationForm.tsx**
+
 - Create/edit organization form
 - Fields: name, description, settings
 - Validation
 - Submit and cancel actions
 
 **AdminSidebar.tsx**
+
 - Admin navigation menu
 - Links to user management, org management, settings
 - Collapsible sections
 - Active route indication
 
 **AdminHeader.tsx**
+
 - Admin page title
 - Breadcrumbs
 - Action buttons (contextual)
 
 **AdminStats.tsx**
+
 - Dashboard statistics cards
 - Display total users, active users, total organizations
 - Growth indicators (percentage change)
@@ -872,6 +933,7 @@ interface UIStore {
 - Responsive card grid
 
 **BulkActionBar.tsx**
+
 - Appears when rows are selected in admin tables
 - Selection count display ("3 users selected")
 - Action dropdown (Activate, Deactivate, Delete)
@@ -880,6 +942,7 @@ interface UIStore {
 - Clear selection button
 
 **UserActivationToggle.tsx**
+
 - Toggle or button to activate/deactivate individual users
 - Show current status (Active/Inactive)
 - Confirmation for deactivation
@@ -887,6 +950,7 @@ interface UIStore {
 - Optimistic UI updates
 
 **OrganizationMemberManager.tsx**
+
 - Add members to organization (user search/select)
 - Remove members from organization
 - Change member roles (owner, admin, member)
@@ -897,16 +961,19 @@ interface UIStore {
 **Chart Components** (`src/components/charts/`):
 
 **BarChartCard.tsx**
+
 - Wrapped Recharts BarChart
 - Card container with title and description
 - Responsive
 - Themed colors
 
 **LineChartCard.tsx**
+
 - Wrapped Recharts LineChart
 - Similar structure to BarChartCard
 
 **PieChartCard.tsx**
+
 - Wrapped Recharts PieChart
 - Legend
 - Tooltips
@@ -914,6 +981,7 @@ interface UIStore {
 **Settings Components** (`src/components/settings/`):
 
 **ProfileSettings.tsx**
+
 - User profile edit form
 - Fields: first_name, last_name, email, phone_number
 - Avatar upload (optional)
@@ -921,6 +989,7 @@ interface UIStore {
 - Form validation and submission
 
 **PasswordSettings.tsx**
+
 - Password change form
 - Fields: current password, new password, confirm new password
 - Password strength indicator
@@ -928,6 +997,7 @@ interface UIStore {
 - Option to logout all other devices after change
 
 **SessionManagement.tsx**
+
 - List all active sessions
 - Display session cards with device info
 - Revoke session functionality
@@ -935,6 +1005,7 @@ interface UIStore {
 - Current session highlighting
 
 **SessionCard.tsx**
+
 - Individual session display
 - Device icon (desktop, mobile, tablet)
 - Location and IP display
@@ -942,6 +1013,7 @@ interface UIStore {
 - Revoke button (disabled for current session)
 
 **PreferencesSettings.tsx**
+
 - User preferences form (theme, notifications, etc.)
 - Stored in User.preferences JSON field
 - Theme toggle (light, dark, system)
@@ -950,22 +1022,26 @@ interface UIStore {
 **Common Components** (`src/components/common/`):
 
 **DataTable.tsx**
+
 - Generic reusable data table
 - Props: data, columns, pagination, sorting, filtering
 - Built on shadcn Table component
 - TypeScript generic for type safety
 
 **LoadingSpinner.tsx**
+
 - Centered spinner
 - Size variants
 - Accessible (aria-label)
 
 **ErrorBoundary.tsx**
+
 - React error boundary
 - Display fallback UI on errors
 - Error reporting hook
 
 **PageHeader.tsx**
+
 - Page title
 - Optional description
 - Optional action buttons
@@ -973,6 +1049,7 @@ interface UIStore {
 ### 7.3 Component Guidelines
 
 **Component Structure:**
+
 ```typescript
 // Imports
 import { ... } from 'react';
@@ -990,7 +1067,7 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
   // Hooks
   // Derived state
   // Event handlers
-  
+
   // Render
   return (
     // JSX
@@ -999,6 +1076,7 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
 ```
 
 **Best Practices:**
+
 - Prefer named exports over default exports
 - Co-locate types with component file
 - Use TypeScript for all props
@@ -1016,15 +1094,18 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
 ### 8.1 Route Structure
 
 **Public Routes:**
+
 - `/` - Home page (accessible to all)
 - `/login` - Login page
 - `/register` - Registration page
 
 **Authenticated Routes:**
+
 - `/` - Home page (authenticated view, different from public)
 - `/dashboard` - Optional: user dashboard
 
 **Admin Routes:**
+
 - `/admin` - Admin dashboard/landing with statistics and charts
 - `/admin/users` - User list with search, filters, and bulk actions
 - `/admin/users/[id]` - User detail/edit with sessions and organizations
@@ -1035,6 +1116,7 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
 - `/admin/organizations/new` - Create organization
 
 **Account/Settings Routes:**
+
 - `/settings` - Settings layout (redirects to /settings/profile)
 - `/settings/profile` - User profile edit (first_name, last_name, email, phone, preferences)
 - `/settings/password` - Change password (current + new password)
@@ -1042,6 +1124,7 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
 - `/settings/preferences` - User preferences (theme, notifications, etc.)
 
 **Development Routes (dev environment only):**
+
 - `/dev/components` - Component showcase/storybook
 - `/dev/icons` - Icon preview
 - `/dev/theme` - Theme preview
@@ -1051,6 +1134,7 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
 **Home Page** (`/`):
 
 **Public View:**
+
 - Hero section with project description
 - Feature highlights
 - Call-to-action (login/register buttons)
@@ -1058,6 +1142,7 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
 - Footer
 
 **Authenticated View:**
+
 - Welcome message with user name
 - Quick stats or dashboard widgets
 - Recent activity
@@ -1123,6 +1208,7 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
 ### 8.3 Layout Strategy
 
 **Root Layout** (`src/app/layout.tsx`):
+
 - HTML structure
 - TanStack Query provider
 - Theme provider
@@ -1130,11 +1216,13 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
 - Global metadata
 
 **Auth Group Layout** (`src/app/(auth)/layout.tsx`):
+
 - Centered form layout
 - No header/footer
 - Background styling
 
 **Authenticated Group Layout** (`src/app/(authenticated)/layout.tsx`):
+
 - Header
 - Optional sidebar
 - Main content area
@@ -1142,12 +1230,14 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
 - Auth guard
 
 **Admin Layout** (`src/app/(authenticated)/admin/layout.tsx`):
+
 - Admin header
 - Admin sidebar
 - Breadcrumbs
 - Admin-specific auth guard (role check)
 
 **Dev Layout** (`src/app/dev/layout.tsx`):
+
 - Simple layout
 - Environment check (only render in dev)
 - Navigation between dev pages
@@ -1155,6 +1245,7 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
 ### 8.4 Page Components
 
 **Structure:**
+
 - Each page is a Server Component by default
 - Client Components used for interactivity
 - Loading states via `loading.tsx`
@@ -1162,6 +1253,7 @@ export function ComponentName({ prop1, prop2 }: ComponentProps) {
 - Metadata exported for SEO
 
 **Example:**
+
 ```typescript
 // src/app/(authenticated)/admin/users/page.tsx
 import { Metadata } from 'next';
@@ -1175,8 +1267,8 @@ export const metadata: Metadata = {
 export default function UsersPage() {
   return (
     <div>
-      <PageHeader 
-        title="Users" 
+      <PageHeader
+        title="Users"
         description="Manage application users"
       />
       <UserTable />
@@ -1192,6 +1284,7 @@ export default function UsersPage() {
 ### 9.1 Environment Variables
 
 **Required Environment Variables:**
+
 ```env
 # API Configuration
 NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
@@ -1219,12 +1312,14 @@ NEXT_PUBLIC_DEBUG_API=false
 ```
 
 **Environment File Structure:**
+
 - `.env.example` - Template with all variables (committed)
 - `.env.local` - Local overrides (gitignored)
 - `.env.development` - Development defaults (optional)
 - `.env.production` - Production values (optional, for reference)
 
 **Environment Validation:**
+
 - Use zod to validate environment variables at build time
 - Fail fast if required variables are missing
 - Type-safe access via `src/config/env.ts`
@@ -1232,6 +1327,7 @@ NEXT_PUBLIC_DEBUG_API=false
 ### 9.2 Development Scripts
 
 **package.json Scripts:**
+
 ```json
 {
   "scripts": {
@@ -1253,6 +1349,7 @@ NEXT_PUBLIC_DEBUG_API=false
 ### 9.3 Code Quality Tools
 
 **ESLint:**
+
 - Next.js ESLint configuration
 - TypeScript ESLint rules
 - React hooks rules
@@ -1260,11 +1357,13 @@ NEXT_PUBLIC_DEBUG_API=false
 - Accessibility rules (eslint-plugin-jsx-a11y)
 
 **Prettier:**
+
 - Consistent code formatting
 - Integrated with ESLint
 - Pre-commit hook (optional: husky + lint-staged)
 
 **TypeScript:**
+
 - Strict mode enabled
 - Path aliases configured (`@/*` -> `src/*`)
 - Incremental compilation
@@ -1273,10 +1372,12 @@ NEXT_PUBLIC_DEBUG_API=false
 ### 9.4 Development Routes Requirements
 
 **Environment Check:**
+
 - `/dev/*` routes only accessible when `NODE_ENV === 'development'`
 - Display 404 or redirect in production
 
 **Component Showcase Page:**
+
 - Organized by category (UI, Admin, Layout, Common, Charts)
 - Each component in isolated container
 - Interactive props (where applicable)
@@ -1291,6 +1392,7 @@ NEXT_PUBLIC_DEBUG_API=false
 ### 10.1 TypeScript Standards
 
 **Type Definitions:**
+
 - Define types in `src/types/` for shared types
 - Co-locate types with components for component-specific types
 - Use interfaces for object shapes, types for unions/primitives
@@ -1298,11 +1400,13 @@ NEXT_PUBLIC_DEBUG_API=false
 - Use generic types for reusable components and utilities
 
 **Naming:**
+
 - Interfaces: PascalCase with descriptive names (e.g., `UserProfile`, `ApiResponse`)
 - Type aliases: PascalCase (e.g., `UserId`, `DateString`)
 - Enums: PascalCase for enum name, UPPER_SNAKE_CASE for values
 
 **Import Aliases:**
+
 - `@/` alias maps to `src/`
 - Use `@/components/ui` instead of relative paths for UI components
 - Use `@/lib` for library code
@@ -1311,21 +1415,25 @@ NEXT_PUBLIC_DEBUG_API=false
 ### 10.2 Component Standards
 
 **Naming:**
+
 - PascalCase for component files and component names
 - Match file name with component name
 
 **Structure:**
+
 - One component per file
 - Extract complex logic into custom hooks
 - Separate concerns (presentation vs. logic)
 
 **Props:**
+
 - Define explicit prop interfaces
 - Use destructuring in function signature
 - Provide defaults via destructuring when appropriate
 - Document complex props with JSDoc comments
 
 **State:**
+
 - Keep state as local as possible
 - Use appropriate state management for each use case
 - Avoid redundant state (derive when possible)
@@ -1333,36 +1441,42 @@ NEXT_PUBLIC_DEBUG_API=false
 ### 10.3 Styling Standards
 
 **Tailwind Usage:**
+
 - Use Tailwind utility classes directly in JSX
 - Avoid inline styles unless absolutely necessary
 - Use `cn()` utility for conditional classes
 - Extract repeated class combinations into components
 
 **Responsive Design:**
+
 - Mobile-first approach
 - Use Tailwind responsive modifiers (sm, md, lg, xl, 2xl)
 - Test on multiple screen sizes
 
 **Dark Mode:**
-- Use Tailwind dark mode classes (dark:*)
+
+- Use Tailwind dark mode classes (dark:\*)
 - Ensure all components support dark mode
 - Test both light and dark themes
 
 ### 10.4 API Integration Standards
 
 **Query Hooks:**
+
 - One hook per operation
 - Consistent naming: `use[Resource]`, `use[Resource]s`, `useCreate[Resource]`, etc.
 - Proper query keys for cache management
 - Handle loading, error, and success states
 
 **Mutation Hooks:**
+
 - Return mutation function and status
 - Invalidate relevant queries on success
 - Handle errors gracefully
 - Provide user feedback (toast notifications)
 
 **Error Handling:**
+
 - Display user-friendly error messages
 - Log errors to console (or error service)
 - Show retry options when appropriate
@@ -1371,6 +1485,7 @@ NEXT_PUBLIC_DEBUG_API=false
 ### 10.5 Form Standards
 
 **Form Implementation:**
+
 - Use react-hook-form for form state
 - Use zod for validation schemas
 - Use shadcn Form components for consistent UI
@@ -1379,6 +1494,7 @@ NEXT_PUBLIC_DEBUG_API=false
 - Show loading state during submission
 
 **Form Structure:**
+
 ```typescript
 // Define schema
 const formSchema = z.object({
@@ -1402,12 +1518,14 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
 ### 10.6 Testing Standards (Future)
 
 **Test Structure:**
+
 - Unit tests for utilities and hooks
 - Integration tests for API hooks
 - Component tests for reusable components
 - E2E tests for critical user flows
 
 **Testing Tools:**
+
 - Jest for unit tests
 - React Testing Library for component tests
 - Playwright or Cypress for E2E tests (optional)
@@ -1421,18 +1539,21 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
 **ARCHITECTURE.md Requirements:**
 
 **System Overview:**
+
 - High-level architecture diagram
 - Explanation of chosen technologies and why
 - Data flow diagrams (authentication, API calls, state management)
 - Folder structure rationale
 
 **Key Concepts:**
+
 - App Router vs. Pages Router decision
 - Server Components vs. Client Components usage
 - State management philosophy
 - API integration approach
 
 **Architecture Decisions:**
+
 - Why TanStack Query over alternatives
 - Why Zustand over alternatives
 - OpenAPI client generation rationale
@@ -1443,30 +1564,35 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
 **CODING_STANDARDS.md Requirements:**
 
 **TypeScript Guidelines:**
+
 - Type definition best practices
 - When to use interfaces vs. types
 - How to handle unknown types
 - Generic type usage
 
 **Component Guidelines:**
+
 - Component structure template
 - Prop definition standards
 - State management in components
 - Hook usage patterns
 
 **Styling Guidelines:**
+
 - Tailwind usage patterns
 - Responsive design approach
 - Dark mode implementation
 - Component styling dos and don'ts
 
 **API Integration Guidelines:**
+
 - How to create query hooks
 - How to create mutation hooks
 - Error handling patterns
 - Cache invalidation strategies
 
 **Form Guidelines:**
+
 - react-hook-form setup
 - Validation with zod
 - Error display
@@ -1479,6 +1605,7 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
 Provide 2-3 complete feature implementation walkthroughs, including:
 
 **Example 1: User Management Feature**
+
 - Backend API endpoints used
 - Generated API client usage
 - Query hooks creation (`src/lib/api/hooks/useUsers.ts`)
@@ -1488,16 +1615,19 @@ Provide 2-3 complete feature implementation walkthroughs, including:
 - Complete code snippets for each file
 
 **Example 2: Organization Management Feature**
+
 - Similar structure to Example 1
 - Highlights differences and patterns
 
 **Example 3: Adding a New Chart to Admin Dashboard**
+
 - Data fetching setup
 - Chart component creation
 - Integration into dashboard page
 - Styling and responsiveness
 
 **Each Example Should Show:**
+
 1. What files to create/modify
 2. Where each file goes in the project structure
 3. Complete, working code for each file
@@ -1509,18 +1639,21 @@ Provide 2-3 complete feature implementation walkthroughs, including:
 **COMPONENT_GUIDE.md Requirements:**
 
 **shadcn/ui Components:**
+
 - List of installed components
 - Usage examples for each
 - Customization examples
 - Common patterns (forms, dialogs, tables)
 
 **Custom Components:**
+
 - Purpose and when to use
 - Props documentation
 - Usage examples
 - Styling and customization
 
 **Component Composition:**
+
 - How to compose components together
 - Common patterns (Card + Table, Dialog + Form)
 - Best practices for component composition
@@ -1532,11 +1665,13 @@ Provide 2-3 complete feature implementation walkthroughs, including:
 ### 12.1 Performance
 
 **Target Metrics:**
+
 - First Contentful Paint: < 1.5s
 - Time to Interactive: < 3s
 - Lighthouse Performance Score: > 90
 
 **Optimization Strategies:**
+
 - Image optimization (next/image)
 - Code splitting and lazy loading
 - Minimize client-side JavaScript
@@ -1546,6 +1681,7 @@ Provide 2-3 complete feature implementation walkthroughs, including:
 ### 12.2 Accessibility
 
 **Standards:**
+
 - WCAG 2.1 Level AA compliance
 - Keyboard navigation for all interactive elements
 - Screen reader support
@@ -1554,6 +1690,7 @@ Provide 2-3 complete feature implementation walkthroughs, including:
 - Color contrast ratios (4.5:1 for normal text, 3:1 for large text)
 
 **Testing:**
+
 - Manual keyboard navigation testing
 - Screen reader testing (NVDA/JAWS)
 - Lighthouse accessibility audit
@@ -1562,18 +1699,21 @@ Provide 2-3 complete feature implementation walkthroughs, including:
 ### 12.3 Browser Support
 
 **Target Browsers:**
+
 - Chrome (last 2 versions)
 - Firefox (last 2 versions)
 - Safari (last 2 versions)
 - Edge (last 2 versions)
 
 **Mobile:**
+
 - iOS Safari (last 2 versions)
 - Chrome Android (last 2 versions)
 
 ### 12.4 Security
 
 **Client-Side Security:**
+
 - XSS prevention (React defaults + sanitization where needed)
 - CSRF protection (if not handled by backend)
 - Secure token storage
@@ -1582,6 +1722,7 @@ Provide 2-3 complete feature implementation walkthroughs, including:
 - HTTPS only in production
 
 **Dependency Security:**
+
 - Regular dependency updates
 - Security audit via `npm audit`
 - Automated security scanning (Dependabot, Snyk)
@@ -1589,6 +1730,7 @@ Provide 2-3 complete feature implementation walkthroughs, including:
 ### 12.5 SEO
 
 **Requirements:**
+
 - Semantic HTML structure
 - Proper meta tags (title, description)
 - Open Graph tags for social sharing
@@ -1603,23 +1745,27 @@ Provide 2-3 complete feature implementation walkthroughs, including:
 While detailed implementation planning is out of scope for this document, the following priority order is recommended:
 
 **Phase 1: Foundation**
+
 1. Project setup and configuration
 2. API client generation setup
 3. Authentication implementation
 4. Basic layout components
 
 **Phase 2: Core Features**
+
 1. User management pages
 2. Organization management pages
 3. Admin dashboard
 
 **Phase 3: Polish**
+
 1. Development showcase pages
 2. Advanced components
 3. Charts and analytics
 4. Documentation completion
 
 **Phase 4: Production Readiness**
+
 1. Performance optimization
 2. Accessibility audit and fixes
 3. Security hardening
@@ -1669,46 +1815,48 @@ Complete reference of all backend API endpoints for frontend integration. All en
 
 ### 15.1 Authentication Endpoints
 
-| Method | Endpoint | Purpose | Auth Required | Request Body | Response |
-|--------|----------|---------|---------------|--------------|----------|
-| POST | `/api/v1/auth/register` | Register new user account | No | `{email, password, first_name}` | User + tokens |
-| POST | `/api/v1/auth/login` | Authenticate user | No | `{email, password}` | User + access_token + refresh_token |
-| POST | `/api/v1/auth/login/oauth` | OAuth2-compatible login (Swagger UI) | No | Form data | tokens |
-| POST | `/api/v1/auth/refresh` | Refresh access token | Yes (refresh token) | `{refresh_token}` | New access_token + refresh_token |
-| GET | `/api/v1/auth/me` | Get current user from token | Yes | - | User object |
-| POST | `/api/v1/auth/logout` | Logout current device | Yes | - | Success message |
-| POST | `/api/v1/auth/logout-all` | Logout all devices | Yes | - | Success message |
-| POST | `/api/v1/auth/password-reset/request` | Request password reset email | No | `{email}` | Success message (always) |
-| POST | `/api/v1/auth/password-reset/confirm` | Reset password with token | No | `{token, new_password}` | Success message |
+| Method | Endpoint                              | Purpose                              | Auth Required       | Request Body                    | Response                            |
+| ------ | ------------------------------------- | ------------------------------------ | ------------------- | ------------------------------- | ----------------------------------- |
+| POST   | `/api/v1/auth/register`               | Register new user account            | No                  | `{email, password, first_name}` | User + tokens                       |
+| POST   | `/api/v1/auth/login`                  | Authenticate user                    | No                  | `{email, password}`             | User + access_token + refresh_token |
+| POST   | `/api/v1/auth/login/oauth`            | OAuth2-compatible login (Swagger UI) | No                  | Form data                       | tokens                              |
+| POST   | `/api/v1/auth/refresh`                | Refresh access token                 | Yes (refresh token) | `{refresh_token}`               | New access_token + refresh_token    |
+| GET    | `/api/v1/auth/me`                     | Get current user from token          | Yes                 | -                               | User object                         |
+| POST   | `/api/v1/auth/logout`                 | Logout current device                | Yes                 | -                               | Success message                     |
+| POST   | `/api/v1/auth/logout-all`             | Logout all devices                   | Yes                 | -                               | Success message                     |
+| POST   | `/api/v1/auth/password-reset/request` | Request password reset email         | No                  | `{email}`                       | Success message (always)            |
+| POST   | `/api/v1/auth/password-reset/confirm` | Reset password with token            | No                  | `{token, new_password}`         | Success message                     |
 
 **Authentication Response Format:**
+
 ```typescript
 {
-  access_token: string;        // JWT, expires in 15 minutes
-  refresh_token: string;       // JWT, expires in 7 days
-  token_type: "bearer";
+  access_token: string; // JWT, expires in 15 minutes
+  refresh_token: string; // JWT, expires in 7 days
+  token_type: 'bearer';
   user: User;
 }
 ```
 
 ### 15.2 User Endpoints
 
-| Method | Endpoint | Purpose | Auth Required | Query Params | Response |
-|--------|----------|---------|---------------|--------------|----------|
-| GET | `/api/v1/users` | List all users (paginated) | Admin only | `page, page_size, search` | Paginated users |
-| GET | `/api/v1/users/me` | Get own profile | Yes | - | User object |
-| PATCH | `/api/v1/users/me` | Update own profile | Yes | `{first_name, last_name, phone, preferences}` | Updated user |
-| PATCH | `/api/v1/users/me/password` | Change own password | Yes | `{current_password, new_password}` | Success message |
-| GET | `/api/v1/users/{user_id}` | Get user by ID | Yes (own or admin) | - | User object |
-| PATCH | `/api/v1/users/{user_id}` | Update user | Yes (own or admin) | User fields | Updated user |
-| DELETE | `/api/v1/users/{user_id}` | Soft delete user | Admin only | - | Success message |
+| Method | Endpoint                    | Purpose                    | Auth Required      | Query Params                                  | Response        |
+| ------ | --------------------------- | -------------------------- | ------------------ | --------------------------------------------- | --------------- |
+| GET    | `/api/v1/users`             | List all users (paginated) | Admin only         | `page, page_size, search`                     | Paginated users |
+| GET    | `/api/v1/users/me`          | Get own profile            | Yes                | -                                             | User object     |
+| PATCH  | `/api/v1/users/me`          | Update own profile         | Yes                | `{first_name, last_name, phone, preferences}` | Updated user    |
+| PATCH  | `/api/v1/users/me/password` | Change own password        | Yes                | `{current_password, new_password}`            | Success message |
+| GET    | `/api/v1/users/{user_id}`   | Get user by ID             | Yes (own or admin) | -                                             | User object     |
+| PATCH  | `/api/v1/users/{user_id}`   | Update user                | Yes (own or admin) | User fields                                   | Updated user    |
+| DELETE | `/api/v1/users/{user_id}`   | Soft delete user           | Admin only         | -                                             | Success message |
 
 **User Model Fields:**
+
 ```typescript
 {
   id: UUID;
   email: string;
-  first_name: string;           // Required
+  first_name: string; // Required
   last_name: string | null;
   phone_number: string | null;
   is_active: boolean;
@@ -1721,13 +1869,14 @@ Complete reference of all backend API endpoints for frontend integration. All en
 
 ### 15.3 Session Management Endpoints
 
-| Method | Endpoint | Purpose | Auth Required | Response |
-|--------|----------|---------|---------------|----------|
-| GET | `/api/v1/sessions/me` | List my active sessions | Yes | Array of sessions |
-| DELETE | `/api/v1/sessions/{session_id}` | Revoke specific session | Yes (own session) | Success message |
-| DELETE | `/api/v1/sessions/me/expired` | Cleanup expired sessions | Yes | Success message |
+| Method | Endpoint                        | Purpose                  | Auth Required     | Response          |
+| ------ | ------------------------------- | ------------------------ | ----------------- | ----------------- |
+| GET    | `/api/v1/sessions/me`           | List my active sessions  | Yes               | Array of sessions |
+| DELETE | `/api/v1/sessions/{session_id}` | Revoke specific session  | Yes (own session) | Success message   |
+| DELETE | `/api/v1/sessions/me/expired`   | Cleanup expired sessions | Yes               | Success message   |
 
 **Session Model:**
+
 ```typescript
 {
   id: UUID;
@@ -1745,18 +1894,19 @@ Complete reference of all backend API endpoints for frontend integration. All en
 
 ### 15.4 Admin User Management Endpoints
 
-| Method | Endpoint | Purpose | Auth Required | Request Body | Response |
-|--------|----------|---------|---------------|--------------|----------|
-| GET | `/api/v1/admin/users` | List all users with filters | Admin only | `search, is_active, is_superuser, page` | Paginated users |
-| POST | `/api/v1/admin/users` | Create user (can set superuser) | Admin only | User fields + `is_superuser` | Created user |
-| GET | `/api/v1/admin/users/{user_id}` | Get user details | Admin only | - | User with relations |
-| PUT | `/api/v1/admin/users/{user_id}` | Update user (full update) | Admin only | All user fields | Updated user |
-| DELETE | `/api/v1/admin/users/{user_id}` | Soft delete user | Admin only | - | Success message |
-| POST | `/api/v1/admin/users/{user_id}/activate` | Activate user account | Admin only | - | Updated user |
-| POST | `/api/v1/admin/users/{user_id}/deactivate` | Deactivate user account | Admin only | - | Updated user |
-| POST | `/api/v1/admin/users/bulk-action` | Bulk activate/deactivate/delete | Admin only | `{action, user_ids[]}` | Results array |
+| Method | Endpoint                                   | Purpose                         | Auth Required | Request Body                            | Response            |
+| ------ | ------------------------------------------ | ------------------------------- | ------------- | --------------------------------------- | ------------------- |
+| GET    | `/api/v1/admin/users`                      | List all users with filters     | Admin only    | `search, is_active, is_superuser, page` | Paginated users     |
+| POST   | `/api/v1/admin/users`                      | Create user (can set superuser) | Admin only    | User fields + `is_superuser`            | Created user        |
+| GET    | `/api/v1/admin/users/{user_id}`            | Get user details                | Admin only    | -                                       | User with relations |
+| PUT    | `/api/v1/admin/users/{user_id}`            | Update user (full update)       | Admin only    | All user fields                         | Updated user        |
+| DELETE | `/api/v1/admin/users/{user_id}`            | Soft delete user                | Admin only    | -                                       | Success message     |
+| POST   | `/api/v1/admin/users/{user_id}/activate`   | Activate user account           | Admin only    | -                                       | Updated user        |
+| POST   | `/api/v1/admin/users/{user_id}/deactivate` | Deactivate user account         | Admin only    | -                                       | Updated user        |
+| POST   | `/api/v1/admin/users/bulk-action`          | Bulk activate/deactivate/delete | Admin only    | `{action, user_ids[]}`                  | Results array       |
 
 **Bulk Action Request:**
+
 ```typescript
 {
   action: "activate" | "deactivate" | "delete";
@@ -1766,24 +1916,25 @@ Complete reference of all backend API endpoints for frontend integration. All en
 
 ### 15.5 Organization Endpoints
 
-| Method | Endpoint | Purpose | Auth Required | Response |
-|--------|----------|---------|---------------|----------|
-| GET | `/api/v1/organizations` | List organizations | Yes | Array of organizations |
-| POST | `/api/v1/organizations` | Create organization | Yes | Created organization |
-| GET | `/api/v1/organizations/{org_id}` | Get organization details | Yes (member or admin) | Organization |
-| PUT | `/api/v1/organizations/{org_id}` | Update organization | Yes (admin of org) | Updated organization |
-| DELETE | `/api/v1/organizations/{org_id}` | Delete organization | Yes (admin of org) | Success message |
+| Method | Endpoint                         | Purpose                  | Auth Required         | Response               |
+| ------ | -------------------------------- | ------------------------ | --------------------- | ---------------------- |
+| GET    | `/api/v1/organizations`          | List organizations       | Yes                   | Array of organizations |
+| POST   | `/api/v1/organizations`          | Create organization      | Yes                   | Created organization   |
+| GET    | `/api/v1/organizations/{org_id}` | Get organization details | Yes (member or admin) | Organization           |
+| PUT    | `/api/v1/organizations/{org_id}` | Update organization      | Yes (admin of org)    | Updated organization   |
+| DELETE | `/api/v1/organizations/{org_id}` | Delete organization      | Yes (admin of org)    | Success message        |
 
 **Organization Model:**
+
 ```typescript
 {
   id: UUID;
   name: string;
-  slug: string;                    // URL-friendly identifier
+  slug: string; // URL-friendly identifier
   description: string | null;
   is_active: boolean;
-  settings: Record<string, any>;   // JSON settings
-  member_count: number;            // Computed field
+  settings: Record<string, any>; // JSON settings
+  member_count: number; // Computed field
   created_at: datetime;
   updated_at: datetime | null;
 }
@@ -1791,24 +1942,25 @@ Complete reference of all backend API endpoints for frontend integration. All en
 
 ### 15.6 Admin Organization Management Endpoints
 
-| Method | Endpoint | Purpose | Auth Required | Request Body | Response |
-|--------|----------|---------|---------------|--------------|----------|
-| GET | `/api/v1/admin/organizations` | List all orgs with search | Admin only | `search, page` | Paginated orgs |
-| POST | `/api/v1/admin/organizations` | Create organization | Admin only | `{name, slug, description, settings}` | Created org |
-| GET | `/api/v1/admin/organizations/{org_id}` | Get org details | Admin only | - | Organization |
-| PUT | `/api/v1/admin/organizations/{org_id}` | Update organization | Admin only | Org fields | Updated org |
-| DELETE | `/api/v1/admin/organizations/{org_id}` | Delete organization | Admin only | - | Success message |
-| GET | `/api/v1/admin/organizations/{org_id}/members` | List organization members | Admin only | - | Array of members |
-| POST | `/api/v1/admin/organizations/{org_id}/members` | Add member with role | Admin only | `{user_id, role}` | Member object |
-| DELETE | `/api/v1/admin/organizations/{org_id}/members/{user_id}` | Remove member | Admin only | - | Success message |
+| Method | Endpoint                                                 | Purpose                   | Auth Required | Request Body                          | Response         |
+| ------ | -------------------------------------------------------- | ------------------------- | ------------- | ------------------------------------- | ---------------- |
+| GET    | `/api/v1/admin/organizations`                            | List all orgs with search | Admin only    | `search, page`                        | Paginated orgs   |
+| POST   | `/api/v1/admin/organizations`                            | Create organization       | Admin only    | `{name, slug, description, settings}` | Created org      |
+| GET    | `/api/v1/admin/organizations/{org_id}`                   | Get org details           | Admin only    | -                                     | Organization     |
+| PUT    | `/api/v1/admin/organizations/{org_id}`                   | Update organization       | Admin only    | Org fields                            | Updated org      |
+| DELETE | `/api/v1/admin/organizations/{org_id}`                   | Delete organization       | Admin only    | -                                     | Success message  |
+| GET    | `/api/v1/admin/organizations/{org_id}/members`           | List organization members | Admin only    | -                                     | Array of members |
+| POST   | `/api/v1/admin/organizations/{org_id}/members`           | Add member with role      | Admin only    | `{user_id, role}`                     | Member object    |
+| DELETE | `/api/v1/admin/organizations/{org_id}/members/{user_id}` | Remove member             | Admin only    | -                                     | Success message  |
 
 **Organization Member:**
+
 ```typescript
 {
   user_id: UUID;
   user_email: string;
-  user_name: string;               // first_name + last_name
-  role: "owner" | "admin" | "member";
+  user_name: string; // first_name + last_name
+  role: 'owner' | 'admin' | 'member';
   joined_at: datetime;
 }
 ```
@@ -1816,6 +1968,7 @@ Complete reference of all backend API endpoints for frontend integration. All en
 ### 15.7 Response Formats
 
 **Success Response (Data):**
+
 ```typescript
 {
   data: T | T[];                   // Single object or array
@@ -1831,6 +1984,7 @@ Complete reference of all backend API endpoints for frontend integration. All en
 ```
 
 **Success Response (Message):**
+
 ```typescript
 {
   success: true;
@@ -1839,28 +1993,29 @@ Complete reference of all backend API endpoints for frontend integration. All en
 ```
 
 **Error Response:**
+
 ```typescript
 {
   success: false;
   errors: Array<{
-    code: string;                  // e.g., "AUTH_001", "USER_002"
+    code: string; // e.g., "AUTH_001", "USER_002"
     message: string;
-    field?: string;                // Optional field name for form errors
+    field?: string; // Optional field name for form errors
   }>;
 }
 ```
 
 ### 15.8 Common Query Parameters
 
-| Parameter | Type | Description | Default | Example |
-|-----------|------|-------------|---------|---------|
-| `page` | integer | Page number (1-indexed) | 1 | `?page=2` |
-| `page_size` | integer | Items per page | 20 | `?page_size=50` |
-| `search` | string | Search term (name, email, etc.) | - | `?search=john` |
-| `is_active` | boolean | Filter by active status | - | `?is_active=true` |
-| `is_superuser` | boolean | Filter by superuser status | - | `?is_superuser=false` |
-| `sort_by` | string | Sort field | - | `?sort_by=created_at` |
-| `sort_order` | string | Sort direction (asc/desc) | desc | `?sort_order=asc` |
+| Parameter      | Type    | Description                     | Default | Example               |
+| -------------- | ------- | ------------------------------- | ------- | --------------------- |
+| `page`         | integer | Page number (1-indexed)         | 1       | `?page=2`             |
+| `page_size`    | integer | Items per page                  | 20      | `?page_size=50`       |
+| `search`       | string  | Search term (name, email, etc.) | -       | `?search=john`        |
+| `is_active`    | boolean | Filter by active status         | -       | `?is_active=true`     |
+| `is_superuser` | boolean | Filter by superuser status      | -       | `?is_superuser=false` |
+| `sort_by`      | string  | Sort field                      | -       | `?sort_by=created_at` |
+| `sort_order`   | string  | Sort direction (asc/desc)       | desc    | `?sort_order=asc`     |
 
 ### 15.9 Authentication Header Format
 
@@ -1871,6 +2026,7 @@ Authorization: Bearer {access_token}
 ```
 
 Example:
+
 ```typescript
 headers: {
   'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`,
@@ -1881,11 +2037,13 @@ headers: {
 ### 15.10 Rate Limiting
 
 Backend implements rate limiting per endpoint:
+
 - **Auth endpoints**: 5 requests/minute
 - **Read operations**: 60 requests/minute
 - **Write operations**: 10-20 requests/minute
 
 Rate limit headers in response:
+
 ```
 X-RateLimit-Limit: 60
 X-RateLimit-Remaining: 45

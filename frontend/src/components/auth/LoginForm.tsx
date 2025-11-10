@@ -24,10 +24,7 @@ import config from '@/config/app.config';
 // ============================================================================
 
 const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
   password: z
     .string()
     .min(1, 'Password is required')
@@ -187,11 +184,7 @@ export function LoginForm({
         </div>
 
         {/* Submit Button */}
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isSubmitting}
-        >
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Signing in...' : 'Sign in'}
         </Button>
 

@@ -61,10 +61,7 @@ export function Breadcrumbs() {
           return (
             <li key={breadcrumb.href} className="flex items-center">
               {index > 0 && (
-                <ChevronRight
-                  className="mx-2 h-4 w-4 text-muted-foreground"
-                  aria-hidden="true"
-                />
+                <ChevronRight className="mx-2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
               )}
               {isLast ? (
                 <span

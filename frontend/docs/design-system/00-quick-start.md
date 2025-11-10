@@ -66,7 +66,7 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter
+  CardFooter,
 } from '@/components/ui/card';
 
 <Card>
@@ -80,7 +80,7 @@ import {
   <CardFooter>
     <Button>Save</Button>
   </CardFooter>
-</Card>
+</Card>;
 ```
 
 **[See card examples](/dev/components#card)**
@@ -95,18 +95,9 @@ import { Input } from '@/components/ui/input';
 
 <div className="space-y-2">
   <Label htmlFor="email">Email</Label>
-  <Input
-    id="email"
-    type="email"
-    placeholder="you@example.com"
-    {...register('email')}
-  />
-  {errors.email && (
-    <p className="text-sm text-destructive">
-      {errors.email.message}
-    </p>
-  )}
-</div>
+  <Input id="email" type="email" placeholder="you@example.com" {...register('email')} />
+  {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+</div>;
 ```
 
 **[See form patterns](./06-forms.md)** | **[Form examples](/dev/forms)**
@@ -123,7 +114,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogTrigger
+  DialogTrigger,
 } from '@/components/ui/dialog';
 
 <Dialog>
@@ -133,16 +124,14 @@ import {
   <DialogContent>
     <DialogHeader>
       <DialogTitle>Confirm Action</DialogTitle>
-      <DialogDescription>
-        Are you sure you want to proceed?
-      </DialogDescription>
+      <DialogDescription>Are you sure you want to proceed?</DialogDescription>
     </DialogHeader>
     <DialogFooter>
       <Button variant="outline">Cancel</Button>
       <Button>Confirm</Button>
     </DialogFooter>
   </DialogContent>
-</Dialog>
+</Dialog>;
 ```
 
 **[See dialog examples](/dev/components#dialog)**
@@ -197,7 +186,7 @@ import { AlertCircle } from 'lucide-react';
 ```tsx
 // Responsive card grid
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {items.map(item => (
+  {items.map((item) => (
     <Card key={item.id}>
       <CardHeader>
         <CardTitle>{item.title}</CardTitle>
@@ -218,9 +207,7 @@ import { AlertCircle } from 'lucide-react';
       <CardTitle>Login</CardTitle>
     </CardHeader>
     <CardContent>
-      <form className="space-y-4">
-        {/* Form fields */}
-      </form>
+      <form className="space-y-4">{/* Form fields */}</form>
     </CardContent>
   </Card>
 </div>
@@ -247,6 +234,7 @@ import { AlertCircle } from 'lucide-react';
 ```
 
 **Available tokens:**
+
 - `primary` - Main brand color, CTAs
 - `destructive` - Errors, delete actions
 - `muted` - Disabled states, subtle backgrounds
@@ -276,6 +264,7 @@ import { AlertCircle } from 'lucide-react';
 ```
 
 **Common spacing values:**
+
 - `2` (8px) - Tight spacing
 - `4` (16px) - Standard spacing
 - `6` (24px) - Section spacing
@@ -326,6 +315,7 @@ import { AlertCircle } from 'lucide-react';
 ```
 
 **Breakpoints:**
+
 - `sm:` 640px+
 - `md:` 768px+
 - `lg:` 1024px+
@@ -370,11 +360,9 @@ import { AlertCircle } from 'lucide-react';
 ```tsx
 import { Skeleton } from '@/components/ui/skeleton';
 
-{isLoading ? (
-  <Skeleton className="h-12 w-full" />
-) : (
-  <div>{content}</div>
-)}
+{
+  isLoading ? <Skeleton className="h-12 w-full" /> : <div>{content}</div>;
+}
 ```
 
 ### Dropdown Menu
@@ -384,7 +372,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
 <DropdownMenu>
@@ -395,7 +383,7 @@ import {
     <DropdownMenuItem>Edit</DropdownMenuItem>
     <DropdownMenuItem>Delete</DropdownMenuItem>
   </DropdownMenuContent>
-</DropdownMenu>
+</DropdownMenu>;
 ```
 
 ### Badge/Tag
@@ -415,17 +403,20 @@ import { Badge } from '@/components/ui/badge';
 You now know enough to build most interfaces! For deeper knowledge:
 
 ### Learn More
+
 - **Components**: [Complete component guide](./02-components.md)
 - **Layouts**: [Layout patterns](./03-layouts.md)
 - **Forms**: [Form patterns & validation](./06-forms.md)
 - **Custom Components**: [Component creation guide](./05-component-creation.md)
 
 ### Interactive Examples
+
 - **[Component Showcase](/dev/components)** - All components with code
 - **[Layout Examples](/dev/layouts)** - Before/after comparisons
 - **[Form Examples](/dev/forms)** - Complete form implementations
 
 ### Reference
+
 - **[Quick Reference Tables](./99-reference.md)** - Bookmark this for lookups
 - **[Foundations](./01-foundations.md)** - Complete color/spacing/typography guide
 
@@ -449,6 +440,7 @@ Remember these and you'll be 95% compliant:
 You're ready to build. When you hit edge cases or need advanced patterns, refer back to the [full documentation](./README.md).
 
 **Bookmark these:**
+
 - [Quick Reference](./99-reference.md) - For quick lookups
 - [AI Guidelines](./08-ai-guidelines.md) - If using AI assistants
 - [Component Showcase](/dev/components) - For copy-paste examples

@@ -59,11 +59,9 @@ async function mergeCoverage() {
   const jestCoveragePath = path.join(process.cwd(), 'coverage/coverage-final.json');
 
   if (fs.existsSync(jestCoveragePath)) {
-    const jestCoverage: CoverageData = JSON.parse(
-      fs.readFileSync(jestCoveragePath, 'utf-8')
-    );
+    const jestCoverage: CoverageData = JSON.parse(fs.readFileSync(jestCoveragePath, 'utf-8'));
 
-    Object.keys(jestCoverage).forEach(file => jestFiles.add(file));
+    Object.keys(jestCoverage).forEach((file) => jestFiles.add(file));
     stats.jestFiles = jestFiles.size;
 
     console.log(`   ✅ Loaded ${stats.jestFiles} files from Jest coverage`);
@@ -78,7 +76,7 @@ async function mergeCoverage() {
   const e2eDir = path.join(process.cwd(), 'coverage-e2e/.nyc_output');
 
   if (fs.existsSync(e2eDir)) {
-    const files = fs.readdirSync(e2eDir).filter(f => f.endsWith('.json'));
+    const files = fs.readdirSync(e2eDir).filter((f) => f.endsWith('.json'));
 
     if (files.length === 0) {
       console.log('   ⚠️  No E2E coverage files found in:', e2eDir);
@@ -89,7 +87,7 @@ async function mergeCoverage() {
           fs.readFileSync(path.join(e2eDir, file), 'utf-8')
         );
 
-        Object.keys(coverage).forEach(f => e2eFiles.add(f));
+        Object.keys(coverage).forEach((f) => e2eFiles.add(f));
         map.merge(coverage);
         console.log(`   ✅ Loaded E2E coverage from: ${file}`);
       }
@@ -104,7 +102,7 @@ async function mergeCoverage() {
   // Step 3: Calculate statistics
   stats.combinedFiles = map.files().length;
 
-  map.files().forEach(file => {
+  map.files().forEach((file) => {
     const inJest = jestFiles.has(file);
     const inE2E = e2eFiles.has(file);
 
@@ -146,10 +144,18 @@ async function mergeCoverage() {
   console.log('\n' + '='.repeat(70));
   console.log('📊 COMBINED COVERAGE SUMMARY');
   console.log('='.repeat(70));
-  console.log(`\n  Statements: ${summary.statements.pct.toFixed(2)}% (${summary.statements.covered}/${summary.statements.total})`);
-  console.log(`  Branches:   ${summary.branches.pct.toFixed(2)}% (${summary.branches.covered}/${summary.branches.total})`);
-  console.log(`  Functions:  ${summary.functions.pct.toFixed(2)}% (${summary.functions.covered}/${summary.functions.total})`);
-  console.log(`  Lines:      ${summary.lines.pct.toFixed(2)}% (${summary.lines.covered}/${summary.lines.total})`);
+  console.log(
+    `\n  Statements: ${summary.statements.pct.toFixed(2)}% (${summary.statements.covered}/${summary.statements.total})`
+  );
+  console.log(
+    `  Branches:   ${summary.branches.pct.toFixed(2)}% (${summary.branches.covered}/${summary.branches.total})`
+  );
+  console.log(
+    `  Functions:  ${summary.functions.pct.toFixed(2)}% (${summary.functions.covered}/${summary.functions.total})`
+  );
+  console.log(
+    `  Lines:      ${summary.lines.pct.toFixed(2)}% (${summary.lines.covered}/${summary.lines.total})`
+  );
 
   console.log('\n' + '-'.repeat(70));
   console.log('📁 FILE COVERAGE BREAKDOWN');
@@ -162,10 +168,12 @@ async function mergeCoverage() {
   // Show E2E-only files (these were excluded from Jest)
   if (stats.e2eOnlyFiles.length > 0) {
     console.log('\n  📋 Files covered ONLY by E2E tests (excluded from unit tests):');
-    stats.e2eOnlyFiles.slice(0, 10).forEach(file => {
+    stats.e2eOnlyFiles.slice(0, 10).forEach((file) => {
       const fileCoverage = map.fileCoverageFor(file);
       const fileSummary = fileCoverage.toSummary();
-      console.log(`     • ${path.relative(process.cwd(), file)} (${fileSummary.statements.pct.toFixed(1)}%)`);
+      console.log(
+        `     • ${path.relative(process.cwd(), file)} (${fileSummary.statements.pct.toFixed(1)}%)`
+      );
     });
     if (stats.e2eOnlyFiles.length > 10) {
       console.log(`     ... and ${stats.e2eOnlyFiles.length - 10} more`);
@@ -190,7 +198,9 @@ async function mergeCoverage() {
     const actual = (summary as any)[metric].pct;
     const passed = actual >= threshold;
     const icon = passed ? '✅' : '❌';
-    console.log(`   ${icon} ${metric.padEnd(12)}: ${actual.toFixed(2)}% (threshold: ${threshold}%)`);
+    console.log(
+      `   ${icon} ${metric.padEnd(12)}: ${actual.toFixed(2)}% (threshold: ${threshold}%)`
+    );
     if (!passed) thresholdsFailed = true;
   });
 

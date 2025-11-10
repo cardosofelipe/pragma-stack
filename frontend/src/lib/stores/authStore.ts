@@ -32,7 +32,12 @@ interface AuthState {
   tokenExpiresAt: number | null; // Unix timestamp
 
   // Actions
-  setAuth: (user: User, accessToken: string, refreshToken: string, expiresIn?: number) => Promise<void>;
+  setAuth: (
+    user: User,
+    accessToken: string,
+    refreshToken: string,
+    expiresIn?: number
+  ) => Promise<void>;
   setTokens: (accessToken: string, refreshToken: string, expiresIn?: number) => Promise<void>;
   setUser: (user: User) => void;
   clearAuth: () => Promise<void>;
@@ -61,7 +66,8 @@ function calculateExpiry(expiresIn?: number): number {
   let seconds = expiresIn || 900;
 
   // Validate positive number and prevent overflow
-  if (seconds <= 0 || seconds > 31536000) { // Max 1 year
+  if (seconds <= 0 || seconds > 31536000) {
+    // Max 1 year
     console.warn(`Invalid expiresIn value: ${expiresIn}, using default 900s`);
     seconds = 900;
   }
@@ -81,9 +87,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // Set complete auth state (user + tokens)
   setAuth: async (user, accessToken, refreshToken, expiresIn) => {
     // Validate inputs
-    if (!user || !user.id || !user.email ||
-        typeof user.id !== 'string' || typeof user.email !== 'string' ||
-        user.id.trim() === '' || user.email.trim() === '') {
+    if (
+      !user ||
+      !user.id ||
+      !user.email ||
+      typeof user.id !== 'string' ||
+      typeof user.email !== 'string' ||
+      user.id.trim() === '' ||
+      user.email.trim() === ''
+    ) {
       throw new Error('Invalid user object: id and email must be non-empty strings');
     }
 
@@ -132,9 +144,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   // Update user only
   setUser: (user) => {
-    if (!user || !user.id || !user.email ||
-        typeof user.id !== 'string' || typeof user.email !== 'string' ||
-        user.id.trim() === '' || user.email.trim() === '') {
+    if (
+      !user ||
+      !user.id ||
+      !user.email ||
+      typeof user.id !== 'string' ||
+      typeof user.email !== 'string' ||
+      user.id.trim() === '' ||
+      user.email.trim() === ''
+    ) {
       throw new Error('Invalid user object: id and email must be non-empty strings');
     }
 

@@ -21,7 +21,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { SessionCard } from './SessionCard';
-import { useListSessions, useRevokeSession, useRevokeAllOtherSessions } from '@/lib/api/hooks/useSession';
+import {
+  useListSessions,
+  useRevokeSession,
+  useRevokeAllOtherSessions,
+} from '@/lib/api/hooks/useSession';
 import { useState } from 'react';
 
 // ============================================================================
@@ -195,8 +199,8 @@ export function SessionsManager({ className }: SessionsManagerProps) {
           {/* Security Tip */}
           <div className="pt-4 border-t">
             <p className="text-sm text-muted-foreground">
-              <strong className="text-foreground">Security tip:</strong> If you see a session you don&apos;t
-              recognize, revoke it immediately and change your password.
+              <strong className="text-foreground">Security tip:</strong> If you see a session you
+              don&apos;t recognize, revoke it immediately and change your password.
             </p>
           </div>
         </CardContent>
@@ -208,8 +212,8 @@ export function SessionsManager({ className }: SessionsManagerProps) {
           <DialogHeader>
             <DialogTitle>Revoke All Other Sessions?</DialogTitle>
             <DialogDescription>
-              This will sign out all devices except the one you&apos;re currently using.
-              You&apos;ll need to sign in again on those devices.
+              This will sign out all devices except the one you&apos;re currently using. You&apos;ll
+              need to sign in again on those devices.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">

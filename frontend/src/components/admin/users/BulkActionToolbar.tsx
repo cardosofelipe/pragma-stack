@@ -62,9 +62,7 @@ export function BulkActionToolbar({
       onClearSelection();
       setPendingAction(null);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : `Failed to ${pendingAction} users`
-      );
+      toast.error(error instanceof Error ? error.message : `Failed to ${pendingAction} users`);
       setPendingAction(null);
     }
   };
@@ -161,9 +159,7 @@ export function BulkActionToolbar({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{getActionTitle()}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {getActionDescription()}
-            </AlertDialogDescription>
+            <AlertDialogDescription>{getActionDescription()}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>

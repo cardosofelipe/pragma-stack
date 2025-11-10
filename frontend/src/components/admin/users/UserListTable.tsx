@@ -74,8 +74,7 @@ export function UserListTable({
     [onSearch]
   );
 
-  const allSelected =
-    users.length > 0 && users.every((user) => selectedUsers.includes(user.id));
+  const allSelected = users.length > 0 && users.every((user) => selectedUsers.includes(user.id));
 
   return (
     <div className="space-y-4">
@@ -195,28 +194,18 @@ export function UserListTable({
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell className="text-center">
-                      <Badge
-                        variant={user.is_active ? 'default' : 'secondary'}
-                      >
+                      <Badge variant={user.is_active ? 'default' : 'secondary'}>
                         {user.is_active ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">
                       {user.is_superuser ? (
-                        <Check
-                          className="h-4 w-4 mx-auto text-green-600"
-                          aria-label="Yes"
-                        />
+                        <Check className="h-4 w-4 mx-auto text-green-600" aria-label="Yes" />
                       ) : (
-                        <X
-                          className="h-4 w-4 mx-auto text-muted-foreground"
-                          aria-label="No"
-                        />
+                        <X className="h-4 w-4 mx-auto text-muted-foreground" aria-label="No" />
                       )}
                     </TableCell>
-                    <TableCell>
-                      {format(new Date(user.created_at), 'MMM d, yyyy')}
-                    </TableCell>
+                    <TableCell>{format(new Date(user.created_at), 'MMM d, yyyy')}</TableCell>
                     <TableCell>
                       <UserActionMenu
                         user={user}
@@ -237,11 +226,8 @@ export function UserListTable({
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             Showing {(pagination.page - 1) * pagination.page_size + 1} to{' '}
-            {Math.min(
-              pagination.page * pagination.page_size,
-              pagination.total
-            )}{' '}
-            of {pagination.total} users
+            {Math.min(pagination.page * pagination.page_size, pagination.total)} of{' '}
+            {pagination.total} users
           </div>
           <div className="flex gap-2">
             <Button
@@ -266,13 +252,9 @@ export function UserListTable({
 
                   return (
                     <div key={page} className="flex items-center">
-                      {showEllipsis && (
-                        <span className="px-2 text-muted-foreground">...</span>
-                      )}
+                      {showEllipsis && <span className="px-2 text-muted-foreground">...</span>}
                       <Button
-                        variant={
-                          page === pagination.page ? 'default' : 'outline'
-                        }
+                        variant={page === pagination.page ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => onPageChange(page)}
                         className="w-9"

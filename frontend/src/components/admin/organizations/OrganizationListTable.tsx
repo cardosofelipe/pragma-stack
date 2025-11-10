@@ -93,9 +93,7 @@ export function OrganizationListTable({
                     <TableCell className="font-medium">{org.name}</TableCell>
                     <TableCell className="max-w-md truncate">
                       {org.description || (
-                        <span className="text-muted-foreground italic">
-                          No description
-                        </span>
+                        <span className="text-muted-foreground italic">No description</span>
                       )}
                     </TableCell>
                     <TableCell className="text-center">
@@ -112,9 +110,7 @@ export function OrganizationListTable({
                         {org.is_active ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {format(new Date(org.created_at), 'MMM d, yyyy')}
-                    </TableCell>
+                    <TableCell>{format(new Date(org.created_at), 'MMM d, yyyy')}</TableCell>
                     <TableCell>
                       <OrganizationActionMenu
                         organization={org}
@@ -135,11 +131,8 @@ export function OrganizationListTable({
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             Showing {(pagination.page - 1) * pagination.page_size + 1} to{' '}
-            {Math.min(
-              pagination.page * pagination.page_size,
-              pagination.total
-            )}{' '}
-            of {pagination.total} organizations
+            {Math.min(pagination.page * pagination.page_size, pagination.total)} of{' '}
+            {pagination.total} organizations
           </div>
           <div className="flex gap-2">
             <Button
@@ -164,13 +157,9 @@ export function OrganizationListTable({
 
                   return (
                     <div key={page} className="flex items-center">
-                      {showEllipsis && (
-                        <span className="px-2 text-muted-foreground">...</span>
-                      )}
+                      {showEllipsis && <span className="px-2 text-muted-foreground">...</span>}
                       <Button
-                        variant={
-                          page === pagination.page ? 'default' : 'outline'
-                        }
+                        variant={page === pagination.page ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => onPageChange(page)}
                         className="w-9"

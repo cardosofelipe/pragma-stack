@@ -95,7 +95,11 @@ export const MOCK_ORGANIZATIONS = [
  * @param email User email (defaults to mock user email)
  * @param password User password (defaults to mock password)
  */
-export async function loginViaUI(page: Page, email = 'test@example.com', password = 'Password123!'): Promise<void> {
+export async function loginViaUI(
+  page: Page,
+  email = 'test@example.com',
+  password = 'Password123!'
+): Promise<void> {
   // Navigate to login page
   await page.goto('/login');
 
@@ -104,10 +108,7 @@ export async function loginViaUI(page: Page, email = 'test@example.com', passwor
   await page.locator('input[name="password"]').fill(password);
 
   // Submit and wait for navigation to home
-  await Promise.all([
-    page.waitForURL('/'),
-    page.locator('button[type="submit"]').click(),
-  ]);
+  await Promise.all([page.waitForURL('/'), page.locator('button[type="submit"]').click()]);
 
   // Wait for auth to settle
   await page.waitForTimeout(500);
@@ -136,8 +137,10 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
         contentType: 'application/json',
         body: JSON.stringify({
           user: MOCK_USER,
-          access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJleHAiOjk5OTk5OTk5OTl9.signature',
-          refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJleHAiOjk5OTk5OTk5OTl9.signature',
+          access_token:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJleHAiOjk5OTk5OTk5OTl9.signature',
+          refresh_token:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDIiLCJleHAiOjk5OTk5OTk5OTl9.signature',
           expires_in: 3600,
           token_type: 'bearer',
         }),
@@ -239,8 +242,10 @@ export async function setupSuperuserMocks(page: Page): Promise<void> {
         contentType: 'application/json',
         body: JSON.stringify({
           user: MOCK_SUPERUSER,
-          access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDMiLCJleHAiOjk5OTk5OTk5OTl9.signature',
-          refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDQiLCJleHAiOjk5OTk5OTk5OTl9.signature',
+          access_token:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDMiLCJleHAiOjk5OTk5OTk5OTl9.signature',
+          refresh_token:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDQiLCJleHAiOjk5OTk5OTk5OTl9.signature',
           expires_in: 3600,
           token_type: 'bearer',
         }),
@@ -376,7 +381,7 @@ export async function setupSuperuserMocks(page: Page): Promise<void> {
     if (route.request().method() === 'GET' && isSingleOrgEndpoint) {
       // Extract org ID from URL
       const orgId = url.match(/organizations\/([^/]+)/)?.[1]?.replace(/\/$/, ''); // Remove trailing slash if any
-      const org = MOCK_ORGANIZATIONS.find(o => o.id === orgId) || MOCK_ORGANIZATIONS[0];
+      const org = MOCK_ORGANIZATIONS.find((o) => o.id === orgId) || MOCK_ORGANIZATIONS[0];
 
       await route.fulfill({
         status: 200,

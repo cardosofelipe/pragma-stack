@@ -48,13 +48,9 @@ describe('StatCard', () => {
     });
 
     it('renders description when provided', () => {
-      render(
-        <StatCard {...defaultProps} description="Total registered users" />
-      );
+      render(<StatCard {...defaultProps} description="Total registered users" />);
 
-      expect(screen.getByTestId('stat-description')).toHaveTextContent(
-        'Total registered users'
-      );
+      expect(screen.getByTestId('stat-description')).toHaveTextContent('Total registered users');
     });
 
     it('does not render description when not provided', () => {
@@ -85,13 +81,7 @@ describe('StatCard', () => {
     });
 
     it('hides description when loading', () => {
-      render(
-        <StatCard
-          {...defaultProps}
-          description="Test description"
-          loading
-        />
-      );
+      render(<StatCard {...defaultProps} description="Test description" loading />);
 
       expect(screen.queryByTestId('stat-description')).not.toBeInTheDocument();
     });
@@ -179,27 +169,21 @@ describe('StatCard', () => {
     });
 
     it('renders Activity icon', () => {
-      const { container } = render(
-        <StatCard {...defaultProps} icon={Activity} />
-      );
+      const { container } = render(<StatCard {...defaultProps} icon={Activity} />);
 
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
     });
 
     it('renders Building2 icon', () => {
-      const { container } = render(
-        <StatCard {...defaultProps} icon={Building2} />
-      );
+      const { container } = render(<StatCard {...defaultProps} icon={Building2} />);
 
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
     });
 
     it('renders FileText icon', () => {
-      const { container } = render(
-        <StatCard {...defaultProps} icon={FileText} />
-      );
+      const { container } = render(<StatCard {...defaultProps} icon={FileText} />);
 
       const svg = container.querySelector('svg');
       expect(svg).toBeInTheDocument();
@@ -262,9 +246,7 @@ describe('StatCard', () => {
 
       expect(screen.getByTestId('stat-title')).toHaveTextContent('Active Users');
       expect(screen.getByTestId('stat-value')).toHaveTextContent('856');
-      expect(screen.getByTestId('stat-description')).toHaveTextContent(
-        'Currently online'
-      );
+      expect(screen.getByTestId('stat-description')).toHaveTextContent('Currently online');
       expect(screen.getByTestId('stat-trend')).toHaveTextContent('↑');
       expect(screen.getByTestId('stat-card')).toHaveClass('custom-stat');
     });
@@ -313,9 +295,7 @@ describe('StatCard', () => {
     });
 
     it('renders description with appropriate text size', () => {
-      render(
-        <StatCard {...defaultProps} description="Test description" />
-      );
+      render(<StatCard {...defaultProps} description="Test description" />);
 
       const description = screen.getByTestId('stat-description');
       expect(description).toHaveClass('text-xs');

@@ -9,13 +9,13 @@
  * Design: Context handles dependency injection, Zustand handles state management
  */
 
-"use client";
+'use client';
 
-import { createContext, useContext } from "react";
-import type { ReactNode } from "react";
+import { createContext, useContext } from 'react';
+import type { ReactNode } from 'react';
 // eslint-disable-next-line no-restricted-imports -- This is the DI boundary, needs real store for production
-import { useAuthStore as useAuthStoreImpl } from "@/lib/stores/authStore";
-import type { User } from "@/lib/stores/authStore";
+import { useAuthStore as useAuthStoreImpl } from '@/lib/stores/authStore';
+import type { User } from '@/lib/stores/authStore';
 
 /**
  * Authentication state shape
@@ -31,7 +31,12 @@ interface AuthState {
   tokenExpiresAt: number | null;
 
   // Actions
-  setAuth: (user: User, accessToken: string, refreshToken: string, expiresIn?: number) => Promise<void>;
+  setAuth: (
+    user: User,
+    accessToken: string,
+    refreshToken: string,
+    expiresIn?: number
+  ) => Promise<void>;
   setTokens: (accessToken: string, refreshToken: string, expiresIn?: number) => Promise<void>;
   setUser: (user: User) => void;
   clearAuth: () => Promise<void>;
@@ -120,7 +125,7 @@ export function useAuth<T>(selector?: (state: AuthState) => T): AuthState | T {
   const storeHook = useContext(AuthContext);
 
   if (!storeHook) {
-    throw new Error("useAuth must be used within AuthProvider");
+    throw new Error('useAuth must be used within AuthProvider');
   }
 
   // Call the Zustand hook internally (follows React Rules of Hooks)

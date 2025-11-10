@@ -74,18 +74,19 @@ test.describe('Admin Dashboard - Quick Actions', () => {
     const quickActionsSection = page.locator('h2:has-text("Quick Actions")').locator('..');
 
     // Use heading role to match only the card titles, not descriptions
-    await expect(quickActionsSection.getByRole('heading', { name: 'User Management' })).toBeVisible();
+    await expect(
+      quickActionsSection.getByRole('heading', { name: 'User Management' })
+    ).toBeVisible();
     await expect(quickActionsSection.getByRole('heading', { name: 'Organizations' })).toBeVisible();
-    await expect(quickActionsSection.getByRole('heading', { name: 'System Settings' })).toBeVisible();
+    await expect(
+      quickActionsSection.getByRole('heading', { name: 'System Settings' })
+    ).toBeVisible();
   });
 
   test('should navigate to users page when clicking user management', async ({ page }) => {
     const userManagementLink = page.getByRole('link', { name: /User Management/i });
 
-    await Promise.all([
-      page.waitForURL('/admin/users'),
-      userManagementLink.click()
-    ]);
+    await Promise.all([page.waitForURL('/admin/users'), userManagementLink.click()]);
 
     await expect(page).toHaveURL('/admin/users');
   });
@@ -95,10 +96,7 @@ test.describe('Admin Dashboard - Quick Actions', () => {
     const quickActionsSection = page.locator('h2:has-text("Quick Actions")').locator('..');
     const organizationsLink = quickActionsSection.getByRole('link', { name: /Organizations/i });
 
-    await Promise.all([
-      page.waitForURL('/admin/organizations'),
-      organizationsLink.click()
-    ]);
+    await Promise.all([page.waitForURL('/admin/organizations'), organizationsLink.click()]);
 
     await expect(page).toHaveURL('/admin/organizations');
   });

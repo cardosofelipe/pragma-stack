@@ -8,8 +8,7 @@ import { ThemeProvider } from '@/components/theme';
 // Set NEXT_PUBLIC_ENABLE_DEVTOOLS=true in .env.local to enable
 /* istanbul ignore next - Dev-only devtools, not tested in production */
 const ReactQueryDevtools =
-  process.env.NODE_ENV === 'development' &&
-  process.env.NEXT_PUBLIC_ENABLE_DEVTOOLS === 'true'
+  process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_ENABLE_DEVTOOLS === 'true'
     ? lazy(() =>
         import('@tanstack/react-query-devtools').then((mod) => ({
           default: mod.ReactQueryDevtools,

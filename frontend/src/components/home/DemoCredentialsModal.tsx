@@ -51,7 +51,8 @@ export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProp
         <DialogHeader>
           <DialogTitle>Try the Live Demo</DialogTitle>
           <DialogDescription>
-            Use these credentials to explore the template&apos;s features. Both accounts are pre-configured with sample data.
+            Use these credentials to explore the template&apos;s features. Both accounts are
+            pre-configured with sample data.
           </DialogDescription>
         </DialogHeader>
 

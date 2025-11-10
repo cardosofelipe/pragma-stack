@@ -10,13 +10,7 @@ import Link from 'next/link';
 import { Ruler } from 'lucide-react';
 import { DevBreadcrumbs } from '@/components/dev/DevBreadcrumbs';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 // Code-split heavy dev components
@@ -52,9 +46,9 @@ export default function SpacingPage() {
           {/* Introduction */}
           <div className="max-w-3xl space-y-4">
             <p className="text-muted-foreground">
-              The Golden Rule: <strong>Parents control spacing, not children.</strong>{' '}
-              Use gap, space-y, and space-x utilities on the parent container. Avoid
-              margins on children except for exceptions.
+              The Golden Rule: <strong>Parents control spacing, not children.</strong> Use gap,
+              space-y, and space-x utilities on the parent container. Avoid margins on children
+              except for exceptions.
             </p>
             <div className="flex flex-wrap gap-2">
               <Badge variant="outline">gap</Badge>
@@ -73,9 +67,7 @@ export default function SpacingPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Common Spacing Values</CardTitle>
-                <CardDescription>
-                  Use consistent spacing values from the scale
-                </CardDescription>
+                <CardDescription>Use consistent spacing values from the scale</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -95,10 +87,7 @@ export default function SpacingPage() {
                       <span className="text-sm text-muted-foreground">{item.rem}</span>
                       <span className="text-sm">{item.use}</span>
                       <div className="col-span-4">
-                        <div
-                          className="h-2 rounded bg-primary"
-                          style={{ width: item.px }}
-                        ></div>
+                        <div className="h-2 rounded bg-primary" style={{ width: item.px }}></div>
                       </div>
                     </div>
                   ))}
@@ -158,10 +147,7 @@ export default function SpacingPage() {
                   <p className="text-sm font-medium mb-2">Grid (gap-6)</p>
                   <div className="grid grid-cols-3 gap-6">
                     {[1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="rounded-lg border bg-muted p-3 text-center text-sm"
-                      >
+                      <div key={i} className="rounded-lg border bg-muted p-3 text-center text-sm">
                         Card {i}
                       </div>
                     ))}
@@ -207,12 +193,8 @@ export default function SpacingPage() {
                     <div className="rounded-lg border bg-muted p-3 text-sm">
                       First item (no margin)
                     </div>
-                    <div className="rounded-lg border bg-muted p-3 text-sm">
-                      Second item (mt-4)
-                    </div>
-                    <div className="rounded-lg border bg-muted p-3 text-sm">
-                      Third item (mt-4)
-                    </div>
+                    <div className="rounded-lg border bg-muted p-3 text-sm">Second item (mt-4)</div>
+                    <div className="rounded-lg border bg-muted p-3 text-sm">Third item (mt-4)</div>
                   </div>
                 </div>
 
@@ -245,7 +227,7 @@ export default function SpacingPage() {
               title="Don't Let Children Control Spacing"
               description="Parent should control spacing, not children"
               before={{
-                caption: "Children control their own spacing with mt-4",
+                caption: 'Children control their own spacing with mt-4',
                 content: (
                   <div className="space-y-2 rounded-lg border p-4">
                     <div className="rounded bg-muted p-2 text-xs">
@@ -264,14 +246,12 @@ export default function SpacingPage() {
                 ),
               }}
               after={{
-                caption: "Parent controls spacing with space-y-4",
+                caption: 'Parent controls spacing with space-y-4',
                 content: (
                   <div className="space-y-4 rounded-lg border p-4">
                     <div className="rounded bg-muted p-2 text-xs">
                       <div>Child 1</div>
-                      <code className="text-[10px] text-green-600">
-                        parent uses space-y-4
-                      </code>
+                      <code className="text-[10px] text-green-600">parent uses space-y-4</code>
                     </div>
                     <div className="rounded bg-muted p-2 text-xs">
                       <div>Child 2</div>
@@ -290,7 +270,7 @@ export default function SpacingPage() {
               title="Use Gap, Not Margin for Buttons"
               description="Button groups should use gap, not margins"
               before={{
-                caption: "Margin on children - harder to maintain",
+                caption: 'Margin on children - harder to maintain',
                 content: (
                   <div className="flex rounded-lg border p-4">
                     <Button variant="outline" size="sm">
@@ -303,7 +283,7 @@ export default function SpacingPage() {
                 ),
               }}
               after={{
-                caption: "Gap on parent - clean and flexible",
+                caption: 'Gap on parent - clean and flexible',
                 content: (
                   <div className="flex gap-4 rounded-lg border p-4">
                     <Button variant="outline" size="sm">

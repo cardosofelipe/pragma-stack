@@ -119,14 +119,9 @@ export function OrganizationMembersTable({
                         {formatRole(member.role)}
                       </Badge>
                     </TableCell>
+                    <TableCell>{format(new Date(member.joined_at), 'MMM d, yyyy')}</TableCell>
                     <TableCell>
-                      {format(new Date(member.joined_at), 'MMM d, yyyy')}
-                    </TableCell>
-                    <TableCell>
-                      <MemberActionMenu
-                        member={member}
-                        organizationId={organizationId}
-                      />
+                      <MemberActionMenu member={member} organizationId={organizationId} />
                     </TableCell>
                   </TableRow>
                 );
@@ -141,11 +136,8 @@ export function OrganizationMembersTable({
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             Showing {(pagination.page - 1) * pagination.page_size + 1} to{' '}
-            {Math.min(
-              pagination.page * pagination.page_size,
-              pagination.total
-            )}{' '}
-            of {pagination.total} members
+            {Math.min(pagination.page * pagination.page_size, pagination.total)} of{' '}
+            {pagination.total} members
           </div>
           <div className="flex gap-2">
             <Button
@@ -170,13 +162,9 @@ export function OrganizationMembersTable({
 
                   return (
                     <div key={page} className="flex items-center">
-                      {showEllipsis && (
-                        <span className="px-2 text-muted-foreground">...</span>
-                      )}
+                      {showEllipsis && <span className="px-2 text-muted-foreground">...</span>}
                       <Button
-                        variant={
-                          page === pagination.page ? 'default' : 'outline'
-                        }
+                        variant={page === pagination.page ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => onPageChange(page)}
                         className="w-9"

@@ -16,9 +16,7 @@ describe('PreferencesPage', () => {
   it('renders placeholder message', () => {
     render(<PreferencesPage />);
 
-    expect(
-      screen.getByText(/Configure your preferences/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Configure your preferences/)).toBeInTheDocument();
   });
 
   it('mentions Task 3.5', () => {

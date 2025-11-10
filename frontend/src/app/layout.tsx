@@ -1,27 +1,27 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { Providers } from "./providers";
-import { AuthProvider } from "@/lib/auth/AuthContext";
-import { AuthInitializer } from "@/components/auth";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import './globals.css';
+import { Providers } from './providers';
+import { AuthProvider } from '@/lib/auth/AuthContext';
+import { AuthInitializer } from '@/components/auth';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap", // Prevent font from blocking render
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+  display: 'swap', // Prevent font from blocking render
   preload: true,
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap", // Prevent font from blocking render
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+  display: 'swap', // Prevent font from blocking render
   preload: false, // Only preload primary font
 });
 
 export const metadata: Metadata = {
-  title: "FastNext Template",
-  description: "FastAPI + Next.js Template",
+  title: 'FastNext Template',
+  description: 'FastAPI + Next.js Template',
 };
 
 export default function RootLayout({
@@ -57,9 +57,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <AuthInitializer />
           <Providers>{children}</Providers>

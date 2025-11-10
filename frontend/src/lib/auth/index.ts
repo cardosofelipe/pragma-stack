@@ -1,11 +1,7 @@
 // Authentication utilities
 // Examples: Token management, auth helpers, session utilities, etc.
 
-export {
-  encryptData,
-  decryptData,
-  clearEncryptionKey,
-} from './crypto';
+export { encryptData, decryptData, clearEncryptionKey } from './crypto';
 
 export {
   saveTokens,

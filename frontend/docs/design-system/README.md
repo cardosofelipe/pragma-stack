@@ -6,26 +6,28 @@
 
 ## 🚀 Quick Navigation
 
-| For... | Start Here | Time |
-|--------|-----------|------|
-| **Quick Start** | [⚡ 5-Minute Crash Course](./00-quick-start.md) | 5 min |
-| **Component Development** | [🧩 Components](./02-components.md) → [🔨 Creation Guide](./05-component-creation.md) | 15 min |
-| **Layout Design** | [📐 Layouts](./03-layouts.md) → [📏 Spacing](./04-spacing-philosophy.md) | 20 min |
-| **AI Code Generation** | [🤖 AI Guidelines](./08-ai-guidelines.md) | 3 min |
-| **Quick Reference** | [📚 Reference Tables](./99-reference.md) | Instant |
-| **Complete Guide** | Read all docs in order | 1 hour |
+| For...                    | Start Here                                                                            | Time    |
+| ------------------------- | ------------------------------------------------------------------------------------- | ------- |
+| **Quick Start**           | [⚡ 5-Minute Crash Course](./00-quick-start.md)                                       | 5 min   |
+| **Component Development** | [🧩 Components](./02-components.md) → [🔨 Creation Guide](./05-component-creation.md) | 15 min  |
+| **Layout Design**         | [📐 Layouts](./03-layouts.md) → [📏 Spacing](./04-spacing-philosophy.md)              | 20 min  |
+| **AI Code Generation**    | [🤖 AI Guidelines](./08-ai-guidelines.md)                                             | 3 min   |
+| **Quick Reference**       | [📚 Reference Tables](./99-reference.md)                                              | Instant |
+| **Complete Guide**        | Read all docs in order                                                                | 1 hour  |
 
 ---
 
 ## 📖 Documentation Structure
 
 ### Getting Started
+
 - **[00. Quick Start](./00-quick-start.md)** ⚡
   - 5-minute crash course
   - Essential components and patterns
   - Copy-paste ready examples
 
 ### Fundamentals
+
 - **[01. Foundations](./01-foundations.md)** 🎨
   - Color system (OKLCH)
   - Typography scale
@@ -39,6 +41,7 @@
   - Composition patterns
 
 ### Layouts & Spacing
+
 - **[03. Layouts](./03-layouts.md)** 📐
   - Grid vs Flex decision tree
   - Common layout patterns
@@ -52,6 +55,7 @@
   - Consistency patterns
 
 ### Building Components
+
 - **[05. Component Creation](./05-component-creation.md)** 🔨
   - When to create vs compose
   - Component templates
@@ -65,6 +69,7 @@
   - Multi-field examples
 
 ### Best Practices
+
 - **[07. Accessibility](./07-accessibility.md)** ♿
   - WCAG AA compliance
   - Keyboard navigation
@@ -78,6 +83,7 @@
   - Component templates
 
 ### Reference
+
 - **[99. Reference Tables](./99-reference.md)** 📚
   - Quick lookup tables
   - All tokens at a glance
@@ -95,6 +101,7 @@ Explore live examples and copy-paste code:
 - **[Form Patterns](/dev/forms)** - Complete form examples
 
 Each demo page includes:
+
 - ✅ Live, interactive examples
 - ✅ Click-to-copy code snippets
 - ✅ Before/after comparisons
@@ -105,6 +112,7 @@ Each demo page includes:
 ## 🛤️ Learning Paths
 
 ### Path 1: Speedrun (5 minutes)
+
 **Goal**: Start building immediately
 
 1. [Quick Start](./00-quick-start.md) - Essential patterns
@@ -116,6 +124,7 @@ Each demo page includes:
 ---
 
 ### Path 2: Component Developer (15 minutes)
+
 **Goal**: Master component building
 
 1. [Quick Start](./00-quick-start.md) - Basics
@@ -128,6 +137,7 @@ Each demo page includes:
 ---
 
 ### Path 3: Layout Specialist (20 minutes)
+
 **Goal**: Master layouts and spacing
 
 1. [Quick Start](./00-quick-start.md) - Basics
@@ -141,6 +151,7 @@ Each demo page includes:
 ---
 
 ### Path 4: Form Specialist (15 minutes)
+
 **Goal**: Master forms and validation
 
 1. [Quick Start](./00-quick-start.md) - Basics
@@ -154,6 +165,7 @@ Each demo page includes:
 ---
 
 ### Path 5: AI Setup (3 minutes)
+
 **Goal**: Configure AI for perfect code generation
 
 1. [AI Guidelines](./08-ai-guidelines.md) - Read once, code forever
@@ -164,9 +176,11 @@ Each demo page includes:
 ---
 
 ### Path 6: Comprehensive Mastery (1 hour)
+
 **Goal**: Complete understanding of the design system
 
 Read all documents in order:
+
 1. [Quick Start](./00-quick-start.md)
 2. [Foundations](./01-foundations.md)
 3. [Components](./02-components.md)
@@ -211,18 +225,21 @@ Our design system is built on these core principles:
 ## 🤝 Contributing to the Design System
 
 ### Adding a New Component
+
 1. Read [Component Creation Guide](./05-component-creation.md)
 2. Follow the template
 3. Add to [Component Showcase](/dev/components)
 4. Document in [Components](./02-components.md)
 
 ### Adding a New Pattern
+
 1. Validate it solves a real need (used 3+ times)
 2. Document in appropriate guide
 3. Add to [Reference](./99-reference.md)
 4. Create example in `/dev/`
 
 ### Updating Colors/Tokens
+
 1. Edit `src/app/globals.css`
 2. Test in both light and dark modes
 3. Verify WCAG AA contrast

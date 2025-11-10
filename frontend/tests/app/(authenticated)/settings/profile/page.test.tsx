@@ -84,9 +84,7 @@ describe('ProfileSettingsPage', () => {
   const renderWithProvider = (component: React.ReactElement) => {
     return render(
       <QueryClientProvider client={queryClient}>
-        <AuthProvider store={mockStoreHook}>
-          {component}
-        </AuthProvider>
+        <AuthProvider store={mockStoreHook}>{component}</AuthProvider>
       </QueryClientProvider>
     );
   };

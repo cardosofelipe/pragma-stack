@@ -85,9 +85,7 @@ export function OrganizationMembersContent({ organizationId }: OrganizationMembe
         {/* Header with Add Member Button */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">
-              {orgName} Members
-            </h2>
+            <h2 className="text-2xl font-bold tracking-tight">{orgName} Members</h2>
             <p className="text-muted-foreground">
               Manage members and their roles within the organization
             </p>

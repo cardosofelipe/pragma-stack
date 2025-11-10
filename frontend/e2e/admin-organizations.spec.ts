@@ -193,7 +193,7 @@ test.describe('Admin Organization Management - Action Menu', () => {
     // Click view members - use Promise.all for Next.js Link navigation
     await Promise.all([
       page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
-      page.getByText('View Members').click()
+      page.getByText('View Members').click(),
     ]);
 
     // Should navigate to members page
@@ -220,7 +220,9 @@ test.describe('Admin Organization Management - Action Menu', () => {
     await page.getByText('Delete Organization').click();
 
     // Warning should be shown
-    await expect(page.getByText(/This action cannot be undone and will remove all associated data/i)).toBeVisible();
+    await expect(
+      page.getByText(/This action cannot be undone and will remove all associated data/i)
+    ).toBeVisible();
   });
 
   test('should close delete dialog when clicking cancel', async ({ page }) => {
@@ -307,7 +309,7 @@ test.describe('Admin Organization Management - Member Count Interaction', () => 
     // Click on member count - use Promise.all for Next.js Link navigation
     await Promise.all([
       page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
-      memberButton.click()
+      memberButton.click(),
     ]);
 
     // Should navigate to members page

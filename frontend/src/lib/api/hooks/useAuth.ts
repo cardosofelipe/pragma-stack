@@ -121,12 +121,7 @@ export function useLogin(onSuccess?: () => void) {
       const { access_token, refresh_token, user, expires_in } = data;
 
       // Update auth store with user and tokens
-      await setAuth(
-        user as User,
-        access_token,
-        refresh_token || '',
-        expires_in
-      );
+      await setAuth(user as User, access_token, refresh_token || '', expires_in);
 
       // Invalidate and refetch user data
       queryClient.invalidateQueries({ queryKey: authKeys.all });
@@ -199,12 +194,7 @@ export function useRegister(onSuccess?: () => void) {
       const { access_token, refresh_token, user, expires_in } = data;
 
       // Update auth store with user and tokens (auto-login)
-      await setAuth(
-        user as User,
-        access_token,
-        refresh_token || '',
-        expires_in
-      );
+      await setAuth(user as User, access_token, refresh_token || '', expires_in);
 
       // Invalidate and refetch user data
       queryClient.invalidateQueries({ queryKey: authKeys.all });

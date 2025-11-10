@@ -151,9 +151,7 @@ describe('Header', () => {
 
       const adminLinks = screen.queryAllByRole('link', { name: /admin/i });
       // Filter out the one in the dropdown menu
-      const navAdminLinks = adminLinks.filter(
-        (link) => !link.closest('[role="menu"]')
-      );
+      const navAdminLinks = adminLinks.filter((link) => !link.closest('[role="menu"]'));
       expect(navAdminLinks).toHaveLength(0);
     });
 

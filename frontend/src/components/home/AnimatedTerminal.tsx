@@ -94,7 +94,10 @@ export function AnimatedTerminal() {
           </div>
 
           {/* Terminal Content */}
-          <div className="bg-slate-950 p-6 font-mono text-sm overflow-x-auto" style={{ minHeight: '400px' }}>
+          <div
+            className="bg-slate-950 p-6 font-mono text-sm overflow-x-auto"
+            style={{ minHeight: '400px' }}
+          >
             <div className="space-y-2">
               {displayedLines.map((line, index) => (
                 <motion.div
@@ -106,15 +109,18 @@ export function AnimatedTerminal() {
                     line.isSuccess
                       ? 'text-green-400'
                       : line.text.startsWith('#')
-                      ? 'text-slate-500'
-                      : line.text.startsWith('$')
-                      ? 'text-blue-400'
-                      : 'text-slate-300'
+                        ? 'text-slate-500'
+                        : line.text.startsWith('$')
+                          ? 'text-blue-400'
+                          : 'text-slate-300'
                   }`}
                 >
                   {line.text || '\u00A0'}
                   {index === displayedLines.length - 1 && isAnimating && !line.isSuccess && (
-                    <span className="inline-block w-2 h-4 ml-1 bg-slate-400 animate-pulse" aria-hidden="true" />
+                    <span
+                      className="inline-block w-2 h-4 ml-1 bg-slate-400 animate-pulse"
+                      aria-hidden="true"
+                    />
                   )}
                 </motion.div>
               ))}

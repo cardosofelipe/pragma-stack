@@ -22,25 +22,23 @@ import { getGeneralError, getFieldErrors, isAPIErrorArray } from '@/lib/api/erro
 // Validation Schema
 // ============================================================================
 
-const passwordChangeSchema = z.object({
-  current_password: z
-    .string()
-    .min(1, 'Current password is required'),
-  new_password: z
-    .string()
-    .min(1, 'New password is required')
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
-  confirm_password: z
-    .string()
-    .min(1, 'Please confirm your new password'),
-}).refine((data) => data.new_password === data.confirm_password, {
-  message: 'Passwords do not match',
-  path: ['confirm_password'],
-});
+const passwordChangeSchema = z
+  .object({
+    current_password: z.string().min(1, 'Current password is required'),
+    new_password: z
+      .string()
+      .min(1, 'New password is required')
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[0-9]/, 'Password must contain at least one number')
+      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+      .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
+    confirm_password: z.string().min(1, 'Please confirm your new password'),
+  })
+  .refine((data) => data.new_password === data.confirm_password, {
+    message: 'Passwords do not match',
+    path: ['confirm_password'],
+  });
 
 type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
 
@@ -73,10 +71,7 @@ interface PasswordChangeFormProps {
  * <PasswordChangeForm onSuccess={() => console.log('Password changed')} />
  * ```
  */
-export function PasswordChangeForm({
-  onSuccess,
-  className,
-}: PasswordChangeFormProps) {
+export function PasswordChangeForm({ onSuccess, className }: PasswordChangeFormProps) {
   const [serverError, setServerError] = useState<string | null>(null);
   const passwordChangeMutation = usePasswordChange((message) => {
     toast.success(message);
@@ -191,19 +186,12 @@ export function PasswordChangeForm({
 
           {/* Submit Button */}
           <div className="flex items-center gap-4">
-            <Button
-              type="submit"
-              disabled={isSubmitting || !isDirty}
-            >
+            <Button type="submit" disabled={isSubmitting || !isDirty}>
               {isSubmitting ? 'Changing Password...' : 'Change Password'}
             </Button>
             {/* istanbul ignore next - Cancel button requires isDirty state, tested in E2E */}
             {isDirty && !isSubmitting && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => form.reset()}
-              >
+              <Button type="button" variant="outline" onClick={() => form.reset()}>
                 Cancel
               </Button>
             )}

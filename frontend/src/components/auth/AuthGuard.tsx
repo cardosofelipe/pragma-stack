@@ -83,9 +83,8 @@ export function AuthGuard({ children, requireAdmin = false, fallback }: AuthGuar
     // If not loading and not authenticated, redirect to login
     if (!isLoading && !isAuthenticated) {
       // Preserve intended destination
-      const returnUrl = pathname !== config.routes.login
-        ? `?returnUrl=${encodeURIComponent(pathname)}`
-        : '';
+      const returnUrl =
+        pathname !== config.routes.login ? `?returnUrl=${encodeURIComponent(pathname)}` : '';
 
       router.push(`${config.routes.login}${returnUrl}`);
     }

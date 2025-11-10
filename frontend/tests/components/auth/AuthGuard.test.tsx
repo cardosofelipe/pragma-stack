@@ -56,9 +56,7 @@ const createWrapper = () => {
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
@@ -331,9 +329,7 @@ describe('AuthGuard', () => {
       );
 
       await waitFor(() => {
-        expect(mockPush).toHaveBeenCalledWith(
-          expect.stringContaining('returnUrl=%2Fprotected')
-        );
+        expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('returnUrl=%2Fprotected'));
       });
     });
   });

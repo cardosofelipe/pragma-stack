@@ -112,7 +112,10 @@ export function OrganizationFormDialog({
         toast.success(`${data.name} has been updated successfully.`);
       } else {
         // Generate slug from name (simple kebab-case conversion)
-        const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const slug = data.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
 
         await createOrganization.mutateAsync({
           name: data.name,
@@ -125,7 +128,9 @@ export function OrganizationFormDialog({
       form.reset();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : `Failed to ${isEdit ? 'update' : 'create'} organization`
+        error instanceof Error
+          ? error.message
+          : `Failed to ${isEdit ? 'update' : 'create'} organization`
       );
     }
   };
@@ -137,9 +142,7 @@ export function OrganizationFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>
-            {isEdit ? 'Edit Organization' : 'Create Organization'}
-          </DialogTitle>
+          <DialogTitle>{isEdit ? 'Edit Organization' : 'Create Organization'}</DialogTitle>
           <DialogDescription>
             {isEdit
               ? 'Update the organization details below.'
@@ -189,15 +192,10 @@ export function OrganizationFormDialog({
               <Checkbox
                 id="is_active"
                 checked={form.watch('is_active')}
-                onCheckedChange={(checked) =>
-                  form.setValue('is_active', checked === true)
-                }
+                onCheckedChange={(checked) => form.setValue('is_active', checked === true)}
                 disabled={isLoading}
               />
-              <Label
-                htmlFor="is_active"
-                className="text-sm font-normal cursor-pointer"
-              >
+              <Label htmlFor="is_active" className="text-sm font-normal cursor-pointer">
                 Organization is active
               </Label>
             </div>

@@ -26,10 +26,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import {
-  useDeleteOrganization,
-  type Organization,
-} from '@/lib/api/hooks/useAdmin';
+import { useDeleteOrganization, type Organization } from '@/lib/api/hooks/useAdmin';
 
 interface OrganizationActionMenuProps {
   organization: Organization;
@@ -115,8 +112,8 @@ export function OrganizationActionMenu({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Organization</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {organization.name}? This action cannot be undone
-              and will remove all associated data.
+              Are you sure you want to delete {organization.name}? This action cannot be undone and
+              will remove all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

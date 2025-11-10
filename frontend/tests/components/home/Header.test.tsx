@@ -19,27 +19,36 @@ jest.mock('next/link', () => ({
 
 // Mock DemoCredentialsModal
 jest.mock('@/components/home/DemoCredentialsModal', () => ({
-  DemoCredentialsModal: ({ open, onClose }: any) => (
-    open ? <div data-testid="demo-modal">
-      <button onClick={onClose}>Close Modal</button>
-    </div> : null
-  ),
+  DemoCredentialsModal: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="demo-modal">
+        <button onClick={onClose}>Close Modal</button>
+      </div>
+    ) : null,
 }));
 
 describe('Header', () => {
   it('renders logo', () => {
-    render(<Header onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <Header
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     expect(screen.getByText('FastNext')).toBeInTheDocument();
     expect(screen.getByText('Template')).toBeInTheDocument();
   });
 
   it('logo links to homepage', () => {
-    render(<Header onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+    render(
+      <Header
+        onOpenDemoModal={function (): void {
+          throw new Error('Function not implemented.');
+        }}
+      />
+    );
 
     const logoLink = screen.getByRole('link', { name: /fastnext template/i });
     expect(logoLink).toHaveAttribute('href', '/');
@@ -47,42 +56,61 @@ describe('Header', () => {
 
   describe('Desktop Navigation', () => {
     it('renders navigation links', () => {
-      render(<Header onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       expect(screen.getByRole('link', { name: 'Components' })).toHaveAttribute('href', '/dev');
       expect(screen.getByRole('link', { name: 'Admin Demo' })).toHaveAttribute('href', '/admin');
     });
 
     it('renders GitHub link with star badge', () => {
-      render(<Header onOpenDemoModal={function(): void {
-        throw new Error("Function not implemented.");
-    } } />);
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       const githubLinks = screen.getAllByRole('link', { name: /github/i });
-      const desktopGithubLink = githubLinks.find(link =>
+      const desktopGithubLink = githubLinks.find((link) =>
         link.getAttribute('href')?.includes('github.com')
       );
 
-      expect(desktopGithubLink).toHaveAttribute('href', 'https://github.com/your-org/fast-next-template');
+      expect(desktopGithubLink).toHaveAttribute(
+        'href',
+        'https://github.com/your-org/fast-next-template'
+      );
       expect(desktopGithubLink).toHaveAttribute('target', '_blank');
       expect(desktopGithubLink).toHaveAttribute('rel', 'noopener noreferrer');
     });
 
     it('renders Try Demo button', () => {
-      render(<Header onOpenDemoModal={function(): void {
-          throw new Error("Function not implemented.");
-      } } />);
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       const demoButton = screen.getByRole('button', { name: /try demo/i });
       expect(demoButton).toBeInTheDocument();
     });
 
     it('renders Login button', () => {
-      render(<Header onOpenDemoModal={function(): void {
-          throw new Error("Function not implemented.");
-      } } />);
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       const loginLinks = screen.getAllByRole('link', { name: /login/i });
       expect(loginLinks.length).toBeGreaterThan(0);
@@ -102,9 +130,13 @@ describe('Header', () => {
 
   describe('Mobile Menu', () => {
     it('renders mobile menu toggle button', () => {
-      render(<Header onOpenDemoModal={function(): void {
-          throw new Error("Function not implemented.");
-      } } />);
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       // SheetTrigger wraps the button, so we need to find it by aria-label
       const menuButton = screen.getByRole('button', { name: /toggle menu/i });
@@ -112,9 +144,13 @@ describe('Header', () => {
     });
 
     it('mobile menu contains navigation links', () => {
-      render(<Header onOpenDemoModal={function(): void {
-          throw new Error("Function not implemented.");
-      } } />);
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       // Note: SheetContent is hidden by default in tests, but we can verify the links exist
       // The actual mobile menu behavior is tested in E2E tests
@@ -123,33 +159,44 @@ describe('Header', () => {
     });
 
     it('mobile menu contains GitHub link', () => {
-      render(<Header onOpenDemoModal={function(): void {
-          throw new Error("Function not implemented.");
-      } } />);
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       const githubLinks = screen.getAllByRole('link', { name: /github/i });
       expect(githubLinks.length).toBeGreaterThan(0);
     });
   });
 
-
   describe('Accessibility', () => {
     it('has proper ARIA labels for icon buttons', () => {
-      render(<Header onOpenDemoModal={function(): void {
-          throw new Error("Function not implemented.");
-      } } />);
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       const menuButton = screen.getByRole('button', { name: /toggle menu/i });
       expect(menuButton).toHaveAccessibleName();
     });
 
     it('has proper external link attributes', () => {
-      render(<Header onOpenDemoModal={function(): void {
-          throw new Error("Function not implemented.");
-      } } />);
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
 
       const githubLinks = screen.getAllByRole('link', { name: /github/i });
-      const externalLink = githubLinks.find(link =>
+      const externalLink = githubLinks.find((link) =>
         link.getAttribute('href')?.includes('github.com')
       );
 

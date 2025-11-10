@@ -20,21 +20,21 @@
 
 ### Semantic Colors
 
-| Token | Usage | Example |
-|-------|-------|---------|
-| `bg-primary text-primary-foreground` | CTAs, primary actions | Primary button |
-| `bg-secondary text-secondary-foreground` | Secondary actions | Secondary button |
-| `bg-destructive text-destructive-foreground` | Delete, errors | Delete button, error alert |
-| `bg-muted text-muted-foreground` | Disabled, subtle | Disabled button, TabsList |
-| `bg-accent text-accent-foreground` | Hover states | Dropdown hover |
-| `bg-card text-card-foreground` | Cards, elevated surfaces | Card component |
-| `bg-popover text-popover-foreground` | Popovers, dropdowns | Dropdown content |
-| `bg-background text-foreground` | Page background | Body |
-| `text-foreground` | Body text | Paragraphs |
-| `text-muted-foreground` | Secondary text | Captions, helper text |
-| `border-border` | Borders, dividers | Card borders, separators |
-| `border-input` | Input borders | Text input border |
-| `ring-ring` | Focus indicators | Focus ring |
+| Token                                        | Usage                    | Example                    |
+| -------------------------------------------- | ------------------------ | -------------------------- |
+| `bg-primary text-primary-foreground`         | CTAs, primary actions    | Primary button             |
+| `bg-secondary text-secondary-foreground`     | Secondary actions        | Secondary button           |
+| `bg-destructive text-destructive-foreground` | Delete, errors           | Delete button, error alert |
+| `bg-muted text-muted-foreground`             | Disabled, subtle         | Disabled button, TabsList  |
+| `bg-accent text-accent-foreground`           | Hover states             | Dropdown hover             |
+| `bg-card text-card-foreground`               | Cards, elevated surfaces | Card component             |
+| `bg-popover text-popover-foreground`         | Popovers, dropdowns      | Dropdown content           |
+| `bg-background text-foreground`              | Page background          | Body                       |
+| `text-foreground`                            | Body text                | Paragraphs                 |
+| `text-muted-foreground`                      | Secondary text           | Captions, helper text      |
+| `border-border`                              | Borders, dividers        | Card borders, separators   |
+| `border-input`                               | Input borders            | Text input border          |
+| `ring-ring`                                  | Focus indicators         | Focus ring                 |
 
 ### Usage Examples
 
@@ -61,29 +61,29 @@
 
 ### Font Sizes
 
-| Class | rem | px | Use Case | Common |
-|-------|-----|----|----|:------:|
-| `text-xs` | 0.75rem | 12px | Labels, fine print | |
-| `text-sm` | 0.875rem | 14px | Secondary text, captions | ⭐ |
-| `text-base` | 1rem | 16px | Body text (default) | ⭐ |
-| `text-lg` | 1.125rem | 18px | Subheadings | |
-| `text-xl` | 1.25rem | 20px | Card titles | ⭐ |
-| `text-2xl` | 1.5rem | 24px | Section headings | ⭐ |
-| `text-3xl` | 1.875rem | 30px | Page titles | ⭐ |
-| `text-4xl` | 2.25rem | 36px | Large headings | |
-| `text-5xl` | 3rem | 48px | Hero text | |
+| Class       | rem      | px   | Use Case                 | Common |
+| ----------- | -------- | ---- | ------------------------ | :----: |
+| `text-xs`   | 0.75rem  | 12px | Labels, fine print       |        |
+| `text-sm`   | 0.875rem | 14px | Secondary text, captions |   ⭐   |
+| `text-base` | 1rem     | 16px | Body text (default)      |   ⭐   |
+| `text-lg`   | 1.125rem | 18px | Subheadings              |        |
+| `text-xl`   | 1.25rem  | 20px | Card titles              |   ⭐   |
+| `text-2xl`  | 1.5rem   | 24px | Section headings         |   ⭐   |
+| `text-3xl`  | 1.875rem | 30px | Page titles              |   ⭐   |
+| `text-4xl`  | 2.25rem  | 36px | Large headings           |        |
+| `text-5xl`  | 3rem     | 48px | Hero text                |        |
 
 ⭐ = Most commonly used
 
 ### Font Weights
 
-| Class | Value | Use Case | Common |
-|-------|-------|----------|:------:|
-| `font-light` | 300 | De-emphasized text | |
-| `font-normal` | 400 | Body text (default) | ⭐ |
-| `font-medium` | 500 | Labels, menu items | ⭐ |
-| `font-semibold` | 600 | Subheadings, buttons | ⭐ |
-| `font-bold` | 700 | Headings, emphasis | ⭐ |
+| Class           | Value | Use Case             | Common |
+| --------------- | ----- | -------------------- | :----: |
+| `font-light`    | 300   | De-emphasized text   |        |
+| `font-normal`   | 400   | Body text (default)  |   ⭐   |
+| `font-medium`   | 500   | Labels, menu items   |   ⭐   |
+| `font-semibold` | 600   | Subheadings, buttons |   ⭐   |
+| `font-bold`     | 700   | Headings, emphasis   |   ⭐   |
 
 ⭐ = Most commonly used
 
@@ -115,35 +115,35 @@
 
 ### Spacing Values
 
-| Token | rem | px | Use Case | Common |
-|-------|-----|----|----|:------:|
-| `0` | 0 | 0px | No spacing | |
-| `px` | - | 1px | Borders | |
-| `0.5` | 0.125rem | 2px | Very tight | |
-| `1` | 0.25rem | 4px | Icon gaps | |
-| `2` | 0.5rem | 8px | Tight spacing (label → input) | ⭐ |
-| `3` | 0.75rem | 12px | Component padding | |
-| `4` | 1rem | 16px | Standard spacing (form fields) | ⭐ |
-| `5` | 1.25rem | 20px | Medium spacing | |
-| `6` | 1.5rem | 24px | Section spacing (cards) | ⭐ |
-| `8` | 2rem | 32px | Large gaps | ⭐ |
-| `10` | 2.5rem | 40px | Very large gaps | |
-| `12` | 3rem | 48px | Section dividers | ⭐ |
-| `16` | 4rem | 64px | Page sections | |
+| Token | rem      | px   | Use Case                       | Common |
+| ----- | -------- | ---- | ------------------------------ | :----: |
+| `0`   | 0        | 0px  | No spacing                     |        |
+| `px`  | -        | 1px  | Borders                        |        |
+| `0.5` | 0.125rem | 2px  | Very tight                     |        |
+| `1`   | 0.25rem  | 4px  | Icon gaps                      |        |
+| `2`   | 0.5rem   | 8px  | Tight spacing (label → input)  |   ⭐   |
+| `3`   | 0.75rem  | 12px | Component padding              |        |
+| `4`   | 1rem     | 16px | Standard spacing (form fields) |   ⭐   |
+| `5`   | 1.25rem  | 20px | Medium spacing                 |        |
+| `6`   | 1.5rem   | 24px | Section spacing (cards)        |   ⭐   |
+| `8`   | 2rem     | 32px | Large gaps                     |   ⭐   |
+| `10`  | 2.5rem   | 40px | Very large gaps                |        |
+| `12`  | 3rem     | 48px | Section dividers               |   ⭐   |
+| `16`  | 4rem     | 64px | Page sections                  |        |
 
 ⭐ = Most commonly used
 
 ### Spacing Methods
 
-| Method | Use Case | Example |
-|--------|----------|---------|
-| `gap-4` | Flex/grid spacing | `flex gap-4` |
-| `space-y-4` | Vertical stack spacing | `space-y-4` |
-| `space-x-4` | Horizontal stack spacing | `space-x-4` |
-| `p-4` | Padding (all sides) | `p-4` |
-| `px-4` | Horizontal padding | `px-4` |
-| `py-4` | Vertical padding | `py-4` |
-| `m-4` | Margin (exceptions only!) | `mt-8` |
+| Method      | Use Case                  | Example      |
+| ----------- | ------------------------- | ------------ |
+| `gap-4`     | Flex/grid spacing         | `flex gap-4` |
+| `space-y-4` | Vertical stack spacing    | `space-y-4`  |
+| `space-x-4` | Horizontal stack spacing  | `space-x-4`  |
+| `p-4`       | Padding (all sides)       | `p-4`        |
+| `px-4`      | Horizontal padding        | `px-4`       |
+| `py-4`      | Vertical padding          | `py-4`       |
+| `m-4`       | Margin (exceptions only!) | `mt-8`       |
 
 ### Common Spacing Patterns
 
@@ -217,52 +217,52 @@
 
 ```tsx
 // 1 → 2 → 3 progression (most common)
-className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
 
 // 1 → 2 → 4 progression
-className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6';
 
 // 1 → 2 progression (simple)
-className="grid grid-cols-1 md:grid-cols-2 gap-6"
+className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
 
 // 1 → 3 progression (skip 2)
-className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+className = 'grid grid-cols-1 lg:grid-cols-3 gap-6';
 ```
 
 ### Container Widths
 
 ```tsx
 // Standard container
-className="container mx-auto px-4"
+className = 'container mx-auto px-4';
 
 // Constrained widths
-className="max-w-md mx-auto"   // 448px - Forms
-className="max-w-lg mx-auto"   // 512px - Modals
-className="max-w-2xl mx-auto"  // 672px - Articles
-className="max-w-4xl mx-auto"  // 896px - Wide layouts
-className="max-w-7xl mx-auto"  // 1280px - Full page
+className = 'max-w-md mx-auto'; // 448px - Forms
+className = 'max-w-lg mx-auto'; // 512px - Modals
+className = 'max-w-2xl mx-auto'; // 672px - Articles
+className = 'max-w-4xl mx-auto'; // 896px - Wide layouts
+className = 'max-w-7xl mx-auto'; // 1280px - Full page
 ```
 
 ### Flex Patterns
 
 ```tsx
 // Horizontal flex
-className="flex gap-4"
+className = 'flex gap-4';
 
 // Vertical flex
-className="flex flex-col gap-4"
+className = 'flex flex-col gap-4';
 
 // Center items
-className="flex items-center justify-center"
+className = 'flex items-center justify-center';
 
 // Space between
-className="flex items-center justify-between"
+className = 'flex items-center justify-between';
 
 // Wrap items
-className="flex flex-wrap gap-4"
+className = 'flex flex-wrap gap-4';
 
 // Responsive: stack on mobile, row on desktop
-className="flex flex-col sm:flex-row gap-4"
+className = 'flex flex-col sm:flex-row gap-4';
 ```
 
 ---
@@ -273,9 +273,7 @@ className="flex flex-col sm:flex-row gap-4"
 
 ```tsx
 <div className="container mx-auto px-4 py-8">
-  <div className="max-w-4xl mx-auto space-y-6">
-    {/* Content */}
-  </div>
+  <div className="max-w-4xl mx-auto space-y-6">{/* Content */}</div>
 </div>
 ```
 
@@ -287,7 +285,9 @@ className="flex flex-col sm:flex-row gap-4"
     <CardTitle>Title</CardTitle>
     <CardDescription>Description</CardDescription>
   </div>
-  <Button variant="outline" size="sm">Action</Button>
+  <Button variant="outline" size="sm">
+    Action
+  </Button>
 </CardHeader>
 ```
 
@@ -319,9 +319,7 @@ className="flex flex-col sm:flex-row gap-4"
       <CardTitle>Form Title</CardTitle>
     </CardHeader>
     <CardContent>
-      <form className="space-y-4">
-        {/* Fields */}
-      </form>
+      <form className="space-y-4">{/* Fields */}</form>
     </CardContent>
   </Card>
 </div>
@@ -354,17 +352,13 @@ className="flex flex-col sm:flex-row gap-4"
 ### Responsive Text
 
 ```tsx
-<h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
-  Responsive Title
-</h1>
+<h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Responsive Title</h1>
 ```
 
 ### Responsive Padding
 
 ```tsx
-<div className="p-4 sm:p-6 lg:p-8">
-  Responsive padding
-</div>
+<div className="p-4 sm:p-6 lg:p-8">Responsive padding</div>
 ```
 
 ---
@@ -427,16 +421,16 @@ Has error?
 
 ## Keyboard Shortcuts
 
-| Key | Action | Context |
-|-----|--------|---------|
-| `Tab` | Move focus forward | All |
-| `Shift + Tab` | Move focus backward | All |
-| `Enter` | Activate button/link | Buttons, links |
-| `Space` | Activate button/checkbox | Buttons, checkboxes |
-| `Escape` | Close overlay | Dialogs, dropdowns |
-| `Arrow keys` | Navigate items | Dropdowns, lists |
-| `Home` | Jump to start | Lists |
-| `End` | Jump to end | Lists |
+| Key           | Action                   | Context             |
+| ------------- | ------------------------ | ------------------- |
+| `Tab`         | Move focus forward       | All                 |
+| `Shift + Tab` | Move focus backward      | All                 |
+| `Enter`       | Activate button/link     | Buttons, links      |
+| `Space`       | Activate button/checkbox | Buttons, checkboxes |
+| `Escape`      | Close overlay            | Dialogs, dropdowns  |
+| `Arrow keys`  | Navigate items           | Dropdowns, lists    |
+| `Home`        | Jump to start            | Lists               |
+| `End`         | Jump to end              | Lists               |
 
 ---
 
@@ -482,7 +476,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 // Utilities
@@ -506,53 +506,53 @@ import { Check, X, AlertCircle, Loader2 } from 'lucide-react';
 
 ```tsx
 // Required string
-z.string().min(1, 'Required')
+z.string().min(1, 'Required');
 
 // Email
-z.string().email('Invalid email')
+z.string().email('Invalid email');
 
 // Min/max length
-z.string().min(8, 'Min 8 chars').max(100, 'Max 100 chars')
+z.string().min(8, 'Min 8 chars').max(100, 'Max 100 chars');
 
 // Optional
-z.string().optional()
+z.string().optional();
 
 // Number
-z.coerce.number().min(0).max(100)
+z.coerce.number().min(0).max(100);
 
 // Enum
-z.enum(['admin', 'user', 'guest'])
+z.enum(['admin', 'user', 'guest']);
 
 // Boolean
-z.boolean().refine(val => val === true, { message: 'Must accept' })
+z.boolean().refine((val) => val === true, { message: 'Must accept' });
 
 // Password confirmation
 z.object({
   password: z.string().min(8),
-  confirmPassword: z.string()
-}).refine(data => data.password === data.confirmPassword, {
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
-  path: ["confirmPassword"],
-})
+  path: ['confirmPassword'],
+});
 ```
 
 ---
 
 ## Responsive Breakpoints
 
-| Breakpoint | Min Width | Typical Device |
-|------------|-----------|----------------|
-| `sm:` | 640px | Large phones, small tablets |
-| `md:` | 768px | Tablets |
-| `lg:` | 1024px | Laptops, desktops |
-| `xl:` | 1280px | Large desktops |
-| `2xl:` | 1536px | Extra large screens |
+| Breakpoint | Min Width | Typical Device              |
+| ---------- | --------- | --------------------------- |
+| `sm:`      | 640px     | Large phones, small tablets |
+| `md:`      | 768px     | Tablets                     |
+| `lg:`      | 1024px    | Laptops, desktops           |
+| `xl:`      | 1280px    | Large desktops              |
+| `2xl:`     | 1536px    | Extra large screens         |
 
 ```tsx
 // Mobile-first (default → sm → md → lg)
-className="text-sm sm:text-base md:text-lg lg:text-xl"
-className="p-4 sm:p-6 lg:p-8"
-className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+className = 'text-sm sm:text-base md:text-lg lg:text-xl';
+className = 'p-4 sm:p-6 lg:p-8';
+className = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
 ```
 
 ---
@@ -562,20 +562,20 @@ className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
 ### Shadows
 
 ```tsx
-shadow-sm   // Cards, panels
-shadow-md   // Dropdowns, tooltips
-shadow-lg   // Modals, popovers
-shadow-xl   // Floating notifications
+shadow - sm; // Cards, panels
+shadow - md; // Dropdowns, tooltips
+shadow - lg; // Modals, popovers
+shadow - xl; // Floating notifications
 ```
 
 ### Border Radius
 
 ```tsx
-rounded-sm   // 2px - Tags, small badges
-rounded-md   // 4px - Inputs, small buttons
-rounded-lg   // 6px - Cards, buttons (default)
-rounded-xl   // 10px - Large cards, modals
-rounded-full // Pills, avatars, icon buttons
+rounded - sm; // 2px - Tags, small badges
+rounded - md; // 4px - Inputs, small buttons
+rounded - lg; // 6px - Cards, buttons (default)
+rounded - xl; // 10px - Large cards, modals
+rounded - full; // Pills, avatars, icon buttons
 ```
 
 ---
@@ -589,6 +589,7 @@ rounded-full // Pills, avatars, icon buttons
 ---
 
 **Related Documentation:**
+
 - [Quick Start](./00-quick-start.md) - 5-minute crash course
 - [Foundations](./01-foundations.md) - Detailed color, typography, spacing
 - [Components](./02-components.md) - All component variants

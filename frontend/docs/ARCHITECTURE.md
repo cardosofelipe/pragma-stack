@@ -88,6 +88,7 @@ This frontend template provides a production-ready foundation for building moder
 ### 2.1 Core Framework
 
 **Next.js 15.x (App Router)**
+
 - **Why**: Modern React framework with RSC, excellent DX, optimized performance
 - **App Router**: Preferred over Pages Router for better data fetching, layouts, and streaming
 - **Server Components**: Default for better performance, client components for interactivity
@@ -96,11 +97,13 @@ This frontend template provides a production-ready foundation for building moder
 ### 2.2 State Management
 
 **TanStack Query (React Query v5)**
+
 - **Purpose**: Server state management (all API data)
 - **Why**: Automatic caching, background refetching, request deduplication, optimistic updates
 - **Usage**: All data fetching goes through React Query hooks
 
 **Zustand 4.x**
+
 - **Purpose**: Client-only state (authentication, UI preferences)
 - **Why**: Minimal boilerplate, no Context API overhead, simple API
 - **Usage**: Auth store, UI store (sidebar, theme, modals)
@@ -109,27 +112,32 @@ This frontend template provides a production-ready foundation for building moder
 ### 2.3 UI Layer
 
 **shadcn/ui**
+
 - **Why**: Accessible components (Radix UI), customizable, copy-paste (not npm dependency)
 - **Components**: Button, Card, Dialog, Form, Input, Table, Toast, etc.
 - **Customization**: Tailwind-based, easy to adapt to design system
 
 **Tailwind CSS 4.x**
+
 - **Why**: Utility-first, excellent DX, small bundle size, dark mode support
 - **Strategy**: Class-based dark mode, mobile-first responsive design
 - **Customization**: Custom theme colors, design tokens
 
 **Recharts 2.x**
+
 - **Purpose**: Charts for admin dashboard
 - **Why**: React-native, composable, responsive, themed with Tailwind colors
 
 ### 2.4 API Layer
 
 **@hey-api/openapi-ts**
+
 - **Purpose**: Generate TypeScript client from backend OpenAPI spec
 - **Why**: Type-safe API calls, auto-generated types matching backend
 - **Alternative**: Considered `openapi-typescript-codegen` but this is more actively maintained
 
 **Axios 1.x**
+
 - **Purpose**: HTTP client for API calls
 - **Why**: Interceptor support for auth, better error handling than fetch
 - **Usage**: Wrapped in generated API client, configured with auth interceptors
@@ -137,10 +145,12 @@ This frontend template provides a production-ready foundation for building moder
 ### 2.5 Forms & Validation
 
 **react-hook-form 7.x**
+
 - **Purpose**: Form state management
 - **Why**: Excellent performance, minimal re-renders, great DX
 
 **Zod 3.x**
+
 - **Purpose**: Runtime type validation and schema definition
 - **Why**: Type inference, composable schemas, integrates with react-hook-form
 - **Usage**: All forms use Zod schemas with `zodResolver`
@@ -148,10 +158,12 @@ This frontend template provides a production-ready foundation for building moder
 ### 2.6 Testing
 
 **Jest + React Testing Library**
+
 - **Purpose**: Unit and component tests
 - **Why**: Industry standard, excellent React support, accessibility-focused
 
 **Playwright**
+
 - **Purpose**: End-to-end testing
 - **Why**: Fast, reliable, multi-browser, great debugging tools
 - **Coverage Target**: 90%+ for template robustness
@@ -208,6 +220,7 @@ Inspired by backend's 5-layer architecture, frontend follows similar separation 
 ```
 
 **Key Rules:**
+
 - Pages/Layouts should NOT contain business logic
 - Components should NOT call API client directly (use hooks)
 - Hooks should NOT contain display logic
@@ -217,6 +230,7 @@ Inspired by backend's 5-layer architecture, frontend follows similar separation 
 ### 3.2 Component Patterns
 
 **Server Components by Default:**
+
 ```typescript
 // app/(authenticated)/admin/users/page.tsx
 // Server Component - can fetch data directly
@@ -232,6 +246,7 @@ export default async function UsersPage() {
 ```
 
 **Client Components for Interactivity:**
+
 ```typescript
 // components/admin/UserTable.tsx
 'use client';
@@ -245,6 +260,7 @@ export function UserTable() {
 ```
 
 **Composition Over Prop Drilling:**
+
 ```typescript
 // Good: Use composition
 <Card>
@@ -358,6 +374,7 @@ Each module has one clear responsibility:
 ```
 
 **Token Refresh Flow (Automatic):**
+
 ```
 API Request → 401 Response → Check if refresh token exists
    ↓ Yes                                    ↓ No
@@ -369,11 +386,13 @@ New Tokens → Update Store → Retry Original Request
 ### 4.3 State Updates
 
 **Server State (React Query):**
+
 - Automatic background refetch
 - Cache invalidation on mutations
 - Optimistic updates where appropriate
 
 **Client State (Zustand):**
+
 - Direct store updates
 - No actions/reducers boilerplate
 - Subscriptions for components
@@ -385,6 +404,7 @@ New Tokens → Update Store → Retry Original Request
 ### 5.1 Philosophy
 
 **Use the Right Tool for the Right Job:**
+
 - Server data → TanStack Query
 - Auth & tokens → Zustand
 - UI state → Zustand (minimal)
@@ -392,6 +412,7 @@ New Tokens → Update Store → Retry Original Request
 - Component state → useState/useReducer
 
 **Avoid Redundancy:**
+
 - DON'T duplicate server data in Zustand
 - DON'T store API responses in global state
 - DO keep state as local as possible
@@ -399,34 +420,36 @@ New Tokens → Update Store → Retry Original Request
 ### 5.2 TanStack Query Configuration
 
 **Global Config** (`src/config/queryClient.ts`):
+
 ```typescript
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60000,              // 1 minute
-      cacheTime: 300000,             // 5 minutes
-      retry: 3,                      // Retry failed requests
-      refetchOnWindowFocus: true,    // Refetch on tab focus
-      refetchOnReconnect: true,      // Refetch on network reconnect
+      staleTime: 60000, // 1 minute
+      cacheTime: 300000, // 5 minutes
+      retry: 3, // Retry failed requests
+      refetchOnWindowFocus: true, // Refetch on tab focus
+      refetchOnReconnect: true, // Refetch on network reconnect
     },
     mutations: {
-      retry: 1,                      // Retry mutations once
+      retry: 1, // Retry mutations once
     },
   },
 });
 ```
 
 **Query Key Structure:**
+
 ```typescript
-['users']                           // List all users
-['users', userId]                   // Single user
-['users', { page: 1, search: 'john' }] // Filtered list
-['organizations', orgId, 'members'] // Nested resource
+['users'][('users', userId)][('users', { page: 1, search: 'john' })][ // List all users // Single user // Filtered list
+  ('organizations', orgId, 'members')
+]; // Nested resource
 ```
 
 ### 5.3 Zustand Stores
 
 **Auth Store** (`src/stores/authStore.ts`):
+
 ```typescript
 interface AuthStore {
   user: User | null;
@@ -443,6 +466,7 @@ interface AuthStore {
 ```
 
 **UI Store** (`src/stores/uiStore.ts`):
+
 ```typescript
 interface UIStore {
   sidebarOpen: boolean;
@@ -454,6 +478,7 @@ interface UIStore {
 ```
 
 **Store Guidelines:**
+
 - Keep stores small and focused
 - Use selectors for computed values
 - Persist to localStorage where appropriate
@@ -480,6 +505,7 @@ Component → useAuth() hook → AuthContext → Zustand Store → Storage Layer
 **Why This Pattern?**
 
 ✅ **Benefits:**
+
 - **Testable**: E2E tests can inject mock stores without backend
 - **Performant**: Zustand handles state efficiently, Context is just a thin wrapper
 - **Type-safe**: Full TypeScript inference throughout
@@ -488,6 +514,7 @@ Component → useAuth() hook → AuthContext → Zustand Store → Storage Layer
 - **React-idiomatic**: Follows React best practices
 
 **Key Design Principles:**
+
 1. **Thin Context Layer**: Context only provides dependency injection, no business logic
 2. **Zustand for State**: All state management stays in Zustand (no duplicated state)
 3. **Backward Compatible**: Internal refactor only, no API changes
@@ -516,6 +543,7 @@ window.__TEST_AUTH_STORE__ = mockStoreHook;
 ```
 
 **Implementation Details:**
+
 - Stores Zustand hook function (not state) in Context
 - Priority: explicit prop → E2E test store → production singleton
 - Type-safe window global extension for E2E injection
@@ -530,23 +558,25 @@ window.__TEST_AUTH_STORE__ = mockStoreHook;
 const { user, isAuthenticated } = useAuth();
 
 // Pattern 2: Selector (optimized for performance)
-const user = useAuth(state => state.user);
+const user = useAuth((state) => state.user);
 ```
 
 **Why Polymorphic?**
+
 - Simple pattern for most use cases
 - Optimized pattern available when needed
 - Type-safe with function overloads
 - No performance overhead
 
 **Critical Implementation Detail:**
+
 ```typescript
 export function useAuth(): AuthState;
 export function useAuth<T>(selector: (state: AuthState) => T): T;
 export function useAuth<T>(selector?: (state: AuthState) => T): AuthState | T {
   const storeHook = useContext(AuthContext);
   if (!storeHook) {
-    throw new Error("useAuth must be used within AuthProvider");
+    throw new Error('useAuth must be used within AuthProvider');
   }
   // CRITICAL: Call the hook internally (follows React Rules of Hooks)
   return selector ? storeHook(selector) : storeHook();
@@ -580,6 +610,7 @@ function MyComponent() {
 ```
 
 **Why?**
+
 - Component re-renders when auth state changes
 - Type-safe access to all state properties
 - Clean, idiomatic React code
@@ -605,6 +636,7 @@ export function useLogin() {
 ```
 
 **Why?**
+
 - Event handlers run outside React render cycle
 - Don't need to re-render when state changes
 - Using `getState()` directly is cleaner
@@ -694,6 +726,7 @@ test.describe('Protected Pages', () => {
 ```
 
 **Why This Order?**
+
 - AuthProvider must wrap AuthInitializer (AuthInitializer uses auth state)
 - AuthProvider should wrap all app providers (auth available everywhere)
 - Keep provider tree shallow for performance
@@ -701,15 +734,18 @@ test.describe('Protected Pages', () => {
 ### 6.6 Token Management Strategy
 
 **Two-Token System:**
+
 - **Access Token**: Short-lived (15 min), stored in memory/sessionStorage
 - **Refresh Token**: Long-lived (7 days), stored in httpOnly cookie (preferred) or localStorage
 
 **Token Storage Decision:**
+
 - **Primary**: httpOnly cookies (most secure, prevents XSS)
 - **Fallback**: localStorage with encryption wrapper (if cookies not feasible)
 - **Access Token**: sessionStorage or React state (short-lived, acceptable risk)
 
 **Token Rotation:**
+
 - On refresh, both tokens are rotated
 - Old refresh token is invalidated immediately
 - Prevents token replay attacks
@@ -717,6 +753,7 @@ test.describe('Protected Pages', () => {
 ### 6.2 Per-Device Session Tracking
 
 Backend tracks sessions per device:
+
 - Each login creates a unique session with device info
 - Users can view all active sessions
 - Users can revoke individual sessions
@@ -724,6 +761,7 @@ Backend tracks sessions per device:
 - "Logout All" deactivates all sessions
 
 Frontend Implementation:
+
 - Session list page at `/settings/sessions`
 - Display device name, IP, location, last used
 - Highlight current session
@@ -732,6 +770,7 @@ Frontend Implementation:
 ### 6.3 Auth Guard Implementation
 
 **Layout-Based Protection:**
+
 ```typescript
 // app/(authenticated)/layout.tsx
 export default function AuthenticatedLayout({ children }) {
@@ -746,6 +785,7 @@ export default function AuthenticatedLayout({ children }) {
 ```
 
 **Permission Checks:**
+
 ```typescript
 // app/(authenticated)/admin/layout.tsx
 export default function AdminLayout({ children }) {
@@ -776,12 +816,14 @@ export default function AdminLayout({ children }) {
 ### 7.1 OpenAPI Client Generation
 
 **Workflow:**
+
 ```
 Backend OpenAPI Spec → @hey-api/openapi-ts → TypeScript Client
 (/api/v1/openapi.json)                     (src/lib/api/generated/)
 ```
 
 **Generation Script** (`scripts/generate-api-client.sh`):
+
 ```bash
 #!/bin/bash
 API_URL="${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}"
@@ -792,6 +834,7 @@ npx @hey-api/openapi-ts \
 ```
 
 **Benefits:**
+
 - Type-safe API calls
 - Auto-completion in IDE
 - Compile-time error checking
@@ -801,6 +844,7 @@ npx @hey-api/openapi-ts \
 ### 7.2 Axios Configuration
 
 **Base Instance** (`src/lib/api/client.ts`):
+
 ```typescript
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -812,6 +856,7 @@ export const apiClient = axios.create({
 ```
 
 **Request Interceptor:**
+
 ```typescript
 apiClient.interceptors.request.use(
   (config) => {
@@ -826,6 +871,7 @@ apiClient.interceptors.request.use(
 ```
 
 **Response Interceptor:**
+
 ```typescript
 apiClient.interceptors.response.use(
   (response) => response,
@@ -850,6 +896,7 @@ apiClient.interceptors.response.use(
 ### 7.3 Error Handling
 
 **Backend Error Format:**
+
 ```typescript
 {
   success: false,
@@ -864,24 +911,28 @@ apiClient.interceptors.response.use(
 ```
 
 **Frontend Error Parsing:**
+
 ```typescript
 export function parseAPIError(error: AxiosError): APIError {
   if (error.response?.data?.errors) {
     return error.response.data.errors;
   }
-  return [{
-    code: 'UNKNOWN',
-    message: 'An unexpected error occurred'
-  }];
+  return [
+    {
+      code: 'UNKNOWN',
+      message: 'An unexpected error occurred',
+    },
+  ];
 }
 ```
 
 **Error Code Mapping:**
+
 ```typescript
 const ERROR_MESSAGES = {
-  'AUTH_001': 'Invalid email or password',
-  'USER_002': 'This email is already registered',
-  'VAL_001': 'Please check your input',
+  AUTH_001: 'Invalid email or password',
+  USER_002: 'This email is already registered',
+  VAL_001: 'Please check your input',
   // ... all backend error codes
 };
 ```
@@ -889,6 +940,7 @@ const ERROR_MESSAGES = {
 ### 7.4 React Query Hooks Pattern
 
 **Standard Pattern:**
+
 ```typescript
 // lib/api/hooks/useUsers.ts
 export function useUsers(filters?: UserFilters) {
@@ -955,6 +1007,7 @@ app/
 ```
 
 **Route Groups** (parentheses in folder name):
+
 - Organize routes without affecting URL
 - Apply different layouts to route subsets
 - Example: `(auth)` and `(authenticated)` have different layouts
@@ -962,23 +1015,27 @@ app/
 ### 8.2 Layout Strategy
 
 **Root Layout** (`app/layout.tsx`):
+
 - HTML structure
 - React Query provider
 - Theme provider
 - Global metadata
 
 **Auth Layout** (`app/(auth)/layout.tsx`):
+
 - Centered form container
 - No header/footer
 - Minimal styling
 
 **Authenticated Layout** (`app/(authenticated)/layout.tsx`):
+
 - Auth guard (redirect if not authenticated)
 - Header with user menu
 - Main content area
 - Footer
 
 **Admin Layout** (`app/(authenticated)/admin/layout.tsx`):
+
 - Admin sidebar
 - Breadcrumbs
 - Admin permission check (is_superuser)
@@ -1036,11 +1093,13 @@ components/
 ### 9.2 Component Guidelines
 
 **Naming:**
+
 - PascalCase for components: `UserTable.tsx`
 - Match file name with component name
 - One component per file
 
 **Structure:**
+
 ```typescript
 // 1. Imports
 import { useState } from 'react';
@@ -1078,6 +1137,7 @@ export function UserTable({ filters }: UserTableProps) {
 ```
 
 **Best Practices:**
+
 - Prefer named exports over default exports
 - Destructure props in function signature
 - Extract complex logic to hooks
@@ -1087,6 +1147,7 @@ export function UserTable({ filters }: UserTableProps) {
 ### 9.3 Styling Strategy
 
 **Tailwind Utility Classes:**
+
 ```typescript
 <button className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
   Click Me
@@ -1094,6 +1155,7 @@ export function UserTable({ filters }: UserTableProps) {
 ```
 
 **Conditional Classes with cn():**
+
 ```typescript
 import { cn } from '@/lib/utils/cn';
 
@@ -1105,6 +1167,7 @@ import { cn } from '@/lib/utils/cn';
 ```
 
 **Dark Mode:**
+
 ```typescript
 <div className="bg-white dark:bg-gray-900 text-black dark:text-white">
   Content
@@ -1134,18 +1197,21 @@ import { cn } from '@/lib/utils/cn';
 ### 10.2 Test Categories
 
 **Unit Tests** (60% of suite):
+
 - Utilities (`lib/utils/`)
 - Custom hooks (`hooks/`)
 - Services (`services/`)
 - Pure functions
 
 **Component Tests** (30% of suite):
+
 - Reusable components (`components/`)
 - Forms with validation
 - User interactions
 - Accessibility
 
 **Integration Tests** (E2E with Playwright, 10% of suite):
+
 - Critical user flows:
   - Login → Dashboard
   - Admin: Create/Edit/Delete User
@@ -1157,6 +1223,7 @@ import { cn } from '@/lib/utils/cn';
 ### 10.3 Testing Tools
 
 **Jest + React Testing Library:**
+
 ```typescript
 // UserTable.test.tsx
 import { render, screen } from '@testing-library/react';
@@ -1169,6 +1236,7 @@ test('renders user table with data', async () => {
 ```
 
 **Playwright E2E:**
+
 ```typescript
 // tests/e2e/auth.spec.ts
 test('user can login', async ({ page }) => {
@@ -1183,11 +1251,13 @@ test('user can login', async ({ page }) => {
 ### 10.4 Coverage Target
 
 **Goal: 90%+ Overall Coverage**
+
 - Unit tests: 95%+
 - Component tests: 85%+
 - Integration tests: Critical paths only
 
 **Justification for 90%:**
+
 - This is a template for production projects
 - High coverage ensures robustness
 - Confidence for extension and customization
@@ -1199,6 +1269,7 @@ test('user can login', async ({ page }) => {
 ### 11.1 Optimization Strategies
 
 **Code Splitting:**
+
 ```typescript
 // Dynamic imports for heavy components
 const AdminDashboard = dynamic(() => import('./AdminDashboard'), {
@@ -1207,6 +1278,7 @@ const AdminDashboard = dynamic(() => import('./AdminDashboard'), {
 ```
 
 **Image Optimization:**
+
 ```typescript
 import Image from 'next/image';
 
@@ -1220,11 +1292,13 @@ import Image from 'next/image';
 ```
 
 **React Query Caching:**
+
 - Stale time: 1 minute (reduce unnecessary refetches)
 - Cache time: 5 minutes (keep data in memory)
 - Background refetch: Yes (keep data fresh)
 
 **Bundle Size Monitoring:**
+
 ```bash
 npm run build && npm run analyze
 # Use webpack-bundle-analyzer to identify large dependencies
@@ -1233,12 +1307,14 @@ npm run build && npm run analyze
 ### 11.2 Performance Targets
 
 **Lighthouse Scores:**
+
 - Performance: >90
 - Accessibility: 100
 - Best Practices: >90
 - SEO: >90
 
 **Core Web Vitals:**
+
 - LCP (Largest Contentful Paint): <2.5s
 - FID (First Input Delay): <100ms
 - CLS (Cumulative Layout Shift): <0.1
@@ -1250,16 +1326,19 @@ npm run build && npm run analyze
 ### 12.1 Client-Side Security
 
 **XSS Prevention:**
+
 - React's default escaping (JSX)
 - Sanitize user input if rendering HTML
 - CSP headers (configured in backend)
 
 **Token Security:**
+
 - Access token: sessionStorage or memory (15 min expiry mitigates risk)
 - Refresh token: httpOnly cookie (preferred) or encrypted localStorage
 - Never log tokens to console in production
 
 **HTTPS Only:**
+
 - All production requests over HTTPS
 - Cookies with Secure flag
 - No mixed content
@@ -1267,11 +1346,13 @@ npm run build && npm run analyze
 ### 12.2 Input Validation
 
 **Client-Side Validation:**
+
 - Zod schemas for all forms
 - Immediate feedback to users
 - Prevent malformed requests
 
 **Remember:**
+
 - Client validation is for UX
 - Backend validation is for security
 - Always trust backend, not client
@@ -1279,12 +1360,14 @@ npm run build && npm run analyze
 ### 12.3 Dependency Security
 
 **Regular Audits:**
+
 ```bash
 npm audit
 npm audit fix
 ```
 
 **Automated Scanning:**
+
 - Dependabot (GitHub)
 - Snyk (CI/CD integration)
 
@@ -1295,12 +1378,14 @@ npm audit fix
 ### 13.1 Why Next.js App Router?
 
 **Pros:**
+
 - Server Components reduce client bundle
 - Better data fetching patterns
 - Streaming and Suspense built-in
 - Simpler layouts and error handling
 
 **Cons:**
+
 - Newer, less mature than Pages Router
 - Learning curve for team
 
@@ -1309,11 +1394,13 @@ npm audit fix
 ### 13.2 Why TanStack Query?
 
 **Alternatives Considered:**
+
 - SWR: Similar but less features
 - Redux Toolkit Query: Too much boilerplate for our use case
 - Apollo Client: Overkill for REST API
 
 **Why TanStack Query:**
+
 - Best-in-class caching and refetching
 - Framework-agnostic (not tied to Next.js)
 - Excellent DevTools
@@ -1322,11 +1409,13 @@ npm audit fix
 ### 13.3 Why Zustand over Redux?
 
 **Why NOT Redux:**
+
 - Too much boilerplate (actions, reducers, middleware)
 - We don't need time-travel debugging
 - Most state is server state (handled by React Query)
 
 **Why Zustand:**
+
 - Minimal API (easy to learn)
 - No Context API overhead
 - Can use outside React (interceptors)
@@ -1335,11 +1424,13 @@ npm audit fix
 ### 13.4 Why shadcn/ui over Component Libraries?
 
 **Alternatives Considered:**
+
 - Material-UI: Heavy, opinionated styling
 - Chakra UI: Good, but still an npm dependency
 - Ant Design: Too opinionated for template
 
 **Why shadcn/ui:**
+
 - Copy-paste (full control)
 - Accessible (Radix UI primitives)
 - Tailwind-based (consistent with our stack)
@@ -1348,11 +1439,13 @@ npm audit fix
 ### 13.5 Why Axios over Fetch?
 
 **Why NOT Fetch:**
+
 - No request/response interceptors
 - Manual timeout handling
 - Less ergonomic error handling
 
 **Why Axios:**
+
 - Interceptors (essential for auth)
 - Automatic JSON parsing
 - Better error handling
@@ -1364,11 +1457,13 @@ npm audit fix
 **Decision: httpOnly Cookies (Primary), localStorage (Fallback)**
 
 **Why httpOnly Cookies:**
+
 - Most secure (not accessible to JavaScript)
 - Prevents XSS token theft
 - Automatic sending with requests (if CORS configured)
 
 **Why Fallback to localStorage:**
+
 - Simpler initial setup (no backend cookie handling)
 - Still secure with proper measures:
   - Short access token expiry (15 min)
@@ -1377,6 +1472,7 @@ npm audit fix
   - Encrypted wrapper (optional)
 
 **Implementation:**
+
 - Try httpOnly cookies first
 - Fall back to localStorage if not feasible
 - Document choice in code
@@ -1388,12 +1484,14 @@ npm audit fix
 ### 14.1 Production Deployment
 
 **Recommended Platform: Vercel**
+
 - Native Next.js support
 - Edge functions for middleware
 - Automatic preview deployments
 - CDN with global edge network
 
 **Alternative: Docker**
+
 ```dockerfile
 FROM node:20-alpine
 WORKDIR /app
@@ -1408,18 +1506,21 @@ CMD ["npm", "start"]
 ### 14.2 Environment Configuration
 
 **Development:**
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
 NODE_ENV=development
 ```
 
 **Production:**
+
 ```env
 NEXT_PUBLIC_API_URL=https://api.example.com/api/v1
 NODE_ENV=production
 ```
 
 **Secrets:**
+
 - Never commit `.env.local`
 - Use platform-specific secret management (Vercel Secrets, Docker Secrets)
 
@@ -1453,6 +1554,7 @@ jobs:
 This architecture document provides a comprehensive overview of the frontend system design, patterns, and decisions. It should serve as a reference for developers working on the project and guide future architectural decisions.
 
 For specific implementation details, refer to:
+
 - **CODING_STANDARDS.md**: Code style and conventions
 - **COMPONENT_GUIDE.md**: Component usage and patterns
 - **FEATURE_EXAMPLES.md**: Step-by-step feature implementation

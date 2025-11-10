@@ -6,7 +6,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { OrganizationFormDialog } from '@/components/admin/organizations/OrganizationFormDialog';
-import { useCreateOrganization, useUpdateOrganization, type Organization } from '@/lib/api/hooks/useAdmin';
+import {
+  useCreateOrganization,
+  useUpdateOrganization,
+  type Organization,
+} from '@/lib/api/hooks/useAdmin';
 
 // Mock ResizeObserver (needed for Textarea component)
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -28,8 +32,12 @@ jest.mock('sonner', () => ({
   },
 }));
 
-const mockUseCreateOrganization = useCreateOrganization as jest.MockedFunction<typeof useCreateOrganization>;
-const mockUseUpdateOrganization = useUpdateOrganization as jest.MockedFunction<typeof useUpdateOrganization>;
+const mockUseCreateOrganization = useCreateOrganization as jest.MockedFunction<
+  typeof useCreateOrganization
+>;
+const mockUseUpdateOrganization = useUpdateOrganization as jest.MockedFunction<
+  typeof useUpdateOrganization
+>;
 
 describe('OrganizationFormDialog', () => {
   const mockCreateMutate = jest.fn();
@@ -97,7 +105,9 @@ describe('OrganizationFormDialog', () => {
       render(<OrganizationFormDialog {...createProps} />);
 
       expect(screen.getByText('Description')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText('A brief description of the organization...')).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText('A brief description of the organization...')
+      ).toBeInTheDocument();
     });
 
     it('does not render active checkbox in create mode', () => {
@@ -182,7 +192,14 @@ describe('OrganizationFormDialog', () => {
         isPending: true,
       } as any);
 
-      render(<OrganizationFormDialog open={true} onOpenChange={mockOnOpenChange} mode="edit" organization={mockOrganization} />);
+      render(
+        <OrganizationFormDialog
+          open={true}
+          onOpenChange={mockOnOpenChange}
+          mode="edit"
+          organization={mockOrganization}
+        />
+      );
 
       expect(screen.getByRole('button', { name: 'Saving...' })).toBeInTheDocument();
     });

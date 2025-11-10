@@ -22,14 +22,16 @@ describe('usePrefersReducedMotion', () => {
           mockListeners.push(listener);
         }
       }),
-      removeEventListener: jest.fn((event: string, listener: (event: MediaQueryListEvent) => void) => {
-        if (event === 'change') {
-          const index = mockListeners.indexOf(listener);
-          if (index > -1) {
-            mockListeners.splice(index, 1);
+      removeEventListener: jest.fn(
+        (event: string, listener: (event: MediaQueryListEvent) => void) => {
+          if (event === 'change') {
+            const index = mockListeners.indexOf(listener);
+            if (index > -1) {
+              mockListeners.splice(index, 1);
+            }
           }
         }
-      }),
+      ),
       dispatchEvent: jest.fn(),
     }));
 
@@ -96,7 +98,7 @@ describe('usePrefersReducedMotion', () => {
 
     // Simulate media query change
     act(() => {
-      mockListeners.forEach(listener => {
+      mockListeners.forEach((listener) => {
         listener({ matches: true } as MediaQueryListEvent);
       });
     });
@@ -126,7 +128,7 @@ describe('usePrefersReducedMotion', () => {
 
     // Simulate media query change
     act(() => {
-      mockListeners.forEach(listener => {
+      mockListeners.forEach((listener) => {
         listener({ matches: false } as MediaQueryListEvent);
       });
     });

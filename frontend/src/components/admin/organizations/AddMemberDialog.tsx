@@ -47,11 +47,7 @@ interface AddMemberDialogProps {
   organizationId: string;
 }
 
-export function AddMemberDialog({
-  open,
-  onOpenChange,
-  organizationId,
-}: AddMemberDialogProps) {
+export function AddMemberDialog({ open, onOpenChange, organizationId }: AddMemberDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch all users for the dropdown (simplified - in production, use search/autocomplete)
@@ -69,7 +65,12 @@ export function AddMemberDialog({
     },
   });
 
-  const { handleSubmit, formState: { errors }, setValue, watch } = form;
+  const {
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = form;
   const selectedRole = watch('role');
   const selectedEmail = watch('userEmail');
 
@@ -139,7 +140,12 @@ export function AddMemberDialog({
           {/* Role Select */}
           <div className="space-y-2">
             <Label htmlFor="role">Role *</Label>
-            <Select value={selectedRole} onValueChange={(value) => setValue('role', value as 'owner' | 'admin' | 'member' | 'guest')}>
+            <Select
+              value={selectedRole}
+              onValueChange={(value) =>
+                setValue('role', value as 'owner' | 'admin' | 'member' | 'guest')
+              }
+            >
               <SelectTrigger id="role">
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
@@ -150,9 +156,7 @@ export function AddMemberDialog({
                 <SelectItem value="guest">Guest</SelectItem>
               </SelectContent>
             </Select>
-            {errors.role && (
-              <p className="text-sm text-destructive">{errors.role.message}</p>
-            )}
+            {errors.role && <p className="text-sm text-destructive">{errors.role.message}</p>}
           </div>
 
           {/* Actions */}

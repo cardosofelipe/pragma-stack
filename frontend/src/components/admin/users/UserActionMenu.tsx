@@ -49,9 +49,7 @@ export function UserActionMenu({ user, isCurrentUser, onEdit }: UserActionMenuPr
   const deactivateUser = useDeactivateUser();
   const deleteUser = useDeleteUser();
 
-  const fullName = user.last_name
-    ? `${user.first_name} ${user.last_name}`
-    : user.first_name;
+  const fullName = user.last_name ? `${user.first_name} ${user.last_name}` : user.first_name;
 
   // Handle activate action
   const handleActivate = async () => {

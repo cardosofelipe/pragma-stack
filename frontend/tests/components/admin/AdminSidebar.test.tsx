@@ -70,7 +70,10 @@ describe('AdminSidebar', () => {
 
       expect(screen.getByTestId('nav-dashboard')).toHaveAttribute('href', '/admin');
       expect(screen.getByTestId('nav-users')).toHaveAttribute('href', '/admin/users');
-      expect(screen.getByTestId('nav-organizations')).toHaveAttribute('href', '/admin/organizations');
+      expect(screen.getByTestId('nav-organizations')).toHaveAttribute(
+        'href',
+        '/admin/organizations'
+      );
       expect(screen.getByTestId('nav-settings')).toHaveAttribute('href', '/admin/settings');
     });
 

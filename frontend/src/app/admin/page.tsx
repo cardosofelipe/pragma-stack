@@ -27,9 +27,7 @@ export default function AdminPage() {
       <div className="space-y-8">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Admin Dashboard
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
           <p className="mt-2 text-muted-foreground">
             Manage users, organizations, and system settings
           </p>
@@ -72,9 +70,7 @@ export default function AdminPage() {
                   <Settings className="h-5 w-5 text-primary" aria-hidden="true" />
                   <h3 className="font-semibold">System Settings</h3>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Configure system-wide settings
-                </p>
+                <p className="text-sm text-muted-foreground">Configure system-wide settings</p>
               </div>
             </Link>
           </div>

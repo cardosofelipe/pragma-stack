@@ -40,11 +40,7 @@ const settingsTabs = [
   },
 ];
 
-export default function SettingsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function SettingsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   // Determine active tab based on pathname
@@ -54,12 +50,8 @@ export default function SettingsLayout({
     <div className="container mx-auto px-4 py-8">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">
-          Settings
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Manage your account settings and preferences
-        </p>
+        <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+        <p className="mt-2 text-muted-foreground">Manage your account settings and preferences</p>
       </div>
 
       {/* Tabs Navigation */}
@@ -79,9 +71,7 @@ export default function SettingsLayout({
         </TabsList>
 
         {/* Tab Content */}
-        <div className="rounded-lg border bg-card text-card-foreground p-6">
-          {children}
-        </div>
+        <div className="rounded-lg border bg-card text-card-foreground p-6">{children}</div>
       </Tabs>
     </div>
   );

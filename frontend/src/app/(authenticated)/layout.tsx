@@ -15,18 +15,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AuthenticatedLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
       <div className="flex min-h-screen flex-col">
         <Header />
-        <main className="flex-1">
-          {children}
-        </main>
+        <main className="flex-1">{children}</main>
         <Footer />
       </div>
     </AuthGuard>

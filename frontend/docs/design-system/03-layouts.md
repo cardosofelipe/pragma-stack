@@ -36,16 +36,16 @@ Use this flowchart to choose between Grid and Flex:
 
 ### Quick Rules
 
-| Scenario | Solution |
-|----------|----------|
-| **Equal-width columns** | Grid (`grid grid-cols-3`) |
-| **Flexible item sizes** | Flex (`flex gap-4`) |
-| **2D layout (rows + cols)** | Grid (`grid grid-cols-2 grid-rows-3`) |
-| **1D layout (row OR col)** | Flex (`flex` or `flex flex-col`) |
-| **Card grid** | Grid (`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3`) |
-| **Navbar items** | Flex (`flex items-center gap-4`) |
-| **Sidebar + Content** | Flex (`flex gap-6`) |
-| **Form fields** | Flex column (`flex flex-col gap-4` or `space-y-4`) |
+| Scenario                    | Solution                                                |
+| --------------------------- | ------------------------------------------------------- |
+| **Equal-width columns**     | Grid (`grid grid-cols-3`)                               |
+| **Flexible item sizes**     | Flex (`flex gap-4`)                                     |
+| **2D layout (rows + cols)** | Grid (`grid grid-cols-2 grid-rows-3`)                   |
+| **1D layout (row OR col)**  | Flex (`flex` or `flex flex-col`)                        |
+| **Card grid**               | Grid (`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3`) |
+| **Navbar items**            | Flex (`flex items-center gap-4`)                        |
+| **Sidebar + Content**       | Flex (`flex gap-6`)                                     |
+| **Form fields**             | Flex column (`flex flex-col gap-4` or `space-y-4`)      |
 
 ---
 
@@ -68,15 +68,14 @@ These 5 patterns cover 80% of all layout needs. Master these first.
       <CardHeader>
         <CardTitle>Section Title</CardTitle>
       </CardHeader>
-      <CardContent>
-        Page content goes here
-      </CardContent>
+      <CardContent>Page content goes here</CardContent>
     </Card>
   </div>
 </div>
 ```
 
 **Key Features:**
+
 - `container` - Responsive container with max-width
 - `mx-auto` - Center horizontally
 - `px-4` - Horizontal padding (mobile-friendly)
@@ -85,6 +84,7 @@ These 5 patterns cover 80% of all layout needs. Master these first.
 - `space-y-6` - Vertical spacing between children
 
 **When to use:**
+
 - Blog posts
 - Documentation pages
 - Settings pages
@@ -103,7 +103,7 @@ These 5 patterns cover 80% of all layout needs. Master these first.
   <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
 
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {items.map(item => (
+    {items.map((item) => (
       <Card key={item.id}>
         <CardHeader>
           <CardTitle>{item.title}</CardTitle>
@@ -119,11 +119,13 @@ These 5 patterns cover 80% of all layout needs. Master these first.
 ```
 
 **Responsive behavior:**
+
 - **Mobile** (`< 768px`): 1 column
 - **Tablet** (`≥ 768px`): 2 columns
 - **Desktop** (`≥ 1024px`): 3 columns
 
 **Key Features:**
+
 - `grid` - Use CSS Grid
 - `grid-cols-1` - Default: 1 column (mobile-first)
 - `md:grid-cols-2` - 2 columns on tablet
@@ -131,6 +133,7 @@ These 5 patterns cover 80% of all layout needs. Master these first.
 - `gap-6` - Consistent spacing between items
 
 **When to use:**
+
 - Dashboards
 - Product grids
 - Image galleries
@@ -171,17 +174,20 @@ These 5 patterns cover 80% of all layout needs. Master these first.
 ```
 
 **Key Features:**
+
 - `max-w-md` - Constrain form width (448px max)
 - `mx-auto` - Center the form
 - `space-y-4` - Vertical spacing between fields
 - `w-full` - Full-width button
 
 **Form width guidelines:**
+
 - **Short forms** (login, signup): `max-w-md` (448px)
 - **Medium forms** (profile, settings): `max-w-lg` (512px)
 - **Long forms** (checkout): `max-w-2xl` (672px)
 
 **When to use:**
+
 - Login/signup forms
 - Contact forms
 - Settings forms
@@ -220,6 +226,7 @@ These 5 patterns cover 80% of all layout needs. Master these first.
 ```
 
 **Key Features:**
+
 - `flex` - Horizontal layout
 - `w-64` - Fixed sidebar width (256px)
 - `flex-1` - Main content takes remaining space
@@ -249,6 +256,7 @@ These 5 patterns cover 80% of all layout needs. Master these first.
 ```
 
 **When to use:**
+
 - Admin dashboards
 - Settings pages
 - Documentation sites
@@ -277,17 +285,20 @@ These 5 patterns cover 80% of all layout needs. Master these first.
 ```
 
 **Key Features:**
+
 - `max-w-2xl` - Optimal reading width (672px)
 - `mx-auto` - Center content
 - `prose` - Typography styles (if using @tailwindcss/typography)
 
 **Width recommendations:**
+
 - **Articles/Blogs**: `max-w-2xl` (672px)
 - **Documentation**: `max-w-3xl` (768px)
 - **Landing pages**: `max-w-4xl` (896px) or wider
 - **Forms**: `max-w-md` (448px)
 
 **When to use:**
+
 - Blog posts
 - Articles
 - Documentation
@@ -327,13 +338,13 @@ Always start with mobile layout, then enhance for larger screens:
 
 ### Breakpoints
 
-| Breakpoint | Min Width | Typical Use |
-|------------|-----------|-------------|
-| `sm:` | 640px | Large phones, small tablets |
-| `md:` | 768px | Tablets |
-| `lg:` | 1024px | Laptops, desktops |
-| `xl:` | 1280px | Large desktops |
-| `2xl:` | 1536px | Extra large screens |
+| Breakpoint | Min Width | Typical Use                 |
+| ---------- | --------- | --------------------------- |
+| `sm:`      | 640px     | Large phones, small tablets |
+| `md:`      | 768px     | Tablets                     |
+| `lg:`      | 1024px    | Laptops, desktops           |
+| `xl:`      | 1280px    | Large desktops              |
+| `2xl:`     | 1536px    | Extra large screens         |
 
 ### Responsive Grid Columns
 
@@ -457,12 +468,8 @@ grid-cols-1 lg:grid-cols-3
 ```tsx
 // 2/3 - 1/3 split
 <div className="grid grid-cols-3 gap-6">
-  <div className="col-span-2">
-    Main content (2/3 width)
-  </div>
-  <div className="col-span-1">
-    Sidebar (1/3 width)
-  </div>
+  <div className="col-span-2">Main content (2/3 width)</div>
+  <div className="col-span-1">Sidebar (1/3 width)</div>
 </div>
 ```
 
@@ -482,12 +489,8 @@ grid-cols-1 lg:grid-cols-3
 
 ```tsx
 <div className="flex gap-6">
-  <aside className="sticky top-6 h-fit w-64">
-    {/* Stays in view while scrolling */}
-  </aside>
-  <main className="flex-1">
-    {/* Scrollable content */}
-  </main>
+  <aside className="sticky top-6 h-fit w-64">{/* Stays in view while scrolling */}</aside>
+  <main className="flex-1">{/* Scrollable content */}</main>
 </div>
 ```
 
@@ -579,6 +582,7 @@ w-full px-4
 ---
 
 **Related Documentation:**
+
 - [Spacing Philosophy](./04-spacing-philosophy.md) - When to use margin vs padding vs gap
 - [Foundations](./01-foundations.md) - Spacing tokens and scale
 - [Quick Start](./00-quick-start.md) - Essential patterns

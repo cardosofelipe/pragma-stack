@@ -14,7 +14,10 @@ import Link from 'next/link';
 // Code-split PasswordResetConfirmForm (319 lines)
 const PasswordResetConfirmForm = dynamic(
   /* istanbul ignore next - Next.js dynamic import, tested via component */
-  () => import('@/components/auth/PasswordResetConfirmForm').then((mod) => ({ default: mod.PasswordResetConfirmForm })),
+  () =>
+    import('@/components/auth/PasswordResetConfirmForm').then((mod) => ({
+      default: mod.PasswordResetConfirmForm,
+    })),
   {
     loading: () => (
       <div className="space-y-4">
@@ -53,15 +56,12 @@ export default function PasswordResetConfirmContent() {
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight">
-            Invalid Reset Link
-          </h2>
+          <h2 className="text-3xl font-bold tracking-tight">Invalid Reset Link</h2>
         </div>
 
         <Alert variant="destructive">
           <p className="text-sm">
-            This password reset link is invalid or has expired. Please request a new
-            password reset.
+            This password reset link is invalid or has expired. Please request a new password reset.
           </p>
         </Alert>
 

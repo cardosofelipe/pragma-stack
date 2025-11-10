@@ -24,12 +24,14 @@
 We follow **WCAG 2.1 Level AA** as the **minimum** standard.
 
 **Why Level AA?**
+
 - ✅ Required for most legal compliance (ADA, Section 508)
 - ✅ Covers 95%+ of accessibility needs
 - ✅ Achievable without major UX compromises
 - ✅ Industry standard for modern web apps
 
 **WCAG Principles (POUR):**
+
 1. **Perceivable** - Information can be perceived by users
 2. **Operable** - Interface can be operated by users
 3. **Understandable** - Information and operation are understandable
@@ -63,14 +65,15 @@ Creating a UI element?
 
 ### Minimum Contrast Ratios (WCAG AA)
 
-| Content Type | Minimum Ratio | Example |
-|--------------|---------------|---------|
-| **Normal text** (< 18px) | **4.5:1** | Body paragraphs, form labels |
-| **Large text** (≥ 18px or ≥ 14px bold) | **3:1** | Headings, subheadings |
-| **UI components** | **3:1** | Buttons, form borders, icons |
-| **Graphical objects** | **3:1** | Chart elements, infographics |
+| Content Type                           | Minimum Ratio | Example                      |
+| -------------------------------------- | ------------- | ---------------------------- |
+| **Normal text** (< 18px)               | **4.5:1**     | Body paragraphs, form labels |
+| **Large text** (≥ 18px or ≥ 14px bold) | **3:1**       | Headings, subheadings        |
+| **UI components**                      | **3:1**       | Buttons, form borders, icons |
+| **Graphical objects**                  | **3:1**       | Chart elements, infographics |
 
 **WCAG AAA (ideal, not required):**
+
 - Normal text: 7:1
 - Large text: 4.5:1
 
@@ -79,6 +82,7 @@ Creating a UI element?
 ### Testing Color Contrast
 
 **Tools:**
+
 - [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
 - Chrome DevTools: Inspect element → Accessibility panel
 - [Contrast Ratio Tool](https://contrast-ratio.com)
@@ -104,6 +108,7 @@ Creating a UI element?
 ```
 
 **Our design system tokens are WCAG AA compliant:**
+
 - `text-foreground` on `bg-background`: 12.6:1 ✅
 - `text-primary-foreground` on `bg-primary`: 8.2:1 ✅
 - `text-destructive` on `bg-background`: 5.1:1 ✅
@@ -116,6 +121,7 @@ Creating a UI element?
 **8% of men and 0.5% of women** have some form of color blindness.
 
 **Best practices:**
+
 - ❌ Don't rely on color alone to convey information
 - ✅ Use icons, text labels, or patterns in addition to color
 - ✅ Test with color blindness simulators
@@ -148,6 +154,7 @@ Creating a UI element?
 ### Core Requirements
 
 All interactive elements must be:
+
 1. ✅ **Focusable** - Can be reached with Tab key
 2. ✅ **Activatable** - Can be triggered with Enter or Space
 3. ✅ **Navigable** - Can move between with arrow keys (where appropriate)
@@ -176,6 +183,7 @@ All interactive elements must be:
 ```
 
 **When to use `tabIndex`:**
+
 - `tabIndex={0}` - Make non-interactive element focusable
 - `tabIndex={-1}` - Remove from tab order (for programmatic focus)
 - `tabIndex={1+}` - ❌ **Avoid** - Breaks natural order
@@ -184,31 +192,31 @@ All interactive elements must be:
 
 ### Keyboard Shortcuts
 
-| Key | Action | Example |
-|-----|--------|---------|
-| **Tab** | Move focus forward | Navigate through form fields |
-| **Shift + Tab** | Move focus backward | Go back to previous field |
-| **Enter** | Activate button/link | Submit form, follow link |
-| **Space** | Activate button/checkbox | Toggle checkbox, click button |
-| **Escape** | Close overlay | Close dialog, dropdown |
-| **Arrow keys** | Navigate within component | Navigate dropdown items |
-| **Home** | Jump to start | First item in list |
-| **End** | Jump to end | Last item in list |
+| Key             | Action                    | Example                       |
+| --------------- | ------------------------- | ----------------------------- |
+| **Tab**         | Move focus forward        | Navigate through form fields  |
+| **Shift + Tab** | Move focus backward       | Go back to previous field     |
+| **Enter**       | Activate button/link      | Submit form, follow link      |
+| **Space**       | Activate button/checkbox  | Toggle checkbox, click button |
+| **Escape**      | Close overlay             | Close dialog, dropdown        |
+| **Arrow keys**  | Navigate within component | Navigate dropdown items       |
+| **Home**        | Jump to start             | First item in list            |
+| **End**         | Jump to end               | Last item in list             |
 
 ---
 
 ### Implementing Keyboard Navigation
 
 **Button (automatic):**
+
 ```tsx
 // ✅ Button is keyboard accessible by default
-<Button onClick={handleClick}>
-  Click me
-</Button>
+<Button onClick={handleClick}>Click me</Button>
 // Enter or Space triggers onClick
 ```
 
 **Custom clickable div (needs work):**
+
 ```tsx
 // ❌ BAD - Not keyboard accessible
 <div onClick={handleClick}>
@@ -237,11 +245,12 @@ All interactive elements must be:
 ```
 
 **Dropdown navigation:**
+
 ```tsx
 <DropdownMenu>
   <DropdownMenuContent>
-    <DropdownMenuItem>Edit</DropdownMenuItem>  {/* Arrow down */}
-    <DropdownMenuItem>Delete</DropdownMenuItem>  {/* Arrow down */}
+    <DropdownMenuItem>Edit</DropdownMenuItem> {/* Arrow down */}
+    <DropdownMenuItem>Delete</DropdownMenuItem> {/* Arrow down */}
   </DropdownMenuContent>
 </DropdownMenu>
 // shadcn/ui handles arrow key navigation automatically
@@ -276,12 +285,14 @@ All interactive elements must be:
 ### Screen Reader Basics
 
 **Popular screen readers:**
+
 - **NVDA** (Windows) - Free, most popular for testing
 - **JAWS** (Windows) - Industry standard, paid
 - **VoiceOver** (macOS/iOS) - Built-in to Apple devices
 - **TalkBack** (Android) - Built-in to Android
 
 **What screen readers announce:**
+
 - Semantic element type (button, link, heading, etc.)
 - Element text content
 - Element state (expanded, selected, disabled)
@@ -334,6 +345,7 @@ All interactive elements must be:
 ```
 
 **Semantic elements:**
+
 - `<header>` - Page header
 - `<nav>` - Navigation
 - `<main>` - Main content (only one per page)
@@ -364,6 +376,7 @@ All interactive elements must be:
 ```
 
 **Icon-only buttons:**
+
 ```tsx
 // ✅ GOOD - ARIA label
 <Button size="icon" aria-label="Close dialog">
@@ -383,6 +396,7 @@ All interactive elements must be:
 ### Common ARIA Attributes
 
 **ARIA roles:**
+
 ```tsx
 <div role="button" tabIndex={0}>Custom Button</div>
 <div role="alert">Error message</div>
@@ -391,6 +405,7 @@ All interactive elements must be:
 ```
 
 **ARIA states:**
+
 ```tsx
 <button aria-expanded={isOpen}>Toggle Menu</button>
 <button aria-pressed={isActive}>Toggle</button>
@@ -399,6 +414,7 @@ All interactive elements must be:
 ```
 
 **ARIA properties:**
+
 ```tsx
 <button aria-label="Close">×</button>
 <input aria-describedby="email-help" />
@@ -412,6 +428,7 @@ All interactive elements must be:
 ### Form Accessibility
 
 **Label association:**
+
 ```tsx
 // ✅ GOOD - Explicit association
 <Label htmlFor="email">Email</Label>
@@ -423,6 +440,7 @@ All interactive elements must be:
 ```
 
 **Error messages:**
+
 ```tsx
 // ✅ GOOD - Linked with aria-describedby
 <Label htmlFor="password">Password</Label>
@@ -444,6 +462,7 @@ All interactive elements must be:
 ```
 
 **Required fields:**
+
 ```tsx
 // ✅ GOOD - Marked as required
 <Label htmlFor="name">
@@ -502,6 +521,7 @@ toast.success('User created');
 ```
 
 **Use `:focus-visible` instead of `:focus`:**
+
 - `:focus` - Shows on mouse click AND keyboard
 - `:focus-visible` - Shows only on keyboard (better UX)
 
@@ -516,7 +536,7 @@ toast.success('User created');
 <Dialog open={isOpen} onOpenChange={setIsOpen}>
   <DialogContent>
     {/* Focus trapped inside */}
-    <Input autoFocus />  {/* Focus first field */}
+    <Input autoFocus /> {/* Focus first field */}
     <Button>Submit</Button>
   </DialogContent>
 </Dialog>
@@ -539,7 +559,7 @@ const handleDelete = () => {
   inputRef.current?.focus();
 };
 
-<Input ref={inputRef} />
+<Input ref={inputRef} />;
 ```
 
 ---
@@ -549,11 +569,13 @@ const handleDelete = () => {
 ### Automated Testing Tools
 
 **Browser extensions:**
+
 - [axe DevTools](https://www.deque.com/axe/devtools/) - Free, comprehensive
 - [WAVE](https://wave.webaim.org/extension/) - Visual feedback
 - [Lighthouse](https://developer.chrome.com/docs/lighthouse/) - Built into Chrome
 
 **CI/CD testing:**
+
 - [@axe-core/react](https://github.com/dequelabs/axe-core-npm/tree/develop/packages/react) - Runtime accessibility testing
 - [jest-axe](https://github.com/nickcolley/jest-axe) - Jest integration
 - [Playwright accessibility testing](https://playwright.dev/docs/accessibility-testing)
@@ -563,6 +585,7 @@ const handleDelete = () => {
 ### Manual Testing Checklist
 
 #### Keyboard Testing
+
 1. [ ] Unplug mouse
 2. [ ] Tab through entire page
 3. [ ] All interactive elements focusable?
@@ -572,6 +595,7 @@ const handleDelete = () => {
 7. [ ] Tab order logical?
 
 #### Screen Reader Testing
+
 1. [ ] Install NVDA (Windows) or VoiceOver (Mac)
 2. [ ] Navigate page with screen reader on
 3. [ ] All content announced?
@@ -580,6 +604,7 @@ const handleDelete = () => {
 6. [ ] Heading hierarchy correct?
 
 #### Contrast Testing
+
 1. [ ] Use contrast checker on all text
 2. [ ] Check UI components (buttons, borders)
 3. [ ] Test in dark mode too
@@ -590,6 +615,7 @@ const handleDelete = () => {
 ### Testing with Real Users
 
 **Considerations:**
+
 - Test with actual users who rely on assistive technologies
 - Different screen readers behave differently
 - Mobile screen readers (VoiceOver, TalkBack) differ from desktop
@@ -600,6 +626,7 @@ const handleDelete = () => {
 ## Accessibility Checklist
 
 ### General
+
 - [ ] Page has `<title>` and `<meta name="description">`
 - [ ] Page has proper heading hierarchy (h1 → h2 → h3)
 - [ ] Landmarks used (`<header>`, `<nav>`, `<main>`, `<footer>`)
@@ -607,12 +634,14 @@ const handleDelete = () => {
 - [ ] No content relies on color alone
 
 ### Color & Contrast
+
 - [ ] Text has 4.5:1 contrast (normal) or 3:1 (large)
 - [ ] UI components have 3:1 contrast
 - [ ] Tested in both light and dark modes
 - [ ] Color blindness simulator used
 
 ### Keyboard
+
 - [ ] All interactive elements focusable
 - [ ] Focus indicators visible (ring, outline, etc.)
 - [ ] Tab order is logical
@@ -622,6 +651,7 @@ const handleDelete = () => {
 - [ ] Arrow keys navigate lists/menus
 
 ### Screen Readers
+
 - [ ] All images have alt text
 - [ ] Icon-only buttons have aria-label
 - [ ] Form labels associated with inputs
@@ -631,6 +661,7 @@ const handleDelete = () => {
 - [ ] ARIA roles used correctly
 
 ### Forms
+
 - [ ] Labels associated with inputs (`htmlFor` + `id`)
 - [ ] Error messages linked (`aria-describedby`)
 - [ ] Invalid inputs marked (`aria-invalid`)
@@ -638,6 +669,7 @@ const handleDelete = () => {
 - [ ] Submit button disabled during submission
 
 ### Focus Management
+
 - [ ] Dialogs trap focus
 - [ ] Focus returns after dialog closes
 - [ ] Programmatic focus after actions
@@ -650,29 +682,36 @@ const handleDelete = () => {
 **Easy improvements with big impact:**
 
 1. **Add alt text to images**
+
    ```tsx
    <img src="/logo.png" alt="Company Logo" />
    ```
 
 2. **Associate labels with inputs**
+
    ```tsx
    <Label htmlFor="email">Email</Label>
    <Input id="email" />
    ```
 
 3. **Use semantic HTML**
+
    ```tsx
    <button> instead of <div onClick>
    ```
 
 4. **Add aria-label to icon buttons**
+
    ```tsx
-   <Button aria-label="Close"><X /></Button>
+   <Button aria-label="Close">
+     <X />
+   </Button>
    ```
 
 5. **Use semantic color tokens**
+
    ```tsx
-   className="text-foreground" // Auto contrast
+   className = 'text-foreground'; // Auto contrast
    ```
 
 6. **Test with keyboard only**
@@ -691,11 +730,13 @@ const handleDelete = () => {
 ---
 
 **Related Documentation:**
+
 - [Forms](./06-forms.md) - Accessible form patterns
 - [Components](./02-components.md) - All components are accessible
 - [Foundations](./01-foundations.md) - Color contrast tokens
 
 **External Resources:**
+
 - [WCAG 2.1 Quick Reference](https://www.w3.org/WAI/WCAG21/quickref/)
 - [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
 - [A11y Project Checklist](https://www.a11yproject.com/checklist/)

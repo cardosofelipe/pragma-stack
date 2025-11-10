@@ -15,11 +15,13 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ onOpenDemoModal }: HeroSectionProps) {
-
   return (
     <section className="relative overflow-hidden">
       {/* Gradient Background */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-background to-background" aria-hidden="true" />
+      <div
+        className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-background to-background"
+        aria-hidden="true"
+      />
       <div
         className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_30%_20%,rgba(var(--primary-rgb,120,119,198),0.1),transparent_50%)]"
         aria-hidden="true"
@@ -38,7 +40,10 @@ export function HeroSection({ onOpenDemoModal }: HeroSectionProps) {
             transition={{ duration: 0.5 }}
           >
             <div className="inline-flex items-center gap-2 rounded-full border bg-background/50 px-4 py-1.5 text-sm backdrop-blur">
-              <span className="inline-block h-2 w-2 rounded-full bg-green-500 animate-pulse" aria-hidden="true" />
+              <span
+                className="inline-block h-2 w-2 rounded-full bg-green-500 animate-pulse"
+                aria-hidden="true"
+              />
               <span className="font-medium">MIT Licensed</span>
               <span className="text-muted-foreground">•</span>
               <span className="font-medium">97% Test Coverage</span>
@@ -79,20 +84,14 @@ export function HeroSection({ onOpenDemoModal }: HeroSectionProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Button
-              size="lg"
-              onClick={onOpenDemoModal}
-              className="gap-2 text-base group"
-            >
-              <Play className="h-5 w-5 group-hover:scale-110 transition-transform" aria-hidden="true" />
+            <Button size="lg" onClick={onOpenDemoModal} className="gap-2 text-base group">
+              <Play
+                className="h-5 w-5 group-hover:scale-110 transition-transform"
+                aria-hidden="true"
+              />
               Try Live Demo
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="gap-2 text-base group"
-            >
+            <Button asChild size="lg" variant="outline" className="gap-2 text-base group">
               <a
                 href="https://github.com/your-org/fast-next-template"
                 target="_blank"
@@ -100,18 +99,19 @@ export function HeroSection({ onOpenDemoModal }: HeroSectionProps) {
               >
                 <Github className="h-5 w-5" aria-hidden="true" />
                 View on GitHub
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                <ArrowRight
+                  className="h-4 w-4 group-hover:translate-x-1 transition-transform"
+                  aria-hidden="true"
+                />
               </a>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="ghost"
-              className="gap-2 text-base group"
-            >
+            <Button asChild size="lg" variant="ghost" className="gap-2 text-base group">
               <Link href="/dev">
                 Explore Components
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                <ArrowRight
+                  className="h-4 w-4 group-hover:translate-x-1 transition-transform"
+                  aria-hidden="true"
+                />
               </Link>
             </Button>
           </motion.div>

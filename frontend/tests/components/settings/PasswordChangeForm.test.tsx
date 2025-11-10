@@ -121,7 +121,9 @@ describe('PasswordChangeForm', () => {
     it('allows typing in confirm password field', async () => {
       renderWithProvider(<PasswordChangeForm />);
 
-      const confirmPasswordInput = screen.getByLabelText(/confirm new password/i) as HTMLInputElement;
+      const confirmPasswordInput = screen.getByLabelText(
+        /confirm new password/i
+      ) as HTMLInputElement;
       await user.type(confirmPasswordInput, 'NewPassword123!');
 
       expect(confirmPasswordInput.value).toBe('NewPassword123!');

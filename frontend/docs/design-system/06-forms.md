@@ -27,6 +27,7 @@
 - **shadcn/ui components** - Input, Label, Button, etc.
 
 **Why this stack?**
+
 - ✅ Type-safe validation (TypeScript + Zod)
 - ✅ Minimal re-renders (react-hook-form)
 - ✅ Accessible by default (shadcn/ui)
@@ -80,11 +81,7 @@ export function SimpleForm() {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          {...form.register('email')}
-        />
+        <Input id="email" type="email" {...form.register('email')} />
       </div>
 
       <Button type="submit">Submit</Button>
@@ -180,6 +177,7 @@ export function LoginForm() {
 ```
 
 **Key points:**
+
 1. Define Zod schema first
 2. Infer TypeScript type with `z.infer`
 3. Use `zodResolver` in `useForm`
@@ -217,15 +215,9 @@ export function LoginForm() {
 ```tsx
 <div className="space-y-2">
   <Label htmlFor="description">Description</Label>
-  <Textarea
-    id="description"
-    rows={4}
-    {...form.register('description')}
-  />
+  <Textarea id="description" rows={4} {...form.register('description')} />
   {form.formState.errors.description && (
-    <p className="text-sm text-destructive">
-      {form.formState.errors.description.message}
-    </p>
+    <p className="text-sm text-destructive">{form.formState.errors.description.message}</p>
   )}
 </div>
 ```
@@ -237,10 +229,7 @@ export function LoginForm() {
 ```tsx
 <div className="space-y-2">
   <Label htmlFor="role">Role</Label>
-  <Select
-    value={form.watch('role')}
-    onValueChange={(value) => form.setValue('role', value)}
-  >
+  <Select value={form.watch('role')} onValueChange={(value) => form.setValue('role', value)}>
     <SelectTrigger id="role">
       <SelectValue placeholder="Select a role" />
     </SelectTrigger>
@@ -251,9 +240,7 @@ export function LoginForm() {
     </SelectContent>
   </Select>
   {form.formState.errors.role && (
-    <p className="text-sm text-destructive">
-      {form.formState.errors.role.message}
-    </p>
+    <p className="text-sm text-destructive">{form.formState.errors.role.message}</p>
   )}
 </div>
 ```
@@ -272,12 +259,12 @@ export function LoginForm() {
   <Label htmlFor="terms" className="text-sm font-normal">
     I accept the terms and conditions
   </Label>
-</div>
-{form.formState.errors.acceptTerms && (
-  <p className="text-sm text-destructive">
-    {form.formState.errors.acceptTerms.message}
-  </p>
-)}
+</div>;
+{
+  form.formState.errors.acceptTerms && (
+    <p className="text-sm text-destructive">{form.formState.errors.acceptTerms.message}</p>
+  );
+}
 ```
 
 ---
@@ -289,22 +276,16 @@ export function LoginForm() {
   <Label>Notification Method</Label>
   <div className="space-y-2">
     <div className="flex items-center space-x-2">
-      <input
-        type="radio"
-        id="email"
-        value="email"
-        {...form.register('notificationMethod')}
-      />
-      <Label htmlFor="email" className="font-normal">Email</Label>
+      <input type="radio" id="email" value="email" {...form.register('notificationMethod')} />
+      <Label htmlFor="email" className="font-normal">
+        Email
+      </Label>
     </div>
     <div className="flex items-center space-x-2">
-      <input
-        type="radio"
-        id="sms"
-        value="sms"
-        {...form.register('notificationMethod')}
-      />
-      <Label htmlFor="sms" className="font-normal">SMS</Label>
+      <input type="radio" id="sms" value="sms" {...form.register('notificationMethod')} />
+      <Label htmlFor="sms" className="font-normal">
+        SMS
+      </Label>
     </div>
   </div>
 </div>
@@ -320,65 +301,68 @@ export function LoginForm() {
 import { z } from 'zod';
 
 // Email
-z.string().email('Invalid email address')
+z.string().email('Invalid email address');
 
 // Min/max length
-z.string().min(8, 'Minimum 8 characters').max(100, 'Maximum 100 characters')
+z.string().min(8, 'Minimum 8 characters').max(100, 'Maximum 100 characters');
 
 // Required field
-z.string().min(1, 'This field is required')
+z.string().min(1, 'This field is required');
 
 // Optional field
-z.string().optional()
+z.string().optional();
 
 // Number with range
-z.number().min(0).max(100)
+z.number().min(0).max(100);
 
 // Number from string input
-z.coerce.number().min(0)
+z.coerce.number().min(0);
 
 // Enum
 z.enum(['admin', 'user', 'guest'], {
-  errorMap: () => ({ message: 'Invalid role' })
-})
+  errorMap: () => ({ message: 'Invalid role' }),
+});
 
 // URL
-z.string().url('Invalid URL')
+z.string().url('Invalid URL');
 
 // Password with requirements
 z.string()
   .min(8, 'Password must be at least 8 characters')
   .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
   .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-  .regex(/[0-9]/, 'Password must contain at least one number')
+  .regex(/[0-9]/, 'Password must contain at least one number');
 
 // Confirm password
 z.object({
   password: z.string().min(8),
-  confirmPassword: z.string()
+  confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
-  path: ["confirmPassword"],
-})
+  path: ['confirmPassword'],
+});
 
 // Custom validation
 z.string().refine((val) => !val.includes('badword'), {
   message: 'Invalid input',
-})
+});
 
 // Conditional fields
 z.object({
   role: z.enum(['admin', 'user']),
   adminKey: z.string().optional(),
-}).refine((data) => {
-  if (data.role === 'admin') {
-    return !!data.adminKey;
+}).refine(
+  (data) => {
+    if (data.role === 'admin') {
+      return !!data.adminKey;
+    }
+    return true;
+  },
+  {
+    message: 'Admin key required for admin role',
+    path: ['adminKey'],
   }
-  return true;
-}, {
-  message: 'Admin key required for admin role',
-  path: ['adminKey'],
-})
+);
 ```
 
 ---
@@ -448,6 +432,7 @@ type UserFormData = z.infer<typeof userFormSchema>;
 ```
 
 **Accessibility notes:**
+
 - Use `aria-invalid` to indicate error state
 - Use `aria-describedby` to link error message
 - Error ID format: `{fieldName}-error`
@@ -470,14 +455,14 @@ const onSubmit = async (data: FormData) => {
 };
 
 // Display form-level error
-{form.formState.errors.root && (
-  <Alert variant="destructive">
-    <AlertCircle className="h-4 w-4" />
-    <AlertDescription>
-      {form.formState.errors.root.message}
-    </AlertDescription>
-  </Alert>
-)}
+{
+  form.formState.errors.root && (
+    <Alert variant="destructive">
+      <AlertCircle className="h-4 w-4" />
+      <AlertDescription>{form.formState.errors.root.message}</AlertDescription>
+    </Alert>
+  );
+}
 ```
 
 ---
@@ -620,32 +605,26 @@ const onSubmit = async (data: FormData) => {
   <div className="space-y-4">
     <div>
       <h3 className="text-lg font-semibold">Personal Information</h3>
-      <p className="text-sm text-muted-foreground">
-        Basic details about you
-      </p>
+      <p className="text-sm text-muted-foreground">Basic details about you</p>
     </div>
     <Separator />
-    <div className="space-y-4">
-      {/* Fields */}
-    </div>
+    <div className="space-y-4">{/* Fields */}</div>
   </div>
 
   {/* Section 2 */}
   <div className="space-y-4">
     <div>
       <h3 className="text-lg font-semibold">Account Settings</h3>
-      <p className="text-sm text-muted-foreground">
-        Configure your account preferences
-      </p>
+      <p className="text-sm text-muted-foreground">Configure your account preferences</p>
     </div>
     <Separator />
-    <div className="space-y-4">
-      {/* Fields */}
-    </div>
+    <div className="space-y-4">{/* Fields */}</div>
   </div>
 
   <div className="flex justify-end gap-4">
-    <Button type="button" variant="outline">Cancel</Button>
+    <Button type="button" variant="outline">
+      Cancel
+    </Button>
     <Button type="submit">Save Changes</Button>
   </div>
 </form>
@@ -661,10 +640,14 @@ const onSubmit = async (data: FormData) => {
 import { useFieldArray } from 'react-hook-form';
 
 const schema = z.object({
-  items: z.array(z.object({
-    name: z.string().min(1),
-    quantity: z.coerce.number().min(1),
-  })).min(1, 'At least one item required'),
+  items: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        quantity: z.coerce.number().min(1),
+      })
+    )
+    .min(1, 'At least one item required'),
 });
 
 function DynamicForm() {
@@ -684,30 +667,19 @@ function DynamicForm() {
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
       {fields.map((field, index) => (
         <div key={field.id} className="flex gap-4">
-          <Input
-            {...form.register(`items.${index}.name`)}
-            placeholder="Item name"
-          />
+          <Input {...form.register(`items.${index}.name`)} placeholder="Item name" />
           <Input
             type="number"
             {...form.register(`items.${index}.quantity`)}
             placeholder="Quantity"
           />
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={() => remove(index)}
-          >
+          <Button type="button" variant="destructive" onClick={() => remove(index)}>
             Remove
           </Button>
         </div>
       ))}
 
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => append({ name: '', quantity: 1 })}
-      >
+      <Button type="button" variant="outline" onClick={() => append({ name: '', quantity: 1 })}>
         Add Item
       </Button>
 
@@ -722,18 +694,23 @@ function DynamicForm() {
 ### Conditional Fields
 
 ```tsx
-const schema = z.object({
-  role: z.enum(['user', 'admin']),
-  adminKey: z.string().optional(),
-}).refine((data) => {
-  if (data.role === 'admin') {
-    return !!data.adminKey;
-  }
-  return true;
-}, {
-  message: 'Admin key required',
-  path: ['adminKey'],
-});
+const schema = z
+  .object({
+    role: z.enum(['user', 'admin']),
+    adminKey: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.role === 'admin') {
+        return !!data.adminKey;
+      }
+      return true;
+    },
+    {
+      message: 'Admin key required',
+      path: ['adminKey'],
+    }
+  );
 
 function ConditionalForm() {
   const form = useForm({ resolver: zodResolver(schema) });
@@ -741,23 +718,17 @@ function ConditionalForm() {
 
   return (
     <form className="space-y-4">
-      <Select
-        value={role}
-        onValueChange={(val) => form.setValue('role', val as any)}
-      >
-        <SelectTrigger><SelectValue /></SelectTrigger>
+      <Select value={role} onValueChange={(val) => form.setValue('role', val as any)}>
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
         <SelectContent>
           <SelectItem value="user">User</SelectItem>
           <SelectItem value="admin">Admin</SelectItem>
         </SelectContent>
       </Select>
 
-      {role === 'admin' && (
-        <Input
-          {...form.register('adminKey')}
-          placeholder="Admin Key"
-        />
-      )}
+      {role === 'admin' && <Input {...form.register('adminKey')} placeholder="Admin Key" />}
     </form>
   );
 }
@@ -774,14 +745,10 @@ const schema = z.object({
   }),
 });
 
-<input
-  type="file"
-  {...form.register('file')}
-  accept="image/*"
-/>
+<input type="file" {...form.register('file')} accept="image/*" />;
 
 const onSubmit = (data: FormData) => {
-  const file = data.file[0];  // FileList -> File
+  const file = data.file[0]; // FileList -> File
   const formData = new FormData();
   formData.append('file', file);
   // Upload formData
@@ -795,6 +762,7 @@ const onSubmit = (data: FormData) => {
 Before shipping a form, verify:
 
 ### Functionality
+
 - [ ] All fields register correctly
 - [ ] Validation works (test invalid inputs)
 - [ ] Submit handler fires
@@ -803,6 +771,7 @@ Before shipping a form, verify:
 - [ ] Success case redirects/shows success
 
 ### Accessibility
+
 - [ ] Labels associated with inputs (`htmlFor` + `id`)
 - [ ] Error messages use `aria-describedby`
 - [ ] Invalid inputs have `aria-invalid`
@@ -810,6 +779,7 @@ Before shipping a form, verify:
 - [ ] Submit button disabled during submission
 
 ### UX
+
 - [ ] Field errors appear on blur or submit
 - [ ] Loading state prevents double-submit
 - [ ] Success message or redirect on success
@@ -827,11 +797,13 @@ Before shipping a form, verify:
 ---
 
 **Related Documentation:**
+
 - [Components](./02-components.md) - Input, Label, Button, Select
 - [Layouts](./03-layouts.md) - Form layout patterns
 - [Accessibility](./07-accessibility.md) - ARIA attributes for forms
 
 **External Resources:**
+
 - [react-hook-form Documentation](https://react-hook-form.com)
 - [Zod Documentation](https://zod.dev)
 

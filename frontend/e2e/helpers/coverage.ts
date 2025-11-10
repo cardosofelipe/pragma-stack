@@ -55,7 +55,7 @@ export async function startCoverage(
   }
 
   try {
-      await page.coverage.startJSCoverage({
+    await page.coverage.startJSCoverage({
       resetOnNavigation: options?.resetOnNavigation ?? false,
       // @ts-expect-error - includeRawScriptCoverage is not in official types but supported by Playwright
       includeRawScriptCoverage: options?.includeRawScriptCoverage ?? false,
@@ -201,9 +201,9 @@ export const withCoverage = {
 function sanitizeFilename(name: string): string {
   return name
     .replace(/[^a-z0-9\s-]/gi, '') // Remove special chars
-    .replace(/\s+/g, '_')           // Replace spaces with underscores
+    .replace(/\s+/g, '_') // Replace spaces with underscores
     .toLowerCase()
-    .substring(0, 100);             // Limit length
+    .substring(0, 100); // Limit length
 }
 
 /**

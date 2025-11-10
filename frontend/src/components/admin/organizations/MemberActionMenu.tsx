@@ -25,20 +25,14 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import {
-  useRemoveOrganizationMember,
-  type OrganizationMember,
-} from '@/lib/api/hooks/useAdmin';
+import { useRemoveOrganizationMember, type OrganizationMember } from '@/lib/api/hooks/useAdmin';
 
 interface MemberActionMenuProps {
   member: OrganizationMember;
   organizationId: string;
 }
 
-export function MemberActionMenu({
-  member,
-  organizationId,
-}: MemberActionMenuProps) {
+export function MemberActionMenu({ member, organizationId }: MemberActionMenuProps) {
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -59,9 +53,8 @@ export function MemberActionMenu({
     }
   };
 
-  const memberName = [member.first_name, member.last_name]
-    .filter(Boolean)
-    .join(' ') || member.email;
+  const memberName =
+    [member.first_name, member.last_name].filter(Boolean).join(' ') || member.email;
 
   return (
     <>
@@ -93,8 +86,8 @@ export function MemberActionMenu({
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Member</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove {memberName} from this organization?
-              This action cannot be undone.
+              Are you sure you want to remove {memberName} from this organization? This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
