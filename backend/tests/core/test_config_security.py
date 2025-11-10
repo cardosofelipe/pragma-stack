@@ -6,8 +6,10 @@ Critical security tests covering:
 
 These tests prevent security misconfigurations.
 """
-import pytest
+
 import os
+
+import pytest
 from pydantic import ValidationError
 
 
@@ -43,6 +45,7 @@ class TestSecretKeySecurityValidation:
             # Import Settings class fresh (to pick up new env var)
             # The ValidationError should be raised during reload when Settings() is instantiated
             import importlib
+
             from app.core import config
 
             # Reload will raise ValidationError because Settings() is instantiated at module level
@@ -58,7 +61,9 @@ class TestSecretKeySecurityValidation:
 
             # Reload config to restore original settings
             import importlib
+
             from app.core import config
+
             importlib.reload(config)
 
     def test_secret_key_exactly_32_characters_accepted(self):
@@ -75,7 +80,9 @@ class TestSecretKeySecurityValidation:
             os.environ["SECRET_KEY"] = key_32
 
             import importlib
+
             from app.core import config
+
             importlib.reload(config)
 
             # Should work
@@ -89,7 +96,9 @@ class TestSecretKeySecurityValidation:
                 os.environ.pop("SECRET_KEY", None)
 
             import importlib
+
             from app.core import config
+
             importlib.reload(config)
 
     def test_secret_key_long_enough_accepted(self):
@@ -106,7 +115,9 @@ class TestSecretKeySecurityValidation:
             os.environ["SECRET_KEY"] = key_64
 
             import importlib
+
             from app.core import config
+
             importlib.reload(config)
 
             # Should work
@@ -120,7 +131,9 @@ class TestSecretKeySecurityValidation:
                 os.environ.pop("SECRET_KEY", None)
 
             import importlib
+
             from app.core import config
+
             importlib.reload(config)
 
     def test_default_secret_key_meets_requirements(self):
@@ -132,4 +145,6 @@ class TestSecretKeySecurityValidation:
         from app.core.config import settings
 
         # Current settings should have valid SECRET_KEY
-        assert len(settings.SECRET_KEY) >= 32, "Default SECRET_KEY must be at least 32 chars"
+        assert len(settings.SECRET_KEY) >= 32, (
+            "Default SECRET_KEY must be at least 32 chars"
+        )

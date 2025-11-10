@@ -2,10 +2,12 @@
 """
 Tests for user routes.
 """
+
+from uuid import uuid4
+
 import pytest
 import pytest_asyncio
 from fastapi import status
-from uuid import uuid4
 
 
 @pytest_asyncio.fixture
@@ -13,10 +15,7 @@ async def superuser_token(client, async_test_superuser):
     """Get access token for superuser."""
     response = await client.post(
         "/api/v1/auth/login",
-        json={
-            "email": "superuser@example.com",
-            "password": "SuperPassword123!"
-        }
+        json={"email": "superuser@example.com", "password": "SuperPassword123!"},
     )
     assert response.status_code == 200
     return response.json()["access_token"]
@@ -27,10 +26,7 @@ async def user_token(client, async_test_user):
     """Get access token for regular user."""
     response = await client.post(
         "/api/v1/auth/login",
-        json={
-            "email": "testuser@example.com",
-            "password": "TestPassword123!"
-        }
+        json={"email": "testuser@example.com", "password": "TestPassword123!"},
     )
     assert response.status_code == 200
     return response.json()["access_token"]
@@ -43,8 +39,7 @@ class TestListUsers:
     async def test_list_users_success(self, client, superuser_token):
         """Test listing users successfully (covers lines 87-100)."""
         response = await client.get(
-            "/api/v1/users",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            "/api/v1/users", headers={"Authorization": f"Bearer {superuser_token}"}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -58,7 +53,7 @@ class TestListUsers:
         """Test listing users with is_superuser filter (covers line 74)."""
         response = await client.get(
             "/api/v1/users?is_superuser=true",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -73,8 +68,7 @@ class TestGetCurrentUser:
     async def test_get_current_user_success(self, client, async_test_user, user_token):
         """Test getting current user profile."""
         response = await client.get(
-            "/api/v1/users/me",
-            headers={"Authorization": f"Bearer {user_token}"}
+            "/api/v1/users/me", headers={"Authorization": f"Bearer {user_token}"}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -92,7 +86,7 @@ class TestUpdateCurrentUser:
         response = await client.patch(
             "/api/v1/users/me",
             headers={"Authorization": f"Bearer {user_token}"},
-            json={"first_name": "UpdatedName"}
+            json={"first_name": "UpdatedName"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -104,12 +98,14 @@ class TestUpdateCurrentUser:
         """Test database error handling during update (covers lines 162-169)."""
         from unittest.mock import patch
 
-        with patch('app.api.routes.users.user_crud.update', side_effect=Exception("DB error")):
+        with patch(
+            "app.api.routes.users.user_crud.update", side_effect=Exception("DB error")
+        ):
             with pytest.raises(Exception):
                 await client.patch(
                     "/api/v1/users/me",
                     headers={"Authorization": f"Bearer {user_token}"},
-                    json={"first_name": "Updated"}
+                    json={"first_name": "Updated"},
                 )
 
     @pytest.mark.asyncio
@@ -118,7 +114,7 @@ class TestUpdateCurrentUser:
         response = await client.patch(
             "/api/v1/users/me",
             headers={"Authorization": f"Bearer {user_token}"},
-            json={"is_superuser": True}
+            json={"is_superuser": True},
         )
 
         # Pydantic validation should reject this at the schema level
@@ -137,12 +133,15 @@ class TestUpdateCurrentUser:
         """Test ValueError handling during update (covers lines 165-166)."""
         from unittest.mock import patch
 
-        with patch('app.api.routes.users.user_crud.update', side_effect=ValueError("Invalid value")):
+        with patch(
+            "app.api.routes.users.user_crud.update",
+            side_effect=ValueError("Invalid value"),
+        ):
             with pytest.raises(ValueError):
                 await client.patch(
                     "/api/v1/users/me",
                     headers={"Authorization": f"Bearer {user_token}"},
-                    json={"first_name": "Updated"}
+                    json={"first_name": "Updated"},
                 )
 
 
@@ -154,7 +153,7 @@ class TestGetUser:
         """Test getting user by ID."""
         response = await client.get(
             f"/api/v1/users/{async_test_user.id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -167,7 +166,7 @@ class TestGetUser:
         fake_id = uuid4()
         response = await client.get(
             f"/api/v1/users/{fake_id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -183,30 +182,34 @@ class TestUpdateUserById:
         response = await client.patch(
             f"/api/v1/users/{fake_id}",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={"first_name": "Updated"}
+            json={"first_name": "Updated"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_update_user_by_id_non_superuser_cannot_change_superuser_status(self, client, async_test_user, user_token):
+    async def test_update_user_by_id_non_superuser_cannot_change_superuser_status(
+        self, client, async_test_user, user_token
+    ):
         """Test non-superuser cannot modify superuser status (Pydantic validation)."""
         response = await client.patch(
             f"/api/v1/users/{async_test_user.id}",
             headers={"Authorization": f"Bearer {user_token}"},
-            json={"is_superuser": True}
+            json={"is_superuser": True},
         )
 
         # Pydantic validation should reject this at the schema level
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     @pytest.mark.asyncio
-    async def test_update_user_by_id_success(self, client, async_test_user, superuser_token):
+    async def test_update_user_by_id_success(
+        self, client, async_test_user, superuser_token
+    ):
         """Test updating user successfully (covers lines 276-278)."""
         response = await client.patch(
             f"/api/v1/users/{async_test_user.id}",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={"first_name": "SuperUpdated"}
+            json={"first_name": "SuperUpdated"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -214,29 +217,37 @@ class TestUpdateUserById:
         assert data["first_name"] == "SuperUpdated"
 
     @pytest.mark.asyncio
-    async def test_update_user_by_id_value_error(self, client, async_test_user, superuser_token):
+    async def test_update_user_by_id_value_error(
+        self, client, async_test_user, superuser_token
+    ):
         """Test ValueError handling (covers lines 280-281)."""
         from unittest.mock import patch
 
-        with patch('app.api.routes.users.user_crud.update', side_effect=ValueError("Invalid")):
+        with patch(
+            "app.api.routes.users.user_crud.update", side_effect=ValueError("Invalid")
+        ):
             with pytest.raises(ValueError):
                 await client.patch(
                     f"/api/v1/users/{async_test_user.id}",
                     headers={"Authorization": f"Bearer {superuser_token}"},
-                    json={"first_name": "Updated"}
+                    json={"first_name": "Updated"},
                 )
 
     @pytest.mark.asyncio
-    async def test_update_user_by_id_unexpected_error(self, client, async_test_user, superuser_token):
+    async def test_update_user_by_id_unexpected_error(
+        self, client, async_test_user, superuser_token
+    ):
         """Test unexpected error handling (covers lines 283-284)."""
         from unittest.mock import patch
 
-        with patch('app.api.routes.users.user_crud.update', side_effect=Exception("Unexpected")):
+        with patch(
+            "app.api.routes.users.user_crud.update", side_effect=Exception("Unexpected")
+        ):
             with pytest.raises(Exception):
                 await client.patch(
                     f"/api/v1/users/{async_test_user.id}",
                     headers={"Authorization": f"Bearer {superuser_token}"},
-                    json={"first_name": "Updated"}
+                    json={"first_name": "Updated"},
                 )
 
 
@@ -246,18 +257,18 @@ class TestChangePassword:
     @pytest.mark.asyncio
     async def test_change_password_success(self, client, async_test_db):
         """Test changing password successfully."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create a fresh user
         async with AsyncTestingSessionLocal() as session:
-            from app.models.user import User
             from app.core.auth import get_password_hash
+            from app.models.user import User
 
             new_user = User(
                 email="changepass@example.com",
                 password_hash=get_password_hash("OldPassword123!"),
                 first_name="Change",
-                last_name="Pass"
+                last_name="Pass",
             )
             session.add(new_user)
             await session.commit()
@@ -265,10 +276,7 @@ class TestChangePassword:
         # Login
         login_response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": "changepass@example.com",
-                "password": "OldPassword123!"
-            }
+            json={"email": "changepass@example.com", "password": "OldPassword123!"},
         )
         token = login_response.json()["access_token"]
 
@@ -278,8 +286,8 @@ class TestChangePassword:
             headers={"Authorization": f"Bearer {token}"},
             json={
                 "current_password": "OldPassword123!",
-                "new_password": "NewPassword456!"
-            }
+                "new_password": "NewPassword456!",
+            },
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -289,10 +297,7 @@ class TestChangePassword:
         # Verify new password works
         login_response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": "changepass@example.com",
-                "password": "NewPassword456!"
-            }
+            json={"email": "changepass@example.com", "password": "NewPassword456!"},
         )
         assert login_response.status_code == status.HTTP_200_OK
 
@@ -306,7 +311,7 @@ class TestDeleteUserById:
         fake_id = uuid4()
         response = await client.delete(
             f"/api/v1/users/{fake_id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -314,18 +319,18 @@ class TestDeleteUserById:
     @pytest.mark.asyncio
     async def test_delete_user_success(self, client, async_test_db, superuser_token):
         """Test deleting user successfully (covers lines 383-388)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create a user to delete
         async with AsyncTestingSessionLocal() as session:
-            from app.models.user import User
             from app.core.auth import get_password_hash
+            from app.models.user import User
 
             user_to_delete = User(
                 email=f"delete{uuid4().hex[:8]}@example.com",
                 password_hash=get_password_hash("Password123!"),
                 first_name="Delete",
-                last_name="Me"
+                last_name="Me",
             )
             session.add(user_to_delete)
             await session.commit()
@@ -334,7 +339,7 @@ class TestDeleteUserById:
 
         response = await client.delete(
             f"/api/v1/users/{user_id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -342,25 +347,35 @@ class TestDeleteUserById:
         assert data["success"] is True
 
     @pytest.mark.asyncio
-    async def test_delete_user_value_error(self, client, async_test_user, superuser_token):
+    async def test_delete_user_value_error(
+        self, client, async_test_user, superuser_token
+    ):
         """Test ValueError handling during delete (covers lines 390-391)."""
         from unittest.mock import patch
 
-        with patch('app.api.routes.users.user_crud.soft_delete', side_effect=ValueError("Cannot delete")):
+        with patch(
+            "app.api.routes.users.user_crud.soft_delete",
+            side_effect=ValueError("Cannot delete"),
+        ):
             with pytest.raises(ValueError):
                 await client.delete(
                     f"/api/v1/users/{async_test_user.id}",
-                    headers={"Authorization": f"Bearer {superuser_token}"}
+                    headers={"Authorization": f"Bearer {superuser_token}"},
                 )
 
     @pytest.mark.asyncio
-    async def test_delete_user_unexpected_error(self, client, async_test_user, superuser_token):
+    async def test_delete_user_unexpected_error(
+        self, client, async_test_user, superuser_token
+    ):
         """Test unexpected error handling during delete (covers lines 393-394)."""
         from unittest.mock import patch
 
-        with patch('app.api.routes.users.user_crud.soft_delete', side_effect=Exception("Unexpected")):
+        with patch(
+            "app.api.routes.users.user_crud.soft_delete",
+            side_effect=Exception("Unexpected"),
+        ):
             with pytest.raises(Exception):
                 await client.delete(
                     f"/api/v1/users/{async_test_user.id}",
-                    headers={"Authorization": f"Bearer {superuser_token}"}
+                    headers={"Authorization": f"Bearer {superuser_token}"},
                 )

@@ -3,13 +3,15 @@
 Comprehensive tests for base CRUD database failure scenarios.
 Tests exception handling, rollbacks, and error messages.
 """
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from sqlalchemy.exc import IntegrityError, OperationalError, DataError
+
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
+import pytest
+from sqlalchemy.exc import DataError, OperationalError
+
 from app.crud.user import user as user_crud
-from app.schemas.users import UserCreate, UserUpdate
+from app.schemas.users import UserCreate
 
 
 class TestBaseCRUDCreateFailures:
@@ -18,19 +20,24 @@ class TestBaseCRUDCreateFailures:
     @pytest.mark.asyncio
     async def test_create_operational_error_triggers_rollback(self, async_test_db):
         """Test that OperationalError triggers rollback (User CRUD catches as Exception)."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            async def mock_commit():
-                raise OperationalError("Connection lost", {}, Exception("DB connection failed"))
 
-            with patch.object(session, 'commit', side_effect=mock_commit):
-                with patch.object(session, 'rollback', new_callable=AsyncMock) as mock_rollback:
+            async def mock_commit():
+                raise OperationalError(
+                    "Connection lost", {}, Exception("DB connection failed")
+                )
+
+            with patch.object(session, "commit", side_effect=mock_commit):
+                with patch.object(
+                    session, "rollback", new_callable=AsyncMock
+                ) as mock_rollback:
                     user_data = UserCreate(
                         email="operror@example.com",
                         password="TestPassword123!",
                         first_name="Test",
-                        last_name="User"
+                        last_name="User",
                     )
 
                     # User CRUD catches this as generic Exception and re-raises
@@ -43,19 +50,22 @@ class TestBaseCRUDCreateFailures:
     @pytest.mark.asyncio
     async def test_create_data_error_triggers_rollback(self, async_test_db):
         """Test that DataError triggers rollback (User CRUD catches as Exception)."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
+
             async def mock_commit():
                 raise DataError("Invalid data type", {}, Exception("Data overflow"))
 
-            with patch.object(session, 'commit', side_effect=mock_commit):
-                with patch.object(session, 'rollback', new_callable=AsyncMock) as mock_rollback:
+            with patch.object(session, "commit", side_effect=mock_commit):
+                with patch.object(
+                    session, "rollback", new_callable=AsyncMock
+                ) as mock_rollback:
                     user_data = UserCreate(
                         email="dataerror@example.com",
                         password="TestPassword123!",
                         first_name="Test",
-                        last_name="User"
+                        last_name="User",
                     )
 
                     # User CRUD catches this as generic Exception and re-raises
@@ -67,19 +77,22 @@ class TestBaseCRUDCreateFailures:
     @pytest.mark.asyncio
     async def test_create_unexpected_exception_triggers_rollback(self, async_test_db):
         """Test that unexpected exceptions trigger rollback and re-raise."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
+
             async def mock_commit():
                 raise RuntimeError("Unexpected database error")
 
-            with patch.object(session, 'commit', side_effect=mock_commit):
-                with patch.object(session, 'rollback', new_callable=AsyncMock) as mock_rollback:
+            with patch.object(session, "commit", side_effect=mock_commit):
+                with patch.object(
+                    session, "rollback", new_callable=AsyncMock
+                ) as mock_rollback:
                     user_data = UserCreate(
                         email="unexpected@example.com",
                         password="TestPassword123!",
                         first_name="Test",
-                        last_name="User"
+                        last_name="User",
                     )
 
                     with pytest.raises(RuntimeError, match="Unexpected database error"):
@@ -94,7 +107,7 @@ class TestBaseCRUDUpdateFailures:
     @pytest.mark.asyncio
     async def test_update_operational_error(self, async_test_db, async_test_user):
         """Test update with OperationalError."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
             user = await user_crud.get(session, id=str(async_test_user.id))
@@ -102,17 +115,21 @@ class TestBaseCRUDUpdateFailures:
             async def mock_commit():
                 raise OperationalError("Connection timeout", {}, Exception("Timeout"))
 
-            with patch.object(session, 'commit', side_effect=mock_commit):
-                with patch.object(session, 'rollback', new_callable=AsyncMock) as mock_rollback:
+            with patch.object(session, "commit", side_effect=mock_commit):
+                with patch.object(
+                    session, "rollback", new_callable=AsyncMock
+                ) as mock_rollback:
                     with pytest.raises(ValueError, match="Database operation failed"):
-                        await user_crud.update(session, db_obj=user, obj_in={"first_name": "Updated"})
+                        await user_crud.update(
+                            session, db_obj=user, obj_in={"first_name": "Updated"}
+                        )
 
                     mock_rollback.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_update_data_error(self, async_test_db, async_test_user):
         """Test update with DataError."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
             user = await user_crud.get(session, id=str(async_test_user.id))
@@ -120,17 +137,21 @@ class TestBaseCRUDUpdateFailures:
             async def mock_commit():
                 raise DataError("Invalid data", {}, Exception("Data type mismatch"))
 
-            with patch.object(session, 'commit', side_effect=mock_commit):
-                with patch.object(session, 'rollback', new_callable=AsyncMock) as mock_rollback:
+            with patch.object(session, "commit", side_effect=mock_commit):
+                with patch.object(
+                    session, "rollback", new_callable=AsyncMock
+                ) as mock_rollback:
                     with pytest.raises(ValueError, match="Database operation failed"):
-                        await user_crud.update(session, db_obj=user, obj_in={"first_name": "Updated"})
+                        await user_crud.update(
+                            session, db_obj=user, obj_in={"first_name": "Updated"}
+                        )
 
                     mock_rollback.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_update_unexpected_error(self, async_test_db, async_test_user):
         """Test update with unexpected error."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
             user = await user_crud.get(session, id=str(async_test_user.id))
@@ -138,10 +159,14 @@ class TestBaseCRUDUpdateFailures:
             async def mock_commit():
                 raise KeyError("Unexpected error")
 
-            with patch.object(session, 'commit', side_effect=mock_commit):
-                with patch.object(session, 'rollback', new_callable=AsyncMock) as mock_rollback:
+            with patch.object(session, "commit", side_effect=mock_commit):
+                with patch.object(
+                    session, "rollback", new_callable=AsyncMock
+                ) as mock_rollback:
                     with pytest.raises(KeyError):
-                        await user_crud.update(session, db_obj=user, obj_in={"first_name": "Updated"})
+                        await user_crud.update(
+                            session, db_obj=user, obj_in={"first_name": "Updated"}
+                        )
 
                     mock_rollback.assert_called_once()
 
@@ -150,16 +175,21 @@ class TestBaseCRUDRemoveFailures:
     """Test base CRUD remove method exception handling."""
 
     @pytest.mark.asyncio
-    async def test_remove_unexpected_error_triggers_rollback(self, async_test_db, async_test_user):
+    async def test_remove_unexpected_error_triggers_rollback(
+        self, async_test_db, async_test_user
+    ):
         """Test that unexpected errors in remove trigger rollback."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
+
             async def mock_commit():
                 raise RuntimeError("Database write failed")
 
-            with patch.object(session, 'commit', side_effect=mock_commit):
-                with patch.object(session, 'rollback', new_callable=AsyncMock) as mock_rollback:
+            with patch.object(session, "commit", side_effect=mock_commit):
+                with patch.object(
+                    session, "rollback", new_callable=AsyncMock
+                ) as mock_rollback:
                     with pytest.raises(RuntimeError, match="Database write failed"):
                         await user_crud.remove(session, id=str(async_test_user.id))
 
@@ -172,16 +202,15 @@ class TestBaseCRUDGetMultiWithTotalFailures:
     @pytest.mark.asyncio
     async def test_get_multi_with_total_database_error(self, async_test_db):
         """Test get_multi_with_total handles database errors."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
             # Mock execute to raise an error
-            original_execute = session.execute
 
             async def mock_execute(*args, **kwargs):
                 raise OperationalError("Query failed", {}, Exception("Database error"))
 
-            with patch.object(session, 'execute', side_effect=mock_execute):
+            with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
                     await user_crud.get_multi_with_total(session, skip=0, limit=10)
 
@@ -192,13 +221,14 @@ class TestBaseCRUDCountFailures:
     @pytest.mark.asyncio
     async def test_count_database_error_propagates(self, async_test_db):
         """Test count propagates database errors."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
+
             async def mock_execute(*args, **kwargs):
                 raise OperationalError("Count failed", {}, Exception("DB error"))
 
-            with patch.object(session, 'execute', side_effect=mock_execute):
+            with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
                     await user_crud.count(session)
 
@@ -207,16 +237,21 @@ class TestBaseCRUDSoftDeleteFailures:
     """Test soft_delete method exception handling."""
 
     @pytest.mark.asyncio
-    async def test_soft_delete_unexpected_error_triggers_rollback(self, async_test_db, async_test_user):
+    async def test_soft_delete_unexpected_error_triggers_rollback(
+        self, async_test_db, async_test_user
+    ):
         """Test soft_delete handles unexpected errors with rollback."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
+
             async def mock_commit():
                 raise RuntimeError("Soft delete failed")
 
-            with patch.object(session, 'commit', side_effect=mock_commit):
-                with patch.object(session, 'rollback', new_callable=AsyncMock) as mock_rollback:
+            with patch.object(session, "commit", side_effect=mock_commit):
+                with patch.object(
+                    session, "rollback", new_callable=AsyncMock
+                ) as mock_rollback:
                     with pytest.raises(RuntimeError, match="Soft delete failed"):
                         await user_crud.soft_delete(session, id=str(async_test_user.id))
 
@@ -229,7 +264,7 @@ class TestBaseCRUDRestoreFailures:
     @pytest.mark.asyncio
     async def test_restore_unexpected_error_triggers_rollback(self, async_test_db):
         """Test restore handles unexpected errors with rollback."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         # First create and soft delete a user
         async with SessionLocal() as session:
@@ -237,7 +272,7 @@ class TestBaseCRUDRestoreFailures:
                 email="restore_test@example.com",
                 password="TestPassword123!",
                 first_name="Restore",
-                last_name="Test"
+                last_name="Test",
             )
             user = await user_crud.create(session, obj_in=user_data)
             user_id = user.id
@@ -248,11 +283,14 @@ class TestBaseCRUDRestoreFailures:
 
         # Now test restore failure
         async with SessionLocal() as session:
+
             async def mock_commit():
                 raise RuntimeError("Restore failed")
 
-            with patch.object(session, 'commit', side_effect=mock_commit):
-                with patch.object(session, 'rollback', new_callable=AsyncMock) as mock_rollback:
+            with patch.object(session, "commit", side_effect=mock_commit):
+                with patch.object(
+                    session, "rollback", new_callable=AsyncMock
+                ) as mock_rollback:
                     with pytest.raises(RuntimeError, match="Restore failed"):
                         await user_crud.restore(session, id=str(user_id))
 
@@ -265,13 +303,14 @@ class TestBaseCRUDGetFailures:
     @pytest.mark.asyncio
     async def test_get_database_error_propagates(self, async_test_db):
         """Test get propagates database errors."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
+
             async def mock_execute(*args, **kwargs):
                 raise OperationalError("Get failed", {}, Exception("DB error"))
 
-            with patch.object(session, 'execute', side_effect=mock_execute):
+            with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
                     await user_crud.get(session, id=str(uuid4()))
 
@@ -282,12 +321,13 @@ class TestBaseCRUDGetMultiFailures:
     @pytest.mark.asyncio
     async def test_get_multi_database_error_propagates(self, async_test_db):
         """Test get_multi propagates database errors."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
+
             async def mock_execute(*args, **kwargs):
                 raise OperationalError("Query failed", {}, Exception("DB error"))
 
-            with patch.object(session, 'execute', side_effect=mock_execute):
+            with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
                     await user_crud.get_multi(session, skip=0, limit=10)

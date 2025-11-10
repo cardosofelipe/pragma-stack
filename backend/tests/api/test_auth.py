@@ -2,6 +2,7 @@
 """
 Tests for authentication endpoints.
 """
+
 import pytest
 import pytest_asyncio
 from fastapi import status
@@ -19,8 +20,8 @@ class TestRegisterEndpoint:
                 "email": "newuser@example.com",
                 "password": "NewPassword123!",
                 "first_name": "New",
-                "last_name": "User"
-            }
+                "last_name": "User",
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -36,8 +37,8 @@ class TestRegisterEndpoint:
                 "email": async_test_user.email,
                 "password": "TestPassword123!",
                 "first_name": "Test",
-                "last_name": "User"
-            }
+                "last_name": "User",
+            },
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -51,8 +52,8 @@ class TestRegisterEndpoint:
                 "email": "test@example.com",
                 "password": "weak",
                 "first_name": "Test",
-                "last_name": "User"
-            }
+                "last_name": "User",
+            },
         )
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -66,10 +67,7 @@ class TestLoginEndpoint:
         """Test successful login."""
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": "testuser@example.com",
-                "password": "TestPassword123!"
-            }
+            json={"email": "testuser@example.com", "password": "TestPassword123!"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -82,10 +80,7 @@ class TestLoginEndpoint:
         """Test login with invalid password."""
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": "testuser@example.com",
-                "password": "WrongPassword123!"
-            }
+            json={"email": "testuser@example.com", "password": "WrongPassword123!"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -95,10 +90,7 @@ class TestLoginEndpoint:
         """Test login with non-existent user."""
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": "nonexistent@example.com",
-                "password": "TestPassword123!"
-            }
+            json={"email": "nonexistent@example.com", "password": "TestPassword123!"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -106,27 +98,25 @@ class TestLoginEndpoint:
     @pytest.mark.asyncio
     async def test_login_inactive_user(self, client, async_test_db):
         """Test login with inactive user."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            from app.models.user import User
             from app.core.auth import get_password_hash
+            from app.models.user import User
+
             inactive_user = User(
                 email="inactive@example.com",
                 password_hash=get_password_hash("TestPassword123!"),
                 first_name="Inactive",
                 last_name="User",
-                is_active=False
+                is_active=False,
             )
             session.add(inactive_user)
             await session.commit()
 
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": "inactive@example.com",
-                "password": "TestPassword123!"
-            }
+            json={"email": "inactive@example.com", "password": "TestPassword123!"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -140,10 +130,7 @@ class TestRefreshTokenEndpoint:
         """Get a refresh token for testing."""
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": "testuser@example.com",
-                "password": "TestPassword123!"
-            }
+            json={"email": "testuser@example.com", "password": "TestPassword123!"},
         )
         return response.json()["refresh_token"]
 
@@ -151,8 +138,7 @@ class TestRefreshTokenEndpoint:
     async def test_refresh_token_success(self, client, refresh_token):
         """Test successful token refresh."""
         response = await client.post(
-            "/api/v1/auth/refresh",
-            json={"refresh_token": refresh_token}
+            "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -164,8 +150,7 @@ class TestRefreshTokenEndpoint:
     async def test_refresh_token_invalid(self, client):
         """Test refresh with invalid token."""
         response = await client.post(
-            "/api/v1/auth/refresh",
-            json={"refresh_token": "invalid.token.here"}
+            "/api/v1/auth/refresh", json={"refresh_token": "invalid.token.here"}
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -179,13 +164,13 @@ class TestLogoutEndpoint:
         """Get tokens for testing."""
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": "testuser@example.com",
-                "password": "TestPassword123!"
-            }
+            json={"email": "testuser@example.com", "password": "TestPassword123!"},
         )
         data = response.json()
-        return {"access_token": data["access_token"], "refresh_token": data["refresh_token"]}
+        return {
+            "access_token": data["access_token"],
+            "refresh_token": data["refresh_token"],
+        }
 
     @pytest.mark.asyncio
     async def test_logout_success(self, client, tokens):
@@ -193,7 +178,7 @@ class TestLogoutEndpoint:
         response = await client.post(
             "/api/v1/auth/logout",
             headers={"Authorization": f"Bearer {tokens['access_token']}"},
-            json={"refresh_token": tokens["refresh_token"]}
+            json={"refresh_token": tokens["refresh_token"]},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -202,8 +187,7 @@ class TestLogoutEndpoint:
     async def test_logout_without_auth(self, client):
         """Test logout without authentication."""
         response = await client.post(
-            "/api/v1/auth/logout",
-            json={"refresh_token": "some.token"}
+            "/api/v1/auth/logout", json={"refresh_token": "some.token"}
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -215,8 +199,7 @@ class TestPasswordResetRequest:
     async def test_password_reset_request_success(self, client, async_test_user):
         """Test password reset request with existing user."""
         response = await client.post(
-            "/api/v1/auth/password-reset/request",
-            json={"email": async_test_user.email}
+            "/api/v1/auth/password-reset/request", json={"email": async_test_user.email}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -228,7 +211,7 @@ class TestPasswordResetRequest:
         """Test password reset request with non-existent email."""
         response = await client.post(
             "/api/v1/auth/password-reset/request",
-            json={"email": "nonexistent@example.com"}
+            json={"email": "nonexistent@example.com"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -244,10 +227,7 @@ class TestPasswordResetConfirm:
         """Test password reset with invalid token."""
         response = await client.post(
             "/api/v1/auth/password-reset/confirm",
-            json={
-                "token": "invalid.token.here",
-                "new_password": "NewPassword123!"
-            }
+            json={"token": "invalid.token.here", "new_password": "NewPassword123!"},
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -261,20 +241,20 @@ class TestLogoutAll:
         """Get tokens for testing."""
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": "testuser@example.com",
-                "password": "TestPassword123!"
-            }
+            json={"email": "testuser@example.com", "password": "TestPassword123!"},
         )
         data = response.json()
-        return {"access_token": data["access_token"], "refresh_token": data["refresh_token"]}
+        return {
+            "access_token": data["access_token"],
+            "refresh_token": data["refresh_token"],
+        }
 
     @pytest.mark.asyncio
     async def test_logout_all_success(self, client, tokens):
         """Test logout from all devices."""
         response = await client.post(
             "/api/v1/auth/logout-all",
-            headers={"Authorization": f"Bearer {tokens['access_token']}"}
+            headers={"Authorization": f"Bearer {tokens['access_token']}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -298,10 +278,7 @@ class TestOAuthLogin:
         """Test successful OAuth login."""
         response = await client.post(
             "/api/v1/auth/login/oauth",
-            data={
-                "username": "testuser@example.com",
-                "password": "TestPassword123!"
-            }
+            data={"username": "testuser@example.com", "password": "TestPassword123!"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -315,10 +292,7 @@ class TestOAuthLogin:
         """Test OAuth login with invalid credentials."""
         response = await client.post(
             "/api/v1/auth/login/oauth",
-            data={
-                "username": "testuser@example.com",
-                "password": "WrongPassword"
-            }
+            data={"username": "testuser@example.com", "password": "WrongPassword"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED

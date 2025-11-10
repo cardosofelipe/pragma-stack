@@ -2,23 +2,23 @@
 """
 Comprehensive tests for session management API endpoints.
 """
+
+from datetime import UTC, datetime, timedelta
+from unittest.mock import patch
+from uuid import uuid4
+
 import pytest
 import pytest_asyncio
-from datetime import datetime, timedelta, timezone
-from uuid import uuid4
-from unittest.mock import patch
-
 from fastapi import status
 
 from app.models.user_session import UserSession
-from app.schemas.users import UserCreate
 
 
 # Disable rate limiting for tests
 @pytest.fixture(autouse=True)
 def disable_rate_limit():
     """Disable rate limiting for all tests in this module."""
-    with patch('app.api.routes.sessions.limiter.enabled', False):
+    with patch("app.api.routes.sessions.limiter.enabled", False):
         yield
 
 
@@ -27,10 +27,7 @@ async def user_token(client, async_test_user):
     """Create and return an access token for async_test_user."""
     response = await client.post(
         "/api/v1/auth/login",
-        json={
-            "email": "testuser@example.com",
-            "password": "TestPassword123!"
-        }
+        json={"email": "testuser@example.com", "password": "TestPassword123!"},
     )
     assert response.status_code == 200
     return response.json()["access_token"]
@@ -39,7 +36,7 @@ async def user_token(client, async_test_user):
 @pytest_asyncio.fixture
 async def async_test_user2(async_test_db):
     """Create a second test user."""
-    test_engine, SessionLocal = async_test_db
+    _test_engine, SessionLocal = async_test_db
 
     async with SessionLocal() as session:
         from app.crud.user import user as user_crud
@@ -49,7 +46,7 @@ async def async_test_user2(async_test_db):
             email="testuser2@example.com",
             password="TestPassword123!",
             first_name="Test",
-            last_name="User2"
+            last_name="User2",
         )
         user = await user_crud.create(session, obj_in=user_data)
         await session.commit()
@@ -61,9 +58,11 @@ class TestListMySessions:
     """Tests for GET /api/v1/sessions/me endpoint."""
 
     @pytest.mark.asyncio
-    async def test_list_my_sessions_success(self, client, async_test_user, async_test_db, user_token):
+    async def test_list_my_sessions_success(
+        self, client, async_test_user, async_test_db, user_token
+    ):
         """Test successfully listing user's active sessions."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         # Create some sessions for the user
         async with SessionLocal() as session:
@@ -75,8 +74,8 @@ class TestListMySessions:
                 ip_address="192.168.1.100",
                 user_agent="Mozilla/5.0 (iPhone)",
                 is_active=True,
-                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
-                last_used_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC) + timedelta(days=7),
+                last_used_at=datetime.now(UTC),
             )
             # Active session 2
             s2 = UserSession(
@@ -86,8 +85,8 @@ class TestListMySessions:
                 ip_address="192.168.1.101",
                 user_agent="Mozilla/5.0 (Macintosh)",
                 is_active=True,
-                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
-                last_used_at=datetime.now(timezone.utc) - timedelta(hours=1)
+                expires_at=datetime.now(UTC) + timedelta(days=7),
+                last_used_at=datetime.now(UTC) - timedelta(hours=1),
             )
             # Inactive session (should not appear)
             s3 = UserSession(
@@ -97,16 +96,15 @@ class TestListMySessions:
                 ip_address="192.168.1.102",
                 user_agent="Mozilla/5.0",
                 is_active=False,
-                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
-                last_used_at=datetime.now(timezone.utc) - timedelta(days=1)
+                expires_at=datetime.now(UTC) + timedelta(days=7),
+                last_used_at=datetime.now(UTC) - timedelta(days=1),
             )
             session.add_all([s1, s2, s3])
             await session.commit()
 
         # Make request
         response = await client.get(
-            "/api/v1/sessions/me",
-            headers={"Authorization": f"Bearer {user_token}"}
+            "/api/v1/sessions/me", headers={"Authorization": f"Bearer {user_token}"}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -128,11 +126,12 @@ class TestListMySessions:
         assert data["sessions"][0]["is_current"] is True
 
     @pytest.mark.asyncio
-    async def test_list_my_sessions_with_login_session(self, client, async_test_user, user_token):
+    async def test_list_my_sessions_with_login_session(
+        self, client, async_test_user, user_token
+    ):
         """Test listing sessions shows the login session."""
         response = await client.get(
-            "/api/v1/sessions/me",
-            headers={"Authorization": f"Bearer {user_token}"}
+            "/api/v1/sessions/me", headers={"Authorization": f"Bearer {user_token}"}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -155,9 +154,11 @@ class TestRevokeSession:
     """Tests for DELETE /api/v1/sessions/{session_id} endpoint."""
 
     @pytest.mark.asyncio
-    async def test_revoke_session_success(self, client, async_test_user, async_test_db, user_token):
+    async def test_revoke_session_success(
+        self, client, async_test_user, async_test_db, user_token
+    ):
         """Test successfully revoking a session."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         # Create a session to revoke
         async with SessionLocal() as session:
@@ -168,8 +169,8 @@ class TestRevokeSession:
                 ip_address="192.168.1.103",
                 user_agent="Mozilla/5.0 (iPad)",
                 is_active=True,
-                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
-                last_used_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC) + timedelta(days=7),
+                last_used_at=datetime.now(UTC),
             )
             session.add(user_session)
             await session.commit()
@@ -179,7 +180,7 @@ class TestRevokeSession:
         # Revoke the session
         response = await client.delete(
             f"/api/v1/sessions/{session_id}",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -191,6 +192,7 @@ class TestRevokeSession:
         # Verify session is deactivated
         async with SessionLocal() as session:
             from app.crud.session import session as session_crud
+
             revoked_session = await session_crud.get(session, id=str(session_id))
             assert revoked_session.is_active is False
 
@@ -200,7 +202,7 @@ class TestRevokeSession:
         fake_id = uuid4()
         response = await client.delete(
             f"/api/v1/sessions/{fake_id}",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -222,7 +224,7 @@ class TestRevokeSession:
         self, client, async_test_user, async_test_user2, async_test_db, user_token
     ):
         """Test that users cannot revoke other users' sessions."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         # Create a session for user2
         async with SessionLocal() as session:
@@ -233,8 +235,8 @@ class TestRevokeSession:
                 ip_address="192.168.1.200",
                 user_agent="Mozilla/5.0",
                 is_active=True,
-                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
-                last_used_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC) + timedelta(days=7),
+                last_used_at=datetime.now(UTC),
             )
             session.add(other_user_session)
             await session.commit()
@@ -244,7 +246,7 @@ class TestRevokeSession:
         # Try to revoke it as user1
         response = await client.delete(
             f"/api/v1/sessions/{session_id}",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -263,7 +265,7 @@ class TestCleanupExpiredSessions:
         self, client, async_test_user, async_test_db, user_token
     ):
         """Test successfully cleaning up expired sessions."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         # Create expired and active sessions using CRUD to avoid greenlet issues
         from app.crud.session import session as session_crud
@@ -277,8 +279,8 @@ class TestCleanupExpiredSessions:
                 device_name="Expired 1",
                 ip_address="192.168.1.201",
                 user_agent="Mozilla/5.0",
-                expires_at=datetime.now(timezone.utc) - timedelta(days=1),
-                last_used_at=datetime.now(timezone.utc) - timedelta(days=2)
+                expires_at=datetime.now(UTC) - timedelta(days=1),
+                last_used_at=datetime.now(UTC) - timedelta(days=2),
             )
             e1 = await session_crud.create_session(db, obj_in=e1_data)
             e1.is_active = False
@@ -291,8 +293,8 @@ class TestCleanupExpiredSessions:
                 device_name="Expired 2",
                 ip_address="192.168.1.202",
                 user_agent="Mozilla/5.0",
-                expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
-                last_used_at=datetime.now(timezone.utc) - timedelta(hours=2)
+                expires_at=datetime.now(UTC) - timedelta(hours=1),
+                last_used_at=datetime.now(UTC) - timedelta(hours=2),
             )
             e2 = await session_crud.create_session(db, obj_in=e2_data)
             e2.is_active = False
@@ -305,8 +307,8 @@ class TestCleanupExpiredSessions:
                 device_name="Active",
                 ip_address="192.168.1.203",
                 user_agent="Mozilla/5.0",
-                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
-                last_used_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC) + timedelta(days=7),
+                last_used_at=datetime.now(UTC),
             )
             await session_crud.create_session(db, obj_in=a1_data)
             await db.commit()
@@ -314,7 +316,7 @@ class TestCleanupExpiredSessions:
         # Cleanup expired sessions
         response = await client.delete(
             "/api/v1/sessions/me/expired",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -329,7 +331,7 @@ class TestCleanupExpiredSessions:
         self, client, async_test_user, async_test_db, user_token
     ):
         """Test cleanup when no sessions are expired."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         # Create only active sessions using CRUD
         from app.crud.session import session as session_crud
@@ -342,15 +344,15 @@ class TestCleanupExpiredSessions:
                 device_name="Active Device",
                 ip_address="192.168.1.210",
                 user_agent="Mozilla/5.0",
-                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
-                last_used_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC) + timedelta(days=7),
+                last_used_at=datetime.now(UTC),
             )
             await session_crud.create_session(db, obj_in=a1_data)
             await db.commit()
 
         response = await client.delete(
             "/api/v1/sessions/me/expired",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -369,13 +371,16 @@ class TestCleanupExpiredSessions:
 
 # Additional tests for better coverage
 
+
 class TestSessionsAdditionalCases:
     """Additional tests to improve sessions endpoint coverage."""
 
     @pytest.mark.asyncio
-    async def test_list_sessions_pagination(self, client, async_test_user, async_test_db, user_token):
+    async def test_list_sessions_pagination(
+        self, client, async_test_user, async_test_db, user_token
+    ):
         """Test listing sessions with pagination."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         # Create multiple sessions
         async with SessionLocal() as session:
@@ -389,15 +394,15 @@ class TestSessionsAdditionalCases:
                     device_name=f"Device {i}",
                     ip_address=f"192.168.1.{i}",
                     user_agent="Mozilla/5.0",
-                    expires_at=datetime.now(timezone.utc) + timedelta(days=7),
-                    last_used_at=datetime.now(timezone.utc)
+                    expires_at=datetime.now(UTC) + timedelta(days=7),
+                    last_used_at=datetime.now(UTC),
                 )
                 await session_crud.create_session(session, obj_in=session_data)
             await session.commit()
 
         response = await client.get(
             "/api/v1/sessions/me?page=1&limit=3",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -410,16 +415,21 @@ class TestSessionsAdditionalCases:
         """Test revoking session with invalid UUID."""
         response = await client.delete(
             "/api/v1/sessions/not-a-uuid",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         # Should return 422 for invalid UUID format
-        assert response.status_code in [status.HTTP_422_UNPROCESSABLE_ENTITY, status.HTTP_404_NOT_FOUND]
+        assert response.status_code in [
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_404_NOT_FOUND,
+        ]
 
     @pytest.mark.asyncio
-    async def test_cleanup_expired_sessions_with_mixed_states(self, client, async_test_user, async_test_db, user_token):
+    async def test_cleanup_expired_sessions_with_mixed_states(
+        self, client, async_test_user, async_test_db, user_token
+    ):
         """Test cleanup with mix of active/inactive and expired/not-expired sessions."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         from app.crud.session import session as session_crud
         from app.schemas.sessions import SessionCreate
@@ -432,8 +442,8 @@ class TestSessionsAdditionalCases:
                 device_name="Expired Inactive",
                 ip_address="192.168.1.100",
                 user_agent="Mozilla/5.0",
-                expires_at=datetime.now(timezone.utc) - timedelta(days=1),
-                last_used_at=datetime.now(timezone.utc) - timedelta(days=2)
+                expires_at=datetime.now(UTC) - timedelta(days=1),
+                last_used_at=datetime.now(UTC) - timedelta(days=2),
             )
             e1 = await session_crud.create_session(db, obj_in=e1_data)
             e1.is_active = False
@@ -446,8 +456,8 @@ class TestSessionsAdditionalCases:
                 device_name="Expired Active",
                 ip_address="192.168.1.101",
                 user_agent="Mozilla/5.0",
-                expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
-                last_used_at=datetime.now(timezone.utc) - timedelta(hours=2)
+                expires_at=datetime.now(UTC) - timedelta(hours=1),
+                last_used_at=datetime.now(UTC) - timedelta(hours=2),
             )
             await session_crud.create_session(db, obj_in=e2_data)
 
@@ -455,7 +465,7 @@ class TestSessionsAdditionalCases:
 
         response = await client.delete(
             "/api/v1/sessions/me/expired",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -476,10 +486,12 @@ class TestSessionExceptionHandlers:
         from unittest.mock import patch
 
         # Patch decode_token to raise an exception
-        with patch('app.api.routes.sessions.decode_token', side_effect=Exception("Token decode error")):
+        with patch(
+            "app.api.routes.sessions.decode_token",
+            side_effect=Exception("Token decode error"),
+        ):
             response = await client.get(
-                "/api/v1/sessions/me",
-                headers={"Authorization": f"Bearer {user_token}"}
+                "/api/v1/sessions/me", headers={"Authorization": f"Bearer {user_token}"}
             )
 
             # Should still succeed (exception is caught and ignored in try/except at line 77)
@@ -489,12 +501,16 @@ class TestSessionExceptionHandlers:
     async def test_list_sessions_database_error(self, client, user_token):
         """Test list_sessions handles database errors (covers lines 104-106)."""
         from unittest.mock import patch
+
         from app.crud import session as session_module
 
-        with patch.object(session_module.session, 'get_user_sessions', side_effect=Exception("Database error")):
+        with patch.object(
+            session_module.session,
+            "get_user_sessions",
+            side_effect=Exception("Database error"),
+        ):
             response = await client.get(
-                "/api/v1/sessions/me",
-                headers={"Authorization": f"Bearer {user_token}"}
+                "/api/v1/sessions/me", headers={"Authorization": f"Bearer {user_token}"}
             )
 
             assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -503,18 +519,21 @@ class TestSessionExceptionHandlers:
             assert data["errors"][0]["message"] == "Failed to retrieve sessions"
 
     @pytest.mark.asyncio
-    async def test_revoke_session_database_error(self, client, user_token, async_test_db, async_test_user):
+    async def test_revoke_session_database_error(
+        self, client, user_token, async_test_db, async_test_user
+    ):
         """Test revoke_session handles database errors (covers lines 181-183)."""
+        from datetime import datetime, timedelta
         from unittest.mock import patch
         from uuid import uuid4
+
         from app.crud import session as session_module
 
         # First create a session to revoke
         from app.crud.session import session as session_crud
         from app.schemas.sessions import SessionCreate
-        from datetime import datetime, timedelta, timezone
 
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as db:
             session_in = SessionCreate(
@@ -523,17 +542,21 @@ class TestSessionExceptionHandlers:
                 device_name="Test Device",
                 ip_address="192.168.1.1",
                 user_agent="Mozilla/5.0",
-                last_used_at=datetime.now(timezone.utc),
-                expires_at=datetime.now(timezone.utc) + timedelta(days=60)
+                last_used_at=datetime.now(UTC),
+                expires_at=datetime.now(UTC) + timedelta(days=60),
             )
             user_session = await session_crud.create_session(db, obj_in=session_in)
             session_id = user_session.id
 
         # Mock the deactivate method to raise an exception
-        with patch.object(session_module.session, 'deactivate', side_effect=Exception("Database connection lost")):
+        with patch.object(
+            session_module.session,
+            "deactivate",
+            side_effect=Exception("Database connection lost"),
+        ):
             response = await client.delete(
                 f"/api/v1/sessions/{session_id}",
-                headers={"Authorization": f"Bearer {user_token}"}
+                headers={"Authorization": f"Bearer {user_token}"},
             )
 
             assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -544,12 +567,17 @@ class TestSessionExceptionHandlers:
     async def test_cleanup_expired_sessions_database_error(self, client, user_token):
         """Test cleanup_expired_sessions handles database errors (covers lines 233-236)."""
         from unittest.mock import patch
+
         from app.crud import session as session_module
 
-        with patch.object(session_module.session, 'cleanup_expired_for_user', side_effect=Exception("Cleanup failed")):
+        with patch.object(
+            session_module.session,
+            "cleanup_expired_for_user",
+            side_effect=Exception("Cleanup failed"),
+        ):
             response = await client.delete(
                 "/api/v1/sessions/me/expired",
-                headers={"Authorization": f"Bearer {user_token}"}
+                headers={"Authorization": f"Bearer {user_token}"},
             )
 
             assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR

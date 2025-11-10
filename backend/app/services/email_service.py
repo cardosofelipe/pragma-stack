@@ -5,9 +5,9 @@ Email service with placeholder implementation.
 This service provides email sending functionality with a simple console/log-based
 placeholder that can be easily replaced with a real email provider (SendGrid, SES, etc.)
 """
+
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Optional
 
 from app.core.config import settings
 
@@ -20,13 +20,12 @@ class EmailBackend(ABC):
     @abstractmethod
     async def send_email(
         self,
-        to: List[str],
+        to: list[str],
         subject: str,
         html_content: str,
-        text_content: Optional[str] = None
+        text_content: str | None = None,
     ) -> bool:
         """Send an email."""
-        pass
 
 
 class ConsoleEmailBackend(EmailBackend):
@@ -39,10 +38,10 @@ class ConsoleEmailBackend(EmailBackend):
 
     async def send_email(
         self,
-        to: List[str],
+        to: list[str],
         subject: str,
         html_content: str,
-        text_content: Optional[str] = None
+        text_content: str | None = None,
     ) -> bool:
         """
         Log email content to console/logs.
@@ -88,10 +87,10 @@ class SMTPEmailBackend(EmailBackend):
 
     async def send_email(
         self,
-        to: List[str],
+        to: list[str],
         subject: str,
         html_content: str,
-        text_content: Optional[str] = None
+        text_content: str | None = None,
     ) -> bool:
         """Send email via SMTP."""
         # TODO: Implement SMTP sending
@@ -108,7 +107,7 @@ class EmailService:
     and can be configured to use different backends (console, SMTP, SendGrid, etc.)
     """
 
-    def __init__(self, backend: Optional[EmailBackend] = None):
+    def __init__(self, backend: EmailBackend | None = None):
         """
         Initialize email service with a backend.
 
@@ -118,10 +117,7 @@ class EmailService:
         self.backend = backend or ConsoleEmailBackend()
 
     async def send_password_reset_email(
-        self,
-        to_email: str,
-        reset_token: str,
-        user_name: Optional[str] = None
+        self, to_email: str, reset_token: str, user_name: str | None = None
     ) -> bool:
         """
         Send password reset email.
@@ -142,7 +138,7 @@ class EmailService:
 
         # Plain text version
         text_content = f"""
-Hello{' ' + user_name if user_name else ''},
+Hello{" " + user_name if user_name else ""},
 
 You requested a password reset for your account. Click the link below to reset your password:
 
@@ -177,7 +173,7 @@ The {settings.PROJECT_NAME} Team
             <h1>Password Reset</h1>
         </div>
         <div class="content">
-            <p>Hello{' ' + user_name if user_name else ''},</p>
+            <p>Hello{" " + user_name if user_name else ""},</p>
             <p>You requested a password reset for your account. Click the button below to reset your password:</p>
             <p style="text-align: center;">
                 <a href="{reset_url}" class="button">Reset Password</a>
@@ -200,17 +196,14 @@ The {settings.PROJECT_NAME} Team
                 to=[to_email],
                 subject=subject,
                 html_content=html_content,
-                text_content=text_content
+                text_content=text_content,
             )
         except Exception as e:
-            logger.error(f"Failed to send password reset email to {to_email}: {str(e)}")
+            logger.error(f"Failed to send password reset email to {to_email}: {e!s}")
             return False
 
     async def send_email_verification(
-        self,
-        to_email: str,
-        verification_token: str,
-        user_name: Optional[str] = None
+        self, to_email: str, verification_token: str, user_name: str | None = None
     ) -> bool:
         """
         Send email verification email.
@@ -224,14 +217,16 @@ The {settings.PROJECT_NAME} Team
             True if email sent successfully
         """
         # Generate verification URL
-        verification_url = f"{settings.FRONTEND_URL}/verify-email?token={verification_token}"
+        verification_url = (
+            f"{settings.FRONTEND_URL}/verify-email?token={verification_token}"
+        )
 
         # Prepare email content
         subject = "Verify Your Email Address"
 
         # Plain text version
         text_content = f"""
-Hello{' ' + user_name if user_name else ''},
+Hello{" " + user_name if user_name else ""},
 
 Thank you for signing up! Please verify your email address by clicking the link below:
 
@@ -266,7 +261,7 @@ The {settings.PROJECT_NAME} Team
             <h1>Verify Your Email</h1>
         </div>
         <div class="content">
-            <p>Hello{' ' + user_name if user_name else ''},</p>
+            <p>Hello{" " + user_name if user_name else ""},</p>
             <p>Thank you for signing up! Please verify your email address by clicking the button below:</p>
             <p style="text-align: center;">
                 <a href="{verification_url}" class="button">Verify Email</a>
@@ -289,10 +284,10 @@ The {settings.PROJECT_NAME} Team
                 to=[to_email],
                 subject=subject,
                 html_content=html_content,
-                text_content=text_content
+                text_content=text_content,
             )
         except Exception as e:
-            logger.error(f"Failed to send verification email to {to_email}: {str(e)}")
+            logger.error(f"Failed to send verification email to {to_email}: {e!s}")
             return False
 
 

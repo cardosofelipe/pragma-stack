@@ -1,39 +1,43 @@
 # app/api/routes/auth.py
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user
-from app.core.auth import TokenExpiredError, TokenInvalidError, decode_token
-from app.core.auth import get_password_hash
+from app.core.auth import (
+    TokenExpiredError,
+    TokenInvalidError,
+    decode_token,
+    get_password_hash,
+)
 from app.core.database import get_db
 from app.core.exceptions import (
     AuthenticationError as AuthError,
     DatabaseError,
-    ErrorCode
+    ErrorCode,
 )
 from app.crud.session import session as session_crud
 from app.crud.user import user as user_crud
 from app.models.user import User
 from app.schemas.common import MessageResponse
-from app.schemas.sessions import SessionCreate, LogoutRequest
+from app.schemas.sessions import LogoutRequest, SessionCreate
 from app.schemas.users import (
+    LoginRequest,
+    PasswordResetConfirm,
+    PasswordResetRequest,
+    RefreshTokenRequest,
+    Token,
     UserCreate,
     UserResponse,
-    Token,
-    LoginRequest,
-    RefreshTokenRequest,
-    PasswordResetRequest,
-    PasswordResetConfirm
 )
-from app.services.auth_service import AuthService, AuthenticationError
+from app.services.auth_service import AuthenticationError, AuthService
 from app.services.email_service import email_service
 from app.utils.device import extract_device_info
 from app.utils.security import create_password_reset_token, verify_password_reset_token
@@ -54,7 +58,7 @@ async def _create_login_session(
     request: Request,
     user: User,
     tokens: Token,
-    login_type: str = "login"
+    login_type: str = "login",
 ) -> None:
     """
     Create a session record for successful login.
@@ -81,8 +85,8 @@ async def _create_login_session(
             device_id=device_info.device_id,
             ip_address=device_info.ip_address,
             user_agent=device_info.user_agent,
-            last_used_at=datetime.now(timezone.utc),
-            expires_at=datetime.fromtimestamp(refresh_payload.exp, tz=timezone.utc),
+            last_used_at=datetime.now(UTC),
+            expires_at=datetime.fromtimestamp(refresh_payload.exp, tz=UTC),
             location_city=device_info.location_city,
             location_country=device_info.location_country,
         )
@@ -95,15 +99,20 @@ async def _create_login_session(
         )
     except Exception as session_err:
         # Log but don't fail login if session creation fails
-        logger.error(f"Failed to create session for {user.email}: {str(session_err)}", exc_info=True)
+        logger.error(
+            f"Failed to create session for {user.email}: {session_err!s}", exc_info=True
+        )
 
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED, operation_id="register")
+@router.post(
+    "/register",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    operation_id="register",
+)
 @limiter.limit(f"{5 * RATE_MULTIPLIER}/minute")
 async def register_user(
-        request: Request,
-        user_data: UserCreate,
-        db: AsyncSession = Depends(get_db)
+    request: Request, user_data: UserCreate, db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Register a new user.
@@ -116,25 +125,23 @@ async def register_user(
         return user
     except AuthenticationError as e:
         # SECURITY: Don't reveal if email exists - generic error message
-        logger.warning(f"Registration failed: {str(e)}")
+        logger.warning(f"Registration failed: {e!s}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Registration failed. Please check your information and try again."
+            detail="Registration failed. Please check your information and try again.",
         )
     except Exception as e:
-        logger.error(f"Unexpected error during registration: {str(e)}", exc_info=True)
+        logger.error(f"Unexpected error during registration: {e!s}", exc_info=True)
         raise DatabaseError(
             message="An unexpected error occurred. Please try again later.",
-            error_code=ErrorCode.INTERNAL_ERROR
+            error_code=ErrorCode.INTERNAL_ERROR,
         )
 
 
 @router.post("/login", response_model=Token, operation_id="login")
 @limiter.limit(f"{10 * RATE_MULTIPLIER}/minute")
 async def login(
-        request: Request,
-        login_data: LoginRequest,
-        db: AsyncSession = Depends(get_db)
+    request: Request, login_data: LoginRequest, db: AsyncSession = Depends(get_db)
 ) -> Any:
     """
     Login with username and password.
@@ -146,14 +153,16 @@ async def login(
     """
     try:
         # Attempt to authenticate the user
-        user = await AuthService.authenticate_user(db, login_data.email, login_data.password)
+        user = await AuthService.authenticate_user(
+            db, login_data.email, login_data.password
+        )
 
         # Explicitly check for None result and raise correct exception
         if user is None:
             logger.warning(f"Invalid login attempt for: {login_data.email}")
             raise AuthError(
                 message="Invalid email or password",
-                error_code=ErrorCode.INVALID_CREDENTIALS
+                error_code=ErrorCode.INVALID_CREDENTIALS,
             )
 
         # User is authenticated, generate tokens
@@ -166,29 +175,26 @@ async def login(
 
     except AuthenticationError as e:
         # Handle specific authentication errors like inactive accounts
-        logger.warning(f"Authentication failed: {str(e)}")
-        raise AuthError(
-            message=str(e),
-            error_code=ErrorCode.INVALID_CREDENTIALS
-        )
+        logger.warning(f"Authentication failed: {e!s}")
+        raise AuthError(message=str(e), error_code=ErrorCode.INVALID_CREDENTIALS)
     except AuthError:
         # Re-raise custom auth exceptions without modification
         raise
     except Exception as e:
         # Handle unexpected errors
-        logger.error(f"Unexpected error during login: {str(e)}", exc_info=True)
+        logger.error(f"Unexpected error during login: {e!s}", exc_info=True)
         raise DatabaseError(
             message="An unexpected error occurred. Please try again later.",
-            error_code=ErrorCode.INTERNAL_ERROR
+            error_code=ErrorCode.INTERNAL_ERROR,
         )
 
 
-@router.post("/login/oauth", response_model=Token, operation_id='login_oauth')
+@router.post("/login/oauth", response_model=Token, operation_id="login_oauth")
 @limiter.limit("10/minute")
 async def login_oauth(
-        request: Request,
-        form_data: OAuth2PasswordRequestForm = Depends(),
-        db: AsyncSession = Depends(get_db)
+    request: Request,
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     OAuth2-compatible login endpoint, used by the OpenAPI UI.
@@ -199,12 +205,14 @@ async def login_oauth(
         Access and refresh tokens.
     """
     try:
-        user = await AuthService.authenticate_user(db, form_data.username, form_data.password)
+        user = await AuthService.authenticate_user(
+            db, form_data.username, form_data.password
+        )
 
         if user is None:
             raise AuthError(
                 message="Invalid email or password",
-                error_code=ErrorCode.INVALID_CREDENTIALS
+                error_code=ErrorCode.INVALID_CREDENTIALS,
             )
 
         # Generate tokens
@@ -216,28 +224,25 @@ async def login_oauth(
         # Return full token response with user data
         return tokens
     except AuthenticationError as e:
-        logger.warning(f"OAuth authentication failed: {str(e)}")
-        raise AuthError(
-            message=str(e),
-            error_code=ErrorCode.INVALID_CREDENTIALS
-        )
+        logger.warning(f"OAuth authentication failed: {e!s}")
+        raise AuthError(message=str(e), error_code=ErrorCode.INVALID_CREDENTIALS)
     except AuthError:
         # Re-raise custom auth exceptions without modification
         raise
     except Exception as e:
-        logger.error(f"Unexpected error during OAuth login: {str(e)}", exc_info=True)
+        logger.error(f"Unexpected error during OAuth login: {e!s}", exc_info=True)
         raise DatabaseError(
             message="An unexpected error occurred. Please try again later.",
-            error_code=ErrorCode.INTERNAL_ERROR
+            error_code=ErrorCode.INTERNAL_ERROR,
         )
 
 
 @router.post("/refresh", response_model=Token, operation_id="refresh_token")
 @limiter.limit("30/minute")
 async def refresh_token(
-        request: Request,
-        refresh_data: RefreshTokenRequest,
-        db: AsyncSession = Depends(get_db)
+    request: Request,
+    refresh_data: RefreshTokenRequest,
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Refresh access token using a refresh token.
@@ -249,13 +254,17 @@ async def refresh_token(
     """
     try:
         # Decode the refresh token to get the JTI
-        refresh_payload = decode_token(refresh_data.refresh_token, verify_type="refresh")
+        refresh_payload = decode_token(
+            refresh_data.refresh_token, verify_type="refresh"
+        )
 
         # Check if session exists and is active
         session = await session_crud.get_active_by_jti(db, jti=refresh_payload.jti)
 
         if not session:
-            logger.warning(f"Refresh token used for inactive or non-existent session: {refresh_payload.jti}")
+            logger.warning(
+                f"Refresh token used for inactive or non-existent session: {refresh_payload.jti}"
+            )
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Session has been revoked. Please log in again.",
@@ -274,10 +283,12 @@ async def refresh_token(
                 db,
                 session=session,
                 new_jti=new_refresh_payload.jti,
-                new_expires_at=datetime.fromtimestamp(new_refresh_payload.exp, tz=timezone.utc)
+                new_expires_at=datetime.fromtimestamp(new_refresh_payload.exp, tz=UTC),
             )
         except Exception as session_err:
-            logger.error(f"Failed to update session {session.id}: {str(session_err)}", exc_info=True)
+            logger.error(
+                f"Failed to update session {session.id}: {session_err!s}", exc_info=True
+            )
             # Continue anyway - tokens are already issued
 
         return tokens
@@ -300,10 +311,10 @@ async def refresh_token(
         # Re-raise HTTP exceptions (like session revoked)
         raise
     except Exception as e:
-        logger.error(f"Unexpected error during token refresh: {str(e)}")
+        logger.error(f"Unexpected error during token refresh: {e!s}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An unexpected error occurred. Please try again later."
+            detail="An unexpected error occurred. Please try again later.",
         )
 
 
@@ -320,13 +331,13 @@ async def refresh_token(
 
     **Rate Limit**: 3 requests/minute
     """,
-    operation_id="request_password_reset"
+    operation_id="request_password_reset",
 )
 @limiter.limit("3/minute")
 async def request_password_reset(
     request: Request,
     reset_request: PasswordResetRequest,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Request a password reset.
@@ -345,26 +356,26 @@ async def request_password_reset(
 
             # Send password reset email
             await email_service.send_password_reset_email(
-                to_email=user.email,
-                reset_token=reset_token,
-                user_name=user.first_name
+                to_email=user.email, reset_token=reset_token, user_name=user.first_name
             )
             logger.info(f"Password reset requested for {user.email}")
         else:
             # Log attempt but don't reveal if email exists
-            logger.warning(f"Password reset requested for non-existent or inactive email: {reset_request.email}")
+            logger.warning(
+                f"Password reset requested for non-existent or inactive email: {reset_request.email}"
+            )
 
         # Always return success to prevent email enumeration
         return MessageResponse(
             success=True,
-            message="If your email is registered, you will receive a password reset link shortly"
+            message="If your email is registered, you will receive a password reset link shortly",
         )
     except Exception as e:
-        logger.error(f"Error processing password reset request: {str(e)}", exc_info=True)
+        logger.error(f"Error processing password reset request: {e!s}", exc_info=True)
         # Still return success to prevent information leakage
         return MessageResponse(
             success=True,
-            message="If your email is registered, you will receive a password reset link shortly"
+            message="If your email is registered, you will receive a password reset link shortly",
         )
 
 
@@ -378,13 +389,13 @@ async def request_password_reset(
 
     **Rate Limit**: 5 requests/minute
     """,
-    operation_id="confirm_password_reset"
+    operation_id="confirm_password_reset",
 )
 @limiter.limit("5/minute")
 async def confirm_password_reset(
     request: Request,
     reset_confirm: PasswordResetConfirm,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Confirm password reset with token.
@@ -398,7 +409,7 @@ async def confirm_password_reset(
         if not email:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid or expired password reset token"
+                detail="Invalid or expired password reset token",
             )
 
         # Look up user
@@ -406,14 +417,13 @@ async def confirm_password_reset(
 
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
 
         if not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User account is inactive"
+                detail="User account is inactive",
             )
 
         # Update password
@@ -424,29 +434,33 @@ async def confirm_password_reset(
         # SECURITY: Invalidate all existing sessions after password reset
         # This prevents stolen sessions from being used after password change
         from app.crud.session import session as session_crud
+
         try:
             deactivated_count = await session_crud.deactivate_all_user_sessions(
-                db,
-                user_id=str(user.id)
+                db, user_id=str(user.id)
             )
-            logger.info(f"Password reset successful for {user.email}, invalidated {deactivated_count} sessions")
+            logger.info(
+                f"Password reset successful for {user.email}, invalidated {deactivated_count} sessions"
+            )
         except Exception as session_error:
             # Log but don't fail password reset if session invalidation fails
-            logger.error(f"Failed to invalidate sessions after password reset: {str(session_error)}")
+            logger.error(
+                f"Failed to invalidate sessions after password reset: {session_error!s}"
+            )
 
         return MessageResponse(
             success=True,
-            message="Password has been reset successfully. All devices have been logged out for security. You can now log in with your new password."
+            message="Password has been reset successfully. All devices have been logged out for security. You can now log in with your new password.",
         )
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error confirming password reset: {str(e)}", exc_info=True)
+        logger.error(f"Error confirming password reset: {e!s}", exc_info=True)
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while resetting your password"
+            detail="An error occurred while resetting your password",
         )
 
 
@@ -464,14 +478,14 @@ async def confirm_password_reset(
 
     **Rate Limit**: 10 requests/minute
     """,
-    operation_id="logout"
+    operation_id="logout",
 )
 @limiter.limit("10/minute")
 async def logout(
     request: Request,
     logout_request: LogoutRequest,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Logout from current device by deactivating the session.
@@ -487,15 +501,14 @@ async def logout(
     try:
         # Decode refresh token to get JTI
         try:
-            refresh_payload = decode_token(logout_request.refresh_token, verify_type="refresh")
+            refresh_payload = decode_token(
+                logout_request.refresh_token, verify_type="refresh"
+            )
         except (TokenExpiredError, TokenInvalidError) as e:
             # Even if token is expired/invalid, try to deactivate session
-            logger.warning(f"Logout with invalid/expired token: {str(e)}")
+            logger.warning(f"Logout with invalid/expired token: {e!s}")
             # Don't fail - return success anyway
-            return MessageResponse(
-                success=True,
-                message="Logged out successfully"
-            )
+            return MessageResponse(success=True, message="Logged out successfully")
 
         # Find the session by JTI
         session = await session_crud.get_by_jti(db, jti=refresh_payload.jti)
@@ -509,7 +522,7 @@ async def logout(
                 )
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="You can only logout your own sessions"
+                    detail="You can only logout your own sessions",
                 )
 
             # Deactivate the session
@@ -522,22 +535,20 @@ async def logout(
         else:
             # Session not found - maybe already deleted or never existed
             # Return success anyway (idempotent)
-            logger.info(f"Logout requested for non-existent session (JTI: {refresh_payload.jti})")
+            logger.info(
+                f"Logout requested for non-existent session (JTI: {refresh_payload.jti})"
+            )
 
-        return MessageResponse(
-            success=True,
-            message="Logged out successfully"
-        )
+        return MessageResponse(success=True, message="Logged out successfully")
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error during logout for user {current_user.id}: {str(e)}", exc_info=True)
-        # Don't expose error details
-        return MessageResponse(
-            success=True,
-            message="Logged out successfully"
+        logger.error(
+            f"Error during logout for user {current_user.id}: {e!s}", exc_info=True
         )
+        # Don't expose error details
+        return MessageResponse(success=True, message="Logged out successfully")
 
 
 @router.post(
@@ -553,13 +564,13 @@ async def logout(
 
     **Rate Limit**: 5 requests/minute
     """,
-    operation_id="logout_all"
+    operation_id="logout_all",
 )
 @limiter.limit("5/minute")
 async def logout_all(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Logout from all devices by deactivating all user sessions.
@@ -573,19 +584,25 @@ async def logout_all(
     """
     try:
         # Deactivate all sessions for this user
-        count = await session_crud.deactivate_all_user_sessions(db, user_id=str(current_user.id))
+        count = await session_crud.deactivate_all_user_sessions(
+            db, user_id=str(current_user.id)
+        )
 
-        logger.info(f"User {current_user.id} logged out from all devices ({count} sessions)")
+        logger.info(
+            f"User {current_user.id} logged out from all devices ({count} sessions)"
+        )
 
         return MessageResponse(
             success=True,
-            message=f"Successfully logged out from all devices ({count} sessions terminated)"
+            message=f"Successfully logged out from all devices ({count} sessions terminated)",
         )
 
     except Exception as e:
-        logger.error(f"Error during logout-all for user {current_user.id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Error during logout-all for user {current_user.id}: {e!s}", exc_info=True
+        )
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while logging out"
+            detail="An error occurred while logging out",
         )

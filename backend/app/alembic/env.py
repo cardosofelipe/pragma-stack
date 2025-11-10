@@ -2,11 +2,10 @@ import sys
 from logging.config import fileConfig
 from pathlib import Path
 
-from sqlalchemy import engine_from_config, pool, text, create_engine
+from alembic import context
+from sqlalchemy import create_engine, engine_from_config, pool, text
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.exc import OperationalError
-
-from alembic import context
 
 # Get the path to the app directory (parent of 'alembic')
 app_dir = Path(__file__).resolve().parent.parent
@@ -66,7 +65,9 @@ def ensure_database_exists(db_url: str) -> None:
     admin_url = url.set(database="postgres")
 
     # CREATE DATABASE cannot run inside a transaction
-    admin_engine = create_engine(str(admin_url), isolation_level="AUTOCOMMIT", poolclass=pool.NullPool)
+    admin_engine = create_engine(
+        str(admin_url), isolation_level="AUTOCOMMIT", poolclass=pool.NullPool
+    )
     try:
         with admin_engine.connect() as conn:
             exists = conn.execute(
@@ -122,9 +123,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

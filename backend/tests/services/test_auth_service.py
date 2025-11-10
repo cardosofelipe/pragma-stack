@@ -1,14 +1,18 @@
 # tests/services/test_auth_service.py
 import uuid
-import pytest
-import pytest_asyncio
 from unittest.mock import patch
+
+import pytest
 from sqlalchemy import select
 
-from app.core.auth import get_password_hash, verify_password, TokenExpiredError, TokenInvalidError
+from app.core.auth import (
+    TokenInvalidError,
+    get_password_hash,
+    verify_password,
+)
 from app.models.user import User
-from app.schemas.users import UserCreate, Token
-from app.services.auth_service import AuthService, AuthenticationError
+from app.schemas.users import Token, UserCreate
+from app.services.auth_service import AuthenticationError, AuthService
 
 
 class TestAuthServiceAuthentication:
@@ -17,12 +21,14 @@ class TestAuthServiceAuthentication:
     @pytest.mark.asyncio
     async def test_authenticate_valid_user(self, async_test_db, async_test_user):
         """Test authenticating a user with valid credentials"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Set a known password for the mock user
         password = "TestPassword123!"
         async with AsyncTestingSessionLocal() as session:
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             user = result.scalar_one_or_none()
             user.password_hash = get_password_hash(password)
             await session.commit()
@@ -30,9 +36,7 @@ class TestAuthServiceAuthentication:
         # Authenticate with correct credentials
         async with AsyncTestingSessionLocal() as session:
             auth_user = await AuthService.authenticate_user(
-                db=session,
-                email=async_test_user.email,
-                password=password
+                db=session, email=async_test_user.email, password=password
             )
 
             assert auth_user is not None
@@ -42,26 +46,28 @@ class TestAuthServiceAuthentication:
     @pytest.mark.asyncio
     async def test_authenticate_nonexistent_user(self, async_test_db):
         """Test authenticating with an email that doesn't exist"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             user = await AuthService.authenticate_user(
-                db=session,
-                email="nonexistent@example.com",
-                password="password"
+                db=session, email="nonexistent@example.com", password="password"
             )
 
             assert user is None
 
     @pytest.mark.asyncio
-    async def test_authenticate_with_wrong_password(self, async_test_db, async_test_user):
+    async def test_authenticate_with_wrong_password(
+        self, async_test_db, async_test_user
+    ):
         """Test authenticating with the wrong password"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Set a known password for the mock user
         password = "TestPassword123!"
         async with AsyncTestingSessionLocal() as session:
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             user = result.scalar_one_or_none()
             user.password_hash = get_password_hash(password)
             await session.commit()
@@ -69,9 +75,7 @@ class TestAuthServiceAuthentication:
         # Authenticate with wrong password
         async with AsyncTestingSessionLocal() as session:
             auth_user = await AuthService.authenticate_user(
-                db=session,
-                email=async_test_user.email,
-                password="WrongPassword123"
+                db=session, email=async_test_user.email, password="WrongPassword123"
             )
 
             assert auth_user is None
@@ -79,12 +83,14 @@ class TestAuthServiceAuthentication:
     @pytest.mark.asyncio
     async def test_authenticate_inactive_user(self, async_test_db, async_test_user):
         """Test authenticating an inactive user"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Set a known password and make user inactive
         password = "TestPassword123!"
         async with AsyncTestingSessionLocal() as session:
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             user = result.scalar_one_or_none()
             user.password_hash = get_password_hash(password)
             user.is_active = False
@@ -94,9 +100,7 @@ class TestAuthServiceAuthentication:
         async with AsyncTestingSessionLocal() as session:
             with pytest.raises(AuthenticationError):
                 await AuthService.authenticate_user(
-                    db=session,
-                    email=async_test_user.email,
-                    password=password
+                    db=session, email=async_test_user.email, password=password
                 )
 
 
@@ -106,14 +110,14 @@ class TestAuthServiceUserCreation:
     @pytest.mark.asyncio
     async def test_create_new_user(self, async_test_db):
         """Test creating a new user"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         user_data = UserCreate(
             email="newuser@example.com",
             password="TestPassword123!",
             first_name="New",
             last_name="User",
-            phone_number="+1234567890"
+            phone_number="+1234567890",
         )
 
         async with AsyncTestingSessionLocal() as session:
@@ -135,15 +139,17 @@ class TestAuthServiceUserCreation:
             assert user.is_superuser is False
 
     @pytest.mark.asyncio
-    async def test_create_user_with_existing_email(self, async_test_db, async_test_user):
+    async def test_create_user_with_existing_email(
+        self, async_test_db, async_test_user
+    ):
         """Test creating a user with an email that already exists"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         user_data = UserCreate(
             email=async_test_user.email,  # Use existing email
             password="TestPassword123!",
             first_name="Duplicate",
-            last_name="User"
+            last_name="User",
         )
 
         # Should raise AuthenticationError
@@ -169,7 +175,7 @@ class TestAuthServiceTokens:
     @pytest.mark.asyncio
     async def test_refresh_tokens(self, async_test_db, async_test_user):
         """Test refreshing tokens with a valid refresh token"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create initial tokens
         initial_tokens = AuthService.create_tokens(async_test_user)
@@ -177,8 +183,7 @@ class TestAuthServiceTokens:
         # Refresh tokens
         async with AsyncTestingSessionLocal() as session:
             new_tokens = await AuthService.refresh_tokens(
-                db=session,
-                refresh_token=initial_tokens.refresh_token
+                db=session, refresh_token=initial_tokens.refresh_token
             )
 
             # Verify new tokens are different from old ones
@@ -188,7 +193,7 @@ class TestAuthServiceTokens:
     @pytest.mark.asyncio
     async def test_refresh_tokens_with_invalid_token(self, async_test_db):
         """Test refreshing tokens with an invalid token"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create an invalid token
         invalid_token = "invalid.token.string"
@@ -197,14 +202,15 @@ class TestAuthServiceTokens:
         async with AsyncTestingSessionLocal() as session:
             with pytest.raises(TokenInvalidError):
                 await AuthService.refresh_tokens(
-                    db=session,
-                    refresh_token=invalid_token
+                    db=session, refresh_token=invalid_token
                 )
 
     @pytest.mark.asyncio
-    async def test_refresh_tokens_with_access_token(self, async_test_db, async_test_user):
+    async def test_refresh_tokens_with_access_token(
+        self, async_test_db, async_test_user
+    ):
         """Test refreshing tokens with an access token instead of refresh token"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create tokens
         tokens = AuthService.create_tokens(async_test_user)
@@ -213,18 +219,20 @@ class TestAuthServiceTokens:
         async with AsyncTestingSessionLocal() as session:
             with pytest.raises(TokenInvalidError):
                 await AuthService.refresh_tokens(
-                    db=session,
-                    refresh_token=tokens.access_token
+                    db=session, refresh_token=tokens.access_token
                 )
 
     @pytest.mark.asyncio
     async def test_refresh_tokens_with_nonexistent_user(self, async_test_db):
         """Test refreshing tokens for a user that doesn't exist in the database"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create a token for a non-existent user
         non_existent_id = str(uuid.uuid4())
-        with patch('app.core.auth.decode_token'), patch('app.core.auth.get_token_data') as mock_get_data:
+        with (
+            patch("app.core.auth.decode_token"),
+            patch("app.core.auth.get_token_data") as mock_get_data,
+        ):
             # Mock the token data to return a non-existent user ID
             mock_get_data.return_value.user_id = uuid.UUID(non_existent_id)
 
@@ -232,8 +240,7 @@ class TestAuthServiceTokens:
             async with AsyncTestingSessionLocal() as session:
                 with pytest.raises(TokenInvalidError):
                     await AuthService.refresh_tokens(
-                        db=session,
-                        refresh_token="some.refresh.token"
+                        db=session, refresh_token="some.refresh.token"
                     )
 
 
@@ -243,12 +250,14 @@ class TestAuthServicePasswordChange:
     @pytest.mark.asyncio
     async def test_change_password(self, async_test_db, async_test_user):
         """Test changing a user's password"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Set a known password for the mock user
         current_password = "CurrentPassword123"
         async with AsyncTestingSessionLocal() as session:
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             user = result.scalar_one_or_none()
             user.password_hash = get_password_hash(current_password)
             await session.commit()
@@ -260,7 +269,7 @@ class TestAuthServicePasswordChange:
                 db=session,
                 user_id=async_test_user.id,
                 current_password=current_password,
-                new_password=new_password
+                new_password=new_password,
             )
 
             # Verify operation was successful
@@ -268,7 +277,9 @@ class TestAuthServicePasswordChange:
 
         # Verify password was changed
         async with AsyncTestingSessionLocal() as session:
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             updated_user = result.scalar_one_or_none()
 
             # Verify old password no longer works
@@ -278,14 +289,18 @@ class TestAuthServicePasswordChange:
             assert verify_password(new_password, updated_user.password_hash)
 
     @pytest.mark.asyncio
-    async def test_change_password_wrong_current_password(self, async_test_db, async_test_user):
+    async def test_change_password_wrong_current_password(
+        self, async_test_db, async_test_user
+    ):
         """Test changing password with incorrect current password"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Set a known password for the mock user
         current_password = "CurrentPassword123"
         async with AsyncTestingSessionLocal() as session:
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             user = result.scalar_one_or_none()
             user.password_hash = get_password_hash(current_password)
             await session.commit()
@@ -298,19 +313,21 @@ class TestAuthServicePasswordChange:
                     db=session,
                     user_id=async_test_user.id,
                     current_password=wrong_password,
-                    new_password="NewPassword456"
+                    new_password="NewPassword456",
                 )
 
         # Verify password was not changed
         async with AsyncTestingSessionLocal() as session:
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             user = result.scalar_one_or_none()
             assert verify_password(current_password, user.password_hash)
 
     @pytest.mark.asyncio
     async def test_change_password_nonexistent_user(self, async_test_db):
         """Test changing password for a user that doesn't exist"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         non_existent_id = uuid.uuid4()
 
@@ -320,5 +337,5 @@ class TestAuthServicePasswordChange:
                     db=session,
                     user_id=non_existent_id,
                     current_password="CurrentPassword123",
-                    new_password="NewPassword456"
+                    new_password="NewPassword456",
                 )

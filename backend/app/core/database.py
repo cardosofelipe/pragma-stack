@@ -5,17 +5,18 @@ Database configuration using SQLAlchemy 2.0 and asyncpg.
 This module provides async database connectivity with proper connection pooling
 and session management for FastAPI endpoints.
 """
+
 import logging
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.asyncio import (
-    AsyncSession,
     AsyncEngine,
-    create_async_engine,
+    AsyncSession,
     async_sessionmaker,
+    create_async_engine,
 )
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import DeclarativeBase
@@ -27,12 +28,12 @@ logger = logging.getLogger(__name__)
 
 
 # SQLite compatibility for testing
-@compiles(JSONB, 'sqlite')
+@compiles(JSONB, "sqlite")
 def compile_jsonb_sqlite(type_, compiler, **kw):
     return "TEXT"
 
 
-@compiles(UUID, 'sqlite')
+@compiles(UUID, "sqlite")
 def compile_uuid_sqlite(type_, compiler, **kw):
     return "TEXT"
 
@@ -40,7 +41,6 @@ def compile_uuid_sqlite(type_, compiler, **kw):
 # Declarative base for models (SQLAlchemy 2.0 style)
 class Base(DeclarativeBase):
     """Base class for all database models."""
-    pass
 
 
 def get_async_database_url(url: str) -> str:
@@ -139,7 +139,7 @@ async def async_transaction_scope() -> AsyncGenerator[AsyncSession, None]:
             logger.debug("Async transaction committed successfully")
         except Exception as e:
             await session.rollback()
-            logger.error(f"Async transaction failed, rolling back: {str(e)}")
+            logger.error(f"Async transaction failed, rolling back: {e!s}")
             raise
         finally:
             await session.close()
@@ -155,7 +155,7 @@ async def check_async_database_health() -> bool:
             await db.execute(text("SELECT 1"))
         return True
     except Exception as e:
-        logger.error(f"Async database health check failed: {str(e)}")
+        logger.error(f"Async database health check failed: {e!s}")
         return False
 
 

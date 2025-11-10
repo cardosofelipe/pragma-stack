@@ -7,12 +7,13 @@ Covers all edge cases in validation functions:
 - validate_email_format (line 148)
 - validate_slug (lines 170-183)
 """
+
 import pytest
 
 from app.schemas.validators import (
+    validate_email_format,
     validate_password_strength,
     validate_phone_number,
-    validate_email_format,
     validate_slug,
 )
 
@@ -108,12 +109,14 @@ class TestPhoneNumberValidator:
             validate_phone_number("+123456789012345")  # 15 digits after +
 
     def test_multiple_plus_symbols_rejected(self):
-        """Test phone number with multiple + symbols.
+        r"""Test phone number with multiple + symbols.
 
         Note: Line 115 is defensive code - the regex check at line 110 catches this first.
         The regex ^(?:\+[0-9]{8,14}|0[0-9]{8,14})$ only allows + at the start.
         """
-        with pytest.raises(ValueError, match="must start with \\+ or 0 followed by 8-14 digits"):
+        with pytest.raises(
+            ValueError, match="must start with \\+ or 0 followed by 8-14 digits"
+        ):
             validate_phone_number("+1234+5678901")
 
     def test_non_digit_after_prefix_rejected(self):

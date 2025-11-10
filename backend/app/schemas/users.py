@@ -1,9 +1,9 @@
 # app/schemas/users.py
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, field_validator, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 from app.schemas.validators import validate_password_strength, validate_phone_number
 
@@ -11,12 +11,12 @@ from app.schemas.validators import validate_password_strength, validate_phone_nu
 class UserBase(BaseModel):
     email: EmailStr
     first_name: str
-    last_name: Optional[str] = None
-    phone_number: Optional[str] = None
+    last_name: str | None = None
+    phone_number: str | None = None
 
-    @field_validator('phone_number')
+    @field_validator("phone_number")
     @classmethod
-    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
+    def validate_phone(cls, v: str | None) -> str | None:
         return validate_phone_number(v)
 
 
@@ -24,7 +24,7 @@ class UserCreate(UserBase):
     password: str
     is_superuser: bool = False
 
-    @field_validator('password')
+    @field_validator("password")
     @classmethod
     def password_strength(cls, v: str) -> str:
         """Enterprise-grade password strength validation"""
@@ -32,30 +32,32 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    phone_number: Optional[str] = None
-    password: Optional[str] = None
-    preferences: Optional[Dict[str, Any]] = None
-    is_active: Optional[bool] = None  # Changed default from True to None to avoid unintended updates
-    is_superuser: Optional[bool] = None  # Explicitly reject privilege escalation attempts
+    first_name: str | None = None
+    last_name: str | None = None
+    phone_number: str | None = None
+    password: str | None = None
+    preferences: dict[str, Any] | None = None
+    is_active: bool | None = (
+        None  # Changed default from True to None to avoid unintended updates
+    )
+    is_superuser: bool | None = None  # Explicitly reject privilege escalation attempts
 
-    @field_validator('phone_number')
+    @field_validator("phone_number")
     @classmethod
-    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
+    def validate_phone(cls, v: str | None) -> str | None:
         return validate_phone_number(v)
 
-    @field_validator('password')
+    @field_validator("password")
     @classmethod
-    def password_strength(cls, v: Optional[str]) -> Optional[str]:
+    def password_strength(cls, v: str | None) -> str | None:
         """Enterprise-grade password strength validation"""
         if v is None:
             return v
         return validate_password_strength(v)
 
-    @field_validator('is_superuser')
+    @field_validator("is_superuser")
     @classmethod
-    def prevent_superuser_modification(cls, v: Optional[bool]) -> Optional[bool]:
+    def prevent_superuser_modification(cls, v: bool | None) -> bool | None:
         """Prevent users from modifying their superuser status via this schema."""
         if v is not None:
             raise ValueError("Cannot modify superuser status through user update")
@@ -67,7 +69,7 @@ class UserInDB(UserBase):
     is_active: bool
     is_superuser: bool
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -77,28 +79,28 @@ class UserResponse(UserBase):
     is_active: bool
     is_superuser: bool
     created_at: datetime
-    updated_at: Optional[datetime] = None
+    updated_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class Token(BaseModel):
     access_token: str
-    refresh_token: Optional[str] = None
+    refresh_token: str | None = None
     token_type: str = "bearer"
     user: "UserResponse"  # Forward reference since UserResponse is defined above
-    expires_in: Optional[int] = None  # Token expiration in seconds
+    expires_in: int | None = None  # Token expiration in seconds
 
 
 class TokenPayload(BaseModel):
     sub: str  # User ID
     exp: int  # Expiration time
-    iat: Optional[int] = None  # Issued at
-    jti: Optional[str] = None  # JWT ID
-    is_superuser: Optional[bool] = False
-    first_name: Optional[str] = None
-    email: Optional[str] = None
-    type: Optional[str] = None  # Token type (access/refresh)
+    iat: int | None = None  # Issued at
+    jti: str | None = None  # JWT ID
+    is_superuser: bool | None = False
+    first_name: str | None = None
+    email: str | None = None
+    type: str | None = None  # Token type (access/refresh)
 
 
 class TokenData(BaseModel):
@@ -108,10 +110,11 @@ class TokenData(BaseModel):
 
 class PasswordChange(BaseModel):
     """Schema for changing password (requires current password)."""
+
     current_password: str
     new_password: str
 
-    @field_validator('new_password')
+    @field_validator("new_password")
     @classmethod
     def password_strength(cls, v: str) -> str:
         """Enterprise-grade password strength validation"""
@@ -120,10 +123,11 @@ class PasswordChange(BaseModel):
 
 class PasswordReset(BaseModel):
     """Schema for resetting password (via email token)."""
+
     token: str
     new_password: str
 
-    @field_validator('new_password')
+    @field_validator("new_password")
     @classmethod
     def password_strength(cls, v: str) -> str:
         """Enterprise-grade password strength validation"""
@@ -141,23 +145,19 @@ class RefreshTokenRequest(BaseModel):
 
 class PasswordResetRequest(BaseModel):
     """Schema for requesting a password reset."""
+
     email: EmailStr = Field(..., description="Email address of the account")
 
-    model_config = {
-        "json_schema_extra": {
-            "example": {
-                "email": "user@example.com"
-            }
-        }
-    }
+    model_config = {"json_schema_extra": {"example": {"email": "user@example.com"}}}
 
 
 class PasswordResetConfirm(BaseModel):
     """Schema for confirming a password reset with token."""
+
     token: str = Field(..., description="Password reset token from email")
     new_password: str = Field(..., min_length=8, description="New password")
 
-    @field_validator('new_password')
+    @field_validator("new_password")
     @classmethod
     def password_strength(cls, v: str) -> str:
         """Enterprise-grade password strength validation"""
@@ -167,7 +167,7 @@ class PasswordResetConfirm(BaseModel):
         "json_schema_extra": {
             "example": {
                 "token": "eyJwYXlsb2FkIjp7ImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsImV4cCI6MTcxMjM0NTY3OH19",
-                "new_password": "NewSecurePassword123"
+                "new_password": "NewSecurePassword123",
             }
         }
     }

@@ -1,8 +1,8 @@
 """
 Utility functions for extracting and parsing device information from HTTP requests.
 """
+
 import re
-from typing import Optional
 
 from fastapi import Request
 
@@ -19,11 +19,11 @@ def extract_device_info(request: Request) -> DeviceInfo:
     Returns:
         DeviceInfo object with parsed device information
     """
-    user_agent = request.headers.get('user-agent', '')
+    user_agent = request.headers.get("user-agent", "")
 
     device_info = DeviceInfo(
         device_name=parse_device_name(user_agent),
-        device_id=request.headers.get('x-device-id'),  # Client must send this header
+        device_id=request.headers.get("x-device-id"),  # Client must send this header
         ip_address=get_client_ip(request),
         user_agent=user_agent[:500] if user_agent else None,  # Truncate to max length
         location_city=None,  # Can be populated via IP geolocation service
@@ -33,7 +33,7 @@ def extract_device_info(request: Request) -> DeviceInfo:
     return device_info
 
 
-def parse_device_name(user_agent: str) -> Optional[str]:
+def parse_device_name(user_agent: str) -> str | None:
     """
     Parse user agent string to extract a friendly device name.
 
@@ -54,48 +54,48 @@ def parse_device_name(user_agent: str) -> Optional[str]:
     user_agent_lower = user_agent.lower()
 
     # Mobile devices (check first, as they can contain desktop patterns too)
-    if 'iphone' in user_agent_lower:
+    if "iphone" in user_agent_lower:
         return "iPhone"
-    elif 'ipad' in user_agent_lower:
+    elif "ipad" in user_agent_lower:
         return "iPad"
-    elif 'android' in user_agent_lower:
+    elif "android" in user_agent_lower:
         # Try to extract device model
-        android_match = re.search(r'android.*;\s*([^)]+)\s*build', user_agent_lower)
+        android_match = re.search(r"android.*;\s*([^)]+)\s*build", user_agent_lower)
         if android_match:
             device_model = android_match.group(1).strip()
             return f"Android ({device_model.title()})"
         return "Android device"
-    elif 'windows phone' in user_agent_lower:
+    elif "windows phone" in user_agent_lower:
         return "Windows Phone"
 
     # Tablets (check before desktop, as some tablets contain "android")
-    elif 'tablet' in user_agent_lower:
+    elif "tablet" in user_agent_lower:
         return "Tablet"
 
     # Smart TVs (check before desktop OS patterns)
-    elif any(tv in user_agent_lower for tv in ['smart-tv', 'smarttv']):
+    elif any(tv in user_agent_lower for tv in ["smart-tv", "smarttv"]):
         return "Smart TV"
 
     # Game consoles (check before desktop OS patterns, as Xbox contains "Windows")
-    elif 'playstation' in user_agent_lower:
+    elif "playstation" in user_agent_lower:
         return "PlayStation"
-    elif 'xbox' in user_agent_lower:
+    elif "xbox" in user_agent_lower:
         return "Xbox"
-    elif 'nintendo' in user_agent_lower:
+    elif "nintendo" in user_agent_lower:
         return "Nintendo"
 
     # Desktop operating systems
-    elif 'macintosh' in user_agent_lower or 'mac os x' in user_agent_lower:
+    elif "macintosh" in user_agent_lower or "mac os x" in user_agent_lower:
         # Try to extract browser
         browser = extract_browser(user_agent)
         return f"{browser} on Mac" if browser else "Mac"
-    elif 'windows' in user_agent_lower:
+    elif "windows" in user_agent_lower:
         browser = extract_browser(user_agent)
         return f"{browser} on Windows" if browser else "Windows PC"
-    elif 'linux' in user_agent_lower and 'android' not in user_agent_lower:
+    elif "linux" in user_agent_lower and "android" not in user_agent_lower:
         browser = extract_browser(user_agent)
         return f"{browser} on Linux" if browser else "Linux"
-    elif 'cros' in user_agent_lower:
+    elif "cros" in user_agent_lower:
         return "Chromebook"
 
     # Fallback: just return browser name if detected
@@ -106,7 +106,7 @@ def parse_device_name(user_agent: str) -> Optional[str]:
     return "Unknown device"
 
 
-def extract_browser(user_agent: str) -> Optional[str]:
+def extract_browser(user_agent: str) -> str | None:
     """
     Extract browser name from user agent string.
 
@@ -126,26 +126,26 @@ def extract_browser(user_agent: str) -> Optional[str]:
     user_agent_lower = user_agent.lower()
 
     # Check specific browsers (order matters - check Edge before Chrome!)
-    if 'edg/' in user_agent_lower or 'edge/' in user_agent_lower:
+    if "edg/" in user_agent_lower or "edge/" in user_agent_lower:
         return "Edge"
-    elif 'opr/' in user_agent_lower or 'opera' in user_agent_lower:
+    elif "opr/" in user_agent_lower or "opera" in user_agent_lower:
         return "Opera"
-    elif 'chrome/' in user_agent_lower:
+    elif "chrome/" in user_agent_lower:
         return "Chrome"
-    elif 'safari/' in user_agent_lower:
+    elif "safari/" in user_agent_lower:
         # Make sure it's actually Safari, not Chrome (which also contains "Safari")
-        if 'chrome' not in user_agent_lower:
+        if "chrome" not in user_agent_lower:
             return "Safari"
         return None
-    elif 'firefox/' in user_agent_lower:
+    elif "firefox/" in user_agent_lower:
         return "Firefox"
-    elif 'msie' in user_agent_lower or 'trident/' in user_agent_lower:
+    elif "msie" in user_agent_lower or "trident/" in user_agent_lower:
         return "Internet Explorer"
 
     return None
 
 
-def get_client_ip(request: Request) -> Optional[str]:
+def get_client_ip(request: Request) -> str | None:
     """
     Extract client IP address from request, considering proxy headers.
 
@@ -163,14 +163,14 @@ def get_client_ip(request: Request) -> Optional[str]:
         - request.client.host is fallback for direct connections
     """
     # Check X-Forwarded-For (common in proxied environments)
-    x_forwarded_for = request.headers.get('x-forwarded-for')
+    x_forwarded_for = request.headers.get("x-forwarded-for")
     if x_forwarded_for:
         # Get the first IP (original client)
-        client_ip = x_forwarded_for.split(',')[0].strip()
+        client_ip = x_forwarded_for.split(",")[0].strip()
         return client_ip
 
     # Check X-Real-IP (used by some proxies like nginx)
-    x_real_ip = request.headers.get('x-real-ip')
+    x_real_ip = request.headers.get("x-real-ip")
     if x_real_ip:
         return x_real_ip.strip()
 
@@ -195,9 +195,17 @@ def is_mobile_device(user_agent: str) -> bool:
         return False
 
     mobile_patterns = [
-        'mobile', 'android', 'iphone', 'ipad', 'ipod',
-        'blackberry', 'windows phone', 'webos', 'opera mini',
-        'iemobile', 'mobile safari'
+        "mobile",
+        "android",
+        "iphone",
+        "ipad",
+        "ipod",
+        "blackberry",
+        "windows phone",
+        "webos",
+        "opera mini",
+        "iemobile",
+        "mobile safari",
     ]
 
     user_agent_lower = user_agent.lower()
@@ -220,7 +228,7 @@ def get_device_type(user_agent: str) -> str:
     user_agent_lower = user_agent.lower()
 
     # Check for tablets first (they can contain "mobile" too)
-    if 'ipad' in user_agent_lower or 'tablet' in user_agent_lower:
+    if "ipad" in user_agent_lower or "tablet" in user_agent_lower:
         return "tablet"
 
     # Check for mobile
@@ -228,7 +236,7 @@ def get_device_type(user_agent: str) -> str:
         return "mobile"
 
     # Check for desktop OS patterns
-    if any(os in user_agent_lower for os in ['windows', 'macintosh', 'linux', 'cros']):
+    if any(os in user_agent_lower for os in ["windows", "macintosh", "linux", "cros"]):
         return "desktop"
 
     return "other"

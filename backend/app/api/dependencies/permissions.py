@@ -7,7 +7,7 @@ These dependencies are optional and flexible:
 - Use require_org_role for organization-specific access control
 - Projects can choose to use these or implement their own permission system
 """
-from typing import Optional
+
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
@@ -20,9 +20,7 @@ from app.models.user import User
 from app.models.user_organization import OrganizationRole
 
 
-def require_superuser(
-    current_user: User = Depends(get_current_user)
-) -> User:
+def require_superuser(current_user: User = Depends(get_current_user)) -> User:
     """
     Dependency to ensure the current user is a superuser.
 
@@ -36,7 +34,7 @@ def require_superuser(
     if not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Superuser privileges required"
+            detail="Superuser privileges required",
         )
     return current_user
 
@@ -62,7 +60,7 @@ class OrganizationPermission:
         self,
         organization_id: UUID,
         current_user: User = Depends(get_current_user),
-        db: AsyncSession = Depends(get_db)
+        db: AsyncSession = Depends(get_db),
     ) -> User:
         """
         Check if user has required role in the organization.
@@ -84,21 +82,19 @@ class OrganizationPermission:
 
         # Get user's role in organization
         user_role = await organization_crud.get_user_role_in_org(
-            db,
-            user_id=current_user.id,
-            organization_id=organization_id
+            db, user_id=current_user.id, organization_id=organization_id
         )
 
         if not user_role:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not a member of this organization"
+                detail="Not a member of this organization",
             )
 
         if user_role not in self.allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Role {user_role} not authorized. Required: {self.allowed_roles}"
+                detail=f"Role {user_role} not authorized. Required: {self.allowed_roles}",
             )
 
         return current_user
@@ -106,18 +102,18 @@ class OrganizationPermission:
 
 # Common permission presets for convenience
 require_org_owner = OrganizationPermission([OrganizationRole.OWNER])
-require_org_admin = OrganizationPermission([OrganizationRole.OWNER, OrganizationRole.ADMIN])
-require_org_member = OrganizationPermission([
-    OrganizationRole.OWNER,
-    OrganizationRole.ADMIN,
-    OrganizationRole.MEMBER
-])
+require_org_admin = OrganizationPermission(
+    [OrganizationRole.OWNER, OrganizationRole.ADMIN]
+)
+require_org_member = OrganizationPermission(
+    [OrganizationRole.OWNER, OrganizationRole.ADMIN, OrganizationRole.MEMBER]
+)
 
 
 async def require_org_membership(
     organization_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> User:
     """
     Ensure user is a member of the organization (any role).
@@ -128,15 +124,13 @@ async def require_org_membership(
         return current_user
 
     user_role = await organization_crud.get_user_role_in_org(
-        db,
-        user_id=current_user.id,
-        organization_id=organization_id
+        db, user_id=current_user.id, organization_id=organization_id
     )
 
     if not user_role:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not a member of this organization"
+            detail="Not a member of this organization",
         )
 
     return current_user

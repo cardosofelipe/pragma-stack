@@ -1,5 +1,4 @@
 import logging
-from typing import Optional, List
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
@@ -13,7 +12,7 @@ class Settings(BaseSettings):
     # Environment (must be before SECRET_KEY for validation)
     ENVIRONMENT: str = Field(
         default="development",
-        description="Environment: development, staging, or production"
+        description="Environment: development, staging, or production",
     )
 
     # Security: Content Security Policy
@@ -21,8 +20,7 @@ class Settings(BaseSettings):
     # Set to True for strict CSP (blocks most external resources)
     # Set to "relaxed" for modern frontend development
     CSP_MODE: str = Field(
-        default="relaxed",
-        description="CSP mode: 'strict', 'relaxed', or 'disabled'"
+        default="relaxed", description="CSP mode: 'strict', 'relaxed', or 'disabled'"
     )
 
     # Database configuration
@@ -31,7 +29,7 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: str = "5432"
     POSTGRES_DB: str = "app"
-    DATABASE_URL: Optional[str] = None
+    DATABASE_URL: str | None = None
     db_pool_size: int = 20  # Default connection pool size
     db_max_overflow: int = 50  # Maximum overflow connections
     db_pool_timeout: int = 30  # Seconds to wait for a connection
@@ -59,38 +57,36 @@ class Settings(BaseSettings):
     SECRET_KEY: str = Field(
         default="dev_only_insecure_key_change_in_production_32chars_min",
         min_length=32,
-        description="JWT signing key. MUST be changed in production. Generate with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+        description="JWT signing key. MUST be changed in production. Generate with: python -c 'import secrets; print(secrets.token_urlsafe(32))'",
     )
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15  # 15 minutes (production standard)
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7  # 7 days
 
     # CORS configuration
-    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000"]
+    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:3000"]
 
     # Frontend URL for email links
     FRONTEND_URL: str = Field(
         default="http://localhost:3000",
-        description="Frontend application URL for email links"
+        description="Frontend application URL for email links",
     )
 
     # Admin user
-    FIRST_SUPERUSER_EMAIL: Optional[str] = Field(
-        default=None,
-        description="Email for first superuser account"
+    FIRST_SUPERUSER_EMAIL: str | None = Field(
+        default=None, description="Email for first superuser account"
     )
-    FIRST_SUPERUSER_PASSWORD: Optional[str] = Field(
-        default=None,
-        description="Password for first superuser (min 12 characters)"
+    FIRST_SUPERUSER_PASSWORD: str | None = Field(
+        default=None, description="Password for first superuser (min 12 characters)"
     )
 
-    @field_validator('SECRET_KEY')
+    @field_validator("SECRET_KEY")
     @classmethod
     def validate_secret_key(cls, v: str, info) -> str:
         """Validate SECRET_KEY is secure, especially in production."""
         # Get environment from values if available
         values_data = info.data if info.data else {}
-        env = values_data.get('ENVIRONMENT', 'development')
+        env = values_data.get("ENVIRONMENT", "development")
 
         if v.startswith("your_secret_key_here"):
             if env == "production":
@@ -106,13 +102,15 @@ class Settings(BaseSettings):
             )
 
         if len(v) < 32:
-            raise ValueError("SECRET_KEY must be at least 32 characters long for security")
+            raise ValueError(
+                "SECRET_KEY must be at least 32 characters long for security"
+            )
 
         return v
 
-    @field_validator('FIRST_SUPERUSER_PASSWORD')
+    @field_validator("FIRST_SUPERUSER_PASSWORD")
     @classmethod
-    def validate_superuser_password(cls, v: Optional[str]) -> Optional[str]:
+    def validate_superuser_password(cls, v: str | None) -> str | None:
         """Validate superuser password strength."""
         if v is None:
             return v
@@ -121,7 +119,13 @@ class Settings(BaseSettings):
             raise ValueError("FIRST_SUPERUSER_PASSWORD must be at least 12 characters")
 
         # Check for common weak passwords
-        weak_passwords = {'admin123', 'Admin123', 'password123', 'Password123', '123456789012'}
+        weak_passwords = {
+            "admin123",
+            "Admin123",
+            "password123",
+            "Password123",
+            "123456789012",
+        }
         if v in weak_passwords:
             raise ValueError(
                 "FIRST_SUPERUSER_PASSWORD is too weak. "
@@ -144,7 +148,7 @@ class Settings(BaseSettings):
         "env_file": "../.env",
         "env_file_encoding": "utf-8",
         "case_sensitive": True,
-        "extra": "ignore"  # Ignore extra fields from .env (e.g., frontend-specific vars)
+        "extra": "ignore",  # Ignore extra fields from .env (e.g., frontend-specific vars)
     }
 
 

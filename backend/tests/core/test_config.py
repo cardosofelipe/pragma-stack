@@ -1,6 +1,7 @@
 # tests/core/test_config.py
 import pytest
 from pydantic import ValidationError
+
 from app.core.config import Settings
 
 
@@ -22,11 +23,15 @@ class TestSecretKeyValidation:
         with pytest.raises(ValidationError) as exc_info:
             Settings(SECRET_KEY=default_key, ENVIRONMENT="production")
 
-        assert "must be set to a secure random value in production" in str(exc_info.value)
+        assert "must be set to a secure random value in production" in str(
+            exc_info.value
+        )
 
     def test_default_secret_key_in_development_allows_with_warning(self, caplog):
         """Test that default SECRET_KEY in development is allowed but warns"""
-        settings = Settings(SECRET_KEY="your_secret_key_here" + "x" * 14, ENVIRONMENT="development")
+        settings = Settings(
+            SECRET_KEY="your_secret_key_here" + "x" * 14, ENVIRONMENT="development"
+        )
 
         assert settings.SECRET_KEY == "your_secret_key_here" + "x" * 14
         # Note: The warning happens during validation, which we've seen works
@@ -44,19 +49,13 @@ class TestSuperuserPasswordValidation:
 
     def test_none_password_accepted(self):
         """Test that None password is accepted (optional field)"""
-        settings = Settings(
-            SECRET_KEY="a" * 32,
-            FIRST_SUPERUSER_PASSWORD=None
-        )
+        settings = Settings(SECRET_KEY="a" * 32, FIRST_SUPERUSER_PASSWORD=None)
         assert settings.FIRST_SUPERUSER_PASSWORD is None
 
     def test_password_too_short_raises_error(self):
         """Test that password shorter than 12 characters raises error"""
         with pytest.raises(ValidationError) as exc_info:
-            Settings(
-                SECRET_KEY="a" * 32,
-                FIRST_SUPERUSER_PASSWORD="Short1"
-            )
+            Settings(SECRET_KEY="a" * 32, FIRST_SUPERUSER_PASSWORD="Short1")
 
         assert "must be at least 12 characters" in str(exc_info.value)
 
@@ -64,14 +63,11 @@ class TestSuperuserPasswordValidation:
         """Test that common weak passwords are rejected"""
         # Test with the exact weak passwords from the validator
         # These are in the weak_passwords set and should be rejected
-        weak_passwords = ['123456789012']  # Exactly 12 chars, in the weak set
+        weak_passwords = ["123456789012"]  # Exactly 12 chars, in the weak set
 
         for weak_pwd in weak_passwords:
             with pytest.raises(ValidationError) as exc_info:
-                Settings(
-                    SECRET_KEY="a" * 32,
-                    FIRST_SUPERUSER_PASSWORD=weak_pwd
-                )
+                Settings(SECRET_KEY="a" * 32, FIRST_SUPERUSER_PASSWORD=weak_pwd)
             # Should get "too weak" message
             error_str = str(exc_info.value)
             assert "too weak" in error_str
@@ -79,30 +75,21 @@ class TestSuperuserPasswordValidation:
     def test_password_without_lowercase_rejected(self):
         """Test that password without lowercase is rejected"""
         with pytest.raises(ValidationError) as exc_info:
-            Settings(
-                SECRET_KEY="a" * 32,
-                FIRST_SUPERUSER_PASSWORD="ALLUPPERCASE123"
-            )
+            Settings(SECRET_KEY="a" * 32, FIRST_SUPERUSER_PASSWORD="ALLUPPERCASE123")
 
         assert "must contain lowercase, uppercase, and digits" in str(exc_info.value)
 
     def test_password_without_uppercase_rejected(self):
         """Test that password without uppercase is rejected"""
         with pytest.raises(ValidationError) as exc_info:
-            Settings(
-                SECRET_KEY="a" * 32,
-                FIRST_SUPERUSER_PASSWORD="alllowercase123"
-            )
+            Settings(SECRET_KEY="a" * 32, FIRST_SUPERUSER_PASSWORD="alllowercase123")
 
         assert "must contain lowercase, uppercase, and digits" in str(exc_info.value)
 
     def test_password_without_digit_rejected(self):
         """Test that password without digit is rejected"""
         with pytest.raises(ValidationError) as exc_info:
-            Settings(
-                SECRET_KEY="a" * 32,
-                FIRST_SUPERUSER_PASSWORD="NoDigitsHere"
-            )
+            Settings(SECRET_KEY="a" * 32, FIRST_SUPERUSER_PASSWORD="NoDigitsHere")
 
         assert "must contain lowercase, uppercase, and digits" in str(exc_info.value)
 
@@ -110,8 +97,7 @@ class TestSuperuserPasswordValidation:
         """Test that strong password is accepted"""
         strong_password = "StrongPassword123!"
         settings = Settings(
-            SECRET_KEY="a" * 32,
-            FIRST_SUPERUSER_PASSWORD=strong_password
+            SECRET_KEY="a" * 32, FIRST_SUPERUSER_PASSWORD=strong_password
         )
 
         assert settings.FIRST_SUPERUSER_PASSWORD == strong_password
@@ -150,7 +136,7 @@ class TestDatabaseConfiguration:
             POSTGRES_HOST="testhost",
             POSTGRES_PORT="5432",
             POSTGRES_DB="testdb",
-            DATABASE_URL=None  # Don't use explicit URL
+            DATABASE_URL=None,  # Don't use explicit URL
         )
 
         expected_url = "postgresql://testuser:testpass@testhost:5432/testdb"
@@ -159,10 +145,7 @@ class TestDatabaseConfiguration:
     def test_explicit_database_url_used_when_set(self):
         """Test that explicit DATABASE_URL is used when provided"""
         explicit_url = "postgresql://explicit:pass@host:5432/db"
-        settings = Settings(
-            SECRET_KEY="a" * 32,
-            DATABASE_URL=explicit_url
-        )
+        settings = Settings(SECRET_KEY="a" * 32, DATABASE_URL=explicit_url)
 
         assert settings.database_url == explicit_url
 

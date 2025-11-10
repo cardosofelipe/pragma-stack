@@ -4,9 +4,9 @@ Async database initialization script.
 
 Creates the first superuser if configured and doesn't already exist.
 """
+
 import asyncio
 import logging
-from typing import Optional
 
 from app.core.config import settings
 from app.core.database import SessionLocal, engine
@@ -17,7 +17,7 @@ from app.schemas.users import UserCreate
 logger = logging.getLogger(__name__)
 
 
-async def init_db() -> Optional[User]:
+async def init_db() -> User | None:
     """
     Initialize database with first superuser if settings are configured and user doesn't exist.
 
@@ -49,7 +49,7 @@ async def init_db() -> Optional[User]:
                 password=superuser_password,
                 first_name="Admin",
                 last_name="User",
-                is_superuser=True
+                is_superuser=True,
             )
 
             user = await user_crud.create(session, obj_in=user_in)
@@ -70,13 +70,13 @@ async def main():
     # Configure logging to show info logs
     logging.basicConfig(
         level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
     try:
         user = await init_db()
         if user:
-            print(f"✓ Database initialized successfully")
+            print("✓ Database initialized successfully")
             print(f"✓ Superuser: {user.email}")
         else:
             print("✗ Failed to initialize database")

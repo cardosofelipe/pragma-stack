@@ -3,11 +3,12 @@ Session management endpoints.
 
 Allows users to view and manage their active sessions across devices.
 """
+
 import logging
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,11 +16,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies.auth import get_current_user
 from app.core.auth import decode_token
 from app.core.database import get_db
-from app.core.exceptions import NotFoundError, AuthorizationError, ErrorCode
+from app.core.exceptions import AuthorizationError, ErrorCode, NotFoundError
 from app.crud.session import session as session_crud
 from app.models.user import User
 from app.schemas.common import MessageResponse
-from app.schemas.sessions import SessionResponse, SessionListResponse
+from app.schemas.sessions import SessionListResponse, SessionResponse
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -39,13 +40,13 @@ limiter = Limiter(key_func=get_remote_address)
 
     **Rate Limit**: 30 requests/minute
     """,
-    operation_id="list_my_sessions"
+    operation_id="list_my_sessions",
 )
 @limiter.limit("30/minute")
 async def list_my_sessions(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     List all active sessions for the current user.
@@ -60,18 +61,15 @@ async def list_my_sessions(
     try:
         # Get all active sessions for user
         sessions = await session_crud.get_user_sessions(
-            db,
-            user_id=str(current_user.id),
-            active_only=True
+            db, user_id=str(current_user.id), active_only=True
         )
 
         # Try to identify current session from Authorization header
-        current_session_jti = None
         auth_header = request.headers.get("authorization")
         if auth_header and auth_header.startswith("Bearer "):
             try:
                 access_token = auth_header.split(" ")[1]
-                token_payload = decode_token(access_token)
+                decode_token(access_token)
                 # Note: Access tokens don't have JTI by default, but we can try
                 # For now, we'll mark current based on most recent activity
             except Exception:
@@ -90,22 +88,27 @@ async def list_my_sessions(
                 last_used_at=s.last_used_at,
                 created_at=s.created_at,
                 expires_at=s.expires_at,
-                is_current=(s == sessions[0] if sessions else False)  # Most recent = current
+                is_current=(
+                    s == sessions[0] if sessions else False
+                ),  # Most recent = current
             )
             session_responses.append(session_response)
 
-        logger.info(f"User {current_user.id} listed {len(session_responses)} active sessions")
+        logger.info(
+            f"User {current_user.id} listed {len(session_responses)} active sessions"
+        )
 
         return SessionListResponse(
-            sessions=session_responses,
-            total=len(session_responses)
+            sessions=session_responses, total=len(session_responses)
         )
 
     except Exception as e:
-        logger.error(f"Error listing sessions for user {current_user.id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Error listing sessions for user {current_user.id}: {e!s}", exc_info=True
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve sessions"
+            detail="Failed to retrieve sessions",
         )
 
 
@@ -122,14 +125,14 @@ async def list_my_sessions(
 
     **Rate Limit**: 10 requests/minute
     """,
-    operation_id="revoke_session"
+    operation_id="revoke_session",
 )
 @limiter.limit("10/minute")
 async def revoke_session(
     request: Request,
     session_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Revoke a specific session by ID.
@@ -149,7 +152,7 @@ async def revoke_session(
         if not session:
             raise NotFoundError(
                 message=f"Session {session_id} not found",
-                error_code=ErrorCode.NOT_FOUND
+                error_code=ErrorCode.NOT_FOUND,
             )
 
         # Verify session belongs to current user
@@ -160,7 +163,7 @@ async def revoke_session(
             )
             raise AuthorizationError(
                 message="You can only revoke your own sessions",
-                error_code=ErrorCode.INSUFFICIENT_PERMISSIONS
+                error_code=ErrorCode.INSUFFICIENT_PERMISSIONS,
             )
 
         # Deactivate the session
@@ -173,16 +176,16 @@ async def revoke_session(
 
         return MessageResponse(
             success=True,
-            message=f"Session revoked: {session.device_name or 'Unknown device'}"
+            message=f"Session revoked: {session.device_name or 'Unknown device'}",
         )
 
     except (NotFoundError, AuthorizationError):
         raise
     except Exception as e:
-        logger.error(f"Error revoking session {session_id}: {str(e)}", exc_info=True)
+        logger.error(f"Error revoking session {session_id}: {e!s}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to revoke session"
+            detail="Failed to revoke session",
         )
 
 
@@ -198,13 +201,13 @@ async def revoke_session(
 
     **Rate Limit**: 5 requests/minute
     """,
-    operation_id="cleanup_expired_sessions"
+    operation_id="cleanup_expired_sessions",
 )
 @limiter.limit("5/minute")
 async def cleanup_expired_sessions(
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Cleanup expired sessions for the current user.
@@ -219,21 +222,24 @@ async def cleanup_expired_sessions(
     try:
         # Use optimized bulk DELETE instead of N individual deletes
         deleted_count = await session_crud.cleanup_expired_for_user(
-            db,
-            user_id=str(current_user.id)
+            db, user_id=str(current_user.id)
         )
 
-        logger.info(f"User {current_user.id} cleaned up {deleted_count} expired sessions")
+        logger.info(
+            f"User {current_user.id} cleaned up {deleted_count} expired sessions"
+        )
 
         return MessageResponse(
-            success=True,
-            message=f"Cleaned up {deleted_count} expired sessions"
+            success=True, message=f"Cleaned up {deleted_count} expired sessions"
         )
 
     except Exception as e:
-        logger.error(f"Error cleaning up sessions for user {current_user.id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Error cleaning up sessions for user {current_user.id}: {e!s}",
+            exc_info=True,
+        )
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to cleanup sessions"
+            detail="Failed to cleanup sessions",
         )

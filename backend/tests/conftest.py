@@ -1,28 +1,32 @@
 # tests/conftest.py
 import os
 import uuid
-from datetime import datetime, timezone
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 # Set IS_TEST environment variable BEFORE importing app
 # This prevents the scheduler from starting during tests
 os.environ["IS_TEST"] = "True"
 
-from app.main import app
-from app.core.database import get_db
-from app.models.user import User
 from app.core.auth import get_password_hash
-from app.utils.test_utils import setup_test_db, teardown_test_db, setup_async_test_db, teardown_async_test_db
+from app.core.database import get_db
+from app.main import app
+from app.models.user import User
+from app.utils.test_utils import (
+    setup_async_test_db,
+    setup_test_db,
+    teardown_async_test_db,
+    teardown_test_db,
+)
 
 
 @pytest.fixture(scope="function")
 def db_session():
     """
     Creates a fresh SQLite in-memory database for each test function.
-    
+
     Yields a SQLAlchemy session that can be used for testing.
     """
     # Set up the database
@@ -46,6 +50,7 @@ async def async_test_db():
     yield test_engine, AsyncTestingSessionLocal
     await teardown_async_test_db(test_engine)
 
+
 @pytest.fixture
 def user_create_data():
     return {
@@ -55,7 +60,7 @@ def user_create_data():
         "last_name": "User",
         "phone_number": "+1234567890",
         "is_superuser": False,
-        "preferences": None
+        "preferences": None,
     }
 
 
@@ -102,7 +107,7 @@ async def client(async_test_db):
 
     This overrides the get_db dependency to use the test database.
     """
-    test_engine, AsyncTestingSessionLocal = async_test_db
+    _test_engine, AsyncTestingSessionLocal = async_test_db
 
     async def override_get_db():
         async with AsyncTestingSessionLocal() as session:
@@ -176,7 +181,7 @@ async def async_test_user(async_test_db):
 
     Password: TestPassword123
     """
-    test_engine, AsyncTestingSessionLocal = async_test_db
+    _test_engine, AsyncTestingSessionLocal = async_test_db
     async with AsyncTestingSessionLocal() as session:
         user = User(
             id=uuid.uuid4(),
@@ -202,7 +207,7 @@ async def async_test_superuser(async_test_db):
 
     Password: SuperPassword123
     """
-    test_engine, AsyncTestingSessionLocal = async_test_db
+    _test_engine, AsyncTestingSessionLocal = async_test_db
     async with AsyncTestingSessionLocal() as session:
         user = User(
             id=uuid.uuid4(),

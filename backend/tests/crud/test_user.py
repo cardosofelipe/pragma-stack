@@ -2,12 +2,10 @@
 """
 Comprehensive tests for async user CRUD operations.
 """
+
 import pytest
-from datetime import datetime, timezone
-from uuid import uuid4
 
 from app.crud.user import user as user_crud
-from app.models.user import User
 from app.schemas.users import UserCreate, UserUpdate
 
 
@@ -17,7 +15,7 @@ class TestGetByEmail:
     @pytest.mark.asyncio
     async def test_get_by_email_success(self, async_test_db, async_test_user):
         """Test getting user by email."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             result = await user_crud.get_by_email(session, email=async_test_user.email)
@@ -28,10 +26,12 @@ class TestGetByEmail:
     @pytest.mark.asyncio
     async def test_get_by_email_not_found(self, async_test_db):
         """Test getting non-existent email returns None."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            result = await user_crud.get_by_email(session, email="nonexistent@example.com")
+            result = await user_crud.get_by_email(
+                session, email="nonexistent@example.com"
+            )
             assert result is None
 
 
@@ -41,7 +41,7 @@ class TestCreate:
     @pytest.mark.asyncio
     async def test_create_user_success(self, async_test_db):
         """Test successfully creating a user_crud."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             user_data = UserCreate(
@@ -49,7 +49,7 @@ class TestCreate:
                 password="SecurePass123!",
                 first_name="New",
                 last_name="User",
-                phone_number="+1234567890"
+                phone_number="+1234567890",
             )
             result = await user_crud.create(session, obj_in=user_data)
 
@@ -65,7 +65,7 @@ class TestCreate:
     @pytest.mark.asyncio
     async def test_create_superuser_success(self, async_test_db):
         """Test creating a superuser."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             user_data = UserCreate(
@@ -73,7 +73,7 @@ class TestCreate:
                 password="SuperPass123!",
                 first_name="Super",
                 last_name="User",
-                is_superuser=True
+                is_superuser=True,
             )
             result = await user_crud.create(session, obj_in=user_data)
 
@@ -83,14 +83,14 @@ class TestCreate:
     @pytest.mark.asyncio
     async def test_create_duplicate_email_fails(self, async_test_db, async_test_user):
         """Test creating user with duplicate email raises ValueError."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             user_data = UserCreate(
                 email=async_test_user.email,  # Duplicate email
                 password="AnotherPass123!",
                 first_name="Duplicate",
-                last_name="User"
+                last_name="User",
             )
 
             with pytest.raises(ValueError) as exc_info:
@@ -105,16 +105,14 @@ class TestUpdate:
     @pytest.mark.asyncio
     async def test_update_user_basic_fields(self, async_test_db, async_test_user):
         """Test updating basic user fields."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             # Get fresh copy of user
             user = await user_crud.get(session, id=str(async_test_user.id))
 
             update_data = UserUpdate(
-                first_name="Updated",
-                last_name="Name",
-                phone_number="+9876543210"
+                first_name="Updated", last_name="Name", phone_number="+9876543210"
             )
             result = await user_crud.update(session, db_obj=user, obj_in=update_data)
 
@@ -125,7 +123,7 @@ class TestUpdate:
     @pytest.mark.asyncio
     async def test_update_user_password(self, async_test_db):
         """Test updating user password."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create a fresh user for this test
         async with AsyncTestingSessionLocal() as session:
@@ -133,7 +131,7 @@ class TestUpdate:
                 email="passwordtest@example.com",
                 password="OldPassword123!",
                 first_name="Pass",
-                last_name="Test"
+                last_name="Test",
             )
             user = await user_crud.create(session, obj_in=user_data)
             user_id = user.id
@@ -149,12 +147,14 @@ class TestUpdate:
             await session.refresh(result)
             assert result.password_hash != old_password_hash
             assert result.password_hash is not None
-            assert "NewDifferentPassword123!" not in result.password_hash  # Should be hashed
+            assert (
+                "NewDifferentPassword123!" not in result.password_hash
+            )  # Should be hashed
 
     @pytest.mark.asyncio
     async def test_update_user_with_dict(self, async_test_db, async_test_user):
         """Test updating user with dictionary."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             user = await user_crud.get(session, id=str(async_test_user.id))
@@ -171,13 +171,11 @@ class TestGetMultiWithTotal:
     @pytest.mark.asyncio
     async def test_get_multi_with_total_basic(self, async_test_db, async_test_user):
         """Test basic pagination."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             users, total = await user_crud.get_multi_with_total(
-                session,
-                skip=0,
-                limit=10
+                session, skip=0, limit=10
             )
             assert total >= 1
             assert len(users) >= 1
@@ -186,7 +184,7 @@ class TestGetMultiWithTotal:
     @pytest.mark.asyncio
     async def test_get_multi_with_total_sorting_asc(self, async_test_db):
         """Test sorting in ascending order."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create multiple users
         async with AsyncTestingSessionLocal() as session:
@@ -195,17 +193,13 @@ class TestGetMultiWithTotal:
                     email=f"sort{i}@example.com",
                     password="SecurePass123!",
                     first_name=f"User{i}",
-                    last_name="Test"
+                    last_name="Test",
                 )
                 await user_crud.create(session, obj_in=user_data)
 
         async with AsyncTestingSessionLocal() as session:
-            users, total = await user_crud.get_multi_with_total(
-                session,
-                skip=0,
-                limit=10,
-                sort_by="email",
-                sort_order="asc"
+            users, _total = await user_crud.get_multi_with_total(
+                session, skip=0, limit=10, sort_by="email", sort_order="asc"
             )
 
             # Check if sorted (at least the test users)
@@ -216,7 +210,7 @@ class TestGetMultiWithTotal:
     @pytest.mark.asyncio
     async def test_get_multi_with_total_sorting_desc(self, async_test_db):
         """Test sorting in descending order."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create multiple users
         async with AsyncTestingSessionLocal() as session:
@@ -225,17 +219,13 @@ class TestGetMultiWithTotal:
                     email=f"desc{i}@example.com",
                     password="SecurePass123!",
                     first_name=f"User{i}",
-                    last_name="Test"
+                    last_name="Test",
                 )
                 await user_crud.create(session, obj_in=user_data)
 
         async with AsyncTestingSessionLocal() as session:
-            users, total = await user_crud.get_multi_with_total(
-                session,
-                skip=0,
-                limit=10,
-                sort_by="email",
-                sort_order="desc"
+            users, _total = await user_crud.get_multi_with_total(
+                session, skip=0, limit=10, sort_by="email", sort_order="desc"
             )
 
             # Check if sorted descending (at least the test users)
@@ -246,7 +236,7 @@ class TestGetMultiWithTotal:
     @pytest.mark.asyncio
     async def test_get_multi_with_total_filtering(self, async_test_db):
         """Test filtering by field."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create active and inactive users
         async with AsyncTestingSessionLocal() as session:
@@ -254,7 +244,7 @@ class TestGetMultiWithTotal:
                 email="active@example.com",
                 password="SecurePass123!",
                 first_name="Active",
-                last_name="User"
+                last_name="User",
             )
             await user_crud.create(session, obj_in=active_user)
 
@@ -262,23 +252,18 @@ class TestGetMultiWithTotal:
                 email="inactive@example.com",
                 password="SecurePass123!",
                 first_name="Inactive",
-                last_name="User"
+                last_name="User",
             )
             created_inactive = await user_crud.create(session, obj_in=inactive_user)
 
             # Deactivate the user
             await user_crud.update(
-                session,
-                db_obj=created_inactive,
-                obj_in={"is_active": False}
+                session, db_obj=created_inactive, obj_in={"is_active": False}
             )
 
         async with AsyncTestingSessionLocal() as session:
-            users, total = await user_crud.get_multi_with_total(
-                session,
-                skip=0,
-                limit=100,
-                filters={"is_active": True}
+            users, _total = await user_crud.get_multi_with_total(
+                session, skip=0, limit=100, filters={"is_active": True}
             )
 
             # All returned users should be active
@@ -287,7 +272,7 @@ class TestGetMultiWithTotal:
     @pytest.mark.asyncio
     async def test_get_multi_with_total_search(self, async_test_db):
         """Test search functionality."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create user with unique name
         async with AsyncTestingSessionLocal() as session:
@@ -295,16 +280,13 @@ class TestGetMultiWithTotal:
                 email="searchable@example.com",
                 password="SecurePass123!",
                 first_name="Searchable",
-                last_name="UserName"
+                last_name="UserName",
             )
             await user_crud.create(session, obj_in=user_data)
 
         async with AsyncTestingSessionLocal() as session:
             users, total = await user_crud.get_multi_with_total(
-                session,
-                skip=0,
-                limit=100,
-                search="Searchable"
+                session, skip=0, limit=100, search="Searchable"
             )
 
             assert total >= 1
@@ -313,7 +295,7 @@ class TestGetMultiWithTotal:
     @pytest.mark.asyncio
     async def test_get_multi_with_total_pagination(self, async_test_db):
         """Test pagination with skip and limit."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create multiple users
         async with AsyncTestingSessionLocal() as session:
@@ -322,23 +304,19 @@ class TestGetMultiWithTotal:
                     email=f"page{i}@example.com",
                     password="SecurePass123!",
                     first_name=f"Page{i}",
-                    last_name="User"
+                    last_name="User",
                 )
                 await user_crud.create(session, obj_in=user_data)
 
         async with AsyncTestingSessionLocal() as session:
             # Get first page
             users_page1, total = await user_crud.get_multi_with_total(
-                session,
-                skip=0,
-                limit=2
+                session, skip=0, limit=2
             )
 
             # Get second page
             users_page2, total2 = await user_crud.get_multi_with_total(
-                session,
-                skip=2,
-                limit=2
+                session, skip=2, limit=2
             )
 
             # Total should be same
@@ -349,7 +327,7 @@ class TestGetMultiWithTotal:
     @pytest.mark.asyncio
     async def test_get_multi_with_total_validation_negative_skip(self, async_test_db):
         """Test validation fails for negative skip."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             with pytest.raises(ValueError) as exc_info:
@@ -360,7 +338,7 @@ class TestGetMultiWithTotal:
     @pytest.mark.asyncio
     async def test_get_multi_with_total_validation_negative_limit(self, async_test_db):
         """Test validation fails for negative limit."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             with pytest.raises(ValueError) as exc_info:
@@ -371,7 +349,7 @@ class TestGetMultiWithTotal:
     @pytest.mark.asyncio
     async def test_get_multi_with_total_validation_max_limit(self, async_test_db):
         """Test validation fails for limit > 1000."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             with pytest.raises(ValueError) as exc_info:
@@ -386,7 +364,7 @@ class TestBulkUpdateStatus:
     @pytest.mark.asyncio
     async def test_bulk_update_status_success(self, async_test_db):
         """Test bulk updating user status."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create multiple users
         user_ids = []
@@ -396,7 +374,7 @@ class TestBulkUpdateStatus:
                     email=f"bulk{i}@example.com",
                     password="SecurePass123!",
                     first_name=f"Bulk{i}",
-                    last_name="User"
+                    last_name="User",
                 )
                 user = await user_crud.create(session, obj_in=user_data)
                 user_ids.append(user.id)
@@ -404,9 +382,7 @@ class TestBulkUpdateStatus:
         # Bulk deactivate
         async with AsyncTestingSessionLocal() as session:
             count = await user_crud.bulk_update_status(
-                session,
-                user_ids=user_ids,
-                is_active=False
+                session, user_ids=user_ids, is_active=False
             )
             assert count == 3
 
@@ -419,20 +395,18 @@ class TestBulkUpdateStatus:
     @pytest.mark.asyncio
     async def test_bulk_update_status_empty_list(self, async_test_db):
         """Test bulk update with empty list returns 0."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             count = await user_crud.bulk_update_status(
-                session,
-                user_ids=[],
-                is_active=False
+                session, user_ids=[], is_active=False
             )
             assert count == 0
 
     @pytest.mark.asyncio
     async def test_bulk_update_status_reactivate(self, async_test_db):
         """Test bulk reactivating users."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create inactive user
         async with AsyncTestingSessionLocal() as session:
@@ -440,7 +414,7 @@ class TestBulkUpdateStatus:
                 email="reactivate@example.com",
                 password="SecurePass123!",
                 first_name="Reactivate",
-                last_name="User"
+                last_name="User",
             )
             user = await user_crud.create(session, obj_in=user_data)
             # Deactivate
@@ -450,9 +424,7 @@ class TestBulkUpdateStatus:
         # Reactivate
         async with AsyncTestingSessionLocal() as session:
             count = await user_crud.bulk_update_status(
-                session,
-                user_ids=[user_id],
-                is_active=True
+                session, user_ids=[user_id], is_active=True
             )
             assert count == 1
 
@@ -468,7 +440,7 @@ class TestBulkSoftDelete:
     @pytest.mark.asyncio
     async def test_bulk_soft_delete_success(self, async_test_db):
         """Test bulk soft deleting users."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create multiple users
         user_ids = []
@@ -478,17 +450,14 @@ class TestBulkSoftDelete:
                     email=f"delete{i}@example.com",
                     password="SecurePass123!",
                     first_name=f"Delete{i}",
-                    last_name="User"
+                    last_name="User",
                 )
                 user = await user_crud.create(session, obj_in=user_data)
                 user_ids.append(user.id)
 
         # Bulk delete
         async with AsyncTestingSessionLocal() as session:
-            count = await user_crud.bulk_soft_delete(
-                session,
-                user_ids=user_ids
-            )
+            count = await user_crud.bulk_soft_delete(session, user_ids=user_ids)
             assert count == 3
 
         # Verify all are soft deleted
@@ -501,7 +470,7 @@ class TestBulkSoftDelete:
     @pytest.mark.asyncio
     async def test_bulk_soft_delete_with_exclusion(self, async_test_db):
         """Test bulk soft delete with excluded user_crud."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create multiple users
         user_ids = []
@@ -511,7 +480,7 @@ class TestBulkSoftDelete:
                     email=f"exclude{i}@example.com",
                     password="SecurePass123!",
                     first_name=f"Exclude{i}",
-                    last_name="User"
+                    last_name="User",
                 )
                 user = await user_crud.create(session, obj_in=user_data)
                 user_ids.append(user.id)
@@ -520,9 +489,7 @@ class TestBulkSoftDelete:
         exclude_id = user_ids[0]
         async with AsyncTestingSessionLocal() as session:
             count = await user_crud.bulk_soft_delete(
-                session,
-                user_ids=user_ids,
-                exclude_user_id=exclude_id
+                session, user_ids=user_ids, exclude_user_id=exclude_id
             )
             assert count == 2  # Only 2 deleted
 
@@ -534,19 +501,16 @@ class TestBulkSoftDelete:
     @pytest.mark.asyncio
     async def test_bulk_soft_delete_empty_list(self, async_test_db):
         """Test bulk delete with empty list returns 0."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            count = await user_crud.bulk_soft_delete(
-                session,
-                user_ids=[]
-            )
+            count = await user_crud.bulk_soft_delete(session, user_ids=[])
             assert count == 0
 
     @pytest.mark.asyncio
     async def test_bulk_soft_delete_all_excluded(self, async_test_db):
         """Test bulk delete where all users are excluded."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create user
         async with AsyncTestingSessionLocal() as session:
@@ -554,7 +518,7 @@ class TestBulkSoftDelete:
                 email="onlyuser@example.com",
                 password="SecurePass123!",
                 first_name="Only",
-                last_name="User"
+                last_name="User",
             )
             user = await user_crud.create(session, obj_in=user_data)
             user_id = user.id
@@ -562,16 +526,14 @@ class TestBulkSoftDelete:
         # Try to delete but exclude
         async with AsyncTestingSessionLocal() as session:
             count = await user_crud.bulk_soft_delete(
-                session,
-                user_ids=[user_id],
-                exclude_user_id=user_id
+                session, user_ids=[user_id], exclude_user_id=user_id
             )
             assert count == 0
 
     @pytest.mark.asyncio
     async def test_bulk_soft_delete_already_deleted(self, async_test_db):
         """Test bulk delete doesn't re-delete already deleted users."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create and delete user
         async with AsyncTestingSessionLocal() as session:
@@ -579,7 +541,7 @@ class TestBulkSoftDelete:
                 email="predeleted@example.com",
                 password="SecurePass123!",
                 first_name="PreDeleted",
-                last_name="User"
+                last_name="User",
             )
             user = await user_crud.create(session, obj_in=user_data)
             user_id = user.id
@@ -589,10 +551,7 @@ class TestBulkSoftDelete:
 
         # Try to delete again
         async with AsyncTestingSessionLocal() as session:
-            count = await user_crud.bulk_soft_delete(
-                session,
-                user_ids=[user_id]
-            )
+            count = await user_crud.bulk_soft_delete(session, user_ids=[user_id])
             assert count == 0  # Already deleted
 
 
@@ -602,7 +561,7 @@ class TestUtilityMethods:
     @pytest.mark.asyncio
     async def test_is_active_true(self, async_test_db, async_test_user):
         """Test is_active returns True for active user_crud."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             user = await user_crud.get(session, id=str(async_test_user.id))
@@ -611,14 +570,14 @@ class TestUtilityMethods:
     @pytest.mark.asyncio
     async def test_is_active_false(self, async_test_db):
         """Test is_active returns False for inactive user_crud."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             user_data = UserCreate(
                 email="inactive2@example.com",
                 password="SecurePass123!",
                 first_name="Inactive",
-                last_name="User"
+                last_name="User",
             )
             user = await user_crud.create(session, obj_in=user_data)
             await user_crud.update(session, db_obj=user, obj_in={"is_active": False})
@@ -628,7 +587,7 @@ class TestUtilityMethods:
     @pytest.mark.asyncio
     async def test_is_superuser_true(self, async_test_db, async_test_superuser):
         """Test is_superuser returns True for superuser."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             user = await user_crud.get(session, id=str(async_test_superuser.id))
@@ -637,7 +596,7 @@ class TestUtilityMethods:
     @pytest.mark.asyncio
     async def test_is_superuser_false(self, async_test_db, async_test_user):
         """Test is_superuser returns False for regular user_crud."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             user = await user_crud.get(session, id=str(async_test_user.id))
@@ -654,42 +613,52 @@ class TestUserExceptionHandlers:
     async def test_get_by_email_database_error(self, async_test_db):
         """Test get_by_email handles database errors (covers lines 30-32)."""
         from unittest.mock import patch
-        test_engine, AsyncTestingSessionLocal = async_test_db
+
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            with patch.object(session, 'execute', side_effect=Exception("Database query failed")):
+            with patch.object(
+                session, "execute", side_effect=Exception("Database query failed")
+            ):
                 with pytest.raises(Exception, match="Database query failed"):
                     await user_crud.get_by_email(session, email="test@example.com")
 
     @pytest.mark.asyncio
-    async def test_bulk_update_status_database_error(self, async_test_db, async_test_user):
+    async def test_bulk_update_status_database_error(
+        self, async_test_db, async_test_user
+    ):
         """Test bulk_update_status handles database errors (covers lines 205-208)."""
-        from unittest.mock import patch, AsyncMock
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        from unittest.mock import AsyncMock, patch
+
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             # Mock execute to fail
-            with patch.object(session, 'execute', side_effect=Exception("Bulk update failed")):
-                with patch.object(session, 'rollback', new_callable=AsyncMock):
+            with patch.object(
+                session, "execute", side_effect=Exception("Bulk update failed")
+            ):
+                with patch.object(session, "rollback", new_callable=AsyncMock):
                     with pytest.raises(Exception, match="Bulk update failed"):
                         await user_crud.bulk_update_status(
-                            session,
-                            user_ids=[async_test_user.id],
-                            is_active=False
+                            session, user_ids=[async_test_user.id], is_active=False
                         )
 
     @pytest.mark.asyncio
-    async def test_bulk_soft_delete_database_error(self, async_test_db, async_test_user):
+    async def test_bulk_soft_delete_database_error(
+        self, async_test_db, async_test_user
+    ):
         """Test bulk_soft_delete handles database errors (covers lines 257-260)."""
-        from unittest.mock import patch, AsyncMock
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        from unittest.mock import AsyncMock, patch
+
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             # Mock execute to fail
-            with patch.object(session, 'execute', side_effect=Exception("Bulk delete failed")):
-                with patch.object(session, 'rollback', new_callable=AsyncMock):
+            with patch.object(
+                session, "execute", side_effect=Exception("Bulk delete failed")
+            ):
+                with patch.object(session, "rollback", new_callable=AsyncMock):
                     with pytest.raises(Exception, match="Bulk delete failed"):
                         await user_crud.bulk_soft_delete(
-                            session,
-                            user_ids=[async_test_user.id]
+                            session, user_ids=[async_test_user.id]
                         )

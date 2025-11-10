@@ -9,18 +9,19 @@ Covers:
 - init_async_db
 - close_async_db
 """
+
+from unittest.mock import patch
+
 import pytest
-import pytest_asyncio
-from unittest.mock import patch, MagicMock, AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import (
-    get_async_database_url,
-    get_db,
     async_transaction_scope,
     check_async_database_health,
-    init_async_db,
     close_async_db,
+    get_async_database_url,
+    get_db,
+    init_async_db,
 )
 
 
@@ -88,12 +89,13 @@ class TestAsyncTransactionScope:
     async def test_transaction_scope_commits_on_success(self, async_test_db):
         """Test that successful operations are committed (covers line 138)."""
         # Mock the transaction scope to use test database
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
-        with patch('app.core.database.SessionLocal', SessionLocal):
+        with patch("app.core.database.SessionLocal", SessionLocal):
             async with async_transaction_scope() as db:
                 # Execute a simple query to verify transaction works
                 from sqlalchemy import text
+
                 result = await db.execute(text("SELECT 1"))
                 assert result is not None
             # Transaction should be committed (covers line 138 debug log)
@@ -101,12 +103,13 @@ class TestAsyncTransactionScope:
     @pytest.mark.asyncio
     async def test_transaction_scope_rollback_on_error(self, async_test_db):
         """Test that transaction rolls back on exception."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
-        with patch('app.core.database.SessionLocal', SessionLocal):
+        with patch("app.core.database.SessionLocal", SessionLocal):
             with pytest.raises(RuntimeError, match="Test error"):
                 async with async_transaction_scope() as db:
                     from sqlalchemy import text
+
                     await db.execute(text("SELECT 1"))
                     raise RuntimeError("Test error")
 
@@ -117,9 +120,9 @@ class TestCheckAsyncDatabaseHealth:
     @pytest.mark.asyncio
     async def test_database_health_check_success(self, async_test_db):
         """Test health check returns True on success (covers line 156)."""
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
-        with patch('app.core.database.SessionLocal', SessionLocal):
+        with patch("app.core.database.SessionLocal", SessionLocal):
             result = await check_async_database_health()
             assert result is True
 
@@ -127,7 +130,7 @@ class TestCheckAsyncDatabaseHealth:
     async def test_database_health_check_failure(self):
         """Test health check returns False on database error."""
         # Mock async_transaction_scope to raise an error
-        with patch('app.core.database.async_transaction_scope') as mock_scope:
+        with patch("app.core.database.async_transaction_scope") as mock_scope:
             mock_scope.side_effect = Exception("Database connection failed")
 
             result = await check_async_database_health()
@@ -140,10 +143,10 @@ class TestInitAsyncDb:
     @pytest.mark.asyncio
     async def test_init_async_db_creates_tables(self, async_test_db):
         """Test init_async_db creates tables (covers lines 174-176)."""
-        test_engine, SessionLocal = async_test_db
+        test_engine, _SessionLocal = async_test_db
 
         # Mock the engine to use test engine
-        with patch('app.core.database.engine', test_engine):
+        with patch("app.core.database.engine", test_engine):
             await init_async_db()
             # If no exception, tables were created successfully
 
@@ -155,7 +158,6 @@ class TestCloseAsyncDb:
     async def test_close_async_db_disposes_engine(self):
         """Test close_async_db disposes engine (covers lines 185-186)."""
         # Create a fresh engine to test closing
-        from app.core.database import engine
 
         # Close connections
         await close_async_db()

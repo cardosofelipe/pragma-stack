@@ -4,8 +4,9 @@ Organization endpoints for regular users.
 
 These endpoints allow users to view and manage organizations they belong to.
 """
+
 import logging
-from typing import Any, List
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
@@ -14,18 +15,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies.auth import get_current_user
 from app.api.dependencies.permissions import require_org_admin, require_org_membership
 from app.core.database import get_db
-from app.core.exceptions import NotFoundError, ErrorCode
+from app.core.exceptions import ErrorCode, NotFoundError
 from app.crud.organization import organization as organization_crud
 from app.models.user import User
 from app.schemas.common import (
-    PaginationParams,
     PaginatedResponse,
-    create_pagination_meta
+    PaginationParams,
+    create_pagination_meta,
 )
 from app.schemas.organizations import (
-    OrganizationResponse,
     OrganizationMemberResponse,
-    OrganizationUpdate
+    OrganizationResponse,
+    OrganizationUpdate,
 )
 
 logger = logging.getLogger(__name__)
@@ -35,15 +36,15 @@ router = APIRouter()
 
 @router.get(
     "/me",
-    response_model=List[OrganizationResponse],
+    response_model=list[OrganizationResponse],
     summary="Get My Organizations",
     description="Get all organizations the current user belongs to",
-    operation_id="get_my_organizations"
+    operation_id="get_my_organizations",
 )
 async def get_my_organizations(
     is_active: bool = Query(True, description="Filter by active membership"),
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Get all organizations the current user belongs to.
@@ -54,15 +55,13 @@ async def get_my_organizations(
     try:
         # Get all org data in single query with JOIN and subquery
         orgs_data = await organization_crud.get_user_organizations_with_details(
-            db,
-            user_id=current_user.id,
-            is_active=is_active
+            db, user_id=current_user.id, is_active=is_active
         )
 
         # Transform to response objects
         orgs_with_data = []
         for item in orgs_data:
-            org = item['organization']
+            org = item["organization"]
             org_dict = {
                 "id": org.id,
                 "name": org.name,
@@ -72,14 +71,14 @@ async def get_my_organizations(
                 "settings": org.settings,
                 "created_at": org.created_at,
                 "updated_at": org.updated_at,
-                "member_count": item['member_count']
+                "member_count": item["member_count"],
             }
             orgs_with_data.append(OrganizationResponse(**org_dict))
 
         return orgs_with_data
 
     except Exception as e:
-        logger.error(f"Error getting user organizations: {str(e)}", exc_info=True)
+        logger.error(f"Error getting user organizations: {e!s}", exc_info=True)
         raise
 
 
@@ -88,12 +87,12 @@ async def get_my_organizations(
     response_model=OrganizationResponse,
     summary="Get Organization Details",
     description="Get details of an organization the user belongs to",
-    operation_id="get_organization"
+    operation_id="get_organization",
 )
 async def get_organization(
     organization_id: UUID,
     current_user: User = Depends(require_org_membership),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Get details of a specific organization.
@@ -105,7 +104,7 @@ async def get_organization(
         if not org:  # pragma: no cover - Permission check prevents this (see docs/UNREACHABLE_DEFENSIVE_CODE_ANALYSIS.md)
             raise NotFoundError(
                 detail=f"Organization {organization_id} not found",
-                error_code=ErrorCode.NOT_FOUND
+                error_code=ErrorCode.NOT_FOUND,
             )
 
         org_dict = {
@@ -117,14 +116,16 @@ async def get_organization(
             "settings": org.settings,
             "created_at": org.created_at,
             "updated_at": org.updated_at,
-            "member_count": await organization_crud.get_member_count(db, organization_id=org.id)
+            "member_count": await organization_crud.get_member_count(
+                db, organization_id=org.id
+            ),
         }
         return OrganizationResponse(**org_dict)
 
     except NotFoundError:  # pragma: no cover - See above
         raise
     except Exception as e:
-        logger.error(f"Error getting organization: {str(e)}", exc_info=True)
+        logger.error(f"Error getting organization: {e!s}", exc_info=True)
         raise
 
 
@@ -133,14 +134,14 @@ async def get_organization(
     response_model=PaginatedResponse[OrganizationMemberResponse],
     summary="Get Organization Members",
     description="Get all members of an organization (members can view)",
-    operation_id="get_organization_members"
+    operation_id="get_organization_members",
 )
 async def get_organization_members(
     organization_id: UUID,
     pagination: PaginationParams = Depends(),
     is_active: bool = Query(True, description="Filter by active status"),
     current_user: User = Depends(require_org_membership),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Get all members of an organization.
@@ -153,7 +154,7 @@ async def get_organization_members(
             organization_id=organization_id,
             skip=pagination.offset,
             limit=pagination.limit,
-            is_active=is_active
+            is_active=is_active,
         )
 
         member_responses = [OrganizationMemberResponse(**member) for member in members]
@@ -162,13 +163,13 @@ async def get_organization_members(
             total=total,
             page=pagination.page,
             limit=pagination.limit,
-            items_count=len(member_responses)
+            items_count=len(member_responses),
         )
 
         return PaginatedResponse(data=member_responses, pagination=pagination_meta)
 
     except Exception as e:
-        logger.error(f"Error getting organization members: {str(e)}", exc_info=True)
+        logger.error(f"Error getting organization members: {e!s}", exc_info=True)
         raise
 
 
@@ -177,13 +178,13 @@ async def get_organization_members(
     response_model=OrganizationResponse,
     summary="Update Organization",
     description="Update organization details (admin/owner only)",
-    operation_id="update_organization"
+    operation_id="update_organization",
 )
 async def update_organization(
     organization_id: UUID,
     org_in: OrganizationUpdate,
     current_user: User = Depends(require_org_admin),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Update organization details.
@@ -195,11 +196,13 @@ async def update_organization(
         if not org:  # pragma: no cover - Permission check prevents this (see docs/UNREACHABLE_DEFENSIVE_CODE_ANALYSIS.md)
             raise NotFoundError(
                 detail=f"Organization {organization_id} not found",
-                error_code=ErrorCode.NOT_FOUND
+                error_code=ErrorCode.NOT_FOUND,
             )
 
         updated_org = await organization_crud.update(db, db_obj=org, obj_in=org_in)
-        logger.info(f"User {current_user.email} updated organization {updated_org.name}")
+        logger.info(
+            f"User {current_user.email} updated organization {updated_org.name}"
+        )
 
         org_dict = {
             "id": updated_org.id,
@@ -210,12 +213,14 @@ async def update_organization(
             "settings": updated_org.settings,
             "created_at": updated_org.created_at,
             "updated_at": updated_org.updated_at,
-            "member_count": await organization_crud.get_member_count(db, organization_id=updated_org.id)
+            "member_count": await organization_crud.get_member_count(
+                db, organization_id=updated_org.id
+            ),
         }
         return OrganizationResponse(**org_dict)
 
     except NotFoundError:  # pragma: no cover - See above
         raise
     except Exception as e:
-        logger.error(f"Error updating organization: {str(e)}", exc_info=True)
+        logger.error(f"Error updating organization: {e!s}", exc_info=True)
         raise

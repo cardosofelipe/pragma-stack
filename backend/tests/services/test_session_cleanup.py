@@ -2,23 +2,27 @@
 """
 Comprehensive tests for session cleanup service.
 """
-import pytest
+
 import asyncio
-from datetime import datetime, timedelta, timezone
-from unittest.mock import patch, MagicMock, AsyncMock
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, patch
+
+import pytest
+from sqlalchemy import select
 
 from app.models.user_session import UserSession
-from sqlalchemy import select
 
 
 class TestCleanupExpiredSessions:
     """Tests for cleanup_expired_sessions function."""
 
     @pytest.mark.asyncio
-    async def test_cleanup_expired_sessions_success(self, async_test_db, async_test_user):
+    async def test_cleanup_expired_sessions_success(
+        self, async_test_db, async_test_user
+    ):
         """Test successful cleanup of expired sessions."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create mix of sessions
         async with AsyncTestingSessionLocal() as session:
@@ -30,9 +34,9 @@ class TestCleanupExpiredSessions:
                 ip_address="192.168.1.1",
                 user_agent="Mozilla/5.0",
                 is_active=True,
-                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
-                created_at=datetime.now(timezone.utc) - timedelta(days=1),
-                last_used_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC) + timedelta(days=7),
+                created_at=datetime.now(UTC) - timedelta(days=1),
+                last_used_at=datetime.now(UTC),
             )
 
             # 2. Inactive, expired, old (SHOULD be deleted)
@@ -43,9 +47,9 @@ class TestCleanupExpiredSessions:
                 ip_address="192.168.1.2",
                 user_agent="Mozilla/5.0",
                 is_active=False,
-                expires_at=datetime.now(timezone.utc) - timedelta(days=10),
-                created_at=datetime.now(timezone.utc) - timedelta(days=40),
-                last_used_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC) - timedelta(days=10),
+                created_at=datetime.now(UTC) - timedelta(days=40),
+                last_used_at=datetime.now(UTC),
             )
 
             # 3. Inactive, expired, recent (should NOT be deleted - within keep_days)
@@ -56,17 +60,23 @@ class TestCleanupExpiredSessions:
                 ip_address="192.168.1.3",
                 user_agent="Mozilla/5.0",
                 is_active=False,
-                expires_at=datetime.now(timezone.utc) - timedelta(days=1),
-                created_at=datetime.now(timezone.utc) - timedelta(days=5),
-                last_used_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC) - timedelta(days=1),
+                created_at=datetime.now(UTC) - timedelta(days=5),
+                last_used_at=datetime.now(UTC),
             )
 
-            session.add_all([active_session, old_expired_session, recent_expired_session])
+            session.add_all(
+                [active_session, old_expired_session, recent_expired_session]
+            )
             await session.commit()
 
         # Mock SessionLocal to return our test session
-        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch(
+            "app.services.session_cleanup.SessionLocal",
+            return_value=AsyncTestingSessionLocal(),
+        ):
             from app.services.session_cleanup import cleanup_expired_sessions
+
             deleted_count = await cleanup_expired_sessions(keep_days=30)
 
         # Should only delete old_expired_session
@@ -85,7 +95,7 @@ class TestCleanupExpiredSessions:
     @pytest.mark.asyncio
     async def test_cleanup_no_sessions_to_delete(self, async_test_db, async_test_user):
         """Test cleanup when no sessions meet deletion criteria."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             active = UserSession(
@@ -95,15 +105,19 @@ class TestCleanupExpiredSessions:
                 ip_address="192.168.1.1",
                 user_agent="Mozilla/5.0",
                 is_active=True,
-                expires_at=datetime.now(timezone.utc) + timedelta(days=7),
-                created_at=datetime.now(timezone.utc),
-                last_used_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC) + timedelta(days=7),
+                created_at=datetime.now(UTC),
+                last_used_at=datetime.now(UTC),
             )
             session.add(active)
             await session.commit()
 
-        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch(
+            "app.services.session_cleanup.SessionLocal",
+            return_value=AsyncTestingSessionLocal(),
+        ):
             from app.services.session_cleanup import cleanup_expired_sessions
+
             deleted_count = await cleanup_expired_sessions(keep_days=30)
 
         assert deleted_count == 0
@@ -111,10 +125,14 @@ class TestCleanupExpiredSessions:
     @pytest.mark.asyncio
     async def test_cleanup_empty_database(self, async_test_db):
         """Test cleanup with no sessions in database."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
-        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch(
+            "app.services.session_cleanup.SessionLocal",
+            return_value=AsyncTestingSessionLocal(),
+        ):
             from app.services.session_cleanup import cleanup_expired_sessions
+
             deleted_count = await cleanup_expired_sessions(keep_days=30)
 
         assert deleted_count == 0
@@ -122,7 +140,7 @@ class TestCleanupExpiredSessions:
     @pytest.mark.asyncio
     async def test_cleanup_with_keep_days_0(self, async_test_db, async_test_user):
         """Test cleanup with keep_days=0 deletes all inactive expired sessions."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             today_expired = UserSession(
@@ -132,15 +150,19 @@ class TestCleanupExpiredSessions:
                 ip_address="192.168.1.1",
                 user_agent="Mozilla/5.0",
                 is_active=False,
-                expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
-                created_at=datetime.now(timezone.utc) - timedelta(hours=2),
-                last_used_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC) - timedelta(hours=1),
+                created_at=datetime.now(UTC) - timedelta(hours=2),
+                last_used_at=datetime.now(UTC),
             )
             session.add(today_expired)
             await session.commit()
 
-        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch(
+            "app.services.session_cleanup.SessionLocal",
+            return_value=AsyncTestingSessionLocal(),
+        ):
             from app.services.session_cleanup import cleanup_expired_sessions
+
             deleted_count = await cleanup_expired_sessions(keep_days=0)
 
         assert deleted_count == 1
@@ -148,7 +170,7 @@ class TestCleanupExpiredSessions:
     @pytest.mark.asyncio
     async def test_cleanup_bulk_delete_efficiency(self, async_test_db, async_test_user):
         """Test that cleanup uses bulk DELETE for many sessions."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create 50 expired sessions
         async with AsyncTestingSessionLocal() as session:
@@ -161,16 +183,20 @@ class TestCleanupExpiredSessions:
                     ip_address="192.168.1.1",
                     user_agent="Mozilla/5.0",
                     is_active=False,
-                    expires_at=datetime.now(timezone.utc) - timedelta(days=10),
-                    created_at=datetime.now(timezone.utc) - timedelta(days=40),
-                    last_used_at=datetime.now(timezone.utc)
+                    expires_at=datetime.now(UTC) - timedelta(days=10),
+                    created_at=datetime.now(UTC) - timedelta(days=40),
+                    last_used_at=datetime.now(UTC),
                 )
                 sessions_to_add.append(expired)
             session.add_all(sessions_to_add)
             await session.commit()
 
-        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch(
+            "app.services.session_cleanup.SessionLocal",
+            return_value=AsyncTestingSessionLocal(),
+        ):
             from app.services.session_cleanup import cleanup_expired_sessions
+
             deleted_count = await cleanup_expired_sessions(keep_days=30)
 
         assert deleted_count == 50
@@ -178,14 +204,20 @@ class TestCleanupExpiredSessions:
     @pytest.mark.asyncio
     async def test_cleanup_database_error_returns_zero(self, async_test_db):
         """Test cleanup returns 0 on database errors (doesn't crash)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Mock session_crud.cleanup_expired to raise error
-        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
-            with patch('app.services.session_cleanup.session_crud.cleanup_expired') as mock_cleanup:
+        with patch(
+            "app.services.session_cleanup.SessionLocal",
+            return_value=AsyncTestingSessionLocal(),
+        ):
+            with patch(
+                "app.services.session_cleanup.session_crud.cleanup_expired"
+            ) as mock_cleanup:
                 mock_cleanup.side_effect = Exception("Database connection lost")
 
                 from app.services.session_cleanup import cleanup_expired_sessions
+
                 # Should not crash, should return 0
                 deleted_count = await cleanup_expired_sessions(keep_days=30)
 
@@ -198,7 +230,7 @@ class TestGetSessionStatistics:
     @pytest.mark.asyncio
     async def test_get_statistics_with_sessions(self, async_test_db, async_test_user):
         """Test getting session statistics with various session types."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
             # 2 active, not expired
@@ -210,9 +242,9 @@ class TestGetSessionStatistics:
                     ip_address="192.168.1.1",
                     user_agent="Mozilla/5.0",
                     is_active=True,
-                    expires_at=datetime.now(timezone.utc) + timedelta(days=7),
-                    created_at=datetime.now(timezone.utc),
-                    last_used_at=datetime.now(timezone.utc)
+                    expires_at=datetime.now(UTC) + timedelta(days=7),
+                    created_at=datetime.now(UTC),
+                    last_used_at=datetime.now(UTC),
                 )
                 session.add(active)
 
@@ -225,9 +257,9 @@ class TestGetSessionStatistics:
                     ip_address="192.168.1.2",
                     user_agent="Mozilla/5.0",
                     is_active=False,
-                    expires_at=datetime.now(timezone.utc) - timedelta(days=1),
-                    created_at=datetime.now(timezone.utc) - timedelta(days=2),
-                last_used_at=datetime.now(timezone.utc)
+                    expires_at=datetime.now(UTC) - timedelta(days=1),
+                    created_at=datetime.now(UTC) - timedelta(days=2),
+                    last_used_at=datetime.now(UTC),
                 )
                 session.add(inactive)
 
@@ -239,16 +271,20 @@ class TestGetSessionStatistics:
                 ip_address="192.168.1.3",
                 user_agent="Mozilla/5.0",
                 is_active=True,
-                expires_at=datetime.now(timezone.utc) - timedelta(hours=1),
-                created_at=datetime.now(timezone.utc) - timedelta(days=1),
-                last_used_at=datetime.now(timezone.utc)
+                expires_at=datetime.now(UTC) - timedelta(hours=1),
+                created_at=datetime.now(UTC) - timedelta(days=1),
+                last_used_at=datetime.now(UTC),
             )
             session.add(expired_active)
 
             await session.commit()
 
-        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch(
+            "app.services.session_cleanup.SessionLocal",
+            return_value=AsyncTestingSessionLocal(),
+        ):
             from app.services.session_cleanup import get_session_statistics
+
             stats = await get_session_statistics()
 
         assert stats["total"] == 6
@@ -259,10 +295,14 @@ class TestGetSessionStatistics:
     @pytest.mark.asyncio
     async def test_get_statistics_empty_database(self, async_test_db):
         """Test getting statistics with no sessions."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
-        with patch('app.services.session_cleanup.SessionLocal', return_value=AsyncTestingSessionLocal()):
+        with patch(
+            "app.services.session_cleanup.SessionLocal",
+            return_value=AsyncTestingSessionLocal(),
+        ):
             from app.services.session_cleanup import get_session_statistics
+
             stats = await get_session_statistics()
 
         assert stats["total"] == 0
@@ -271,9 +311,11 @@ class TestGetSessionStatistics:
         assert stats["expired"] == 0
 
     @pytest.mark.asyncio
-    async def test_get_statistics_database_error_returns_empty_dict(self, async_test_db):
+    async def test_get_statistics_database_error_returns_empty_dict(
+        self, async_test_db
+    ):
         """Test statistics returns empty dict on database errors."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, _AsyncTestingSessionLocal = async_test_db
 
         # Create a mock that raises on execute
         mock_session = AsyncMock()
@@ -283,8 +325,12 @@ class TestGetSessionStatistics:
         async def mock_session_local():
             yield mock_session
 
-        with patch('app.services.session_cleanup.SessionLocal', return_value=mock_session_local()):
+        with patch(
+            "app.services.session_cleanup.SessionLocal",
+            return_value=mock_session_local(),
+        ):
             from app.services.session_cleanup import get_session_statistics
+
             stats = await get_session_statistics()
 
         assert stats == {}
@@ -294,9 +340,11 @@ class TestConcurrentCleanup:
     """Tests for concurrent cleanup scenarios."""
 
     @pytest.mark.asyncio
-    async def test_concurrent_cleanup_no_duplicate_deletes(self, async_test_db, async_test_user):
+    async def test_concurrent_cleanup_no_duplicate_deletes(
+        self, async_test_db, async_test_user
+    ):
         """Test concurrent cleanups don't cause race conditions."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create 10 expired sessions
         async with AsyncTestingSessionLocal() as session:
@@ -308,20 +356,24 @@ class TestConcurrentCleanup:
                     ip_address="192.168.1.1",
                     user_agent="Mozilla/5.0",
                     is_active=False,
-                    expires_at=datetime.now(timezone.utc) - timedelta(days=10),
-                    created_at=datetime.now(timezone.utc) - timedelta(days=40),
-                    last_used_at=datetime.now(timezone.utc)
+                    expires_at=datetime.now(UTC) - timedelta(days=10),
+                    created_at=datetime.now(UTC) - timedelta(days=40),
+                    last_used_at=datetime.now(UTC),
                 )
                 session.add(expired)
             await session.commit()
 
         # Run two cleanups concurrently
         # Use side_effect to return fresh session instances for each call
-        with patch('app.services.session_cleanup.SessionLocal', side_effect=lambda: AsyncTestingSessionLocal()):
+        with patch(
+            "app.services.session_cleanup.SessionLocal",
+            side_effect=lambda: AsyncTestingSessionLocal(),
+        ):
             from app.services.session_cleanup import cleanup_expired_sessions
+
             results = await asyncio.gather(
                 cleanup_expired_sessions(keep_days=30),
-                cleanup_expired_sessions(keep_days=30)
+                cleanup_expired_sessions(keep_days=30),
             )
 
         # Both should report deleting sessions (may overlap due to transaction timing)

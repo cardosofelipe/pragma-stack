@@ -1,39 +1,39 @@
 import logging
-logging.getLogger('passlib').setLevel(logging.ERROR)
 
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional, Union
-import uuid
+logging.getLogger("passlib").setLevel(logging.ERROR)
+
 import asyncio
+import uuid
+from datetime import UTC, datetime, timedelta
 from functools import partial
+from typing import Any
 
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import ValidationError
 
 from app.core.config import settings
 from app.schemas.users import TokenData, TokenPayload
 
-
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 # Custom exceptions for auth
 class AuthError(Exception):
     """Base authentication error"""
-    pass
+
 
 class TokenExpiredError(AuthError):
     """Token has expired"""
-    pass
+
 
 class TokenInvalidError(AuthError):
     """Token is invalid"""
-    pass
+
 
 class TokenMissingClaimError(AuthError):
     """Token is missing a required claim"""
-    pass
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -62,8 +62,7 @@ async def verify_password_async(plain_password: str, hashed_password: str) -> bo
     """
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(
-        None,
-        partial(pwd_context.verify, plain_password, hashed_password)
+        None, partial(pwd_context.verify, plain_password, hashed_password)
     )
 
 
@@ -82,17 +81,13 @@ async def get_password_hash_async(password: str) -> str:
         Hashed password string
     """
     loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(
-        None,
-        pwd_context.hash,
-        password
-    )
+    return await loop.run_in_executor(None, pwd_context.hash, password)
 
 
 def create_access_token(
-        subject: Union[str, Any],
-        expires_delta: Optional[timedelta] = None,
-        claims: Optional[Dict[str, Any]] = None
+    subject: str | Any,
+    expires_delta: timedelta | None = None,
+    claims: dict[str, Any] | None = None,
 ) -> str:
     """
     Create a JWT access token.
@@ -106,17 +101,19 @@ def create_access_token(
         Encoded JWT token
     """
     if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(UTC) + timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
 
     # Base token data
     to_encode = {
         "sub": str(subject),
         "exp": expire,
-        "iat": datetime.now(tz=timezone.utc),
+        "iat": datetime.now(tz=UTC),
         "jti": str(uuid.uuid4()),
-        "type": "access"
+        "type": "access",
     }
 
     # Add custom claims
@@ -125,17 +122,14 @@ def create_access_token(
 
     # Create the JWT
     encoded_jwt = jwt.encode(
-        to_encode,
-        settings.SECRET_KEY,
-        algorithm=settings.ALGORITHM
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
 
     return encoded_jwt
 
 
 def create_refresh_token(
-        subject: Union[str, Any],
-        expires_delta: Optional[timedelta] = None
+    subject: str | Any, expires_delta: timedelta | None = None
 ) -> str:
     """
     Create a JWT refresh token.
@@ -148,28 +142,26 @@ def create_refresh_token(
         Encoded JWT refresh token
     """
     if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+        expire = datetime.now(UTC) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
 
     to_encode = {
         "sub": str(subject),
         "exp": expire,
-        "iat": datetime.now(timezone.utc),
+        "iat": datetime.now(UTC),
         "jti": str(uuid.uuid4()),
-        "type": "refresh"
+        "type": "refresh",
     }
 
     encoded_jwt = jwt.encode(
-        to_encode,
-        settings.SECRET_KEY,
-        algorithm=settings.ALGORITHM
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
 
     return encoded_jwt
 
 
-def decode_token(token: str, verify_type: Optional[str] = None) -> TokenPayload:
+def decode_token(token: str, verify_type: str | None = None) -> TokenPayload:
     """
     Decode and verify a JWT token.
 
@@ -195,8 +187,8 @@ def decode_token(token: str, verify_type: Optional[str] = None) -> TokenPayload:
                 "verify_signature": True,
                 "verify_exp": True,
                 "verify_iat": True,
-                "require": ["exp", "sub", "iat"]
-            }
+                "require": ["exp", "sub", "iat"],
+            },
         )
 
         # SECURITY: Explicitly verify the algorithm to prevent algorithm confusion attacks

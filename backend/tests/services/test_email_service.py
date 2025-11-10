@@ -2,13 +2,15 @@
 """
 Tests for email service functionality.
 """
+
+from unittest.mock import AsyncMock
+
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
 
 from app.services.email_service import (
-    EmailService,
     ConsoleEmailBackend,
-    SMTPEmailBackend
+    EmailService,
+    SMTPEmailBackend,
 )
 
 
@@ -24,7 +26,7 @@ class TestConsoleEmailBackend:
             to=["user@example.com"],
             subject="Test Subject",
             html_content="<p>Test HTML</p>",
-            text_content="Test Text"
+            text_content="Test Text",
         )
 
         assert result is True
@@ -37,7 +39,7 @@ class TestConsoleEmailBackend:
         result = await backend.send_email(
             to=["user@example.com"],
             subject="Test Subject",
-            html_content="<p>Test HTML</p>"
+            html_content="<p>Test HTML</p>",
         )
 
         assert result is True
@@ -50,7 +52,7 @@ class TestConsoleEmailBackend:
         result = await backend.send_email(
             to=["user1@example.com", "user2@example.com"],
             subject="Test Subject",
-            html_content="<p>Test HTML</p>"
+            html_content="<p>Test HTML</p>",
         )
 
         assert result is True
@@ -66,7 +68,7 @@ class TestSMTPEmailBackend:
             host="smtp.example.com",
             port=587,
             username="test@example.com",
-            password="password"
+            password="password",
         )
 
         assert backend.host == "smtp.example.com"
@@ -81,14 +83,14 @@ class TestSMTPEmailBackend:
             host="smtp.example.com",
             port=587,
             username="test@example.com",
-            password="password"
+            password="password",
         )
 
         # Should fall back to console backend since SMTP is not implemented
         result = await backend.send_email(
             to=["user@example.com"],
             subject="Test Subject",
-            html_content="<p>Test HTML</p>"
+            html_content="<p>Test HTML</p>",
         )
 
         assert result is True
@@ -114,9 +116,7 @@ class TestEmailService:
         service = EmailService()
 
         result = await service.send_password_reset_email(
-            to_email="user@example.com",
-            reset_token="test_token_123",
-            user_name="John"
+            to_email="user@example.com", reset_token="test_token_123", user_name="John"
         )
 
         assert result is True
@@ -127,8 +127,7 @@ class TestEmailService:
         service = EmailService()
 
         result = await service.send_password_reset_email(
-            to_email="user@example.com",
-            reset_token="test_token_123"
+            to_email="user@example.com", reset_token="test_token_123"
         )
 
         assert result is True
@@ -142,8 +141,7 @@ class TestEmailService:
 
         token = "test_reset_token_xyz"
         await service.send_password_reset_email(
-            to_email="user@example.com",
-            reset_token=token
+            to_email="user@example.com", reset_token=token
         )
 
         # Verify send_email was called
@@ -151,7 +149,7 @@ class TestEmailService:
         call_args = backend_mock.send_email.call_args
 
         # Check that token is in the HTML content
-        html_content = call_args.kwargs['html_content']
+        html_content = call_args.kwargs["html_content"]
         assert token in html_content
 
     @pytest.mark.asyncio
@@ -162,8 +160,7 @@ class TestEmailService:
         service = EmailService(backend=backend_mock)
 
         result = await service.send_password_reset_email(
-            to_email="user@example.com",
-            reset_token="test_token"
+            to_email="user@example.com", reset_token="test_token"
         )
 
         assert result is False
@@ -176,7 +173,7 @@ class TestEmailService:
         result = await service.send_email_verification(
             to_email="user@example.com",
             verification_token="verification_token_123",
-            user_name="Jane"
+            user_name="Jane",
         )
 
         assert result is True
@@ -187,8 +184,7 @@ class TestEmailService:
         service = EmailService()
 
         result = await service.send_email_verification(
-            to_email="user@example.com",
-            verification_token="verification_token_123"
+            to_email="user@example.com", verification_token="verification_token_123"
         )
 
         assert result is True
@@ -202,8 +198,7 @@ class TestEmailService:
 
         token = "test_verification_token_xyz"
         await service.send_email_verification(
-            to_email="user@example.com",
-            verification_token=token
+            to_email="user@example.com", verification_token=token
         )
 
         # Verify send_email was called
@@ -211,7 +206,7 @@ class TestEmailService:
         call_args = backend_mock.send_email.call_args
 
         # Check that token is in the HTML content
-        html_content = call_args.kwargs['html_content']
+        html_content = call_args.kwargs["html_content"]
         assert token in html_content
 
     @pytest.mark.asyncio
@@ -222,8 +217,7 @@ class TestEmailService:
         service = EmailService(backend=backend_mock)
 
         result = await service.send_email_verification(
-            to_email="user@example.com",
-            verification_token="test_token"
+            to_email="user@example.com", verification_token="test_token"
         )
 
         assert result is False
@@ -236,14 +230,12 @@ class TestEmailService:
         service = EmailService(backend=backend_mock)
 
         await service.send_password_reset_email(
-            to_email="user@example.com",
-            reset_token="token123",
-            user_name="Test User"
+            to_email="user@example.com", reset_token="token123", user_name="Test User"
         )
 
         call_args = backend_mock.send_email.call_args
-        html_content = call_args.kwargs['html_content']
-        text_content = call_args.kwargs['text_content']
+        html_content = call_args.kwargs["html_content"]
+        text_content = call_args.kwargs["text_content"]
 
         # Check HTML content
         assert "Password Reset" in html_content
@@ -251,7 +243,9 @@ class TestEmailService:
         assert "Test User" in html_content
 
         # Check text content
-        assert "Password Reset" in text_content or "password reset" in text_content.lower()
+        assert (
+            "Password Reset" in text_content or "password reset" in text_content.lower()
+        )
         assert "token123" in text_content
 
     @pytest.mark.asyncio
@@ -264,12 +258,12 @@ class TestEmailService:
         await service.send_email_verification(
             to_email="user@example.com",
             verification_token="verify123",
-            user_name="Test User"
+            user_name="Test User",
         )
 
         call_args = backend_mock.send_email.call_args
-        html_content = call_args.kwargs['html_content']
-        text_content = call_args.kwargs['text_content']
+        html_content = call_args.kwargs["html_content"]
+        text_content = call_args.kwargs["text_content"]
 
         # Check HTML content
         assert "Verify" in html_content

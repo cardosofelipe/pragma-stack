@@ -3,12 +3,13 @@
 Tests for admin route exception handlers, error paths, and success paths.
 Focus on code coverage of both error handling and normal operation branches.
 """
+
+from unittest.mock import patch
+from uuid import uuid4
+
 import pytest
 import pytest_asyncio
-from unittest.mock import patch, AsyncMock
 from fastapi import status
-from uuid import uuid4
-from app.models.user_organization import OrganizationRole
 
 
 @pytest_asyncio.fixture
@@ -16,16 +17,14 @@ async def superuser_token(client, async_test_superuser):
     """Get access token for superuser."""
     response = await client.post(
         "/api/v1/auth/login",
-        json={
-            "email": "superuser@example.com",
-            "password": "SuperPassword123!"
-        }
+        json={"email": "superuser@example.com", "password": "SuperPassword123!"},
     )
     assert response.status_code == 200
     return response.json()["access_token"]
 
 
 # ===== USER MANAGEMENT ERROR TESTS =====
+
 
 class TestAdminListUsersFilters:
     """Test admin list users with various filters."""
@@ -35,7 +34,7 @@ class TestAdminListUsersFilters:
         """Test listing users with is_superuser filter (covers line 96)."""
         response = await client.get(
             "/api/v1/admin/users?is_superuser=true",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -45,11 +44,14 @@ class TestAdminListUsersFilters:
     @pytest.mark.asyncio
     async def test_list_users_database_error_propagates(self, client, superuser_token):
         """Test that database errors propagate correctly (covers line 118-120)."""
-        with patch('app.api.routes.admin.user_crud.get_multi_with_total', side_effect=Exception("DB error")):
+        with patch(
+            "app.api.routes.admin.user_crud.get_multi_with_total",
+            side_effect=Exception("DB error"),
+        ):
             with pytest.raises(Exception):
                 await client.get(
                     "/api/v1/admin/users",
-                    headers={"Authorization": f"Bearer {superuser_token}"}
+                    headers={"Authorization": f"Bearer {superuser_token}"},
                 )
 
 
@@ -57,7 +59,9 @@ class TestAdminCreateUserErrors:
     """Test admin create user error handling."""
 
     @pytest.mark.asyncio
-    async def test_create_user_duplicate_email(self, client, async_test_user, superuser_token):
+    async def test_create_user_duplicate_email(
+        self, client, async_test_user, superuser_token
+    ):
         """Test creating user with duplicate email (covers line 145-150)."""
         response = await client.post(
             "/api/v1/admin/users",
@@ -66,17 +70,22 @@ class TestAdminCreateUserErrors:
                 "email": async_test_user.email,
                 "password": "NewPassword123!",
                 "first_name": "Duplicate",
-                "last_name": "User"
-            }
+                "last_name": "User",
+            },
         )
 
         # Should get error for duplicate email
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_create_user_unexpected_error_propagates(self, client, superuser_token):
+    async def test_create_user_unexpected_error_propagates(
+        self, client, superuser_token
+    ):
         """Test unexpected errors during user creation (covers line 151-153)."""
-        with patch('app.api.routes.admin.user_crud.create', side_effect=RuntimeError("Unexpected error")):
+        with patch(
+            "app.api.routes.admin.user_crud.create",
+            side_effect=RuntimeError("Unexpected error"),
+        ):
             with pytest.raises(RuntimeError):
                 await client.post(
                     "/api/v1/admin/users",
@@ -85,8 +94,8 @@ class TestAdminCreateUserErrors:
                         "email": "newerror@example.com",
                         "password": "NewPassword123!",
                         "first_name": "New",
-                        "last_name": "User"
-                    }
+                        "last_name": "User",
+                    },
                 )
 
 
@@ -99,7 +108,7 @@ class TestAdminGetUserErrors:
         fake_id = uuid4()
         response = await client.get(
             f"/api/v1/admin/users/{fake_id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -115,20 +124,25 @@ class TestAdminUpdateUserErrors:
         response = await client.put(
             f"/api/v1/admin/users/{fake_id}",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={"first_name": "Updated"}
+            json={"first_name": "Updated"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_update_user_unexpected_error(self, client, async_test_user, superuser_token):
+    async def test_update_user_unexpected_error(
+        self, client, async_test_user, superuser_token
+    ):
         """Test unexpected errors during user update (covers line 206-208)."""
-        with patch('app.api.routes.admin.user_crud.update', side_effect=RuntimeError("Update failed")):
+        with patch(
+            "app.api.routes.admin.user_crud.update",
+            side_effect=RuntimeError("Update failed"),
+        ):
             with pytest.raises(RuntimeError):
                 await client.put(
                     f"/api/v1/admin/users/{async_test_user.id}",
                     headers={"Authorization": f"Bearer {superuser_token}"},
-                    json={"first_name": "Updated"}
+                    json={"first_name": "Updated"},
                 )
 
 
@@ -141,19 +155,24 @@ class TestAdminDeleteUserErrors:
         fake_id = uuid4()
         response = await client.delete(
             f"/api/v1/admin/users/{fake_id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_delete_user_unexpected_error(self, client, async_test_user, superuser_token):
+    async def test_delete_user_unexpected_error(
+        self, client, async_test_user, superuser_token
+    ):
         """Test unexpected errors during user deletion (covers line 238-240)."""
-        with patch('app.api.routes.admin.user_crud.soft_delete', side_effect=Exception("Delete failed")):
+        with patch(
+            "app.api.routes.admin.user_crud.soft_delete",
+            side_effect=Exception("Delete failed"),
+        ):
             with pytest.raises(Exception):
                 await client.delete(
                     f"/api/v1/admin/users/{async_test_user.id}",
-                    headers={"Authorization": f"Bearer {superuser_token}"}
+                    headers={"Authorization": f"Bearer {superuser_token}"},
                 )
 
 
@@ -166,19 +185,24 @@ class TestAdminActivateUserErrors:
         fake_id = uuid4()
         response = await client.post(
             f"/api/v1/admin/users/{fake_id}/activate",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_activate_user_unexpected_error(self, client, async_test_user, superuser_token):
+    async def test_activate_user_unexpected_error(
+        self, client, async_test_user, superuser_token
+    ):
         """Test unexpected errors during user activation (covers line 282-284)."""
-        with patch('app.api.routes.admin.user_crud.update', side_effect=Exception("Activation failed")):
+        with patch(
+            "app.api.routes.admin.user_crud.update",
+            side_effect=Exception("Activation failed"),
+        ):
             with pytest.raises(Exception):
                 await client.post(
                     f"/api/v1/admin/users/{async_test_user.id}/activate",
-                    headers={"Authorization": f"Bearer {superuser_token}"}
+                    headers={"Authorization": f"Bearer {superuser_token}"},
                 )
 
 
@@ -191,33 +215,41 @@ class TestAdminDeactivateUserErrors:
         fake_id = uuid4()
         response = await client.post(
             f"/api/v1/admin/users/{fake_id}/deactivate",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_deactivate_self_forbidden(self, client, async_test_superuser, superuser_token):
+    async def test_deactivate_self_forbidden(
+        self, client, async_test_superuser, superuser_token
+    ):
         """Test that admin cannot deactivate themselves (covers line 319-323)."""
         response = await client.post(
             f"/api/v1/admin/users/{async_test_superuser.id}/deactivate",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.asyncio
-    async def test_deactivate_user_unexpected_error(self, client, async_test_user, superuser_token):
+    async def test_deactivate_user_unexpected_error(
+        self, client, async_test_user, superuser_token
+    ):
         """Test unexpected errors during user deactivation (covers line 326-328)."""
-        with patch('app.api.routes.admin.user_crud.update', side_effect=Exception("Deactivation failed")):
+        with patch(
+            "app.api.routes.admin.user_crud.update",
+            side_effect=Exception("Deactivation failed"),
+        ):
             with pytest.raises(Exception):
                 await client.post(
                     f"/api/v1/admin/users/{async_test_user.id}/deactivate",
-                    headers={"Authorization": f"Bearer {superuser_token}"}
+                    headers={"Authorization": f"Bearer {superuser_token}"},
                 )
 
 
 # ===== ORGANIZATION MANAGEMENT ERROR TESTS =====
+
 
 class TestAdminListOrganizationsErrors:
     """Test admin list organizations error handling."""
@@ -225,11 +257,14 @@ class TestAdminListOrganizationsErrors:
     @pytest.mark.asyncio
     async def test_list_organizations_database_error(self, client, superuser_token):
         """Test list organizations with database error (covers line 427-456)."""
-        with patch('app.api.routes.admin.organization_crud.get_multi_with_member_counts', side_effect=Exception("DB error")):
+        with patch(
+            "app.api.routes.admin.organization_crud.get_multi_with_member_counts",
+            side_effect=Exception("DB error"),
+        ):
             with pytest.raises(Exception):
                 await client.get(
                     "/api/v1/admin/organizations",
-                    headers={"Authorization": f"Bearer {superuser_token}"}
+                    headers={"Authorization": f"Bearer {superuser_token}"},
                 )
 
 
@@ -237,17 +272,18 @@ class TestAdminCreateOrganizationErrors:
     """Test admin create organization error handling."""
 
     @pytest.mark.asyncio
-    async def test_create_organization_duplicate_slug(self, client, async_test_db, superuser_token):
+    async def test_create_organization_duplicate_slug(
+        self, client, async_test_db, superuser_token
+    ):
         """Test creating organization with duplicate slug (covers line 480-483)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create an organization first
         async with AsyncTestingSessionLocal() as session:
             from app.models.organization import Organization
+
             org = Organization(
-                name="Existing Org",
-                slug="existing-org",
-                description="Test org"
+                name="Existing Org", slug="existing-org", description="Test org"
             )
             session.add(org)
             await session.commit()
@@ -259,8 +295,8 @@ class TestAdminCreateOrganizationErrors:
             json={
                 "name": "New Org",
                 "slug": "existing-org",
-                "description": "Duplicate slug"
-            }
+                "description": "Duplicate slug",
+            },
         )
 
         # Should get error for duplicate slug
@@ -269,16 +305,15 @@ class TestAdminCreateOrganizationErrors:
     @pytest.mark.asyncio
     async def test_create_organization_unexpected_error(self, client, superuser_token):
         """Test unexpected errors during organization creation (covers line 484-485)."""
-        with patch('app.api.routes.admin.organization_crud.create', side_effect=RuntimeError("Creation failed")):
+        with patch(
+            "app.api.routes.admin.organization_crud.create",
+            side_effect=RuntimeError("Creation failed"),
+        ):
             with pytest.raises(RuntimeError):
                 await client.post(
                     "/api/v1/admin/organizations",
                     headers={"Authorization": f"Bearer {superuser_token}"},
-                    json={
-                        "name": "New Org",
-                        "slug": "new-org",
-                        "description": "Test"
-                    }
+                    json={"name": "New Org", "slug": "new-org", "description": "Test"},
                 )
 
 
@@ -291,7 +326,7 @@ class TestAdminGetOrganizationErrors:
         fake_id = uuid4()
         response = await client.get(
             f"/api/v1/admin/organizations/{fake_id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -307,35 +342,39 @@ class TestAdminUpdateOrganizationErrors:
         response = await client.put(
             f"/api/v1/admin/organizations/{fake_id}",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={"name": "Updated Org"}
+            json={"name": "Updated Org"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_update_organization_unexpected_error(self, client, async_test_db, superuser_token):
+    async def test_update_organization_unexpected_error(
+        self, client, async_test_db, superuser_token
+    ):
         """Test unexpected errors during organization update (covers line 573-575)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create an organization
         async with AsyncTestingSessionLocal() as session:
             from app.models.organization import Organization
+
             org = Organization(
-                name="Test Org",
-                slug="test-org-update-error",
-                description="Test"
+                name="Test Org", slug="test-org-update-error", description="Test"
             )
             session.add(org)
             await session.commit()
             await session.refresh(org)
             org_id = org.id
 
-        with patch('app.api.routes.admin.organization_crud.update', side_effect=Exception("Update failed")):
+        with patch(
+            "app.api.routes.admin.organization_crud.update",
+            side_effect=Exception("Update failed"),
+        ):
             with pytest.raises(Exception):
                 await client.put(
                     f"/api/v1/admin/organizations/{org_id}",
                     headers={"Authorization": f"Bearer {superuser_token}"},
-                    json={"name": "Updated"}
+                    json={"name": "Updated"},
                 )
 
 
@@ -348,34 +387,38 @@ class TestAdminDeleteOrganizationErrors:
         fake_id = uuid4()
         response = await client.delete(
             f"/api/v1/admin/organizations/{fake_id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_delete_organization_unexpected_error(self, client, async_test_db, superuser_token):
+    async def test_delete_organization_unexpected_error(
+        self, client, async_test_db, superuser_token
+    ):
         """Test unexpected errors during organization deletion (covers line 611-613)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization
         async with AsyncTestingSessionLocal() as session:
             from app.models.organization import Organization
+
             org = Organization(
-                name="Error Org",
-                slug="error-org-delete",
-                description="Test"
+                name="Error Org", slug="error-org-delete", description="Test"
             )
             session.add(org)
             await session.commit()
             await session.refresh(org)
             org_id = org.id
 
-        with patch('app.api.routes.admin.organization_crud.remove', side_effect=Exception("Delete failed")):
+        with patch(
+            "app.api.routes.admin.organization_crud.remove",
+            side_effect=Exception("Delete failed"),
+        ):
             with pytest.raises(Exception):
                 await client.delete(
                     f"/api/v1/admin/organizations/{org_id}",
-                    headers={"Authorization": f"Bearer {superuser_token}"}
+                    headers={"Authorization": f"Bearer {superuser_token}"},
                 )
 
 
@@ -388,34 +431,38 @@ class TestAdminListOrganizationMembersErrors:
         fake_id = uuid4()
         response = await client.get(
             f"/api/v1/admin/organizations/{fake_id}/members",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_list_members_database_error(self, client, async_test_db, superuser_token):
+    async def test_list_members_database_error(
+        self, client, async_test_db, superuser_token
+    ):
         """Test database errors during member listing (covers line 660-662)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization
         async with AsyncTestingSessionLocal() as session:
             from app.models.organization import Organization
+
             org = Organization(
-                name="Members Error Org",
-                slug="members-error-org",
-                description="Test"
+                name="Members Error Org", slug="members-error-org", description="Test"
             )
             session.add(org)
             await session.commit()
             await session.refresh(org)
             org_id = org.id
 
-        with patch('app.api.routes.admin.organization_crud.get_organization_members', side_effect=Exception("DB error")):
+        with patch(
+            "app.api.routes.admin.organization_crud.get_organization_members",
+            side_effect=Exception("DB error"),
+        ):
             with pytest.raises(Exception):
                 await client.get(
                     f"/api/v1/admin/organizations/{org_id}/members",
-                    headers={"Authorization": f"Bearer {superuser_token}"}
+                    headers={"Authorization": f"Bearer {superuser_token}"},
                 )
 
 
@@ -423,32 +470,32 @@ class TestAdminAddOrganizationMemberErrors:
     """Test admin add organization member error handling."""
 
     @pytest.mark.asyncio
-    async def test_add_member_nonexistent_organization(self, client, async_test_user, superuser_token):
+    async def test_add_member_nonexistent_organization(
+        self, client, async_test_user, superuser_token
+    ):
         """Test adding member to non-existent organization (covers line 689-693)."""
         fake_id = uuid4()
         response = await client.post(
             f"/api/v1/admin/organizations/{fake_id}/members",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={
-                "user_id": str(async_test_user.id),
-                "role": "member"
-            }
+            json={"user_id": str(async_test_user.id), "role": "member"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_add_nonexistent_user_to_organization(self, client, async_test_db, superuser_token):
+    async def test_add_nonexistent_user_to_organization(
+        self, client, async_test_db, superuser_token
+    ):
         """Test adding non-existent user to organization (covers line 696-700)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization
         async with AsyncTestingSessionLocal() as session:
             from app.models.organization import Organization
+
             org = Organization(
-                name="Add Member Org",
-                slug="add-member-org",
-                description="Test"
+                name="Add Member Org", slug="add-member-org", description="Test"
             )
             session.add(org)
             await session.commit()
@@ -459,41 +506,39 @@ class TestAdminAddOrganizationMemberErrors:
         response = await client.post(
             f"/api/v1/admin/organizations/{org_id}/members",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={
-                "user_id": str(fake_user_id),
-                "role": "member"
-            }
+            json={"user_id": str(fake_user_id), "role": "member"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_add_member_unexpected_error(self, client, async_test_db, async_test_user, superuser_token):
+    async def test_add_member_unexpected_error(
+        self, client, async_test_db, async_test_user, superuser_token
+    ):
         """Test unexpected errors during member addition (covers line 727-729)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization
         async with AsyncTestingSessionLocal() as session:
             from app.models.organization import Organization
+
             org = Organization(
-                name="Error Add Org",
-                slug="error-add-org",
-                description="Test"
+                name="Error Add Org", slug="error-add-org", description="Test"
             )
             session.add(org)
             await session.commit()
             await session.refresh(org)
             org_id = org.id
 
-        with patch('app.api.routes.admin.organization_crud.add_user', side_effect=Exception("Add failed")):
+        with patch(
+            "app.api.routes.admin.organization_crud.add_user",
+            side_effect=Exception("Add failed"),
+        ):
             with pytest.raises(Exception):
                 await client.post(
                     f"/api/v1/admin/organizations/{org_id}/members",
                     headers={"Authorization": f"Bearer {superuser_token}"},
-                    json={
-                        "user_id": str(async_test_user.id),
-                        "role": "member"
-                    }
+                    json={"user_id": str(async_test_user.id), "role": "member"},
                 )
 
 
@@ -501,30 +546,32 @@ class TestAdminRemoveOrganizationMemberErrors:
     """Test admin remove organization member error handling."""
 
     @pytest.mark.asyncio
-    async def test_remove_member_nonexistent_organization(self, client, async_test_user, superuser_token):
+    async def test_remove_member_nonexistent_organization(
+        self, client, async_test_user, superuser_token
+    ):
         """Test removing member from non-existent organization (covers line 750-754)."""
         fake_id = uuid4()
         response = await client.delete(
             f"/api/v1/admin/organizations/{fake_id}/members/{async_test_user.id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
     @pytest.mark.asyncio
-    async def test_remove_member_unexpected_error(self, client, async_test_db, async_test_user, superuser_token):
+    async def test_remove_member_unexpected_error(
+        self, client, async_test_db, async_test_user, superuser_token
+    ):
         """Test unexpected errors during member removal (covers line 780-782)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization with member
         async with AsyncTestingSessionLocal() as session:
             from app.models.organization import Organization
-            from app.models.user_organization import UserOrganization, OrganizationRole
+            from app.models.user_organization import OrganizationRole, UserOrganization
 
             org = Organization(
-                name="Remove Member Org",
-                slug="remove-member-org",
-                description="Test"
+                name="Remove Member Org", slug="remove-member-org", description="Test"
             )
             session.add(org)
             await session.commit()
@@ -533,21 +580,25 @@ class TestAdminRemoveOrganizationMemberErrors:
             member = UserOrganization(
                 user_id=async_test_user.id,
                 organization_id=org.id,
-                role=OrganizationRole.MEMBER
+                role=OrganizationRole.MEMBER,
             )
             session.add(member)
             await session.commit()
             org_id = org.id
 
-        with patch('app.api.routes.admin.organization_crud.remove_user', side_effect=Exception("Remove failed")):
+        with patch(
+            "app.api.routes.admin.organization_crud.remove_user",
+            side_effect=Exception("Remove failed"),
+        ):
             with pytest.raises(Exception):
                 await client.delete(
                     f"/api/v1/admin/organizations/{org_id}/members/{async_test_user.id}",
-                    headers={"Authorization": f"Bearer {superuser_token}"}
+                    headers={"Authorization": f"Bearer {superuser_token}"},
                 )
 
 
 # ===== SUCCESS PATH TESTS =====
+
 
 class TestAdminListUsersSuccess:
     """Test admin list users success paths."""
@@ -557,7 +608,7 @@ class TestAdminListUsersSuccess:
         """Test listing users with pagination (covers lines 109-116)."""
         response = await client.get(
             "/api/v1/admin/users?page=1&limit=10",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -579,8 +630,8 @@ class TestAdminCreateUserSuccess:
                 "email": f"newuser{uuid4().hex[:8]}@example.com",
                 "password": "NewPassword123!",
                 "first_name": "New",
-                "last_name": "User"
-            }
+                "last_name": "User",
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -598,7 +649,7 @@ class TestAdminUpdateUserSuccess:
         response = await client.put(
             f"/api/v1/admin/users/{async_test_user.id}",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={"first_name": "Updated"}
+            json={"first_name": "Updated"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -612,18 +663,18 @@ class TestAdminDeleteUserSuccess:
     @pytest.mark.asyncio
     async def test_delete_user_success(self, client, async_test_db, superuser_token):
         """Test deleting user successfully (covers lines 226-246)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create a user to delete
         async with AsyncTestingSessionLocal() as session:
-            from app.models.user import User
             from app.core.auth import get_password_hash
+            from app.models.user import User
 
             user_to_delete = User(
                 email=f"delete{uuid4().hex[:8]}@example.com",
                 password_hash=get_password_hash("Password123!"),
                 first_name="Delete",
-                last_name="Me"
+                last_name="Me",
             )
             session.add(user_to_delete)
             await session.commit()
@@ -632,7 +683,7 @@ class TestAdminDeleteUserSuccess:
 
         response = await client.delete(
             f"/api/v1/admin/users/{user_id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -640,11 +691,13 @@ class TestAdminDeleteUserSuccess:
         assert data["success"] is True
 
     @pytest.mark.asyncio
-    async def test_delete_self_fails(self, client, async_test_superuser, superuser_token):
+    async def test_delete_self_fails(
+        self, client, async_test_superuser, superuser_token
+    ):
         """Test that admin cannot delete themselves (covers lines 233-238)."""
         response = await client.delete(
             f"/api/v1/admin/users/{async_test_superuser.id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -656,19 +709,19 @@ class TestAdminActivateUserSuccess:
     @pytest.mark.asyncio
     async def test_activate_user_success(self, client, async_test_db, superuser_token):
         """Test activating user successfully (covers lines 270-282)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create inactive user
         async with AsyncTestingSessionLocal() as session:
-            from app.models.user import User
             from app.core.auth import get_password_hash
+            from app.models.user import User
 
             inactive_user = User(
                 email=f"inactive{uuid4().hex[:8]}@example.com",
                 password_hash=get_password_hash("Password123!"),
                 first_name="Inactive",
                 last_name="User",
-                is_active=False
+                is_active=False,
             )
             session.add(inactive_user)
             await session.commit()
@@ -677,7 +730,7 @@ class TestAdminActivateUserSuccess:
 
         response = await client.post(
             f"/api/v1/admin/users/{user_id}/activate",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -689,11 +742,13 @@ class TestAdminDeactivateUserSuccess:
     """Test admin deactivate user success paths."""
 
     @pytest.mark.asyncio
-    async def test_deactivate_user_success(self, client, async_test_user, superuser_token):
+    async def test_deactivate_user_success(
+        self, client, async_test_user, superuser_token
+    ):
         """Test deactivating user successfully (covers lines 306-326)."""
         response = await client.post(
             f"/api/v1/admin/users/{async_test_user.id}/deactivate",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -701,11 +756,13 @@ class TestAdminDeactivateUserSuccess:
         assert data["success"] is True
 
     @pytest.mark.asyncio
-    async def test_deactivate_self_fails(self, client, async_test_superuser, superuser_token):
+    async def test_deactivate_self_fails(
+        self, client, async_test_superuser, superuser_token
+    ):
         """Test that admin cannot deactivate themselves (covers lines 313-318)."""
         response = await client.post(
             f"/api/v1/admin/users/{async_test_superuser.id}/deactivate",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -717,13 +774,13 @@ class TestAdminBulkUserActionSuccess:
     @pytest.mark.asyncio
     async def test_bulk_activate_success(self, client, async_test_db, superuser_token):
         """Test bulk activate users (covers lines 355-360, 375-392)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create inactive users
         user_ids = []
         async with AsyncTestingSessionLocal() as session:
-            from app.models.user import User
             from app.core.auth import get_password_hash
+            from app.models.user import User
 
             for i in range(2):
                 user = User(
@@ -731,7 +788,7 @@ class TestAdminBulkUserActionSuccess:
                     password_hash=get_password_hash("Password123!"),
                     first_name="Bulk",
                     last_name=f"User{i}",
-                    is_active=False
+                    is_active=False,
                 )
                 session.add(user)
                 await session.commit()
@@ -741,10 +798,7 @@ class TestAdminBulkUserActionSuccess:
         response = await client.post(
             "/api/v1/admin/users/bulk-action",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={
-                "action": "activate",
-                "user_ids": user_ids
-            }
+            json={"action": "activate", "user_ids": user_ids},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -752,15 +806,17 @@ class TestAdminBulkUserActionSuccess:
         assert data["affected_count"] >= 0
 
     @pytest.mark.asyncio
-    async def test_bulk_deactivate_success(self, client, async_test_db, superuser_token):
+    async def test_bulk_deactivate_success(
+        self, client, async_test_db, superuser_token
+    ):
         """Test bulk deactivate users (covers lines 361-366)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create active users
         user_ids = []
         async with AsyncTestingSessionLocal() as session:
-            from app.models.user import User
             from app.core.auth import get_password_hash
+            from app.models.user import User
 
             for i in range(2):
                 user = User(
@@ -768,7 +824,7 @@ class TestAdminBulkUserActionSuccess:
                     password_hash=get_password_hash("Password123!"),
                     first_name="Bulk",
                     last_name=f"Deactivate{i}",
-                    is_active=True
+                    is_active=True,
                 )
                 session.add(user)
                 await session.commit()
@@ -778,10 +834,7 @@ class TestAdminBulkUserActionSuccess:
         response = await client.post(
             "/api/v1/admin/users/bulk-action",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={
-                "action": "deactivate",
-                "user_ids": user_ids
-            }
+            json={"action": "deactivate", "user_ids": user_ids},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -791,20 +844,20 @@ class TestAdminBulkUserActionSuccess:
     @pytest.mark.asyncio
     async def test_bulk_delete_success(self, client, async_test_db, superuser_token):
         """Test bulk delete users (covers lines 367-373)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create users to delete
         user_ids = []
         async with AsyncTestingSessionLocal() as session:
-            from app.models.user import User
             from app.core.auth import get_password_hash
+            from app.models.user import User
 
             for i in range(2):
                 user = User(
                     email=f"bulkdel{i}{uuid4().hex[:8]}@example.com",
                     password_hash=get_password_hash("Password123!"),
                     first_name="Bulk",
-                    last_name=f"Delete{i}"
+                    last_name=f"Delete{i}",
                 )
                 session.add(user)
                 await session.commit()
@@ -814,10 +867,7 @@ class TestAdminBulkUserActionSuccess:
         response = await client.post(
             "/api/v1/admin/users/bulk-action",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={
-                "action": "delete",
-                "user_ids": user_ids
-            }
+            json={"action": "delete", "user_ids": user_ids},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -833,7 +883,7 @@ class TestAdminListOrganizationsSuccess:
         """Test listing organizations with pagination (covers lines 427-452)."""
         response = await client.get(
             "/api/v1/admin/organizations?page=1&limit=10",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -855,8 +905,8 @@ class TestAdminCreateOrganizationSuccess:
             json={
                 "name": "New Organization",
                 "slug": unique_slug,
-                "description": "Test org"
-            }
+                "description": "Test org",
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -869,18 +919,18 @@ class TestAdminGetOrganizationSuccess:
     """Test admin get organization success paths."""
 
     @pytest.mark.asyncio
-    async def test_get_organization_success(self, client, async_test_db, superuser_token):
+    async def test_get_organization_success(
+        self, client, async_test_db, superuser_token
+    ):
         """Test getting organization successfully (covers lines 516-533)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization
         async with AsyncTestingSessionLocal() as session:
             from app.models.organization import Organization
 
             org = Organization(
-                name="Get Org",
-                slug=f"getorg{uuid4().hex[:8]}",
-                description="Test"
+                name="Get Org", slug=f"getorg{uuid4().hex[:8]}", description="Test"
             )
             session.add(org)
             await session.commit()
@@ -889,7 +939,7 @@ class TestAdminGetOrganizationSuccess:
 
         response = await client.get(
             f"/api/v1/admin/organizations/{org_id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -901,9 +951,11 @@ class TestAdminUpdateOrganizationSuccess:
     """Test admin update organization success paths."""
 
     @pytest.mark.asyncio
-    async def test_update_organization_success(self, client, async_test_db, superuser_token):
+    async def test_update_organization_success(
+        self, client, async_test_db, superuser_token
+    ):
         """Test updating organization successfully (covers lines 552-572)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization
         async with AsyncTestingSessionLocal() as session:
@@ -912,7 +964,7 @@ class TestAdminUpdateOrganizationSuccess:
             org = Organization(
                 name="Update Org",
                 slug=f"updateorg{uuid4().hex[:8]}",
-                description="Test"
+                description="Test",
             )
             session.add(org)
             await session.commit()
@@ -922,7 +974,7 @@ class TestAdminUpdateOrganizationSuccess:
         response = await client.put(
             f"/api/v1/admin/organizations/{org_id}",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={"name": "Updated Org Name"}
+            json={"name": "Updated Org Name"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -934,9 +986,11 @@ class TestAdminDeleteOrganizationSuccess:
     """Test admin delete organization success paths."""
 
     @pytest.mark.asyncio
-    async def test_delete_organization_success(self, client, async_test_db, superuser_token):
+    async def test_delete_organization_success(
+        self, client, async_test_db, superuser_token
+    ):
         """Test deleting organization successfully (covers lines 596-608)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization
         async with AsyncTestingSessionLocal() as session:
@@ -945,7 +999,7 @@ class TestAdminDeleteOrganizationSuccess:
             org = Organization(
                 name="Delete Org",
                 slug=f"deleteorg{uuid4().hex[:8]}",
-                description="Test"
+                description="Test",
             )
             session.add(org)
             await session.commit()
@@ -954,7 +1008,7 @@ class TestAdminDeleteOrganizationSuccess:
 
         response = await client.delete(
             f"/api/v1/admin/organizations/{org_id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -966,19 +1020,21 @@ class TestAdminListOrganizationMembersSuccess:
     """Test admin list organization members success paths."""
 
     @pytest.mark.asyncio
-    async def test_list_organization_members_success(self, client, async_test_db, async_test_user, superuser_token):
+    async def test_list_organization_members_success(
+        self, client, async_test_db, async_test_user, superuser_token
+    ):
         """Test listing organization members successfully (covers lines 634-658)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization with member
         async with AsyncTestingSessionLocal() as session:
             from app.models.organization import Organization
-            from app.models.user_organization import UserOrganization, OrganizationRole
+            from app.models.user_organization import OrganizationRole, UserOrganization
 
             org = Organization(
                 name="Members Org",
                 slug=f"membersorg{uuid4().hex[:8]}",
-                description="Test"
+                description="Test",
             )
             session.add(org)
             await session.commit()
@@ -987,7 +1043,7 @@ class TestAdminListOrganizationMembersSuccess:
             member = UserOrganization(
                 user_id=async_test_user.id,
                 organization_id=org.id,
-                role=OrganizationRole.MEMBER
+                role=OrganizationRole.MEMBER,
             )
             session.add(member)
             await session.commit()
@@ -995,7 +1051,7 @@ class TestAdminListOrganizationMembersSuccess:
 
         response = await client.get(
             f"/api/v1/admin/organizations/{org_id}/members",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -1008,9 +1064,11 @@ class TestAdminAddOrganizationMemberSuccess:
     """Test admin add organization member success paths."""
 
     @pytest.mark.asyncio
-    async def test_add_member_success(self, client, async_test_db, async_test_user, superuser_token):
+    async def test_add_member_success(
+        self, client, async_test_db, async_test_user, superuser_token
+    ):
         """Test adding member to organization successfully (covers lines 689-717)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization
         async with AsyncTestingSessionLocal() as session:
@@ -1019,7 +1077,7 @@ class TestAdminAddOrganizationMemberSuccess:
             org = Organization(
                 name="Add Member Org",
                 slug=f"addmemberorg{uuid4().hex[:8]}",
-                description="Test"
+                description="Test",
             )
             session.add(org)
             await session.commit()
@@ -1029,10 +1087,7 @@ class TestAdminAddOrganizationMemberSuccess:
         response = await client.post(
             f"/api/v1/admin/organizations/{org_id}/members",
             headers={"Authorization": f"Bearer {superuser_token}"},
-            json={
-                "user_id": str(async_test_user.id),
-                "role": "member"
-            }
+            json={"user_id": str(async_test_user.id), "role": "member"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -1044,19 +1099,21 @@ class TestAdminRemoveOrganizationMemberSuccess:
     """Test admin remove organization member success paths."""
 
     @pytest.mark.asyncio
-    async def test_remove_member_success(self, client, async_test_db, async_test_user, superuser_token):
+    async def test_remove_member_success(
+        self, client, async_test_db, async_test_user, superuser_token
+    ):
         """Test removing member from organization successfully (covers lines 750-780)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization with member
         async with AsyncTestingSessionLocal() as session:
             from app.models.organization import Organization
-            from app.models.user_organization import UserOrganization, OrganizationRole
+            from app.models.user_organization import OrganizationRole, UserOrganization
 
             org = Organization(
                 name="Remove Member Success Org",
                 slug=f"removemembersuccess{uuid4().hex[:8]}",
-                description="Test"
+                description="Test",
             )
             session.add(org)
             await session.commit()
@@ -1065,7 +1122,7 @@ class TestAdminRemoveOrganizationMemberSuccess:
             member = UserOrganization(
                 user_id=async_test_user.id,
                 organization_id=org.id,
-                role=OrganizationRole.MEMBER
+                role=OrganizationRole.MEMBER,
             )
             session.add(member)
             await session.commit()
@@ -1073,7 +1130,7 @@ class TestAdminRemoveOrganizationMemberSuccess:
 
         response = await client.delete(
             f"/api/v1/admin/organizations/{org_id}/members/{async_test_user.id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -1081,9 +1138,11 @@ class TestAdminRemoveOrganizationMemberSuccess:
         assert data["success"] is True
 
     @pytest.mark.asyncio
-    async def test_remove_nonmember_fails(self, client, async_test_db, async_test_user, superuser_token):
+    async def test_remove_nonmember_fails(
+        self, client, async_test_db, async_test_user, superuser_token
+    ):
         """Test removing non-member fails (covers lines 769-773)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create organization without member
         async with AsyncTestingSessionLocal() as session:
@@ -1092,7 +1151,7 @@ class TestAdminRemoveOrganizationMemberSuccess:
             org = Organization(
                 name="No Member Org",
                 slug=f"nomemberorg{uuid4().hex[:8]}",
-                description="Test"
+                description="Test",
             )
             session.add(org)
             await session.commit()
@@ -1101,7 +1160,7 @@ class TestAdminRemoveOrganizationMemberSuccess:
 
         response = await client.delete(
             f"/api/v1/admin/organizations/{org_id}/members/{async_test_user.id}",
-            headers={"Authorization": f"Bearer {superuser_token}"}
+            headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND

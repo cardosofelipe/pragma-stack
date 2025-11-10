@@ -4,19 +4,34 @@ Shared validators for Pydantic schemas.
 This module provides reusable validation functions to ensure consistency
 across all schemas and avoid code duplication.
 """
+
 import re
-from typing import Set
 
 # Common weak passwords that should be rejected
-COMMON_PASSWORDS: Set[str] = {
-    'password', 'password1', 'password123', 'password1234',
-    'admin', 'admin123', 'admin1234',
-    'welcome', 'welcome1', 'welcome123',
-    'qwerty', 'qwerty123',
-    '12345678', '123456789', '1234567890',
-    'letmein', 'letmein1', 'letmein123',
-    'monkey123', 'dragon123',
-    'passw0rd', 'p@ssw0rd', 'p@ssword',
+COMMON_PASSWORDS: set[str] = {
+    "password",
+    "password1",
+    "password123",
+    "password1234",
+    "admin",
+    "admin123",
+    "admin1234",
+    "welcome",
+    "welcome1",
+    "welcome123",
+    "qwerty",
+    "qwerty123",
+    "12345678",
+    "123456789",
+    "1234567890",
+    "letmein",
+    "letmein1",
+    "letmein123",
+    "monkey123",
+    "dragon123",
+    "passw0rd",
+    "p@ssw0rd",
+    "p@ssword",
 }
 
 
@@ -47,18 +62,21 @@ def validate_password_strength(password: str) -> str:
     """
     # Check minimum length
     if len(password) < 12:
-        raise ValueError('Password must be at least 12 characters long')
+        raise ValueError("Password must be at least 12 characters long")
 
     # Check against common passwords (case-insensitive)
     if password.lower() in COMMON_PASSWORDS:
-        raise ValueError('Password is too common. Please choose a stronger password')
+        raise ValueError("Password is too common. Please choose a stronger password")
 
     # Check for required character types
     checks = [
-        (any(c.islower() for c in password), 'at least one lowercase letter'),
-        (any(c.isupper() for c in password), 'at least one uppercase letter'),
-        (any(c.isdigit() for c in password), 'at least one digit'),
-        (any(c in '!@#$%^&*()_+-=[]{}|;:,.<>?~`' for c in password), 'at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?~`)')
+        (any(c.islower() for c in password), "at least one lowercase letter"),
+        (any(c.isupper() for c in password), "at least one uppercase letter"),
+        (any(c.isdigit() for c in password), "at least one digit"),
+        (
+            any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?~`" for c in password),
+            "at least one special character (!@#$%^&*()_+-=[]{}|;:,.<>?~`)",
+        ),
     ]
 
     failed = [msg for check, msg in checks if not check]
@@ -94,10 +112,10 @@ def validate_phone_number(phone: str | None) -> str | None:
 
     # Check for empty strings
     if not phone or phone.strip() == "":
-        raise ValueError('Phone number cannot be empty')
+        raise ValueError("Phone number cannot be empty")
 
     # Remove all spaces and formatting characters
-    cleaned = re.sub(r'[\s\-\(\)]', '', phone)
+    cleaned = re.sub(r"[\s\-\(\)]", "", phone)
 
     # Basic pattern:
     # Must start with + or 0
@@ -105,19 +123,19 @@ def validate_phone_number(phone: str | None) -> str | None:
     # After 0 must have at least 8 digits
     # Maximum total length of 15 digits (international standard)
     # Only allowed characters are + at start and digits
-    pattern = r'^(?:\+[0-9]{8,14}|0[0-9]{8,14})$'
+    pattern = r"^(?:\+[0-9]{8,14}|0[0-9]{8,14})$"
 
     if not re.match(pattern, cleaned):
-        raise ValueError('Phone number must start with + or 0 followed by 8-14 digits')
+        raise ValueError("Phone number must start with + or 0 followed by 8-14 digits")
 
     # Additional validation to catch specific invalid cases
     # NOTE: These checks are defensive code - the regex pattern above already catches these cases
-    if cleaned.count('+') > 1:  # pragma: no cover
-        raise ValueError('Phone number can only contain one + symbol at the start')
+    if cleaned.count("+") > 1:  # pragma: no cover
+        raise ValueError("Phone number can only contain one + symbol at the start")
 
     # Check for any non-digit characters (except the leading +)
     if not all(c.isdigit() for c in cleaned[1:]):  # pragma: no cover
-        raise ValueError('Phone number can only contain digits after the prefix')
+        raise ValueError("Phone number can only contain digits after the prefix")
 
     return cleaned
 
@@ -169,16 +187,16 @@ def validate_slug(slug: str) -> str:
         ValueError: If slug format is invalid
     """
     if not slug or len(slug) < 2:
-        raise ValueError('Slug must be at least 2 characters long')
+        raise ValueError("Slug must be at least 2 characters long")
 
     if len(slug) > 50:
-        raise ValueError('Slug must be at most 50 characters long')
+        raise ValueError("Slug must be at most 50 characters long")
 
     # Check format
-    if not re.match(r'^[a-z0-9]+(?:-[a-z0-9]+)*$', slug):
+    if not re.match(r"^[a-z0-9]+(?:-[a-z0-9]+)*$", slug):
         raise ValueError(
-            'Slug can only contain lowercase letters, numbers, and hyphens. '
-            'It cannot start or end with a hyphen, and cannot contain consecutive hyphens'
+            "Slug can only contain lowercase letters, numbers, and hyphens. "
+            "It cannot start or end with a hyphen, and cannot contain consecutive hyphens"
         )
 
     return slug

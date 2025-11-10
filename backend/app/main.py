@@ -2,10 +2,10 @@ import logging
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import FastAPI, status, Request, HTTPException
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -19,9 +19,9 @@ from app.core.database import check_database_health
 from app.core.exceptions import (
     APIException,
     api_exception_handler,
-    validation_exception_handler,
     http_exception_handler,
-    unhandled_exception_handler
+    unhandled_exception_handler,
+    validation_exception_handler,
 )
 
 scheduler = AsyncIOScheduler()
@@ -52,11 +52,11 @@ async def lifespan(app: FastAPI):
         # Runs daily at 2:00 AM server time
         scheduler.add_job(
             cleanup_expired_sessions,
-            'cron',
+            "cron",
             hour=2,
             minute=0,
-            id='cleanup_expired_sessions',
-            replace_existing=True
+            id="cleanup_expired_sessions",
+            replace_existing=True,
         )
 
         scheduler.start()
@@ -73,12 +73,12 @@ async def lifespan(app: FastAPI):
         logger.info("Scheduled jobs stopped")
 
 
-logger.info(f"Starting app!!!")
+logger.info("Starting app!!!")
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add rate limiter state to app
@@ -96,7 +96,14 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],  # Explicit methods only
+    allow_methods=[
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+        "OPTIONS",
+    ],  # Explicit methods only
     allow_headers=[
         "Content-Type",
         "Authorization",
@@ -129,12 +136,14 @@ async def limit_request_size(request: Request, call_next):
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             content={
                 "success": False,
-                "errors": [{
-                    "code": "REQUEST_TOO_LARGE",
-                    "message": f"Request body too large. Maximum size is {MAX_REQUEST_SIZE // (1024 * 1024)}MB",
-                    "field": None
-                }]
-            }
+                "errors": [
+                    {
+                        "code": "REQUEST_TOO_LARGE",
+                        "message": f"Request body too large. Maximum size is {MAX_REQUEST_SIZE // (1024 * 1024)}MB",
+                        "field": None,
+                    }
+                ],
+            },
         )
 
     response = await call_next(request)
@@ -165,15 +174,19 @@ async def add_security_headers(request: Request, call_next):
 
     # Enforce HTTPS in production
     if settings.ENVIRONMENT == "production":
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
 
     # Content Security Policy
     csp_mode = settings.CSP_MODE.lower()
 
     # Special handling for API docs
-    is_docs = request.url.path in ["/docs", "/redoc"] or \
-              request.url.path.startswith("/docs/") or \
-              request.url.path.startswith("/redoc/")
+    is_docs = (
+        request.url.path in ["/docs", "/redoc"]
+        or request.url.path.startswith("/docs/")
+        or request.url.path.startswith("/redoc/")
+    )
 
     if csp_mode == "disabled":
         # No CSP (only for local development/debugging)
@@ -264,7 +277,7 @@ async def root():
     description="Check the health status of the API and its dependencies",
     response_description="Health status information",
     tags=["Health"],
-    operation_id="health_check"
+    operation_id="health_check",
 )
 async def health_check() -> JSONResponse:
     """
@@ -278,12 +291,12 @@ async def health_check() -> JSONResponse:
             - environment: Current environment (development, staging, production)
             - database: Database connectivity status
     """
-    health_status: Dict[str, Any] = {
+    health_status: dict[str, Any] = {
         "status": "healthy",
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "version": settings.VERSION,
         "environment": settings.ENVIRONMENT,
-        "checks": {}
+        "checks": {},
     }
 
     response_status = status.HTTP_200_OK
@@ -294,7 +307,7 @@ async def health_check() -> JSONResponse:
         if db_healthy:
             health_status["checks"]["database"] = {
                 "status": "healthy",
-                "message": "Database connection successful"
+                "message": "Database connection successful",
             }
         else:
             raise Exception("Database health check returned unhealthy status")
@@ -302,15 +315,12 @@ async def health_check() -> JSONResponse:
         health_status["status"] = "unhealthy"
         health_status["checks"]["database"] = {
             "status": "unhealthy",
-            "message": f"Database connection failed: {str(e)}"
+            "message": f"Database connection failed: {e!s}",
         }
         response_status = status.HTTP_503_SERVICE_UNAVAILABLE
         logger.error(f"Health check failed - database error: {e}")
 
-    return JSONResponse(
-        status_code=response_status,
-        content=health_status
-    )
+    return JSONResponse(status_code=response_status, content=health_status)
 
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

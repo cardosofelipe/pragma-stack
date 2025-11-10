@@ -2,21 +2,21 @@
 """
 Tests for authentication endpoints.
 """
+
+from unittest.mock import patch
+
 import pytest
-import pytest_asyncio
-from unittest.mock import patch, MagicMock
 from fastapi import status
 from sqlalchemy import select
 
 from app.models.user import User
-from app.schemas.users import UserCreate
 
 
 # Disable rate limiting for tests
 @pytest.fixture(autouse=True)
 def disable_rate_limit():
     """Disable rate limiting for all tests in this module."""
-    with patch('app.api.routes.auth.limiter.enabled', False):
+    with patch("app.api.routes.auth.limiter.enabled", False):
         yield
 
 
@@ -32,8 +32,8 @@ class TestRegisterEndpoint:
                 "email": "newuser@example.com",
                 "password": "SecurePassword123!",
                 "first_name": "New",
-                "last_name": "User"
-            }
+                "last_name": "User",
+            },
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -54,8 +54,8 @@ class TestRegisterEndpoint:
                 "email": async_test_user.email,
                 "password": "SecurePassword123!",
                 "first_name": "Duplicate",
-                "last_name": "User"
-            }
+                "last_name": "User",
+            },
         )
 
         # Security: Returns 400 with generic message to prevent email enumeration
@@ -73,8 +73,8 @@ class TestRegisterEndpoint:
                 "email": "weakpass@example.com",
                 "password": "weak",
                 "first_name": "Weak",
-                "last_name": "Pass"
-            }
+                "last_name": "Pass",
+            },
         )
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -82,7 +82,7 @@ class TestRegisterEndpoint:
     @pytest.mark.asyncio
     async def test_register_unexpected_error(self, client):
         """Test registration with unexpected error."""
-        with patch('app.services.auth_service.AuthService.create_user') as mock_create:
+        with patch("app.services.auth_service.AuthService.create_user") as mock_create:
             mock_create.side_effect = Exception("Unexpected error")
 
             response = await client.post(
@@ -91,8 +91,8 @@ class TestRegisterEndpoint:
                     "email": "error@example.com",
                     "password": "SecurePassword123!",
                     "first_name": "Error",
-                    "last_name": "User"
-                }
+                    "last_name": "User",
+                },
             )
 
             assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -106,10 +106,7 @@ class TestLoginEndpoint:
         """Test successful login."""
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": async_test_user.email,
-                "password": "TestPassword123!"
-            }
+            json={"email": async_test_user.email, "password": "TestPassword123!"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -123,10 +120,7 @@ class TestLoginEndpoint:
         """Test login with wrong password."""
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": async_test_user.email,
-                "password": "WrongPassword123"
-            }
+            json={"email": async_test_user.email, "password": "WrongPassword123"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -136,10 +130,7 @@ class TestLoginEndpoint:
         """Test login with non-existent email."""
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": "nonexistent@example.com",
-                "password": "Password123!"
-            }
+            json={"email": "nonexistent@example.com", "password": "Password123!"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -147,20 +138,19 @@ class TestLoginEndpoint:
     @pytest.mark.asyncio
     async def test_login_inactive_user(self, client, async_test_user, async_test_db):
         """Test login with inactive user."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Get the user in this session and make it inactive
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             user_in_session = result.scalar_one_or_none()
             user_in_session.is_active = False
             await session.commit()
 
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": async_test_user.email,
-                "password": "TestPassword123!"
-            }
+            json={"email": async_test_user.email, "password": "TestPassword123!"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -168,15 +158,14 @@ class TestLoginEndpoint:
     @pytest.mark.asyncio
     async def test_login_unexpected_error(self, client, async_test_user):
         """Test login with unexpected error."""
-        with patch('app.services.auth_service.AuthService.authenticate_user') as mock_auth:
+        with patch(
+            "app.services.auth_service.AuthService.authenticate_user"
+        ) as mock_auth:
             mock_auth.side_effect = Exception("Database error")
 
             response = await client.post(
                 "/api/v1/auth/login",
-                json={
-                    "email": async_test_user.email,
-                    "password": "TestPassword123!"
-                }
+                json={"email": async_test_user.email, "password": "TestPassword123!"},
             )
 
             assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -190,10 +179,7 @@ class TestOAuthLoginEndpoint:
         """Test successful OAuth login."""
         response = await client.post(
             "/api/v1/auth/login/oauth",
-            data={
-                "username": async_test_user.email,
-                "password": "TestPassword123!"
-            }
+            data={"username": async_test_user.email, "password": "TestPassword123!"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -206,31 +192,29 @@ class TestOAuthLoginEndpoint:
         """Test OAuth login with wrong credentials."""
         response = await client.post(
             "/api/v1/auth/login/oauth",
-            data={
-                "username": async_test_user.email,
-                "password": "WrongPassword"
-            }
+            data={"username": async_test_user.email, "password": "WrongPassword"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     @pytest.mark.asyncio
-    async def test_oauth_login_inactive_user(self, client, async_test_user, async_test_db):
+    async def test_oauth_login_inactive_user(
+        self, client, async_test_user, async_test_db
+    ):
         """Test OAuth login with inactive user."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Get the user in this session and make it inactive
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             user_in_session = result.scalar_one_or_none()
             user_in_session.is_active = False
             await session.commit()
 
         response = await client.post(
             "/api/v1/auth/login/oauth",
-            data={
-                "username": async_test_user.email,
-                "password": "TestPassword123!"
-            }
+            data={"username": async_test_user.email, "password": "TestPassword123!"},
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -238,15 +222,17 @@ class TestOAuthLoginEndpoint:
     @pytest.mark.asyncio
     async def test_oauth_login_unexpected_error(self, client, async_test_user):
         """Test OAuth login with unexpected error."""
-        with patch('app.services.auth_service.AuthService.authenticate_user') as mock_auth:
+        with patch(
+            "app.services.auth_service.AuthService.authenticate_user"
+        ) as mock_auth:
             mock_auth.side_effect = Exception("Unexpected error")
 
             response = await client.post(
                 "/api/v1/auth/login/oauth",
                 data={
                     "username": async_test_user.email,
-                    "password": "TestPassword123!"
-                }
+                    "password": "TestPassword123!",
+                },
             )
 
             assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -261,17 +247,13 @@ class TestRefreshTokenEndpoint:
         # First, login to get a refresh token
         login_response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": async_test_user.email,
-                "password": "TestPassword123!"
-            }
+            json={"email": async_test_user.email, "password": "TestPassword123!"},
         )
         refresh_token = login_response.json()["refresh_token"]
 
         # Now refresh the token
         response = await client.post(
-            "/api/v1/auth/refresh",
-            json={"refresh_token": refresh_token}
+            "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -284,12 +266,13 @@ class TestRefreshTokenEndpoint:
         """Test refresh with expired token."""
         from app.core.auth import TokenExpiredError
 
-        with patch('app.services.auth_service.AuthService.refresh_tokens') as mock_refresh:
+        with patch(
+            "app.services.auth_service.AuthService.refresh_tokens"
+        ) as mock_refresh:
             mock_refresh.side_effect = TokenExpiredError("Token expired")
 
             response = await client.post(
-                "/api/v1/auth/refresh",
-                json={"refresh_token": "some_token"}
+                "/api/v1/auth/refresh", json={"refresh_token": "some_token"}
             )
 
             assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -298,8 +281,7 @@ class TestRefreshTokenEndpoint:
     async def test_refresh_token_invalid(self, client):
         """Test refresh with invalid token."""
         response = await client.post(
-            "/api/v1/auth/refresh",
-            json={"refresh_token": "invalid_token"}
+            "/api/v1/auth/refresh", json={"refresh_token": "invalid_token"}
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -310,19 +292,17 @@ class TestRefreshTokenEndpoint:
         # Get a valid refresh token first
         login_response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": async_test_user.email,
-                "password": "TestPassword123!"
-            }
+            json={"email": async_test_user.email, "password": "TestPassword123!"},
         )
         refresh_token = login_response.json()["refresh_token"]
 
-        with patch('app.services.auth_service.AuthService.refresh_tokens') as mock_refresh:
+        with patch(
+            "app.services.auth_service.AuthService.refresh_tokens"
+        ) as mock_refresh:
             mock_refresh.side_effect = Exception("Unexpected error")
 
             response = await client.post(
-                "/api/v1/auth/refresh",
-                json={"refresh_token": refresh_token}
+                "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
             )
 
             assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR

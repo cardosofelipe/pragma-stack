@@ -1,18 +1,20 @@
 """
 Common schemas used across the API for pagination, responses, filtering, and sorting.
 """
+
 from enum import Enum
 from math import ceil
-from typing import Generic, TypeVar, List, Optional
+from typing import TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class SortOrder(str, Enum):
     """Sort order options."""
+
     ASC = "asc"
     DESC = "desc"
 
@@ -20,16 +22,9 @@ class SortOrder(str, Enum):
 class PaginationParams(BaseModel):
     """Parameters for pagination."""
 
-    page: int = Field(
-        default=1,
-        ge=1,
-        description="Page number (1-indexed)"
-    )
+    page: int = Field(default=1, ge=1, description="Page number (1-indexed)")
     limit: int = Field(
-        default=20,
-        ge=1,
-        le=100,
-        description="Number of items per page (max 100)"
+        default=20, ge=1, le=100, description="Number of items per page (max 100)"
     )
 
     @property
@@ -42,34 +37,20 @@ class PaginationParams(BaseModel):
         """Alias for offset (compatibility with existing code)."""
         return self.offset
 
-    model_config = {
-        "json_schema_extra": {
-            "example": {
-                "page": 1,
-                "limit": 20
-            }
-        }
-    }
+    model_config = {"json_schema_extra": {"example": {"page": 1, "limit": 20}}}
 
 
 class SortParams(BaseModel):
     """Parameters for sorting."""
 
-    sort_by: Optional[str] = Field(
-        default=None,
-        description="Field name to sort by"
-    )
+    sort_by: str | None = Field(default=None, description="Field name to sort by")
     sort_order: SortOrder = Field(
-        default=SortOrder.ASC,
-        description="Sort order (asc or desc)"
+        default=SortOrder.ASC, description="Sort order (asc or desc)"
     )
 
     model_config = {
         "json_schema_extra": {
-            "example": {
-                "sort_by": "created_at",
-                "sort_order": "desc"
-            }
+            "example": {"sort_by": "created_at", "sort_order": "desc"}
         }
     }
 
@@ -92,32 +73,30 @@ class PaginationMeta(BaseModel):
                 "page_size": 20,
                 "total_pages": 8,
                 "has_next": True,
-                "has_prev": False
+                "has_prev": False,
             }
         }
     }
 
 
-class PaginatedResponse(BaseModel, Generic[T]):
+class PaginatedResponse[T](BaseModel):
     """Generic paginated response wrapper."""
 
-    data: List[T] = Field(..., description="List of items")
+    data: list[T] = Field(..., description="List of items")
     pagination: PaginationMeta = Field(..., description="Pagination metadata")
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "data": [
-                    {"id": "123", "name": "Example Item"}
-                ],
+                "data": [{"id": "123", "name": "Example Item"}],
                 "pagination": {
                     "total": 150,
                     "page": 1,
                     "page_size": 20,
                     "total_pages": 8,
                     "has_next": True,
-                    "has_prev": False
-                }
+                    "has_prev": False,
+                },
             }
         }
     }
@@ -131,10 +110,7 @@ class MessageResponse(BaseModel):
 
     model_config = {
         "json_schema_extra": {
-            "example": {
-                "success": True,
-                "message": "Operation completed successfully"
-            }
+            "example": {"success": True, "message": "Operation completed successfully"}
         }
     }
 
@@ -142,11 +118,11 @@ class MessageResponse(BaseModel):
 class BulkActionRequest(BaseModel):
     """Request schema for bulk operations on multiple items."""
 
-    ids: List[UUID] = Field(
+    ids: list[UUID] = Field(
         ...,
         min_length=1,
         max_length=100,
-        description="List of item IDs to perform action on (max 100)"
+        description="List of item IDs to perform action on (max 100)",
     )
 
     model_config = {
@@ -154,7 +130,7 @@ class BulkActionRequest(BaseModel):
             "example": {
                 "ids": [
                     "550e8400-e29b-41d4-a716-446655440000",
-                    "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+                    "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
                 ]
             }
         }
@@ -166,24 +142,23 @@ class BulkActionResponse(BaseModel):
 
     success: bool = Field(default=True, description="Operation success status")
     message: str = Field(..., description="Human-readable message")
-    affected_count: int = Field(..., description="Number of items affected by the operation")
+    affected_count: int = Field(
+        ..., description="Number of items affected by the operation"
+    )
 
     model_config = {
         "json_schema_extra": {
             "example": {
                 "success": True,
                 "message": "Successfully deactivated 5 users",
-                "affected_count": 5
+                "affected_count": 5,
             }
         }
     }
 
 
 def create_pagination_meta(
-    total: int,
-    page: int,
-    limit: int,
-    items_count: int
+    total: int, page: int, limit: int, items_count: int
 ) -> PaginationMeta:
     """
     Helper function to create pagination metadata.
@@ -205,5 +180,5 @@ def create_pagination_meta(
         page_size=items_count,
         total_pages=total_pages,
         has_next=page < total_pages,
-        has_prev=page > 1
+        has_prev=page > 1,
     )

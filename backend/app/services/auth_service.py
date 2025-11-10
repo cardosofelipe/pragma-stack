@@ -1,18 +1,17 @@
 # app/services/auth_service.py
 import logging
-from typing import Optional
 from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import (
-    verify_password_async,
-    get_password_hash_async,
+    TokenExpiredError,
+    TokenInvalidError,
     create_access_token,
     create_refresh_token,
-    TokenExpiredError,
-    TokenInvalidError
+    get_password_hash_async,
+    verify_password_async,
 )
 from app.core.config import settings
 from app.core.exceptions import AuthenticationError
@@ -26,7 +25,9 @@ class AuthService:
     """Service for handling authentication operations"""
 
     @staticmethod
-    async def authenticate_user(db: AsyncSession, email: str, password: str) -> Optional[User]:
+    async def authenticate_user(
+        db: AsyncSession, email: str, password: str
+    ) -> User | None:
         """
         Authenticate a user with email and password using async password verification.
 
@@ -87,7 +88,7 @@ class AuthService:
                 last_name=user_data.last_name,
                 phone_number=user_data.phone_number,
                 is_active=True,
-                is_superuser=False
+                is_superuser=False,
             )
 
             db.add(user)
@@ -103,8 +104,8 @@ class AuthService:
         except Exception as e:
             # Rollback on any database errors
             await db.rollback()
-            logger.error(f"Error creating user: {str(e)}", exc_info=True)
-            raise AuthenticationError(f"Failed to create user: {str(e)}")
+            logger.error(f"Error creating user: {e!s}", exc_info=True)
+            raise AuthenticationError(f"Failed to create user: {e!s}")
 
     @staticmethod
     def create_tokens(user: User) -> Token:
@@ -121,18 +122,13 @@ class AuthService:
         claims = {
             "is_superuser": user.is_superuser,
             "email": user.email,
-            "first_name": user.first_name
+            "first_name": user.first_name,
         }
 
         # Create tokens
-        access_token = create_access_token(
-            subject=str(user.id),
-            claims=claims
-        )
+        access_token = create_access_token(subject=str(user.id), claims=claims)
 
-        refresh_token = create_refresh_token(
-            subject=str(user.id)
-        )
+        refresh_token = create_refresh_token(subject=str(user.id))
 
         # Convert User model to UserResponse schema
         user_response = UserResponse.model_validate(user)
@@ -141,7 +137,8 @@ class AuthService:
             access_token=access_token,
             refresh_token=refresh_token,
             user=user_response,
-            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60  # Convert minutes to seconds
+            expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+            * 60,  # Convert minutes to seconds
         )
 
     @staticmethod
@@ -180,11 +177,13 @@ class AuthService:
             return AuthService.create_tokens(user)
 
         except (TokenExpiredError, TokenInvalidError) as e:
-            logger.warning(f"Token refresh failed: {str(e)}")
+            logger.warning(f"Token refresh failed: {e!s}")
             raise
 
     @staticmethod
-    async def change_password(db: AsyncSession, user_id: UUID, current_password: str, new_password: str) -> bool:
+    async def change_password(
+        db: AsyncSession, user_id: UUID, current_password: str, new_password: str
+    ) -> bool:
         """
         Change a user's password.
 
@@ -223,5 +222,7 @@ class AuthService:
         except Exception as e:
             # Rollback on any database errors
             await db.rollback()
-            logger.error(f"Error changing password for user {user_id}: {str(e)}", exc_info=True)
-            raise AuthenticationError(f"Failed to change password: {str(e)}")
+            logger.error(
+                f"Error changing password for user {user_id}: {e!s}", exc_info=True
+            )
+            raise AuthenticationError(f"Failed to change password: {e!s}")

@@ -8,11 +8,11 @@ Critical security tests covering:
 
 These tests cover critical security vulnerabilities that could be exploited.
 """
+
 import pytest
 from jose import jwt
-from datetime import datetime, timedelta, timezone
 
-from app.core.auth import decode_token, create_access_token, TokenInvalidError
+from app.core.auth import TokenInvalidError, create_access_token, decode_token
 from app.core.config import settings
 
 
@@ -46,13 +46,14 @@ class TestJWTAlgorithmSecurityAttacks:
         """
         # Create a payload that would normally be valid (using timestamps)
         import time
+
         now = int(time.time())
 
         payload = {
             "sub": "user123",
             "exp": now + 3600,  # 1 hour from now
             "iat": now,
-            "type": "access"
+            "type": "access",
         }
 
         # Craft a malicious token with "alg: none"
@@ -61,13 +62,13 @@ class TestJWTAlgorithmSecurityAttacks:
         import json
 
         header = {"alg": "none", "typ": "JWT"}
-        header_encoded = base64.urlsafe_b64encode(
-            json.dumps(header).encode()
-        ).decode().rstrip("=")
+        header_encoded = (
+            base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
+        )
 
-        payload_encoded = base64.urlsafe_b64encode(
-            json.dumps(payload).encode()
-        ).decode().rstrip("=")
+        payload_encoded = (
+            base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
+        )
 
         # Token with no signature (algorithm "none")
         malicious_token = f"{header_encoded}.{payload_encoded}."
@@ -85,22 +86,17 @@ class TestJWTAlgorithmSecurityAttacks:
         import time
 
         now = int(time.time())
-        payload = {
-            "sub": "user123",
-            "exp": now + 3600,
-            "iat": now,
-            "type": "access"
-        }
+        payload = {"sub": "user123", "exp": now + 3600, "iat": now, "type": "access"}
 
         # Try uppercase "NONE"
         header = {"alg": "NONE", "typ": "JWT"}
-        header_encoded = base64.urlsafe_b64encode(
-            json.dumps(header).encode()
-        ).decode().rstrip("=")
+        header_encoded = (
+            base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
+        )
 
-        payload_encoded = base64.urlsafe_b64encode(
-            json.dumps(payload).encode()
-        ).decode().rstrip("=")
+        payload_encoded = (
+            base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
+        )
 
         malicious_token = f"{header_encoded}.{payload_encoded}."
 
@@ -121,15 +117,11 @@ class TestJWTAlgorithmSecurityAttacks:
         before our defensive checks at line 212. This is good for security!
         """
         import time
+
         now = int(time.time())
 
         # Create a valid payload
-        payload = {
-            "sub": "user123",
-            "exp": now + 3600,
-            "iat": now,
-            "type": "access"
-        }
+        payload = {"sub": "user123", "exp": now + 3600, "iat": now, "type": "access"}
 
         # Encode with wrong algorithm (RS256 instead of HS256)
         # This simulates an attacker trying algorithm substitution
@@ -137,9 +129,7 @@ class TestJWTAlgorithmSecurityAttacks:
 
         try:
             malicious_token = jwt.encode(
-                payload,
-                settings.SECRET_KEY,
-                algorithm=wrong_algorithm
+                payload, settings.SECRET_KEY, algorithm=wrong_algorithm
             )
 
             # Should reject the token (library catches mismatch)
@@ -156,21 +146,15 @@ class TestJWTAlgorithmSecurityAttacks:
         Prevents algorithm downgrade/upgrade attacks.
         """
         import time
+
         now = int(time.time())
 
-        payload = {
-            "sub": "user123",
-            "exp": now + 3600,
-            "iat": now,
-            "type": "access"
-        }
+        payload = {"sub": "user123", "exp": now + 3600, "iat": now, "type": "access"}
 
         # Create token with HS384 instead of HS256
         try:
             malicious_token = jwt.encode(
-                payload,
-                settings.SECRET_KEY,
-                algorithm="HS384"
+                payload, settings.SECRET_KEY, algorithm="HS384"
             )
 
             with pytest.raises(TokenInvalidError):
@@ -223,20 +207,15 @@ class TestJWTSecurityEdgeCases:
 
         # Create token without "alg" in header
         header = {"typ": "JWT"}  # Missing "alg"
-        payload = {
-            "sub": "user123",
-            "exp": now + 3600,
-            "iat": now,
-            "type": "access"
-        }
+        payload = {"sub": "user123", "exp": now + 3600, "iat": now, "type": "access"}
 
-        header_encoded = base64.urlsafe_b64encode(
-            json.dumps(header).encode()
-        ).decode().rstrip("=")
+        header_encoded = (
+            base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
+        )
 
-        payload_encoded = base64.urlsafe_b64encode(
-            json.dumps(payload).encode()
-        ).decode().rstrip("=")
+        payload_encoded = (
+            base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
+        )
 
         malicious_token = f"{header_encoded}.{payload_encoded}.fake_signature"
 
@@ -253,15 +232,20 @@ class TestJWTSecurityEdgeCases:
         """Test token with malformed JSON in payload."""
         import base64
 
-        header = {"alg": "HS256", "typ": "JWT"}
-        header_encoded = base64.urlsafe_b64encode(
-            b'{"alg":"HS256","typ":"JWT"}'
-        ).decode().rstrip("=")
+        header_encoded = (
+            base64.urlsafe_b64encode(b'{"alg":"HS256","typ":"JWT"}')
+            .decode()
+            .rstrip("=")
+        )
 
         # Invalid JSON (missing closing brace)
-        invalid_payload_encoded = base64.urlsafe_b64encode(
-            b'{"sub":"user123"'  # Invalid JSON
-        ).decode().rstrip("=")
+        invalid_payload_encoded = (
+            base64.urlsafe_b64encode(
+                b'{"sub":"user123"'  # Invalid JSON
+            )
+            .decode()
+            .rstrip("=")
+        )
 
         malicious_token = f"{header_encoded}.{invalid_payload_encoded}.fake_sig"
 

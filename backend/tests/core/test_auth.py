@@ -1,20 +1,20 @@
 # tests/core/test_auth.py
 import uuid
+from datetime import UTC, datetime, timedelta
+
 import pytest
-from datetime import datetime, timedelta, timezone
 from jose import jwt
-from pydantic import ValidationError
 
 from app.core.auth import (
-    verify_password,
-    get_password_hash,
+    TokenExpiredError,
+    TokenInvalidError,
+    TokenMissingClaimError,
     create_access_token,
     create_refresh_token,
     decode_token,
+    get_password_hash,
     get_token_data,
-    TokenExpiredError,
-    TokenInvalidError,
-    TokenMissingClaimError
+    verify_password,
 )
 from app.core.config import settings
 
@@ -58,15 +58,13 @@ class TestTokenCreation:
         custom_claims = {
             "email": "test@example.com",
             "first_name": "Test",
-            "is_superuser": True
+            "is_superuser": True,
         }
         token = create_access_token(subject=user_id, claims=custom_claims)
 
         # Decode token to verify claims
         payload = jwt.decode(
-            token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
 
         # Check standard claims
@@ -87,9 +85,7 @@ class TestTokenCreation:
 
         # Decode token to verify claims
         payload = jwt.decode(
-            token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
 
         # Check standard claims
@@ -105,23 +101,18 @@ class TestTokenCreation:
         expires = timedelta(minutes=5)
 
         # Create token with specific expiration
-        token = create_access_token(
-            subject=user_id,
-            expires_delta=expires
-        )
+        token = create_access_token(subject=user_id, expires_delta=expires)
 
         # Decode token
         payload = jwt.decode(
-            token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
 
         # Get actual expiration time from token
-        expiration = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
+        expiration = datetime.fromtimestamp(payload["exp"], tz=UTC)
 
         # Calculate expected expiration (approximately)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         expected_expiration = now + expires
 
         # Difference should be small (less than 1 second)
@@ -148,7 +139,7 @@ class TestTokenDecoding:
         user_id = str(uuid.uuid4())
 
         # Create a token that's already expired by directly manipulating the payload
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         expired_time = now - timedelta(hours=1)  # 1 hour in the past
 
         # Create the expired token manually
@@ -157,13 +148,11 @@ class TestTokenDecoding:
             "exp": int(expired_time.timestamp()),  # Set expiration in the past
             "iat": int(now.timestamp()),
             "jti": str(uuid.uuid4()),
-            "type": "access"
+            "type": "access",
         }
 
         expired_token = jwt.encode(
-            payload,
-            settings.SECRET_KEY,
-            algorithm=settings.ALGORITHM
+            payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM
         )
 
         # Attempting to decode should raise TokenExpiredError
@@ -180,20 +169,16 @@ class TestTokenDecoding:
     def test_decode_token_with_missing_sub(self):
         """Test that a token without 'sub' claim raises TokenMissingClaimError"""
         # Create a token without a subject
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         payload = {
             "exp": int((now + timedelta(minutes=30)).timestamp()),
             "iat": int(now.timestamp()),
             "jti": str(uuid.uuid4()),
-            "type": "access"
+            "type": "access",
             # No 'sub' claim
         }
 
-        token = jwt.encode(
-            payload,
-            settings.SECRET_KEY,
-            algorithm=settings.ALGORITHM
-        )
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
         with pytest.raises(TokenMissingClaimError):
             decode_token(token)
@@ -211,20 +196,16 @@ class TestTokenDecoding:
         """Test that a token with invalid payload structure raises TokenInvalidError"""
         # Create a token with an invalid payload structure - missing 'sub' which is required
         # but including 'exp' to avoid the expiration check
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         payload = {
             # Missing "sub" field which is required
             "exp": int((now + timedelta(minutes=30)).timestamp()),
             "iat": int(now.timestamp()),
             "jti": str(uuid.uuid4()),
-            "invalid_field": "test"
+            "invalid_field": "test",
         }
 
-        token = jwt.encode(
-            payload,
-            settings.SECRET_KEY,
-            algorithm=settings.ALGORITHM
-        )
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
         # Should raise TokenMissingClaimError due to missing 'sub'
         with pytest.raises(TokenMissingClaimError):
@@ -236,11 +217,7 @@ class TestTokenDecoding:
             "exp": int((now + timedelta(minutes=30)).timestamp()),
         }
 
-        token = jwt.encode(
-            payload,
-            settings.SECRET_KEY,
-            algorithm=settings.ALGORITHM
-        )
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
         # Should raise TokenInvalidError due to ValidationError
         with pytest.raises(TokenInvalidError):
@@ -249,10 +226,7 @@ class TestTokenDecoding:
     def test_get_token_data(self):
         """Test extracting TokenData from a token"""
         user_id = uuid.uuid4()
-        token = create_access_token(
-            subject=str(user_id),
-            claims={"is_superuser": True}
-        )
+        token = create_access_token(subject=str(user_id), claims={"is_superuser": True})
 
         token_data = get_token_data(token)
 

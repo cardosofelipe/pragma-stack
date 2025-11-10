@@ -1,8 +1,8 @@
 """
 Custom exceptions and global exception handlers for the API.
 """
+
 import logging
-from typing import Optional, Union
 
 from fastapi import HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -27,17 +27,13 @@ class APIException(HTTPException):
         status_code: int,
         error_code: ErrorCode,
         message: str,
-        field: Optional[str] = None,
-        headers: Optional[dict] = None
+        field: str | None = None,
+        headers: dict | None = None,
     ):
         self.error_code = error_code
         self.field = field
         self.message = message
-        super().__init__(
-            status_code=status_code,
-            detail=message,
-            headers=headers
-        )
+        super().__init__(status_code=status_code, detail=message, headers=headers)
 
 
 class AuthenticationError(APIException):
@@ -47,14 +43,14 @@ class AuthenticationError(APIException):
         self,
         message: str = "Authentication failed",
         error_code: ErrorCode = ErrorCode.INVALID_CREDENTIALS,
-        field: Optional[str] = None
+        field: str | None = None,
     ):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             error_code=error_code,
             message=message,
             field=field,
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
 
@@ -64,12 +60,12 @@ class AuthorizationError(APIException):
     def __init__(
         self,
         message: str = "Insufficient permissions",
-        error_code: ErrorCode = ErrorCode.INSUFFICIENT_PERMISSIONS
+        error_code: ErrorCode = ErrorCode.INSUFFICIENT_PERMISSIONS,
     ):
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             error_code=error_code,
-            message=message
+            message=message,
         )
 
 
@@ -79,12 +75,12 @@ class NotFoundError(APIException):
     def __init__(
         self,
         message: str = "Resource not found",
-        error_code: ErrorCode = ErrorCode.NOT_FOUND
+        error_code: ErrorCode = ErrorCode.NOT_FOUND,
     ):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             error_code=error_code,
-            message=message
+            message=message,
         )
 
 
@@ -95,13 +91,13 @@ class DuplicateError(APIException):
         self,
         message: str = "Resource already exists",
         error_code: ErrorCode = ErrorCode.DUPLICATE_ENTRY,
-        field: Optional[str] = None
+        field: str | None = None,
     ):
         super().__init__(
             status_code=status.HTTP_409_CONFLICT,
             error_code=error_code,
             message=message,
-            field=field
+            field=field,
         )
 
 
@@ -112,13 +108,13 @@ class ValidationException(APIException):
         self,
         message: str = "Validation error",
         error_code: ErrorCode = ErrorCode.VALIDATION_ERROR,
-        field: Optional[str] = None
+        field: str | None = None,
     ):
         super().__init__(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             error_code=error_code,
             message=message,
-            field=field
+            field=field,
         )
 
 
@@ -128,12 +124,12 @@ class DatabaseError(APIException):
     def __init__(
         self,
         message: str = "Database operation failed",
-        error_code: ErrorCode = ErrorCode.DATABASE_ERROR
+        error_code: ErrorCode = ErrorCode.DATABASE_ERROR,
     ):
         super().__init__(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             error_code=error_code,
-            message=message
+            message=message,
         )
 
 
@@ -152,23 +148,18 @@ async def api_exception_handler(request: Request, exc: APIException) -> JSONResp
     )
 
     error_response = ErrorResponse(
-        errors=[ErrorDetail(
-            code=exc.error_code,
-            message=exc.message,
-            field=exc.field
-        )]
+        errors=[ErrorDetail(code=exc.error_code, message=exc.message, field=exc.field)]
     )
 
     return JSONResponse(
         status_code=exc.status_code,
         content=error_response.model_dump(),
-        headers=exc.headers
+        headers=exc.headers,
     )
 
 
 async def validation_exception_handler(
-    request: Request,
-    exc: Union[RequestValidationError, ValidationError]
+    request: Request, exc: RequestValidationError | ValidationError
 ) -> JSONResponse:
     """
     Handler for Pydantic validation errors.
@@ -189,22 +180,19 @@ async def validation_exception_handler(
             # Skip 'body' or 'query' prefix in location
             field = ".".join(str(x) for x in error["loc"][1:])
 
-        errors.append(ErrorDetail(
-            code=ErrorCode.VALIDATION_ERROR,
-            message=error["msg"],
-            field=field
-        ))
+        errors.append(
+            ErrorDetail(
+                code=ErrorCode.VALIDATION_ERROR, message=error["msg"], field=field
+            )
+        )
 
-    logger.warning(
-        f"Validation error: {len(errors)} errors "
-        f"(path: {request.url.path})"
-    )
+    logger.warning(f"Validation error: {len(errors)} errors (path: {request.url.path})")
 
     error_response = ErrorResponse(errors=errors)
 
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=error_response.model_dump()
+        content=error_response.model_dump(),
     )
 
 
@@ -226,26 +214,21 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     }
 
     error_code = status_code_to_error_code.get(
-        exc.status_code,
-        ErrorCode.INTERNAL_ERROR
+        exc.status_code, ErrorCode.INTERNAL_ERROR
     )
 
     logger.warning(
-        f"HTTP exception: {exc.status_code} - {exc.detail} "
-        f"(path: {request.url.path})"
+        f"HTTP exception: {exc.status_code} - {exc.detail} (path: {request.url.path})"
     )
 
     error_response = ErrorResponse(
-        errors=[ErrorDetail(
-            code=error_code,
-            message=str(exc.detail)
-        )]
+        errors=[ErrorDetail(code=error_code, message=str(exc.detail))]
     )
 
     return JSONResponse(
         status_code=exc.status_code,
         content=error_response.model_dump(),
-        headers=exc.headers
+        headers=exc.headers,
     )
 
 
@@ -257,26 +240,24 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     leaking sensitive information in production.
     """
     logger.error(
-        f"Unhandled exception: {type(exc).__name__} - {str(exc)} "
+        f"Unhandled exception: {type(exc).__name__} - {exc!s} "
         f"(path: {request.url.path})",
-        exc_info=True
+        exc_info=True,
     )
 
     # In production, don't expose internal error details
     from app.core.config import settings
+
     if settings.ENVIRONMENT == "production":
         message = "An internal error occurred. Please try again later."
     else:
-        message = f"{type(exc).__name__}: {str(exc)}"
+        message = f"{type(exc).__name__}: {exc!s}"
 
     error_response = ErrorResponse(
-        errors=[ErrorDetail(
-            code=ErrorCode.INTERNAL_ERROR,
-            message=message
-        )]
+        errors=[ErrorDetail(code=ErrorCode.INTERNAL_ERROR, message=message)]
     )
 
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content=error_response.model_dump()
+        content=error_response.model_dump(),
     )

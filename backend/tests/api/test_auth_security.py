@@ -8,11 +8,10 @@ Critical security tests covering:
 
 These tests prevent real-world attack scenarios.
 """
+
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.auth import create_refresh_token
 from app.crud.session import session as session_crud
 from app.models.user import User
 
@@ -30,10 +29,7 @@ class TestRevokedSessionSecurity:
 
     @pytest.mark.asyncio
     async def test_refresh_token_rejected_after_logout(
-        self,
-        client: AsyncClient,
-        async_test_db,
-        async_test_user: User
+        self, client: AsyncClient, async_test_db, async_test_user: User
     ):
         """
         Test that refresh tokens are rejected after session is deactivated.
@@ -45,10 +41,10 @@ class TestRevokedSessionSecurity:
         4. Attacker tries to use stolen refresh token
         5. System MUST reject it (session revoked)
         """
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         # Step 1: Create a session and refresh token for the user
-        async with SessionLocal() as session:
+        async with SessionLocal():
             # Login to get tokens
             response = await client.post(
                 "/api/v1/auth/login",
@@ -64,8 +60,7 @@ class TestRevokedSessionSecurity:
 
         # Step 2: Verify refresh token works before logout
         response = await client.post(
-            "/api/v1/auth/refresh",
-            json={"refresh_token": refresh_token}
+            "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
         )
         assert response.status_code == 200, "Refresh should work before logout"
 
@@ -73,14 +68,13 @@ class TestRevokedSessionSecurity:
         response = await client.post(
             "/api/v1/auth/logout",
             headers={"Authorization": f"Bearer {access_token}"},
-            json={"refresh_token": refresh_token}
+            json={"refresh_token": refresh_token},
         )
         assert response.status_code == 200, "Logout should succeed"
 
         # Step 4: Attacker tries to use stolen refresh token
         response = await client.post(
-            "/api/v1/auth/refresh",
-            json={"refresh_token": refresh_token}
+            "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
         )
 
         # Step 5: System MUST reject (covers lines 261-262)
@@ -93,10 +87,7 @@ class TestRevokedSessionSecurity:
 
     @pytest.mark.asyncio
     async def test_refresh_token_rejected_for_deleted_session(
-        self,
-        client: AsyncClient,
-        async_test_db,
-        async_test_user: User
+        self, client: AsyncClient, async_test_db, async_test_user: User
     ):
         """
         Test that tokens for deleted sessions are rejected.
@@ -104,7 +95,7 @@ class TestRevokedSessionSecurity:
         Attack Scenario:
         Admin deletes a session from database, but attacker has the token.
         """
-        test_engine, SessionLocal = async_test_db
+        _test_engine, SessionLocal = async_test_db
 
         # Step 1: Login to create a session
         response = await client.post(
@@ -120,6 +111,7 @@ class TestRevokedSessionSecurity:
 
         # Step 2: Manually delete the session from database (simulating admin action)
         from app.core.auth import decode_token
+
         token_data = decode_token(refresh_token, verify_type="refresh")
         jti = token_data.jti
 
@@ -132,15 +124,17 @@ class TestRevokedSessionSecurity:
 
         # Step 3: Try to use the refresh token
         response = await client.post(
-            "/api/v1/auth/refresh",
-            json={"refresh_token": refresh_token}
+            "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
         )
 
         # Should reject (session doesn't exist)
         assert response.status_code == 401
         data = response.json()
         if "errors" in data:
-            assert "revoked" in data["errors"][0]["message"].lower() or "session" in data["errors"][0]["message"].lower()
+            assert (
+                "revoked" in data["errors"][0]["message"].lower()
+                or "session" in data["errors"][0]["message"].lower()
+            )
         else:
             assert "revoked" in data.get("detail", "").lower()
 
@@ -162,7 +156,7 @@ class TestSessionHijackingSecurity:
         client: AsyncClient,
         async_test_db,
         async_test_user: User,
-        async_test_superuser: User
+        async_test_superuser: User,
     ):
         """
         Test that users cannot logout other users' sessions.
@@ -173,7 +167,7 @@ class TestSessionHijackingSecurity:
         3. User A tries to logout User B's session
         4. System MUST reject (cross-user attack)
         """
-        test_engine, SessionLocal = async_test_db
+        _test_engine, _SessionLocal = async_test_db
 
         # Step 1: User A logs in
         response = await client.post(
@@ -202,8 +196,10 @@ class TestSessionHijackingSecurity:
         # Step 3: User A tries to logout User B's session using User B's refresh token
         response = await client.post(
             "/api/v1/auth/logout",
-            headers={"Authorization": f"Bearer {user_a_access}"},  # User A's access token
-            json={"refresh_token": user_b_refresh}  # But User B's refresh token
+            headers={
+                "Authorization": f"Bearer {user_a_access}"
+            },  # User A's access token
+            json={"refresh_token": user_b_refresh},  # But User B's refresh token
         )
 
         # Step 4: System MUST reject (covers lines 509-513)
@@ -217,9 +213,7 @@ class TestSessionHijackingSecurity:
 
     @pytest.mark.asyncio
     async def test_users_can_logout_their_own_sessions(
-        self,
-        client: AsyncClient,
-        async_test_user: User
+        self, client: AsyncClient, async_test_user: User
     ):
         """
         Sanity check: Users CAN logout their own sessions.
@@ -241,6 +235,8 @@ class TestSessionHijackingSecurity:
         response = await client.post(
             "/api/v1/auth/logout",
             headers={"Authorization": f"Bearer {tokens['access_token']}"},
-            json={"refresh_token": tokens["refresh_token"]}
+            json={"refresh_token": tokens["refresh_token"]},
         )
-        assert response.status_code == 200, "Users should be able to logout their own sessions"
+        assert response.status_code == 200, (
+            "Users should be able to logout their own sessions"
+        )

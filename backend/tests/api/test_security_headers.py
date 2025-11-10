@@ -1,7 +1,8 @@
 # tests/api/test_security_headers.py
+from unittest.mock import patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch
 
 from app.main import app
 
@@ -11,8 +12,10 @@ def client():
     """Create a FastAPI test client for the main app (module-scoped for speed)."""
     # Mock get_db to avoid database connection issues
     with patch("app.core.database.get_db") as mock_get_db:
+
         async def mock_session_generator():
-            from unittest.mock import MagicMock, AsyncMock
+            from unittest.mock import AsyncMock, MagicMock
+
             mock_session = MagicMock()
             mock_session.execute = AsyncMock(return_value=None)
             mock_session.close = AsyncMock(return_value=None)
@@ -77,8 +80,10 @@ class TestSecurityHeaders:
         """Test that HSTS header is set in production (covers line 95)"""
         with patch("app.core.config.settings.ENVIRONMENT", "production"):
             with patch("app.core.database.get_db") as mock_get_db:
+
                 async def mock_session_generator():
-                    from unittest.mock import MagicMock, AsyncMock
+                    from unittest.mock import AsyncMock, MagicMock
+
                     mock_session = MagicMock()
                     mock_session.execute = AsyncMock(return_value=None)
                     mock_session.close = AsyncMock(return_value=None)
@@ -88,20 +93,26 @@ class TestSecurityHeaders:
 
                 # Need to reimport app to pick up the new settings
                 from importlib import reload
+
                 import app.main
+
                 reload(app.main)
                 test_client = TestClient(app.main.app)
 
                 response = test_client.get("/health")
                 assert "Strict-Transport-Security" in response.headers
-                assert "max-age=31536000" in response.headers["Strict-Transport-Security"]
+                assert (
+                    "max-age=31536000" in response.headers["Strict-Transport-Security"]
+                )
 
     def test_csp_strict_mode(self):
         """Test CSP strict mode (covers line 121)"""
         with patch("app.core.config.settings.CSP_MODE", "strict"):
             with patch("app.core.database.get_db") as mock_get_db:
+
                 async def mock_session_generator():
-                    from unittest.mock import MagicMock, AsyncMock
+                    from unittest.mock import AsyncMock, MagicMock
+
                     mock_session = MagicMock()
                     mock_session.execute = AsyncMock(return_value=None)
                     mock_session.close = AsyncMock(return_value=None)
@@ -110,7 +121,9 @@ class TestSecurityHeaders:
                 mock_get_db.side_effect = lambda: mock_session_generator()
 
                 from importlib import reload
+
                 import app.main
+
                 reload(app.main)
                 test_client = TestClient(app.main.app)
 
@@ -136,8 +149,10 @@ class TestRootEndpoint:
     def test_root_endpoint(self):
         """Test root endpoint returns HTML (covers line 174)"""
         with patch("app.core.database.get_db") as mock_get_db:
+
             async def mock_session_generator():
-                from unittest.mock import MagicMock, AsyncMock
+                from unittest.mock import AsyncMock, MagicMock
+
                 mock_session = MagicMock()
                 mock_session.execute = AsyncMock(return_value=None)
                 mock_session.close = AsyncMock(return_value=None)

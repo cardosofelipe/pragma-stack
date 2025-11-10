@@ -1,13 +1,12 @@
 # tests/api/routes/test_health.py
+from datetime import datetime
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi import status
 from fastapi.testclient import TestClient
-from datetime import datetime
-from sqlalchemy.exc import OperationalError
 
 from app.main import app
-from app.core.database import get_db
 
 
 @pytest.fixture
@@ -121,7 +120,10 @@ class TestHealthEndpoint:
         response = client.get("/health")
 
         # Should succeed without authentication
-        assert response.status_code in [status.HTTP_200_OK, status.HTTP_503_SERVICE_UNAVAILABLE]
+        assert response.status_code in [
+            status.HTTP_200_OK,
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+        ]
 
     def test_health_check_idempotent(self, client):
         """Test that multiple health checks return consistent results"""
@@ -142,7 +144,10 @@ class TestHealthEndpoint:
         assert data1["environment"] == data2["environment"]
 
         # Same database check status
-        assert data1["checks"]["database"]["status"] == data2["checks"]["database"]["status"]
+        assert (
+            data1["checks"]["database"]["status"]
+            == data2["checks"]["database"]["status"]
+        )
 
     def test_health_check_content_type(self, client):
         """Test that health check returns JSON content type"""

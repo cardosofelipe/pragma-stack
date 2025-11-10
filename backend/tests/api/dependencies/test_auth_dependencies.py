@@ -1,15 +1,16 @@
 # tests/api/dependencies/test_auth_dependencies.py
-import pytest
-import pytest_asyncio
 import uuid
 from unittest.mock import patch
+
+import pytest
+import pytest_asyncio
 from fastapi import HTTPException
 
 from app.api.dependencies.auth import (
-    get_current_user,
     get_current_active_user,
     get_current_superuser,
-    get_optional_current_user
+    get_current_user,
+    get_optional_current_user,
 )
 from app.core.auth import TokenExpiredError, TokenInvalidError, get_password_hash
 from app.models.user import User
@@ -24,7 +25,7 @@ def mock_token():
 @pytest_asyncio.fixture
 async def async_mock_user(async_test_db):
     """Async fixture to create and return a mock User instance."""
-    test_engine, AsyncTestingSessionLocal = async_test_db
+    _test_engine, AsyncTestingSessionLocal = async_test_db
     async with AsyncTestingSessionLocal() as session:
         mock_user = User(
             id=uuid.uuid4(),
@@ -47,12 +48,14 @@ class TestGetCurrentUser:
     """Tests for get_current_user dependency"""
 
     @pytest.mark.asyncio
-    async def test_get_current_user_success(self, async_test_db, async_mock_user, mock_token):
+    async def test_get_current_user_success(
+        self, async_test_db, async_mock_user, mock_token
+    ):
         """Test successfully getting the current user"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Mock get_token_data to return user_id that matches our mock_user
-            with patch('app.api.dependencies.auth.get_token_data') as mock_get_data:
+            with patch("app.api.dependencies.auth.get_token_data") as mock_get_data:
                 mock_get_data.return_value.user_id = async_mock_user.id
 
                 # Call the dependency
@@ -65,12 +68,12 @@ class TestGetCurrentUser:
     @pytest.mark.asyncio
     async def test_get_current_user_nonexistent(self, async_test_db, mock_token):
         """Test when the token contains a user ID that doesn't exist"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Mock get_token_data to return a non-existent user ID
             nonexistent_id = uuid.UUID("11111111-1111-1111-1111-111111111111")
 
-            with patch('app.api.dependencies.auth.get_token_data') as mock_get_data:
+            with patch("app.api.dependencies.auth.get_token_data") as mock_get_data:
                 mock_get_data.return_value.user_id = nonexistent_id
 
                 # Should raise HTTPException with 404 status
@@ -81,19 +84,24 @@ class TestGetCurrentUser:
                 assert "User not found" in exc_info.value.detail
 
     @pytest.mark.asyncio
-    async def test_get_current_user_inactive(self, async_test_db, async_mock_user, mock_token):
+    async def test_get_current_user_inactive(
+        self, async_test_db, async_mock_user, mock_token
+    ):
         """Test when the user is inactive"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Get the user in this session and make it inactive
             from sqlalchemy import select
-            result = await session.execute(select(User).where(User.id == async_mock_user.id))
+
+            result = await session.execute(
+                select(User).where(User.id == async_mock_user.id)
+            )
             user_in_session = result.scalar_one_or_none()
             user_in_session.is_active = False
             await session.commit()
 
             # Mock get_token_data
-            with patch('app.api.dependencies.auth.get_token_data') as mock_get_data:
+            with patch("app.api.dependencies.auth.get_token_data") as mock_get_data:
                 mock_get_data.return_value.user_id = async_mock_user.id
 
                 # Should raise HTTPException with 403 status
@@ -106,10 +114,10 @@ class TestGetCurrentUser:
     @pytest.mark.asyncio
     async def test_get_current_user_expired_token(self, async_test_db, mock_token):
         """Test with an expired token"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Mock get_token_data to raise TokenExpiredError
-            with patch('app.api.dependencies.auth.get_token_data') as mock_get_data:
+            with patch("app.api.dependencies.auth.get_token_data") as mock_get_data:
                 mock_get_data.side_effect = TokenExpiredError("Token expired")
 
                 # Should raise HTTPException with 401 status
@@ -122,10 +130,10 @@ class TestGetCurrentUser:
     @pytest.mark.asyncio
     async def test_get_current_user_invalid_token(self, async_test_db, mock_token):
         """Test with an invalid token"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Mock get_token_data to raise TokenInvalidError
-            with patch('app.api.dependencies.auth.get_token_data') as mock_get_data:
+            with patch("app.api.dependencies.auth.get_token_data") as mock_get_data:
                 mock_get_data.side_effect = TokenInvalidError("Invalid token")
 
                 # Should raise HTTPException with 401 status
@@ -194,12 +202,14 @@ class TestGetOptionalCurrentUser:
     """Tests for get_optional_current_user dependency"""
 
     @pytest.mark.asyncio
-    async def test_get_optional_current_user_with_token(self, async_test_db, async_mock_user, mock_token):
+    async def test_get_optional_current_user_with_token(
+        self, async_test_db, async_mock_user, mock_token
+    ):
         """Test getting optional user with a valid token"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Mock get_token_data
-            with patch('app.api.dependencies.auth.get_token_data') as mock_get_data:
+            with patch("app.api.dependencies.auth.get_token_data") as mock_get_data:
                 mock_get_data.return_value.user_id = async_mock_user.id
 
                 # Call the dependency
@@ -212,7 +222,7 @@ class TestGetOptionalCurrentUser:
     @pytest.mark.asyncio
     async def test_get_optional_current_user_no_token(self, async_test_db):
         """Test getting optional user with no token"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Call the dependency with no token
             user = await get_optional_current_user(db=session, token=None)
@@ -221,12 +231,14 @@ class TestGetOptionalCurrentUser:
             assert user is None
 
     @pytest.mark.asyncio
-    async def test_get_optional_current_user_invalid_token(self, async_test_db, mock_token):
+    async def test_get_optional_current_user_invalid_token(
+        self, async_test_db, mock_token
+    ):
         """Test getting optional user with an invalid token"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Mock get_token_data to raise TokenInvalidError
-            with patch('app.api.dependencies.auth.get_token_data') as mock_get_data:
+            with patch("app.api.dependencies.auth.get_token_data") as mock_get_data:
                 mock_get_data.side_effect = TokenInvalidError("Invalid token")
 
                 # Call the dependency
@@ -236,12 +248,14 @@ class TestGetOptionalCurrentUser:
                 assert user is None
 
     @pytest.mark.asyncio
-    async def test_get_optional_current_user_expired_token(self, async_test_db, mock_token):
+    async def test_get_optional_current_user_expired_token(
+        self, async_test_db, mock_token
+    ):
         """Test getting optional user with an expired token"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Mock get_token_data to raise TokenExpiredError
-            with patch('app.api.dependencies.auth.get_token_data') as mock_get_data:
+            with patch("app.api.dependencies.auth.get_token_data") as mock_get_data:
                 mock_get_data.side_effect = TokenExpiredError("Token expired")
 
                 # Call the dependency
@@ -251,19 +265,24 @@ class TestGetOptionalCurrentUser:
                 assert user is None
 
     @pytest.mark.asyncio
-    async def test_get_optional_current_user_inactive(self, async_test_db, async_mock_user, mock_token):
+    async def test_get_optional_current_user_inactive(
+        self, async_test_db, async_mock_user, mock_token
+    ):
         """Test getting optional user when user is inactive"""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             # Get the user in this session and make it inactive
             from sqlalchemy import select
-            result = await session.execute(select(User).where(User.id == async_mock_user.id))
+
+            result = await session.execute(
+                select(User).where(User.id == async_mock_user.id)
+            )
             user_in_session = result.scalar_one_or_none()
             user_in_session.is_active = False
             await session.commit()
 
             # Mock get_token_data
-            with patch('app.api.dependencies.auth.get_token_data') as mock_get_data:
+            with patch("app.api.dependencies.auth.get_token_data") as mock_get_data:
                 mock_get_data.return_value.user_id = async_mock_user.id
 
                 # Call the dependency

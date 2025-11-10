@@ -2,19 +2,21 @@
 """
 Tests for security utility functions.
 """
-import time
+
 import base64
 import json
+import time
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 
 from app.utils.security import (
-    create_upload_token,
-    verify_upload_token,
-    create_password_reset_token,
-    verify_password_reset_token,
     create_email_verification_token,
-    verify_email_verification_token
+    create_password_reset_token,
+    create_upload_token,
+    verify_email_verification_token,
+    verify_password_reset_token,
+    verify_upload_token,
 )
 
 
@@ -31,7 +33,7 @@ class TestCreateUploadToken:
 
         # Token should be base64 encoded
         try:
-            decoded = base64.urlsafe_b64decode(token.encode('utf-8'))
+            decoded = base64.urlsafe_b64decode(token.encode("utf-8"))
             token_data = json.loads(decoded)
             assert "payload" in token_data
             assert "signature" in token_data
@@ -46,7 +48,7 @@ class TestCreateUploadToken:
         token = create_upload_token(file_path, content_type)
 
         # Decode and verify payload
-        decoded = base64.urlsafe_b64decode(token.encode('utf-8'))
+        decoded = base64.urlsafe_b64decode(token.encode("utf-8"))
         token_data = json.loads(decoded)
         payload = token_data["payload"]
 
@@ -62,7 +64,7 @@ class TestCreateUploadToken:
         after = int(time.time())
 
         # Decode token
-        decoded = base64.urlsafe_b64decode(token.encode('utf-8'))
+        decoded = base64.urlsafe_b64decode(token.encode("utf-8"))
         token_data = json.loads(decoded)
         payload = token_data["payload"]
 
@@ -74,11 +76,13 @@ class TestCreateUploadToken:
         """Test token creation with custom expiration time."""
         custom_exp = 600  # 10 minutes
         before = int(time.time())
-        token = create_upload_token("/uploads/test.jpg", "image/jpeg", expires_in=custom_exp)
+        token = create_upload_token(
+            "/uploads/test.jpg", "image/jpeg", expires_in=custom_exp
+        )
         after = int(time.time())
 
         # Decode token
-        decoded = base64.urlsafe_b64decode(token.encode('utf-8'))
+        decoded = base64.urlsafe_b64decode(token.encode("utf-8"))
         token_data = json.loads(decoded)
         payload = token_data["payload"]
 
@@ -92,11 +96,11 @@ class TestCreateUploadToken:
         token2 = create_upload_token("/uploads/test.jpg", "image/jpeg")
 
         # Decode both tokens
-        decoded1 = base64.urlsafe_b64decode(token1.encode('utf-8'))
+        decoded1 = base64.urlsafe_b64decode(token1.encode("utf-8"))
         token_data1 = json.loads(decoded1)
         nonce1 = token_data1["payload"]["nonce"]
 
-        decoded2 = base64.urlsafe_b64decode(token2.encode('utf-8'))
+        decoded2 = base64.urlsafe_b64decode(token2.encode("utf-8"))
         token_data2 = json.loads(decoded2)
         nonce2 = token_data2["payload"]["nonce"]
 
@@ -133,7 +137,7 @@ class TestVerifyUploadToken:
         current_time = 1000000
         mock_time.time = MagicMock(return_value=current_time)
 
-        with patch('app.utils.security.time', mock_time):
+        with patch("app.utils.security.time", mock_time):
             # Create token that "expires" at current_time + 1
             token = create_upload_token("/uploads/test.jpg", "image/jpeg", expires_in=1)
 
@@ -149,13 +153,15 @@ class TestVerifyUploadToken:
         token = create_upload_token("/uploads/test.jpg", "image/jpeg")
 
         # Decode, modify, and re-encode
-        decoded = base64.urlsafe_b64decode(token.encode('utf-8'))
+        decoded = base64.urlsafe_b64decode(token.encode("utf-8"))
         token_data = json.loads(decoded)
         token_data["signature"] = "invalid_signature"
 
         # Re-encode the tampered token
         tampered_json = json.dumps(token_data)
-        tampered_token = base64.urlsafe_b64encode(tampered_json.encode('utf-8')).decode('utf-8')
+        tampered_token = base64.urlsafe_b64encode(tampered_json.encode("utf-8")).decode(
+            "utf-8"
+        )
 
         payload = verify_upload_token(tampered_token)
         assert payload is None
@@ -165,13 +171,15 @@ class TestVerifyUploadToken:
         token = create_upload_token("/uploads/test.jpg", "image/jpeg")
 
         # Decode, modify payload, and re-encode
-        decoded = base64.urlsafe_b64decode(token.encode('utf-8'))
+        decoded = base64.urlsafe_b64decode(token.encode("utf-8"))
         token_data = json.loads(decoded)
         token_data["payload"]["path"] = "/uploads/hacked.exe"
 
         # Re-encode the tampered token (signature won't match)
         tampered_json = json.dumps(token_data)
-        tampered_token = base64.urlsafe_b64encode(tampered_json.encode('utf-8')).decode('utf-8')
+        tampered_token = base64.urlsafe_b64encode(tampered_json.encode("utf-8")).decode(
+            "utf-8"
+        )
 
         payload = verify_upload_token(tampered_token)
         assert payload is None
@@ -194,7 +202,9 @@ class TestVerifyUploadToken:
         """Test that tokens with invalid JSON are rejected."""
         # Create a base64 string that decodes to invalid JSON
         invalid_json = "not valid json"
-        invalid_token = base64.urlsafe_b64encode(invalid_json.encode('utf-8')).decode('utf-8')
+        invalid_token = base64.urlsafe_b64encode(invalid_json.encode("utf-8")).decode(
+            "utf-8"
+        )
 
         payload = verify_upload_token(invalid_token)
         assert payload is None
@@ -207,11 +217,13 @@ class TestVerifyUploadToken:
                 "path": "/uploads/test.jpg"
                 # Missing content_type, exp, nonce
             },
-            "signature": "some_signature"
+            "signature": "some_signature",
         }
 
         incomplete_json = json.dumps(incomplete_data)
-        incomplete_token = base64.urlsafe_b64encode(incomplete_json.encode('utf-8')).decode('utf-8')
+        incomplete_token = base64.urlsafe_b64encode(
+            incomplete_json.encode("utf-8")
+        ).decode("utf-8")
 
         payload = verify_upload_token(incomplete_token)
         assert payload is None
@@ -266,7 +278,7 @@ class TestPasswordResetTokens:
         email = "user@example.com"
 
         # Create token that expires in 1 second
-        with patch('app.utils.security.time') as mock_time:
+        with patch("app.utils.security.time") as mock_time:
             mock_time.time = MagicMock(return_value=1000000)
             token = create_password_reset_token(email, expires_in=1)
 
@@ -287,12 +299,14 @@ class TestPasswordResetTokens:
         token = create_password_reset_token(email)
 
         # Decode and tamper
-        decoded = base64.urlsafe_b64decode(token.encode('utf-8')).decode('utf-8')
+        decoded = base64.urlsafe_b64decode(token.encode("utf-8")).decode("utf-8")
         token_data = json.loads(decoded)
         token_data["payload"]["email"] = "hacker@example.com"
 
         # Re-encode
-        tampered = base64.urlsafe_b64encode(json.dumps(token_data).encode('utf-8')).decode('utf-8')
+        tampered = base64.urlsafe_b64encode(
+            json.dumps(token_data).encode("utf-8")
+        ).decode("utf-8")
 
         verified_email = verify_password_reset_token(tampered)
         assert verified_email is None
@@ -312,14 +326,14 @@ class TestPasswordResetTokens:
         email = "user@example.com"
         custom_exp = 7200  # 2 hours
 
-        with patch('app.utils.security.time') as mock_time:
+        with patch("app.utils.security.time") as mock_time:
             current_time = 1000000
             mock_time.time = MagicMock(return_value=current_time)
 
             token = create_password_reset_token(email, expires_in=custom_exp)
 
             # Decode to check expiration
-            decoded = base64.urlsafe_b64decode(token.encode('utf-8')).decode('utf-8')
+            decoded = base64.urlsafe_b64decode(token.encode("utf-8")).decode("utf-8")
             token_data = json.loads(decoded)
 
             assert token_data["payload"]["exp"] == current_time + custom_exp
@@ -350,7 +364,7 @@ class TestEmailVerificationTokens:
         """Test that expired verification tokens are rejected."""
         email = "user@example.com"
 
-        with patch('app.utils.security.time') as mock_time:
+        with patch("app.utils.security.time") as mock_time:
             mock_time.time = MagicMock(return_value=1000000)
             token = create_email_verification_token(email, expires_in=1)
 
@@ -371,12 +385,14 @@ class TestEmailVerificationTokens:
         token = create_email_verification_token(email)
 
         # Decode and tamper
-        decoded = base64.urlsafe_b64decode(token.encode('utf-8')).decode('utf-8')
+        decoded = base64.urlsafe_b64decode(token.encode("utf-8")).decode("utf-8")
         token_data = json.loads(decoded)
         token_data["payload"]["email"] = "hacker@example.com"
 
         # Re-encode
-        tampered = base64.urlsafe_b64encode(json.dumps(token_data).encode('utf-8')).decode('utf-8')
+        tampered = base64.urlsafe_b64encode(
+            json.dumps(token_data).encode("utf-8")
+        ).decode("utf-8")
 
         verified_email = verify_email_verification_token(tampered)
         assert verified_email is None
@@ -395,14 +411,14 @@ class TestEmailVerificationTokens:
         """Test email verification token with default 24-hour expiration."""
         email = "user@example.com"
 
-        with patch('app.utils.security.time') as mock_time:
+        with patch("app.utils.security.time") as mock_time:
             current_time = 1000000
             mock_time.time = MagicMock(return_value=current_time)
 
             token = create_email_verification_token(email)
 
             # Decode to check expiration (should be 86400 seconds = 24 hours)
-            decoded = base64.urlsafe_b64decode(token.encode('utf-8')).decode('utf-8')
+            decoded = base64.urlsafe_b64decode(token.encode("utf-8")).decode("utf-8")
             token_data = json.loads(decoded)
 
             assert token_data["payload"]["exp"] == current_time + 86400

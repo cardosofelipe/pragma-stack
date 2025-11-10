@@ -1,8 +1,10 @@
 # tests/models/test_user.py
 import uuid
-import pytest
 from datetime import datetime
+
+import pytest
 from sqlalchemy.exc import IntegrityError
+
 from app.models.user import User
 
 
@@ -166,7 +168,6 @@ def test_user_required_fields(db_session):
     db_session.rollback()
 
 
-
 def test_user_defaults(db_session):
     """Test that default values are correctly set."""
     # Arrange - Create a minimal user with only required fields
@@ -210,22 +211,13 @@ def test_user_with_complex_json_preferences(db_session):
     """Test storing and retrieving complex JSON preferences."""
     # Arrange - Create a user with nested JSON preferences
     complex_preferences = {
-        "theme": {
-            "mode": "dark",
-            "colors": {
-                "primary": "#333",
-                "secondary": "#666"
-            }
-        },
+        "theme": {"mode": "dark", "colors": {"primary": "#333", "secondary": "#666"}},
         "notifications": {
             "email": True,
             "sms": False,
-            "push": {
-                "enabled": True,
-                "quiet_hours": [22, 7]
-            }
+            "push": {"enabled": True, "quiet_hours": [22, 7]},
         },
-        "tags": ["important", "family", "events"]
+        "tags": ["important", "family", "events"],
     }
 
     user = User(
@@ -234,13 +226,15 @@ def test_user_with_complex_json_preferences(db_session):
         password_hash="hashedpassword",
         first_name="Complex",
         last_name="JSON",
-        preferences=complex_preferences
+        preferences=complex_preferences,
     )
     db_session.add(user)
     db_session.commit()
 
     # Act - Retrieve the user
-    retrieved_user = db_session.query(User).filter_by(email="complex@example.com").first()
+    retrieved_user = (
+        db_session.query(User).filter_by(email="complex@example.com").first()
+    )
 
     # Assert - The complex JSON should be preserved
     assert retrieved_user.preferences == complex_preferences

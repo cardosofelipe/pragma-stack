@@ -1,33 +1,30 @@
 """
 User management endpoints for CRUD operations.
 """
+
 import logging
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status, Request
+from fastapi import APIRouter, Depends, Query, Request, status
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies.auth import get_current_user, get_current_superuser
+from app.api.dependencies.auth import get_current_superuser, get_current_user
 from app.core.database import get_db
-from app.core.exceptions import (
-    NotFoundError,
-    AuthorizationError,
-    ErrorCode
-)
+from app.core.exceptions import AuthorizationError, ErrorCode, NotFoundError
 from app.crud.user import user as user_crud
 from app.models.user import User
 from app.schemas.common import (
-    PaginationParams,
-    PaginatedResponse,
     MessageResponse,
+    PaginatedResponse,
+    PaginationParams,
     SortParams,
-    create_pagination_meta
+    create_pagination_meta,
 )
-from app.schemas.users import UserResponse, UserUpdate, PasswordChange
-from app.services.auth_service import AuthService, AuthenticationError
+from app.schemas.users import PasswordChange, UserResponse, UserUpdate
+from app.services.auth_service import AuthenticationError, AuthService
 
 logger = logging.getLogger(__name__)
 
@@ -50,15 +47,15 @@ limiter = Limiter(key_func=get_remote_address)
 
     **Rate Limit**: 60 requests/minute
     """,
-    operation_id="list_users"
+    operation_id="list_users",
 )
 async def list_users(
     pagination: PaginationParams = Depends(),
     sort: SortParams = Depends(),
-    is_active: Optional[bool] = Query(None, description="Filter by active status"),
-    is_superuser: Optional[bool] = Query(None, description="Filter by superuser status"),
+    is_active: bool | None = Query(None, description="Filter by active status"),
+    is_superuser: bool | None = Query(None, description="Filter by superuser status"),
     current_user: User = Depends(get_current_superuser),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     List all users with pagination, filtering, and sorting.
@@ -80,7 +77,7 @@ async def list_users(
             limit=pagination.limit,
             sort_by=sort.sort_by,
             sort_order=sort.sort_order.value if sort.sort_order else "asc",
-            filters=filters if filters else None
+            filters=filters if filters else None,
         )
 
         # Create pagination metadata
@@ -88,15 +85,12 @@ async def list_users(
             total=total,
             page=pagination.page,
             limit=pagination.limit,
-            items_count=len(users)
+            items_count=len(users),
         )
 
-        return PaginatedResponse(
-            data=users,
-            pagination=pagination_meta
-        )
+        return PaginatedResponse(data=users, pagination=pagination_meta)
     except Exception as e:
-        logger.error(f"Error listing users: {str(e)}", exc_info=True)
+        logger.error(f"Error listing users: {e!s}", exc_info=True)
         raise
 
 
@@ -111,11 +105,9 @@ async def list_users(
 
     **Rate Limit**: 60 requests/minute
     """,
-    operation_id="get_current_user_profile"
+    operation_id="get_current_user_profile",
 )
-def get_current_user_profile(
-    current_user: User = Depends(get_current_user)
-) -> Any:
+def get_current_user_profile(current_user: User = Depends(get_current_user)) -> Any:
     """Get current user's profile."""
     return current_user
 
@@ -133,12 +125,12 @@ def get_current_user_profile(
 
     **Rate Limit**: 30 requests/minute
     """,
-    operation_id="update_current_user"
+    operation_id="update_current_user",
 )
 async def update_current_user(
     user_update: UserUpdate,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Update current user's profile.
@@ -147,17 +139,17 @@ async def update_current_user(
     """
     try:
         updated_user = await user_crud.update(
-            db,
-            db_obj=current_user,
-            obj_in=user_update
+            db, db_obj=current_user, obj_in=user_update
         )
         logger.info(f"User {current_user.id} updated their profile")
         return updated_user
     except ValueError as e:
-        logger.error(f"Error updating user {current_user.id}: {str(e)}")
+        logger.error(f"Error updating user {current_user.id}: {e!s}")
         raise
     except Exception as e:
-        logger.error(f"Unexpected error updating user {current_user.id}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Unexpected error updating user {current_user.id}: {e!s}", exc_info=True
+        )
         raise
 
 
@@ -175,12 +167,12 @@ async def update_current_user(
 
     **Rate Limit**: 60 requests/minute
     """,
-    operation_id="get_user_by_id"
+    operation_id="get_user_by_id",
 )
 async def get_user_by_id(
     user_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Get user by ID.
@@ -194,7 +186,7 @@ async def get_user_by_id(
         )
         raise AuthorizationError(
             message="Not enough permissions to view this user",
-            error_code=ErrorCode.INSUFFICIENT_PERMISSIONS
+            error_code=ErrorCode.INSUFFICIENT_PERMISSIONS,
         )
 
     # Get user
@@ -202,7 +194,7 @@ async def get_user_by_id(
     if not user:
         raise NotFoundError(
             message=f"User with id {user_id} not found",
-            error_code=ErrorCode.USER_NOT_FOUND
+            error_code=ErrorCode.USER_NOT_FOUND,
         )
 
     return user
@@ -222,13 +214,13 @@ async def get_user_by_id(
 
     **Rate Limit**: 30 requests/minute
     """,
-    operation_id="update_user"
+    operation_id="update_user",
 )
 async def update_user(
     user_id: UUID,
     user_update: UserUpdate,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Update user by ID.
@@ -245,7 +237,7 @@ async def update_user(
         )
         raise AuthorizationError(
             message="Not enough permissions to update this user",
-            error_code=ErrorCode.INSUFFICIENT_PERMISSIONS
+            error_code=ErrorCode.INSUFFICIENT_PERMISSIONS,
         )
 
     # Get user
@@ -253,7 +245,7 @@ async def update_user(
     if not user:
         raise NotFoundError(
             message=f"User with id {user_id} not found",
-            error_code=ErrorCode.USER_NOT_FOUND
+            error_code=ErrorCode.USER_NOT_FOUND,
         )
 
     try:
@@ -261,10 +253,10 @@ async def update_user(
         logger.info(f"User {user_id} updated by {current_user.id}")
         return updated_user
     except ValueError as e:
-        logger.error(f"Error updating user {user_id}: {str(e)}")
+        logger.error(f"Error updating user {user_id}: {e!s}")
         raise
     except Exception as e:
-        logger.error(f"Unexpected error updating user {user_id}: {str(e)}", exc_info=True)
+        logger.error(f"Unexpected error updating user {user_id}: {e!s}", exc_info=True)
         raise
 
 
@@ -281,14 +273,14 @@ async def update_user(
 
     **Rate Limit**: 5 requests/minute
     """,
-    operation_id="change_current_user_password"
+    operation_id="change_current_user_password",
 )
 @limiter.limit("5/minute")
 async def change_current_user_password(
     request: Request,
     password_change: PasswordChange,
     current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Change current user's password.
@@ -300,23 +292,23 @@ async def change_current_user_password(
             db=db,
             user_id=current_user.id,
             current_password=password_change.current_password,
-            new_password=password_change.new_password
+            new_password=password_change.new_password,
         )
 
         if success:
             logger.info(f"User {current_user.id} changed their password")
             return MessageResponse(
-                success=True,
-                message="Password changed successfully"
+                success=True, message="Password changed successfully"
             )
     except AuthenticationError as e:
-        logger.warning(f"Failed password change attempt for user {current_user.id}: {str(e)}")
+        logger.warning(
+            f"Failed password change attempt for user {current_user.id}: {e!s}"
+        )
         raise AuthorizationError(
-            message=str(e),
-            error_code=ErrorCode.INVALID_CREDENTIALS
+            message=str(e), error_code=ErrorCode.INVALID_CREDENTIALS
         )
     except Exception as e:
-        logger.error(f"Error changing password for user {current_user.id}: {str(e)}")
+        logger.error(f"Error changing password for user {current_user.id}: {e!s}")
         raise
 
 
@@ -335,12 +327,12 @@ async def change_current_user_password(
 
     **Note**: This performs a hard delete. Consider implementing soft deletes for production.
     """,
-    operation_id="delete_user"
+    operation_id="delete_user",
 )
 async def delete_user(
     user_id: UUID,
     current_user: User = Depends(get_current_superuser),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> Any:
     """
     Delete user by ID (superuser only).
@@ -351,7 +343,7 @@ async def delete_user(
     if str(user_id) == str(current_user.id):
         raise AuthorizationError(
             message="Cannot delete your own account",
-            error_code=ErrorCode.INSUFFICIENT_PERMISSIONS
+            error_code=ErrorCode.INSUFFICIENT_PERMISSIONS,
         )
 
     # Get user
@@ -359,7 +351,7 @@ async def delete_user(
     if not user:
         raise NotFoundError(
             message=f"User with id {user_id} not found",
-            error_code=ErrorCode.USER_NOT_FOUND
+            error_code=ErrorCode.USER_NOT_FOUND,
         )
 
     try:
@@ -367,12 +359,11 @@ async def delete_user(
         await user_crud.soft_delete(db, id=str(user_id))
         logger.info(f"User {user_id} soft-deleted by {current_user.id}")
         return MessageResponse(
-            success=True,
-            message=f"User {user_id} deleted successfully"
+            success=True, message=f"User {user_id} deleted successfully"
         )
     except ValueError as e:
-        logger.error(f"Error deleting user {user_id}: {str(e)}")
+        logger.error(f"Error deleting user {user_id}: {e!s}")
         raise
     except Exception as e:
-        logger.error(f"Unexpected error deleting user {user_id}: {str(e)}", exc_info=True)
+        logger.error(f"Unexpected error deleting user {user_id}: {e!s}", exc_info=True)
         raise

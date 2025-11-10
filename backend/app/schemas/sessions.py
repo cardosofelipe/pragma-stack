@@ -1,37 +1,44 @@
 """
 Pydantic schemas for user session management.
 """
+
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SessionBase(BaseModel):
     """Base schema for user sessions."""
-    device_name: Optional[str] = Field(None, max_length=255, description="Friendly device name")
-    device_id: Optional[str] = Field(None, max_length=255, description="Persistent device identifier")
+
+    device_name: str | None = Field(
+        None, max_length=255, description="Friendly device name"
+    )
+    device_id: str | None = Field(
+        None, max_length=255, description="Persistent device identifier"
+    )
 
 
 class SessionCreate(SessionBase):
     """Schema for creating a new session (internal use)."""
+
     user_id: UUID
     refresh_token_jti: str = Field(..., max_length=255)
-    ip_address: Optional[str] = Field(None, max_length=45)
-    user_agent: Optional[str] = Field(None, max_length=500)
+    ip_address: str | None = Field(None, max_length=45)
+    user_agent: str | None = Field(None, max_length=500)
     last_used_at: datetime
     expires_at: datetime
-    location_city: Optional[str] = Field(None, max_length=100)
-    location_country: Optional[str] = Field(None, max_length=100)
+    location_city: str | None = Field(None, max_length=100)
+    location_country: str | None = Field(None, max_length=100)
 
 
 class SessionUpdate(BaseModel):
     """Schema for updating a session (internal use)."""
-    last_used_at: Optional[datetime] = None
-    is_active: Optional[bool] = None
-    refresh_token_jti: Optional[str] = None
-    expires_at: Optional[datetime] = None
+
+    last_used_at: datetime | None = None
+    is_active: bool | None = None
+    refresh_token_jti: str | None = None
+    expires_at: datetime | None = None
 
 
 class SessionResponse(SessionBase):
@@ -40,14 +47,17 @@ class SessionResponse(SessionBase):
 
     This is what users see when they list their active sessions.
     """
+
     id: UUID
-    ip_address: Optional[str] = None
-    location_city: Optional[str] = None
-    location_country: Optional[str] = None
+    ip_address: str | None = None
+    location_city: str | None = None
+    location_country: str | None = None
     last_used_at: datetime
     created_at: datetime
     expires_at: datetime
-    is_current: bool = Field(default=False, description="Whether this is the current session")
+    is_current: bool = Field(
+        default=False, description="Whether this is the current session"
+    )
 
     model_config = ConfigDict(
         from_attributes=True,
@@ -62,14 +72,15 @@ class SessionResponse(SessionBase):
                 "last_used_at": "2025-10-31T12:00:00Z",
                 "created_at": "2025-10-30T09:00:00Z",
                 "expires_at": "2025-11-06T09:00:00Z",
-                "is_current": True
+                "is_current": True,
             }
-        }
+        },
     )
 
 
 class SessionListResponse(BaseModel):
     """Response containing list of sessions."""
+
     sessions: list[SessionResponse]
     total: int = Field(..., description="Total number of active sessions")
 
@@ -84,10 +95,10 @@ class SessionListResponse(BaseModel):
                         "last_used_at": "2025-10-31T12:00:00Z",
                         "created_at": "2025-10-30T09:00:00Z",
                         "expires_at": "2025-11-06T09:00:00Z",
-                        "is_current": True
+                        "is_current": True,
                     }
                 ],
-                "total": 1
+                "total": 1,
             }
         }
     )
@@ -95,17 +106,14 @@ class SessionListResponse(BaseModel):
 
 class LogoutRequest(BaseModel):
     """Request schema for logout endpoint."""
+
     refresh_token: str = Field(
-        ...,
-        description="Refresh token for the session to logout from",
-        min_length=10
+        ..., description="Refresh token for the session to logout from", min_length=10
     )
 
     model_config = ConfigDict(
         json_schema_extra={
-            "example": {
-                "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-            }
+            "example": {"refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."}
         }
     )
 
@@ -116,13 +124,14 @@ class AdminSessionResponse(SessionBase):
 
     Includes user information for admin to see who owns each session.
     """
+
     id: UUID
     user_id: UUID
     user_email: str = Field(..., description="Email of the user who owns this session")
-    user_full_name: Optional[str] = Field(None, description="Full name of the user")
-    ip_address: Optional[str] = None
-    location_city: Optional[str] = None
-    location_country: Optional[str] = None
+    user_full_name: str | None = Field(None, description="Full name of the user")
+    ip_address: str | None = None
+    location_city: str | None = None
+    location_country: str | None = None
     last_used_at: datetime
     created_at: datetime
     expires_at: datetime
@@ -144,20 +153,21 @@ class AdminSessionResponse(SessionBase):
                 "last_used_at": "2025-10-31T12:00:00Z",
                 "created_at": "2025-10-30T09:00:00Z",
                 "expires_at": "2025-11-06T09:00:00Z",
-                "is_active": True
+                "is_active": True,
             }
-        }
+        },
     )
 
 
 class DeviceInfo(BaseModel):
     """Device information extracted from request."""
-    device_name: Optional[str] = None
-    device_id: Optional[str] = None
-    ip_address: Optional[str] = None
-    user_agent: Optional[str] = None
-    location_city: Optional[str] = None
-    location_country: Optional[str] = None
+
+    device_name: str | None = None
+    device_id: str | None = None
+    ip_address: str | None = None
+    user_agent: str | None = None
+    location_city: str | None = None
+    location_country: str | None = None
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -167,7 +177,7 @@ class DeviceInfo(BaseModel):
                 "ip_address": "192.168.1.50",
                 "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)...",
                 "location_city": "San Francisco",
-                "location_country": "United States"
+                "location_country": "United States",
             }
         }
     )

@@ -2,7 +2,8 @@
 Authentication utilities for testing.
 This module provides tools to bypass FastAPI's authentication in tests.
 """
-from typing import Callable, Dict, Optional
+
+from collections.abc import Callable
 
 from fastapi import FastAPI
 from fastapi.security import OAuth2PasswordBearer
@@ -13,9 +14,9 @@ from app.models.user import User
 
 
 def create_test_auth_client(
-        app: FastAPI,
-        test_user: User,
-        extra_overrides: Optional[Dict[Callable, Callable]] = None
+    app: FastAPI,
+    test_user: User,
+    extra_overrides: dict[Callable, Callable] | None = None,
 ) -> TestClient:
     """
     Create a test client with authentication pre-configured.
@@ -47,10 +48,7 @@ def create_test_auth_client(
     return TestClient(app)
 
 
-def create_test_optional_auth_client(
-        app: FastAPI,
-        test_user: User
-) -> TestClient:
+def create_test_optional_auth_client(app: FastAPI, test_user: User) -> TestClient:
     """
     Create a test client with optional authentication pre-configured.
 
@@ -70,10 +68,7 @@ def create_test_optional_auth_client(
     return TestClient(app)
 
 
-def create_test_superuser_client(
-        app: FastAPI,
-        test_user: User
-) -> TestClient:
+def create_test_superuser_client(app: FastAPI, test_user: User) -> TestClient:
     """
     Create a test client with superuser authentication pre-configured.
 
@@ -120,7 +115,7 @@ def cleanup_test_client_auth(app: FastAPI) -> None:
     auth_deps = [
         get_current_user,
         get_optional_current_user,
-        OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+        OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login"),
     ]
 
     # Remove overrides

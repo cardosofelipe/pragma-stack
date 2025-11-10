@@ -3,8 +3,9 @@ Background job for cleaning up expired sessions.
 
 This service runs periodically to remove old session records from the database.
 """
+
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.core.database import SessionLocal
 from app.crud.session import session as session_crud
@@ -39,7 +40,7 @@ async def cleanup_expired_sessions(keep_days: int = 30) -> int:
             return count
 
         except Exception as e:
-            logger.error(f"Error during session cleanup: {str(e)}", exc_info=True)
+            logger.error(f"Error during session cleanup: {e!s}", exc_info=True)
             return 0
 
 
@@ -52,20 +53,21 @@ async def get_session_statistics() -> dict:
     """
     async with SessionLocal() as db:
         try:
+            from sqlalchemy import func, select
+
             from app.models.user_session import UserSession
-            from sqlalchemy import select, func
 
             total_result = await db.execute(select(func.count(UserSession.id)))
             total_sessions = total_result.scalar_one()
 
             active_result = await db.execute(
-                select(func.count(UserSession.id)).where(UserSession.is_active == True)
+                select(func.count(UserSession.id)).where(UserSession.is_active)
             )
             active_sessions = active_result.scalar_one()
 
             expired_result = await db.execute(
                 select(func.count(UserSession.id)).where(
-                    UserSession.expires_at < datetime.now(timezone.utc)
+                    UserSession.expires_at < datetime.now(UTC)
                 )
             )
             expired_sessions = expired_result.scalar_one()
@@ -82,5 +84,5 @@ async def get_session_statistics() -> dict:
             return stats
 
         except Exception as e:
-            logger.error(f"Error getting session statistics: {str(e)}", exc_info=True)
+            logger.error(f"Error getting session statistics: {e!s}", exc_info=True)
             return {}

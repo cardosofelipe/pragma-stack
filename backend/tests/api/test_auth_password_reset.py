@@ -2,22 +2,22 @@
 """
 Tests for password reset endpoints.
 """
+
+from unittest.mock import patch
+
 import pytest
-import pytest_asyncio
-from unittest.mock import patch, AsyncMock, MagicMock
 from fastapi import status
 from sqlalchemy import select
 
-from app.schemas.users import PasswordResetRequest, PasswordResetConfirm
-from app.utils.security import create_password_reset_token
 from app.models.user import User
+from app.utils.security import create_password_reset_token
 
 
 # Disable rate limiting for tests
 @pytest.fixture(autouse=True)
 def disable_rate_limit():
     """Disable rate limiting for all tests in this module."""
-    with patch('app.api.routes.auth.limiter.enabled', False):
+    with patch("app.api.routes.auth.limiter.enabled", False):
         yield
 
 
@@ -27,12 +27,14 @@ class TestPasswordResetRequest:
     @pytest.mark.asyncio
     async def test_password_reset_request_valid_email(self, client, async_test_user):
         """Test password reset request with valid email."""
-        with patch('app.api.routes.auth.email_service.send_password_reset_email') as mock_send:
+        with patch(
+            "app.api.routes.auth.email_service.send_password_reset_email"
+        ) as mock_send:
             mock_send.return_value = True
 
             response = await client.post(
                 "/api/v1/auth/password-reset/request",
-                json={"email": async_test_user.email}
+                json={"email": async_test_user.email},
             )
 
             assert response.status_code == status.HTTP_200_OK
@@ -50,10 +52,12 @@ class TestPasswordResetRequest:
     @pytest.mark.asyncio
     async def test_password_reset_request_nonexistent_email(self, client):
         """Test password reset request with non-existent email."""
-        with patch('app.api.routes.auth.email_service.send_password_reset_email') as mock_send:
+        with patch(
+            "app.api.routes.auth.email_service.send_password_reset_email"
+        ) as mock_send:
             response = await client.post(
                 "/api/v1/auth/password-reset/request",
-                json={"email": "nonexistent@example.com"}
+                json={"email": "nonexistent@example.com"},
             )
 
             # Should still return success to prevent email enumeration
@@ -65,20 +69,26 @@ class TestPasswordResetRequest:
             mock_send.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_password_reset_request_inactive_user(self, client, async_test_db, async_test_user):
+    async def test_password_reset_request_inactive_user(
+        self, client, async_test_db, async_test_user
+    ):
         """Test password reset request with inactive user."""
         # Deactivate user
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             user_in_session = result.scalar_one_or_none()
             user_in_session.is_active = False
             await session.commit()
 
-        with patch('app.api.routes.auth.email_service.send_password_reset_email') as mock_send:
+        with patch(
+            "app.api.routes.auth.email_service.send_password_reset_email"
+        ) as mock_send:
             response = await client.post(
                 "/api/v1/auth/password-reset/request",
-                json={"email": async_test_user.email}
+                json={"email": async_test_user.email},
             )
 
             # Should still return success to prevent email enumeration
@@ -93,8 +103,7 @@ class TestPasswordResetRequest:
     async def test_password_reset_request_invalid_email_format(self, client):
         """Test password reset request with invalid email format."""
         response = await client.post(
-            "/api/v1/auth/password-reset/request",
-            json={"email": "not-an-email"}
+            "/api/v1/auth/password-reset/request", json={"email": "not-an-email"}
         )
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -102,22 +111,23 @@ class TestPasswordResetRequest:
     @pytest.mark.asyncio
     async def test_password_reset_request_missing_email(self, client):
         """Test password reset request without email."""
-        response = await client.post(
-            "/api/v1/auth/password-reset/request",
-            json={}
-        )
+        response = await client.post("/api/v1/auth/password-reset/request", json={})
 
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     @pytest.mark.asyncio
-    async def test_password_reset_request_email_service_error(self, client, async_test_user):
+    async def test_password_reset_request_email_service_error(
+        self, client, async_test_user
+    ):
         """Test password reset when email service fails."""
-        with patch('app.api.routes.auth.email_service.send_password_reset_email') as mock_send:
+        with patch(
+            "app.api.routes.auth.email_service.send_password_reset_email"
+        ) as mock_send:
             mock_send.side_effect = Exception("SMTP Error")
 
             response = await client.post(
                 "/api/v1/auth/password-reset/request",
-                json={"email": async_test_user.email}
+                json={"email": async_test_user.email},
             )
 
             # Should still return success even if email fails
@@ -128,14 +138,16 @@ class TestPasswordResetRequest:
     @pytest.mark.asyncio
     async def test_password_reset_request_rate_limiting(self, client, async_test_user):
         """Test that password reset requests are rate limited."""
-        with patch('app.api.routes.auth.email_service.send_password_reset_email') as mock_send:
+        with patch(
+            "app.api.routes.auth.email_service.send_password_reset_email"
+        ) as mock_send:
             mock_send.return_value = True
 
             # Make multiple requests quickly (3/minute limit)
             for _ in range(3):
                 response = await client.post(
                     "/api/v1/auth/password-reset/request",
-                    json={"email": async_test_user.email}
+                    json={"email": async_test_user.email},
                 )
                 assert response.status_code == status.HTTP_200_OK
 
@@ -144,7 +156,9 @@ class TestPasswordResetConfirm:
     """Tests for POST /auth/password-reset/confirm endpoint."""
 
     @pytest.mark.asyncio
-    async def test_password_reset_confirm_valid_token(self, client, async_test_user, async_test_db):
+    async def test_password_reset_confirm_valid_token(
+        self, client, async_test_user, async_test_db
+    ):
         """Test password reset confirmation with valid token."""
         # Generate valid token
         token = create_password_reset_token(async_test_user.email)
@@ -152,10 +166,7 @@ class TestPasswordResetConfirm:
 
         response = await client.post(
             "/api/v1/auth/password-reset/confirm",
-            json={
-                "token": token,
-                "new_password": new_password
-            }
+            json={"token": token, "new_password": new_password},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -164,11 +175,14 @@ class TestPasswordResetConfirm:
         assert "successfully" in data["message"].lower()
 
         # Verify user can login with new password
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             updated_user = result.scalar_one_or_none()
             from app.core.auth import verify_password
+
             assert verify_password(new_password, updated_user.password_hash) is True
 
     @pytest.mark.asyncio
@@ -184,10 +198,7 @@ class TestPasswordResetConfirm:
 
         response = await client.post(
             "/api/v1/auth/password-reset/confirm",
-            json={
-                "token": token,
-                "new_password": "NewSecure123!"
-            }
+            json={"token": token, "new_password": "NewSecure123!"},
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -202,10 +213,7 @@ class TestPasswordResetConfirm:
         """Test password reset confirmation with invalid token."""
         response = await client.post(
             "/api/v1/auth/password-reset/confirm",
-            json={
-                "token": "invalid_token_xyz",
-                "new_password": "NewSecure123!"
-            }
+            json={"token": "invalid_token_xyz", "new_password": "NewSecure123!"},
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -222,19 +230,18 @@ class TestPasswordResetConfirm:
 
         # Create valid token and tamper with it
         token = create_password_reset_token(async_test_user.email)
-        decoded = base64.urlsafe_b64decode(token.encode('utf-8')).decode('utf-8')
+        decoded = base64.urlsafe_b64decode(token.encode("utf-8")).decode("utf-8")
         token_data = json.loads(decoded)
         token_data["payload"]["email"] = "hacker@example.com"
 
         # Re-encode tampered token
-        tampered = base64.urlsafe_b64encode(json.dumps(token_data).encode('utf-8')).decode('utf-8')
+        tampered = base64.urlsafe_b64encode(
+            json.dumps(token_data).encode("utf-8")
+        ).decode("utf-8")
 
         response = await client.post(
             "/api/v1/auth/password-reset/confirm",
-            json={
-                "token": tampered,
-                "new_password": "NewSecure123!"
-            }
+            json={"token": tampered, "new_password": "NewSecure123!"},
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -247,10 +254,7 @@ class TestPasswordResetConfirm:
 
         response = await client.post(
             "/api/v1/auth/password-reset/confirm",
-            json={
-                "token": token,
-                "new_password": "NewSecure123!"
-            }
+            json={"token": token, "new_password": "NewSecure123!"},
         )
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -260,12 +264,16 @@ class TestPasswordResetConfirm:
         assert "not found" in error_msg
 
     @pytest.mark.asyncio
-    async def test_password_reset_confirm_inactive_user(self, client, async_test_user, async_test_db):
+    async def test_password_reset_confirm_inactive_user(
+        self, client, async_test_user, async_test_db
+    ):
         """Test password reset confirmation for inactive user."""
         # Deactivate user
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             user_in_session = result.scalar_one_or_none()
             user_in_session.is_active = False
             await session.commit()
@@ -274,10 +282,7 @@ class TestPasswordResetConfirm:
 
         response = await client.post(
             "/api/v1/auth/password-reset/confirm",
-            json={
-                "token": token,
-                "new_password": "NewSecure123!"
-            }
+            json={"token": token, "new_password": "NewSecure123!"},
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -301,10 +306,7 @@ class TestPasswordResetConfirm:
         for weak_password in weak_passwords:
             response = await client.post(
                 "/api/v1/auth/password-reset/confirm",
-                json={
-                    "token": token,
-                    "new_password": weak_password
-                }
+                json={"token": token, "new_password": weak_password},
             )
 
             assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -315,15 +317,14 @@ class TestPasswordResetConfirm:
         # Missing token
         response = await client.post(
             "/api/v1/auth/password-reset/confirm",
-            json={"new_password": "NewSecure123!"}
+            json={"new_password": "NewSecure123!"},
         )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
         # Missing password
         token = create_password_reset_token("test@example.com")
         response = await client.post(
-            "/api/v1/auth/password-reset/confirm",
-            json={"token": token}
+            "/api/v1/auth/password-reset/confirm", json={"token": token}
         )
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -333,15 +334,12 @@ class TestPasswordResetConfirm:
         token = create_password_reset_token(async_test_user.email)
 
         # Mock the database commit to raise an exception
-        with patch('app.api.routes.auth.user_crud.get_by_email') as mock_get:
+        with patch("app.api.routes.auth.user_crud.get_by_email") as mock_get:
             mock_get.side_effect = Exception("Database error")
 
             response = await client.post(
                 "/api/v1/auth/password-reset/confirm",
-                json={
-                    "token": token,
-                    "new_password": "NewSecure123!"
-                }
+                json={"token": token, "new_password": "NewSecure123!"},
             )
 
             assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -351,18 +349,22 @@ class TestPasswordResetConfirm:
             assert "error" in error_msg or "resetting" in error_msg
 
     @pytest.mark.asyncio
-    async def test_password_reset_full_flow(self, client, async_test_user, async_test_db):
+    async def test_password_reset_full_flow(
+        self, client, async_test_user, async_test_db
+    ):
         """Test complete password reset flow."""
         original_password = async_test_user.password_hash
         new_password = "BrandNew123!"
 
         # Step 1: Request password reset
-        with patch('app.api.routes.auth.email_service.send_password_reset_email') as mock_send:
+        with patch(
+            "app.api.routes.auth.email_service.send_password_reset_email"
+        ) as mock_send:
             mock_send.return_value = True
 
             response = await client.post(
                 "/api/v1/auth/password-reset/request",
-                json={"email": async_test_user.email}
+                json={"email": async_test_user.email},
             )
 
             assert response.status_code == status.HTTP_200_OK
@@ -374,29 +376,24 @@ class TestPasswordResetConfirm:
         # Step 2: Confirm password reset
         response = await client.post(
             "/api/v1/auth/password-reset/confirm",
-            json={
-                "token": reset_token,
-                "new_password": new_password
-            }
+            json={"token": reset_token, "new_password": new_password},
         )
 
         assert response.status_code == status.HTTP_200_OK
 
         # Step 3: Verify old password doesn't work
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
-            result = await session.execute(select(User).where(User.id == async_test_user.id))
+            result = await session.execute(
+                select(User).where(User.id == async_test_user.id)
+            )
             updated_user = result.scalar_one_or_none()
-            from app.core.auth import verify_password
             assert updated_user.password_hash != original_password
 
         # Step 4: Verify new password works
         response = await client.post(
             "/api/v1/auth/login",
-            json={
-                "email": async_test_user.email,
-                "password": new_password
-            }
+            json={"email": async_test_user.email, "password": new_password},
         )
 
         assert response.status_code == status.HTTP_200_OK

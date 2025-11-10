@@ -5,16 +5,18 @@ Tests for organization routes (user endpoints).
 These test the routes in app/api/routes/organizations.py which allow
 users to view and manage organizations they belong to.
 """
+
+from unittest.mock import patch
+from uuid import uuid4
+
 import pytest
 import pytest_asyncio
 from fastapi import status
-from uuid import uuid4
-from unittest.mock import patch, AsyncMock
 
+from app.core.auth import get_password_hash
 from app.models.organization import Organization
 from app.models.user import User
-from app.models.user_organization import UserOrganization, OrganizationRole
-from app.core.auth import get_password_hash
+from app.models.user_organization import OrganizationRole, UserOrganization
 
 
 @pytest_asyncio.fixture
@@ -22,10 +24,7 @@ async def user_token(client, async_test_user):
     """Get access token for regular user."""
     response = await client.post(
         "/api/v1/auth/login",
-        json={
-            "email": "testuser@example.com",
-            "password": "TestPassword123!"
-        }
+        json={"email": "testuser@example.com", "password": "TestPassword123!"},
     )
     assert response.status_code == 200
     return response.json()["access_token"]
@@ -34,7 +33,7 @@ async def user_token(client, async_test_user):
 @pytest_asyncio.fixture
 async def second_user(async_test_db):
     """Create a second test user."""
-    test_engine, AsyncTestingSessionLocal = async_test_db
+    _test_engine, AsyncTestingSessionLocal = async_test_db
     async with AsyncTestingSessionLocal() as session:
         user = User(
             id=uuid4(),
@@ -56,12 +55,12 @@ async def second_user(async_test_db):
 @pytest_asyncio.fixture
 async def test_org_with_user_member(async_test_db, async_test_user):
     """Create a test organization with async_test_user as a member."""
-    test_engine, AsyncTestingSessionLocal = async_test_db
+    _test_engine, AsyncTestingSessionLocal = async_test_db
     async with AsyncTestingSessionLocal() as session:
         org = Organization(
             name="Member Org",
             slug="member-org",
-            description="Test organization where user is a member"
+            description="Test organization where user is a member",
         )
         session.add(org)
         await session.commit()
@@ -72,7 +71,7 @@ async def test_org_with_user_member(async_test_db, async_test_user):
             user_id=async_test_user.id,
             organization_id=org.id,
             role=OrganizationRole.MEMBER,
-            is_active=True
+            is_active=True,
         )
         session.add(membership)
         await session.commit()
@@ -83,12 +82,12 @@ async def test_org_with_user_member(async_test_db, async_test_user):
 @pytest_asyncio.fixture
 async def test_org_with_user_admin(async_test_db, async_test_user):
     """Create a test organization with async_test_user as an admin."""
-    test_engine, AsyncTestingSessionLocal = async_test_db
+    _test_engine, AsyncTestingSessionLocal = async_test_db
     async with AsyncTestingSessionLocal() as session:
         org = Organization(
             name="Admin Org",
             slug="admin-org",
-            description="Test organization where user is an admin"
+            description="Test organization where user is an admin",
         )
         session.add(org)
         await session.commit()
@@ -99,7 +98,7 @@ async def test_org_with_user_admin(async_test_db, async_test_user):
             user_id=async_test_user.id,
             organization_id=org.id,
             role=OrganizationRole.ADMIN,
-            is_active=True
+            is_active=True,
         )
         session.add(membership)
         await session.commit()
@@ -110,12 +109,12 @@ async def test_org_with_user_admin(async_test_db, async_test_user):
 @pytest_asyncio.fixture
 async def test_org_with_user_owner(async_test_db, async_test_user):
     """Create a test organization with async_test_user as owner."""
-    test_engine, AsyncTestingSessionLocal = async_test_db
+    _test_engine, AsyncTestingSessionLocal = async_test_db
     async with AsyncTestingSessionLocal() as session:
         org = Organization(
             name="Owner Org",
             slug="owner-org",
-            description="Test organization where user is owner"
+            description="Test organization where user is owner",
         )
         session.add(org)
         await session.commit()
@@ -126,7 +125,7 @@ async def test_org_with_user_owner(async_test_db, async_test_user):
             user_id=async_test_user.id,
             organization_id=org.id,
             role=OrganizationRole.OWNER,
-            is_active=True
+            is_active=True,
         )
         session.add(membership)
         await session.commit()
@@ -136,21 +135,18 @@ async def test_org_with_user_owner(async_test_db, async_test_user):
 
 # ===== GET /api/v1/organizations/me =====
 
+
 class TestGetMyOrganizations:
     """Tests for GET /api/v1/organizations/me endpoint."""
 
     @pytest.mark.asyncio
     async def test_get_my_organizations_success(
-        self,
-        client,
-        user_token,
-        test_org_with_user_member,
-        test_org_with_user_admin
+        self, client, user_token, test_org_with_user_member, test_org_with_user_admin
     ):
         """Test successfully getting user's organizations (covers lines 54-79)."""
         response = await client.get(
             "/api/v1/organizations/me",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -167,21 +163,15 @@ class TestGetMyOrganizations:
 
     @pytest.mark.asyncio
     async def test_get_my_organizations_filter_active(
-        self,
-        client,
-        async_test_db,
-        async_test_user,
-        user_token
+        self, client, async_test_db, async_test_user, user_token
     ):
         """Test filtering organizations by active status."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create active org
         async with AsyncTestingSessionLocal() as session:
             active_org = Organization(
-                name="Active Org",
-                slug="active-org-filter",
-                is_active=True
+                name="Active Org", slug="active-org-filter", is_active=True
             )
             session.add(active_org)
             await session.commit()
@@ -192,14 +182,14 @@ class TestGetMyOrganizations:
                 user_id=async_test_user.id,
                 organization_id=active_org.id,
                 role=OrganizationRole.MEMBER,
-                is_active=True
+                is_active=True,
             )
             session.add(membership)
             await session.commit()
 
         response = await client.get(
             "/api/v1/organizations/me?is_active=true",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -209,7 +199,7 @@ class TestGetMyOrganizations:
     @pytest.mark.asyncio
     async def test_get_my_organizations_empty(self, client, async_test_db):
         """Test getting organizations when user has none."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create user with no org memberships
         async with AsyncTestingSessionLocal() as session:
@@ -219,7 +209,7 @@ class TestGetMyOrganizations:
                 password_hash=get_password_hash("TestPassword123!"),
                 first_name="No",
                 last_name="Org",
-                is_active=True
+                is_active=True,
             )
             session.add(user)
             await session.commit()
@@ -227,13 +217,12 @@ class TestGetMyOrganizations:
         # Login to get token
         login_response = await client.post(
             "/api/v1/auth/login",
-            json={"email": "noorg@example.com", "password": "TestPassword123!"}
+            json={"email": "noorg@example.com", "password": "TestPassword123!"},
         )
         token = login_response.json()["access_token"]
 
         response = await client.get(
-            "/api/v1/organizations/me",
-            headers={"Authorization": f"Bearer {token}"}
+            "/api/v1/organizations/me", headers={"Authorization": f"Bearer {token}"}
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -243,20 +232,18 @@ class TestGetMyOrganizations:
 
 # ===== GET /api/v1/organizations/{organization_id} =====
 
+
 class TestGetOrganization:
     """Tests for GET /api/v1/organizations/{organization_id} endpoint."""
 
     @pytest.mark.asyncio
     async def test_get_organization_success(
-        self,
-        client,
-        user_token,
-        test_org_with_user_member
+        self, client, user_token, test_org_with_user_member
     ):
         """Test successfully getting organization details (covers lines 103-122)."""
         response = await client.get(
             f"/api/v1/organizations/{test_org_with_user_member.id}",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -272,7 +259,7 @@ class TestGetOrganization:
         fake_org_id = uuid4()
         response = await client.get(
             f"/api/v1/organizations/{fake_org_id}",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         # Permission dependency checks membership before endpoint logic
@@ -283,20 +270,14 @@ class TestGetOrganization:
 
     @pytest.mark.asyncio
     async def test_get_organization_not_member(
-        self,
-        client,
-        async_test_db,
-        async_test_user
+        self, client, async_test_db, async_test_user
     ):
         """Test getting organization where user is not a member fails."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create org without adding user
         async with AsyncTestingSessionLocal() as session:
-            org = Organization(
-                name="Not Member Org",
-                slug="not-member-org"
-            )
+            org = Organization(name="Not Member Org", slug="not-member-org")
             session.add(org)
             await session.commit()
             await session.refresh(org)
@@ -305,13 +286,13 @@ class TestGetOrganization:
         # Login as user
         login_response = await client.post(
             "/api/v1/auth/login",
-            json={"email": "testuser@example.com", "password": "TestPassword123!"}
+            json={"email": "testuser@example.com", "password": "TestPassword123!"},
         )
         token = login_response.json()["access_token"]
 
         response = await client.get(
             f"/api/v1/organizations/{org_id}",
-            headers={"Authorization": f"Bearer {token}"}
+            headers={"Authorization": f"Bearer {token}"},
         )
 
         # Should fail permission check
@@ -319,6 +300,7 @@ class TestGetOrganization:
 
 
 # ===== GET /api/v1/organizations/{organization_id}/members =====
+
 
 class TestGetOrganizationMembers:
     """Tests for GET /api/v1/organizations/{organization_id}/members endpoint."""
@@ -331,10 +313,10 @@ class TestGetOrganizationMembers:
         async_test_user,
         second_user,
         user_token,
-        test_org_with_user_member
+        test_org_with_user_member,
     ):
         """Test successfully getting organization members (covers lines 150-168)."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Add second user to org
         async with AsyncTestingSessionLocal() as session:
@@ -342,14 +324,14 @@ class TestGetOrganizationMembers:
                 user_id=second_user.id,
                 organization_id=test_org_with_user_member.id,
                 role=OrganizationRole.MEMBER,
-                is_active=True
+                is_active=True,
             )
             session.add(membership)
             await session.commit()
 
         response = await client.get(
             f"/api/v1/organizations/{test_org_with_user_member.id}/members",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -360,15 +342,12 @@ class TestGetOrganizationMembers:
 
     @pytest.mark.asyncio
     async def test_get_organization_members_with_pagination(
-        self,
-        client,
-        user_token,
-        test_org_with_user_member
+        self, client, user_token, test_org_with_user_member
     ):
         """Test pagination parameters."""
         response = await client.get(
             f"/api/v1/organizations/{test_org_with_user_member.id}/members?page=1&limit=10",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -385,10 +364,10 @@ class TestGetOrganizationMembers:
         async_test_user,
         second_user,
         user_token,
-        test_org_with_user_member
+        test_org_with_user_member,
     ):
         """Test filtering members by active status."""
-        test_engine, AsyncTestingSessionLocal = async_test_db
+        _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Add second user as inactive member
         async with AsyncTestingSessionLocal() as session:
@@ -396,7 +375,7 @@ class TestGetOrganizationMembers:
                 user_id=second_user.id,
                 organization_id=test_org_with_user_member.id,
                 role=OrganizationRole.MEMBER,
-                is_active=False
+                is_active=False,
             )
             session.add(membership)
             await session.commit()
@@ -404,7 +383,7 @@ class TestGetOrganizationMembers:
         # Filter for active only
         response = await client.get(
             f"/api/v1/organizations/{test_org_with_user_member.id}/members?is_active=true",
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -416,31 +395,26 @@ class TestGetOrganizationMembers:
 
 # ===== PUT /api/v1/organizations/{organization_id} =====
 
+
 class TestUpdateOrganization:
     """Tests for PUT /api/v1/organizations/{organization_id} endpoint."""
 
     @pytest.mark.asyncio
     async def test_update_organization_as_admin_success(
-        self,
-        client,
-        async_test_user,
-        test_org_with_user_admin
+        self, client, async_test_user, test_org_with_user_admin
     ):
         """Test successfully updating organization as admin (covers lines 193-215)."""
         # Login as admin user
         login_response = await client.post(
             "/api/v1/auth/login",
-            json={"email": "testuser@example.com", "password": "TestPassword123!"}
+            json={"email": "testuser@example.com", "password": "TestPassword123!"},
         )
         admin_token = login_response.json()["access_token"]
 
         response = await client.put(
             f"/api/v1/organizations/{test_org_with_user_admin.id}",
-            json={
-                "name": "Updated Admin Org",
-                "description": "Updated description"
-            },
-            headers={"Authorization": f"Bearer {admin_token}"}
+            json={"name": "Updated Admin Org", "description": "Updated description"},
+            headers={"Authorization": f"Bearer {admin_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -450,23 +424,20 @@ class TestUpdateOrganization:
 
     @pytest.mark.asyncio
     async def test_update_organization_as_owner_success(
-        self,
-        client,
-        async_test_user,
-        test_org_with_user_owner
+        self, client, async_test_user, test_org_with_user_owner
     ):
         """Test successfully updating organization as owner."""
         # Login as owner user
         login_response = await client.post(
             "/api/v1/auth/login",
-            json={"email": "testuser@example.com", "password": "TestPassword123!"}
+            json={"email": "testuser@example.com", "password": "TestPassword123!"},
         )
         owner_token = login_response.json()["access_token"]
 
         response = await client.put(
             f"/api/v1/organizations/{test_org_with_user_owner.id}",
             json={"name": "Updated Owner Org"},
-            headers={"Authorization": f"Bearer {owner_token}"}
+            headers={"Authorization": f"Bearer {owner_token}"},
         )
 
         assert response.status_code == status.HTTP_200_OK
@@ -475,16 +446,13 @@ class TestUpdateOrganization:
 
     @pytest.mark.asyncio
     async def test_update_organization_as_member_fails(
-        self,
-        client,
-        user_token,
-        test_org_with_user_member
+        self, client, user_token, test_org_with_user_member
     ):
         """Test updating organization as regular member fails."""
         response = await client.put(
             f"/api/v1/organizations/{test_org_with_user_member.id}",
             json={"name": "Should Fail"},
-            headers={"Authorization": f"Bearer {user_token}"}
+            headers={"Authorization": f"Bearer {user_token}"},
         )
 
         # Should fail permission check (need admin or owner)
@@ -492,15 +460,13 @@ class TestUpdateOrganization:
 
     @pytest.mark.asyncio
     async def test_update_organization_not_found(
-        self,
-        client,
-        test_org_with_user_admin
+        self, client, test_org_with_user_admin
     ):
         """Test updating nonexistent organization returns 403 (permission check first)."""
         # Login as admin
         login_response = await client.post(
             "/api/v1/auth/login",
-            json={"email": "testuser@example.com", "password": "TestPassword123!"}
+            json={"email": "testuser@example.com", "password": "TestPassword123!"},
         )
         admin_token = login_response.json()["access_token"]
 
@@ -508,7 +474,7 @@ class TestUpdateOrganization:
         response = await client.put(
             f"/api/v1/organizations/{fake_org_id}",
             json={"name": "Updated"},
-            headers={"Authorization": f"Bearer {admin_token}"}
+            headers={"Authorization": f"Bearer {admin_token}"},
         )
 
         # Permission dependency checks admin role before endpoint logic
@@ -519,6 +485,7 @@ class TestUpdateOrganization:
 
 
 # ===== Authentication Tests =====
+
 
 class TestOrganizationAuthentication:
     """Test authentication requirements for organization endpoints."""
@@ -548,13 +515,13 @@ class TestOrganizationAuthentication:
         """Test unauthenticated access to update fails."""
         fake_id = uuid4()
         response = await client.put(
-            f"/api/v1/organizations/{fake_id}",
-            json={"name": "Test"}
+            f"/api/v1/organizations/{fake_id}", json={"name": "Test"}
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 # ===== Exception Handler Tests (Database Error Scenarios) =====
+
 
 class TestOrganizationExceptionHandlers:
     """
@@ -566,86 +533,74 @@ class TestOrganizationExceptionHandlers:
 
     @pytest.mark.asyncio
     async def test_get_my_organizations_database_error(
-        self,
-        client,
-        user_token,
-        test_org_with_user_member
+        self, client, user_token, test_org_with_user_member
     ):
         """Test generic exception handler in get_my_organizations (covers lines 81-83)."""
         with patch(
             "app.crud.organization.organization.get_user_organizations_with_details",
-            side_effect=Exception("Database connection lost")
+            side_effect=Exception("Database connection lost"),
         ):
             # The exception handler logs and re-raises, so we expect the exception
             # to propagate (which proves the handler executed)
             with pytest.raises(Exception, match="Database connection lost"):
                 await client.get(
                     "/api/v1/organizations/me",
-                    headers={"Authorization": f"Bearer {user_token}"}
+                    headers={"Authorization": f"Bearer {user_token}"},
                 )
 
     @pytest.mark.asyncio
     async def test_get_organization_database_error(
-        self,
-        client,
-        user_token,
-        test_org_with_user_member
+        self, client, user_token, test_org_with_user_member
     ):
         """Test generic exception handler in get_organization (covers lines 124-128)."""
         with patch(
             "app.crud.organization.organization.get",
-            side_effect=Exception("Database timeout")
+            side_effect=Exception("Database timeout"),
         ):
             with pytest.raises(Exception, match="Database timeout"):
                 await client.get(
                     f"/api/v1/organizations/{test_org_with_user_member.id}",
-                    headers={"Authorization": f"Bearer {user_token}"}
+                    headers={"Authorization": f"Bearer {user_token}"},
                 )
 
     @pytest.mark.asyncio
     async def test_get_organization_members_database_error(
-        self,
-        client,
-        user_token,
-        test_org_with_user_member
+        self, client, user_token, test_org_with_user_member
     ):
         """Test generic exception handler in get_organization_members (covers lines 170-172)."""
         with patch(
             "app.crud.organization.organization.get_organization_members",
-            side_effect=Exception("Connection pool exhausted")
+            side_effect=Exception("Connection pool exhausted"),
         ):
             with pytest.raises(Exception, match="Connection pool exhausted"):
                 await client.get(
                     f"/api/v1/organizations/{test_org_with_user_member.id}/members",
-                    headers={"Authorization": f"Bearer {user_token}"}
+                    headers={"Authorization": f"Bearer {user_token}"},
                 )
 
     @pytest.mark.asyncio
     async def test_update_organization_database_error(
-        self,
-        client,
-        async_test_user,
-        test_org_with_user_admin
+        self, client, async_test_user, test_org_with_user_admin
     ):
         """Test generic exception handler in update_organization (covers lines 217-221)."""
         # Login as admin user
         login_response = await client.post(
             "/api/v1/auth/login",
-            json={"email": "testuser@example.com", "password": "TestPassword123!"}
+            json={"email": "testuser@example.com", "password": "TestPassword123!"},
         )
         admin_token = login_response.json()["access_token"]
 
         with patch(
             "app.crud.organization.organization.get",
-            return_value=test_org_with_user_admin
+            return_value=test_org_with_user_admin,
         ):
             with patch(
                 "app.crud.organization.organization.update",
-                side_effect=Exception("Write lock timeout")
+                side_effect=Exception("Write lock timeout"),
             ):
                 with pytest.raises(Exception, match="Write lock timeout"):
                     await client.put(
                         f"/api/v1/organizations/{test_org_with_user_admin.id}",
                         json={"name": "Should Fail"},
-                        headers={"Authorization": f"Bearer {admin_token}"}
+                        headers={"Authorization": f"Bearer {admin_token}"},
                     )

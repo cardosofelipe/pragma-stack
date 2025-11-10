@@ -1,8 +1,8 @@
 """
 Error schemas for standardized API error responses.
 """
+
 from enum import Enum
-from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -53,14 +53,14 @@ class ErrorDetail(BaseModel):
 
     code: ErrorCode = Field(..., description="Machine-readable error code")
     message: str = Field(..., description="Human-readable error message")
-    field: Optional[str] = Field(None, description="Field name if error is field-specific")
+    field: str | None = Field(None, description="Field name if error is field-specific")
 
     model_config = {
         "json_schema_extra": {
             "example": {
                 "code": "VAL_002",
                 "message": "Password must be at least 8 characters long",
-                "field": "password"
+                "field": "password",
             }
         }
     }
@@ -70,7 +70,7 @@ class ErrorResponse(BaseModel):
     """Standardized error response format."""
 
     success: bool = Field(default=False, description="Always false for error responses")
-    errors: List[ErrorDetail] = Field(..., description="List of errors that occurred")
+    errors: list[ErrorDetail] = Field(..., description="List of errors that occurred")
 
     model_config = {
         "json_schema_extra": {
@@ -80,9 +80,9 @@ class ErrorResponse(BaseModel):
                     {
                         "code": "AUTH_001",
                         "message": "Invalid email or password",
-                        "field": None
+                        "field": None,
                     }
-                ]
+                ],
             }
         }
     }

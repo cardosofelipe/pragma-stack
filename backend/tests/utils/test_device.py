@@ -2,18 +2,18 @@
 """
 Comprehensive tests for device utility functions.
 """
-import pytest
+
 from unittest.mock import Mock
 
 from fastapi import Request
 
 from app.utils.device import (
-    extract_device_info,
-    parse_device_name,
     extract_browser,
+    extract_device_info,
     get_client_ip,
+    get_device_type,
     is_mobile_device,
-    get_device_type
+    parse_device_name,
 )
 
 
@@ -138,7 +138,9 @@ class TestExtractBrowser:
 
     def test_extract_browser_edge_legacy(self):
         """Test extracting legacy Edge browser."""
-        ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Edge/18.19582"
+        ua = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Edge/18.19582"
+        )
         result = extract_browser(ua)
         assert result == "Edge"
 
@@ -249,7 +251,7 @@ class TestGetClientIp:
         request = Mock(spec=Request)
         request.headers = {
             "x-forwarded-for": "192.168.1.100",
-            "x-real-ip": "192.168.1.200"
+            "x-real-ip": "192.168.1.200",
         }
         request.client = Mock()
         request.client.host = "192.168.1.50"
@@ -385,7 +387,7 @@ class TestExtractDeviceInfo:
         request.headers = {
             "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)",
             "x-device-id": "device-123-456",
-            "x-forwarded-for": "192.168.1.100"
+            "x-forwarded-for": "192.168.1.100",
         }
         request.client = None
 
