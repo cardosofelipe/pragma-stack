@@ -65,7 +65,7 @@ test:
 
 test-cov:
 	@echo "🧪 Running tests with coverage..."
-	@IS_TEST=True PYTHONPATH=. $(PYTEST) --cov=app --cov-report=term-missing --cov-report=html -n 0
+	@IS_TEST=True PYTHONPATH=. $(PYTEST) --cov=app --cov-report=term-missing --cov-report=html -n 16
 	@echo "📊 Coverage report generated in htmlcov/index.html"
 
 # ============================================================================
