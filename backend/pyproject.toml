@@ -84,6 +84,7 @@ unfixable = []
 "app/alembic/versions/*.py" = ["E402"]  # Migration files have specific structure
 "tests/**/*.py" = ["S101", "N806", "B017", "N817", "S110", "ASYNC251", "RUF043"]  # pytest: asserts, CamelCase fixtures, blind exceptions, try-pass patterns, and async test helpers are intentional
 "app/models/__init__.py" = ["F401"]  # __init__ files re-export modules
+"app/models/base.py" = ["F401"]  # Re-exports Base for use by other models
 "app/utils/test_utils.py" = ["N806"]  # SQLAlchemy session factories use CamelCase convention
 "app/main.py" = ["N806"]  # Constants use UPPER_CASE convention
 

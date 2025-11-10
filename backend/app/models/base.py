@@ -4,7 +4,6 @@ from datetime import UTC, datetime
 from sqlalchemy import Column, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 
-
 # noinspection PyUnresolvedReferences
 from app.core.database import Base
 
