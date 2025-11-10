@@ -1,0 +1,213 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fast-next-backend"
+version = "0.1.0"
+description = "FastAPI backend for Fast-Next template"
+readme = "README.md"
+requires-python = ">=3.12"
+
+# ============================================================================
+# Ruff Configuration - All-in-one linting, formatting, and import sorting
+# ============================================================================
+[tool.ruff]
+target-version = "py312"
+line-length = 88  # Black-compatible
+indent-width = 4
+
+# Exclude directories
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "*.egg-info",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    "alembic/versions",  # Generated migration files
+]
+
+# ============================================================================
+# Ruff Linting Rules
+# ============================================================================
+[tool.ruff.lint]
+# Enable these rule sets:
+# E/W   - pycodestyle errors and warnings
+# F     - pyflakes (unused imports, variables, etc.)
+# I     - isort (import sorting)
+# N     - pep8-naming (naming conventions)
+# UP    - pyupgrade (modern Python syntax)
+# B     - flake8-bugbear (common bugs)
+# C4    - flake8-comprehensions (list/dict comprehensions)
+# PIE   - flake8-pie (misc lints)
+# RUF   - Ruff-specific rules
+# ASYNC - flake8-async (async best practices)
+# S     - flake8-bandit (security)
+# T20   - flake8-print (no print statements)
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "PIE",    # flake8-pie
+    "RUF",    # Ruff-specific
+    "ASYNC",  # flake8-async
+    "S",      # flake8-bandit (security)
+]
+
+# Ignore specific rules
+ignore = [
+    "E501",   # Line too long (handled by formatter)
+    "S101",   # Use of assert (pytest uses asserts)
+    "S104",   # Possible binding to all interfaces (FastAPI needs 0.0.0.0)
+    "S105",   # Possible hardcoded password (false positives in field names)
+    "S106",   # Possible hardcoded password (false positives in field names)
+    "S603",   # subprocess without shell=True (safe usage)
+    "S607",   # Starting a process with a partial path (safe usage)
+    "B008",   # FastAPI Depends() in function defaults (required by framework)
+]
+
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+unfixable = []
+
+# Per-file ignores for special cases
+[tool.ruff.lint.per-file-ignores]
+"app/alembic/env.py" = ["E402", "F403", "F405"]  # Alembic requires specific import order
+"app/alembic/versions/*.py" = ["E402"]  # Migration files have specific structure
+"tests/**/*.py" = ["S101"]  # pytest uses assert statements
+"app/models/__init__.py" = ["F401"]  # __init__ files re-export modules
+
+# ============================================================================
+# Ruff Import Sorting (isort replacement)
+# ============================================================================
+[tool.ruff.lint.isort]
+known-first-party = ["app", "tests"]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+combine-as-imports = true
+force-wrap-aliases = true
+split-on-trailing-comma = true
+
+# ============================================================================
+# Ruff Formatting (Black replacement)
+# ============================================================================
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+
+# ============================================================================
+# mypy Configuration - Type Checking
+# ============================================================================
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Gradual typing - enable later
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_equality = true
+ignore_missing_imports = false
+explicit_package_bases = true
+namespace_packages = true
+
+# Pydantic plugin for better validation
+plugins = ["pydantic.mypy"]
+
+# Per-module options
+[[tool.mypy.overrides]]
+module = "alembic.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "sqlalchemy.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "fastapi_utils.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "slowapi.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "jose.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "passlib.*"
+ignore_missing_imports = true
+
+# ============================================================================
+# Pydantic mypy plugin configuration
+# ============================================================================
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+# ============================================================================
+# Pytest Configuration
+# ============================================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--disable-warnings",
+    "-n", "auto",  # parallel execution
+    "--strict-markers",
+    "--tb=short",
+    "--cov=app",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+markers = [
+    "sqlite: marks tests that should run on SQLite (mocked).",
+    "postgres: marks tests that require a real PostgreSQL database.",
+]
+asyncio_default_fixture_loop_scope = "function"
+
+# ============================================================================
+# Coverage Configuration
+# ============================================================================
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/alembic/versions/*",
+    "*/.venv/*",
+]
+branch = true
+
+[tool.coverage.report]
+precision = 2
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
