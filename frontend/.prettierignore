@@ -1,0 +1,41 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+.next
+out
+build
+dist
+
+# Coverage
+coverage
+.nyc_output
+
+# Generated files
+src/lib/api/generated
+*.gen.ts
+*.gen.tsx
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Auth storage for E2E tests
+.auth
+
+# Package manager lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Other
+.DS_Store
+*.pem
