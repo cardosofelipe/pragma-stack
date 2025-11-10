@@ -140,6 +140,10 @@ module = "alembic.*"
 ignore_errors = true
 
 [[tool.mypy.overrides]]
+module = "app.alembic.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
 module = "sqlalchemy.*"
 ignore_missing_imports = true
 
@@ -169,6 +173,10 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "apscheduler.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "starlette.*"
 ignore_missing_imports = true
 
 # ============================================================================

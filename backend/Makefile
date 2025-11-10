@@ -1,5 +1,13 @@
 .PHONY: help lint lint-fix format format-check type-check test test-cov validate clean install-dev
 
+# Virtual environment binaries
+VENV_BIN = .venv/bin
+PYTHON = $(VENV_BIN)/python
+PIP = $(VENV_BIN)/pip
+PYTEST = $(VENV_BIN)/pytest
+RUFF = $(VENV_BIN)/ruff
+MYPY = $(VENV_BIN)/mypy
+
 # Default target
 help:
 	@echo "🚀 FastAPI Backend - Development Commands"
@@ -26,23 +34,23 @@ help:
 
 lint:
 	@echo "🔍 Running Ruff linter..."
-	@ruff check app/ tests/
+	@$(RUFF) check app/ tests/
 
 lint-fix:
 	@echo "🔧 Running Ruff linter with auto-fix..."
-	@ruff check --fix app/ tests/
+	@$(RUFF) check --fix app/ tests/
 
 format:
 	@echo "✨ Formatting code with Ruff..."
-	@ruff format app/ tests/
+	@$(RUFF) format app/ tests/
 
 format-check:
 	@echo "📋 Checking code formatting..."
-	@ruff format --check app/ tests/
+	@$(RUFF) format --check app/ tests/
 
 type-check:
 	@echo "🔎 Running mypy type checking..."
-	@mypy app/
+	@$(MYPY) app/
 
 validate: lint format-check type-check
 	@echo "✅ All quality checks passed!"
@@ -53,11 +61,11 @@ validate: lint format-check type-check
 
 test:
 	@echo "🧪 Running tests..."
-	@IS_TEST=True pytest
+	@IS_TEST=True PYTHONPATH=. $(PYTEST)
 
 test-cov:
 	@echo "🧪 Running tests with coverage..."
-	@IS_TEST=True pytest --cov=app --cov-report=term-missing --cov-report=html -n 0
+	@IS_TEST=True PYTHONPATH=. $(PYTEST) --cov=app --cov-report=term-missing --cov-report=html -n 0
 	@echo "📊 Coverage report generated in htmlcov/index.html"
 
 # ============================================================================
@@ -66,7 +74,7 @@ test-cov:
 
 install-dev:
 	@echo "📦 Installing development dependencies..."
-	@pip install -r requirements.txt
+	@$(PIP) install -r requirements.txt
 	@echo "✅ Development environment ready!"
 
 clean:

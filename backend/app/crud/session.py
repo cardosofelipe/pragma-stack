@@ -309,7 +309,7 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
             # Use bulk DELETE with WHERE clause - single query
             stmt = delete(UserSession).where(
                 and_(
-                    not UserSession.is_active,
+                    UserSession.is_active == False,  # noqa: E712
                     UserSession.expires_at < now,
                     UserSession.created_at < cutoff_date,
                 )
@@ -356,7 +356,7 @@ class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
             stmt = delete(UserSession).where(
                 and_(
                     UserSession.user_id == uuid_obj,
-                    not UserSession.is_active,
+                    UserSession.is_active == False,  # noqa: E712
                     UserSession.expires_at < now,
                 )
             )
