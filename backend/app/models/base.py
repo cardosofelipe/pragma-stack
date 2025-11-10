@@ -5,7 +5,7 @@ from sqlalchemy import Column, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 
 # noinspection PyUnresolvedReferences
-from app.core.database import Base
+from app.core.database import Base  # Re-exported for other models
 
 
 class TimestampMixin:

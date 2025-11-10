@@ -40,7 +40,7 @@ class UserOrganization(Base, TimestampMixin):
         primary_key=True,
     )
 
-    role = Column(
+    role: Column[OrganizationRole] = Column(
         Enum(OrganizationRole),
         default=OrganizationRole.MEMBER,
         nullable=False,
