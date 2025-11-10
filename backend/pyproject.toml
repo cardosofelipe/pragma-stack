@@ -2,12 +2,75 @@
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.packages.find]
+include = ["app*"]
+exclude = ["tests*", "uploads*", "docs*"]
+
 [project]
 name = "fast-next-backend"
 version = "0.1.0"
 description = "FastAPI backend for Fast-Next template"
 readme = "README.md"
 requires-python = ">=3.12"
+
+# Core dependencies
+dependencies = [
+    # Core FastAPI framework and dependencies
+    "fastapi>=0.115.8",
+    "uvicorn>=0.34.0",
+    "pydantic>=2.10.6",
+    "pydantic-settings>=2.2.1",
+    "python-multipart>=0.0.19",
+    "fastapi-utils==0.8.0",
+
+    # Database
+    "sqlalchemy>=2.0.29",
+    "alembic>=1.14.1",
+    "psycopg2-binary>=2.9.9",
+    "asyncpg>=0.29.0",
+    "aiosqlite==0.21.0",
+
+    # Environment configuration
+    "python-dotenv>=1.0.1",
+
+    # API utilities
+    "email-validator>=2.1.0.post1",
+    "ujson>=5.9.0",
+
+    # CORS and security
+    "starlette>=0.40.0",
+    "starlette-csrf>=1.4.5",
+    "slowapi>=0.1.9",
+
+    # Utilities
+    "httpx>=0.27.0",
+    "tenacity>=8.2.3",
+    "pytz>=2024.1",
+    "pillow>=10.3.0",
+    "apscheduler==3.11.0",
+
+    # Security and authentication (pinned for reproducibility)
+    "python-jose==3.4.0",
+    "passlib==1.7.4",
+    "bcrypt==4.2.1",
+    "cryptography==44.0.1",
+]
+
+# Development dependencies
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.5",
+    "pytest-cov>=4.1.0",
+    "pytest-xdist>=3.8.0",
+    "requests>=2.32.0",
+    "freezegun~=1.5.1",
+
+    # Development tools
+    "ruff>=0.8.0",  # All-in-one: linting, formatting, import sorting
+    "mypy>=1.8.0",  # Type checking
+]
 
 # ============================================================================
 # Ruff Configuration - All-in-one linting, formatting, and import sorting

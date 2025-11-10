@@ -62,12 +62,27 @@ frontend/src/
 ### Backend
 
 #### Setup
+
+**Dependencies are managed with [uv](https://docs.astral.sh/uv/) - the modern, fast Python package manager.**
+
 ```bash
 cd backend
-python -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-pip install -r requirements.txt
+
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install all dependencies (production + dev) from uv.lock
+uv sync --extra dev
+
+# Or use the Makefile
+make install-dev
 ```
+
+**Why uv?**
+- 🚀 10-100x faster than pip
+- 🔒 Reproducible builds with `uv.lock`
+- 📦 Modern dependency resolution
+- ⚡ Built by Astral (creators of Ruff)
 
 #### Database Migrations
 ```bash
@@ -93,27 +108,34 @@ alembic upgrade head
 
 ```bash
 # Run all tests (uses pytest-xdist for parallel execution)
-IS_TEST=True pytest
+make test
 
-# Run with coverage (use -n 0 for accurate coverage)
-IS_TEST=True pytest --cov=app --cov-report=term-missing -n 0
+# Run with coverage report
+make test-cov
+
+# Or run directly with uv
+IS_TEST=True uv run pytest
 
 # Run specific test file
-IS_TEST=True pytest tests/api/test_auth.py -v
+IS_TEST=True uv run pytest tests/api/test_auth.py -v
 
 # Run single test
-IS_TEST=True pytest tests/api/test_auth.py::TestLogin::test_login_success -v
+IS_TEST=True uv run pytest tests/api/test_auth.py::TestLogin::test_login_success -v
+```
 
-# Run with HTML coverage report
-IS_TEST=True pytest --cov=app --cov-report=html -n 0
-open htmlcov/index.html
+**Available Make Commands:**
+```bash
+make help          # Show all available commands
+make install-dev   # Install all dependencies
+make validate      # Run lint + format + type checks
+make test          # Run tests
+make test-cov      # Run tests with coverage
 ```
 
 #### Running Locally
 ```bash
 cd backend
-source .venv/bin/activate
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Frontend
@@ -466,6 +488,35 @@ Automatically applied via middleware in `main.py`:
      return <MyComponent />;
    }
    ```
+
+## Development Tooling Stack
+
+**State-of-the-art Python tooling (Nov 2025):**
+
+### Dependency Management: uv
+- **Fast**: 10-100x faster than pip
+- **Reliable**: Reproducible builds with `uv.lock` lockfile
+- **Modern**: Built by Astral (Ruff creators) in Rust
+- **Commands**:
+  - `make install-dev` - Install all dependencies
+  - `make sync` - Sync from lockfile
+  - `uv add <package>` - Add new dependency
+  - `uv add --dev <package>` - Add dev dependency
+
+### Code Quality: Ruff + mypy
+- **Ruff**: All-in-one linting, formatting, and import sorting
+  - Replaces: Black, Flake8, isort
+  - **10-100x faster** than alternatives
+  - `make lint`, `make format`, `make validate`
+- **mypy**: Type checking with Pydantic plugin
+  - Gradual typing approach
+  - Strategic per-module configurations
+
+### Configuration: pyproject.toml
+- Single source of truth for all tools
+- Dependencies defined in `[project.dependencies]`
+- Dev dependencies in `[project.optional-dependencies]`
+- Tool configs: Ruff, mypy, pytest, coverage
 
 ## Current Project Status (Nov 2025)
 
