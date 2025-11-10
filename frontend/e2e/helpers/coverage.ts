@@ -57,7 +57,7 @@ export async function startCoverage(
   try {
       await page.coverage.startJSCoverage({
       resetOnNavigation: options?.resetOnNavigation ?? false,
-      // @ts-ignore
+      // @ts-expect-error - includeRawScriptCoverage is not in official types but supported by Playwright
       includeRawScriptCoverage: options?.includeRawScriptCoverage ?? false,
     });
   } catch (error) {

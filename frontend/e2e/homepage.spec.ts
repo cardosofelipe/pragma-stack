@@ -214,7 +214,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
 
   test.skip('should close mobile menu when clicking outside', async ({ page }) => {
     // Open mobile menu
-    const mobileMenu = await openMobileMenu(page);
+    const _mobileMenu = await openMobileMenu(page);
 
     // Press Escape key to close menu (more reliable than clicking overlay)
     await page.keyboard.press('Escape');

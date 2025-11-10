@@ -6,7 +6,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
-import { ThemeProvider, useTheme } from '@/components/theme/ThemeProvider';
+import { useTheme } from '@/components/theme/ThemeProvider';
 
 // Mock theme provider for controlled testing
 jest.mock('@/components/theme/ThemeProvider', () => {

@@ -5,7 +5,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { setupSuperuserMocks, loginViaUI } from './helpers/auth';
+import { setupSuperuserMocks } from './helpers/auth';
 
 test.describe('Admin Organization Members - Navigation from Organizations List', () => {
   test.beforeEach(async ({ page }) => {

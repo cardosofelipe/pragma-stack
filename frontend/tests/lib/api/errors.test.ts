@@ -630,7 +630,7 @@ describe('API Error Handling', () => {
 
   describe('Error message completeness', () => {
     it('should have non-empty messages for all error codes', () => {
-      Object.entries(ERROR_MESSAGES).forEach(([code, message]) => {
+      Object.entries(ERROR_MESSAGES).forEach(([_code, message]) => {
         expect(message).toBeTruthy();
         expect(message.length).toBeGreaterThan(0);
         expect(message).not.toBe('');
@@ -639,7 +639,7 @@ describe('API Error Handling', () => {
 
     it('should have user-friendly messages', () => {
       // Check that messages don't contain technical jargon or error codes
-      Object.entries(ERROR_MESSAGES).forEach(([code, message]) => {
+      Object.entries(ERROR_MESSAGES).forEach(([_code, message]) => {
         expect(message).not.toContain('null');
         expect(message).not.toContain('undefined');
         expect(message).not.toContain('Error:');

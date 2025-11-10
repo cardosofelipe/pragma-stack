@@ -25,7 +25,7 @@ jest.mock('next/link', () => ({
 // Mock dynamic import
 jest.mock('next/dynamic', () => ({
   __esModule: true,
-  default: (importFn: () => Promise<any>, options?: any) => {
+  default: (_importFn: () => Promise<any>, _options?: any) => {
     const Component = ({ onSuccess }: { onSuccess?: () => void }) => (
       <div data-testid="password-reset-confirm-form">
         <button onClick={onSuccess}>Submit</button>

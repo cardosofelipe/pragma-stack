@@ -11,9 +11,9 @@
  * - Savings: ~690s (~11 minutes) per test run
  */
 
-import { test as setup, expect } from '@playwright/test';
+import { test as setup } from '@playwright/test';
 import path from 'path';
-import { setupAuthenticatedMocks, setupSuperuserMocks, loginViaUI } from './helpers/auth';
+import { setupAuthenticatedMocks, setupSuperuserMocks } from './helpers/auth';
 
 // Use absolute paths to ensure correct file location
 const ADMIN_STORAGE_STATE = path.join(__dirname, '.auth', 'admin.json');

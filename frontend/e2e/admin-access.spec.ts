@@ -7,7 +7,6 @@ import { test, expect } from '@playwright/test';
 import {
   setupAuthenticatedMocks,
   setupSuperuserMocks,
-  loginViaUI,
 } from './helpers/auth';
 
 test.describe('Admin Access Control', () => {

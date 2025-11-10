@@ -9,7 +9,7 @@ import RegisterPage from '@/app/(auth)/register/page';
 // Mock dynamic import
 jest.mock('next/dynamic', () => ({
   __esModule: true,
-  default: (importFn: () => Promise<any>, options?: any) => {
+  default: (_importFn: () => Promise<any>, _options?: any) => {
     const Component = () => <div data-testid="register-form">Mocked RegisterForm</div>;
     Component.displayName = 'RegisterForm';
     return Component;

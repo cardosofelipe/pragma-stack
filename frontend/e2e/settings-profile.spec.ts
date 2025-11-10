@@ -4,7 +4,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { setupAuthenticatedMocks, loginViaUI, MOCK_USER } from './helpers/auth';
+import { setupAuthenticatedMocks, MOCK_USER } from './helpers/auth';
 
 test.describe('Profile Settings', () => {
   test.beforeEach(async ({ page }) => {

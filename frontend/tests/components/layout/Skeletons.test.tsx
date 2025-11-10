@@ -30,7 +30,7 @@ describe('HeaderSkeleton', () => {
   });
 
   it('has proper styling classes', () => {
-    const { container } = render(<HeaderSkeleton />);
+    render(<HeaderSkeleton />);
 
     // Verify backdrop blur and background
     const header = screen.getByRole('banner');
@@ -60,7 +60,7 @@ describe('AuthLoadingSkeleton', () => {
   });
 
   it('renders main content with container', () => {
-    const { container } = render(<AuthLoadingSkeleton />);
+    render(<AuthLoadingSkeleton />);
 
     const main = screen.getByRole('main');
     expect(main).toHaveClass('flex-1');
@@ -71,7 +71,7 @@ describe('AuthLoadingSkeleton', () => {
   });
 
   it('renders skeleton placeholders in main content', () => {
-    const { container } = render(<AuthLoadingSkeleton />);
+    render(<AuthLoadingSkeleton />);
 
     const main = screen.getByRole('main');
 

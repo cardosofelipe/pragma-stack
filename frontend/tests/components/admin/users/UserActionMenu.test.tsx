@@ -510,8 +510,6 @@ describe('UserActionMenu', () => {
 
   describe('User Name Display', () => {
     it('displays full name when last name is provided', async () => {
-      const user = userEvent.setup();
-
       render(
         <UserActionMenu
           user={mockUser}
@@ -527,7 +525,6 @@ describe('UserActionMenu', () => {
     });
 
     it('displays first name only when last name is null', async () => {
-      const user = userEvent.setup();
       const userWithoutLastName = { ...mockUser, last_name: null };
 
       render(

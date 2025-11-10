@@ -83,7 +83,7 @@ async function convertV8ToIstanbul() {
     // Dynamic import to handle both scenarios (installed vs not installed)
     const module = await import('v8-to-istanbul');
     v8toIstanbul = module.default || module;
-  } catch (error) {
+  } catch {
     console.log('❌ v8-to-istanbul not installed\n');
     console.log('📦 Install it with:');
     console.log('   npm install -D v8-to-istanbul\n');

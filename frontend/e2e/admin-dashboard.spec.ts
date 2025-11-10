@@ -4,7 +4,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { setupSuperuserMocks, loginViaUI } from './helpers/auth';
+import { setupSuperuserMocks } from './helpers/auth';
 
 test.describe('Admin Dashboard - Page Load', () => {
   test.beforeEach(async ({ page }) => {

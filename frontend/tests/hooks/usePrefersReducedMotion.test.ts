@@ -164,7 +164,7 @@ describe('usePrefersReducedMotion', () => {
   it('handles SSR environment safely', () => {
     const originalWindow = global.window;
 
-    // @ts-ignore - Simulating SSR
+    // @ts-expect-error - Simulating SSR
     delete global.window;
 
     const { result } = renderHook(() => usePrefersReducedMotion());

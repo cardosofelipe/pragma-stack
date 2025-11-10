@@ -52,9 +52,9 @@ describe('UserFormDialog', () => {
 
   describe('Module Exports', () => {
     it('exports UserFormDialog component', () => {
-      const module = require('@/components/admin/users/UserFormDialog');
-      expect(module.UserFormDialog).toBeDefined();
-      expect(typeof module.UserFormDialog).toBe('function');
+      const moduleExports = require('@/components/admin/users/UserFormDialog');
+      expect(moduleExports.UserFormDialog).toBeDefined();
+      expect(typeof moduleExports.UserFormDialog).toBe('function');
     });
 
     it('component is a valid React component', () => {
