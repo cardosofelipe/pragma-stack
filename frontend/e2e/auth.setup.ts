@@ -13,7 +13,7 @@
 
 import { test as setup } from '@playwright/test';
 import path from 'path';
-import { setupAuthenticatedMocks, setupSuperuserMocks } from './helpers/auth';
+import { setupAuthenticatedMocks, setupSuperuserMocks, loginViaUI } from './helpers/auth';
 
 // Use absolute paths to ensure correct file location
 const ADMIN_STORAGE_STATE = path.join(__dirname, '.auth', 'admin.json');
