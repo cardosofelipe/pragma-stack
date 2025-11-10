@@ -94,14 +94,21 @@ test.describe('Registration Flow', () => {
 
   test('should show validation errors for empty form', async ({ page }) => {
     // Wait for React hydration to complete
+    await page.waitForLoadState('networkidle');
 
-    // Interact with email field to ensure form is interactive
+    // Wait for submit button to be enabled (ensures form is interactive)
+    const submitButton = page.locator('button[type="submit"]');
+    await submitButton.waitFor({ state: 'visible' });
+
+    // Interact with email field to ensure form is fully interactive
     const emailInput = page.locator('input[name="email"]');
+    await emailInput.waitFor({ state: 'visible' });
     await emailInput.focus();
+    await page.waitForTimeout(500); // Give React Hook Form time to attach handlers
     await emailInput.blur();
 
     // Submit empty form
-    await page.locator('button[type="submit"]').click();
+    await submitButton.click();
 
     // Wait for validation errors - Firefox may be slower
     await expect(page.locator('#email-error')).toBeVisible();

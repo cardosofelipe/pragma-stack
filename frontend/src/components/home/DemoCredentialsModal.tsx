@@ -47,7 +47,7 @@ export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProp
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" data-testid="demo-modal">
         <DialogHeader>
           <DialogTitle>Try the Live Demo</DialogTitle>
           <DialogDescription>

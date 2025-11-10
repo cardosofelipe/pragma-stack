@@ -55,8 +55,9 @@ export async function startCoverage(
   }
 
   try {
-    await page.coverage.startJSCoverage({
+      await page.coverage.startJSCoverage({
       resetOnNavigation: options?.resetOnNavigation ?? false,
+      // @ts-ignore
       includeRawScriptCoverage: options?.includeRawScriptCoverage ?? false,
     });
   } catch (error) {

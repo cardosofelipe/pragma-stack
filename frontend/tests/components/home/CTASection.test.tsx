@@ -35,21 +35,27 @@ jest.mock('@/components/home/DemoCredentialsModal', () => ({
 
 describe('CTASection', () => {
   it('renders main headline', () => {
-    render(<CTASection />);
+    render(<CTASection onOpenDemoModal={function(): void {
+        throw new Error("Function not implemented.");
+    } } />);
 
     expect(screen.getByText(/Start Building,/i)).toBeInTheDocument();
     expect(screen.getByText(/Not Boilerplating/i)).toBeInTheDocument();
   });
 
   it('renders subtext with key messaging', () => {
-    render(<CTASection />);
+    render(<CTASection onOpenDemoModal={function(): void {
+        throw new Error("Function not implemented.");
+    } } />);
 
     expect(screen.getByText(/Clone the repository, read the docs/i)).toBeInTheDocument();
     expect(screen.getByText(/Free forever, MIT licensed/i)).toBeInTheDocument();
   });
 
   it('renders GitHub CTA button', () => {
-    render(<CTASection />);
+    render(<CTASection onOpenDemoModal={function(): void {
+        throw new Error("Function not implemented.");
+    } } />);
 
     const githubLink = screen.getByRole('link', { name: /get started on github/i });
     expect(githubLink).toHaveAttribute('href', 'https://github.com/your-org/fast-next-template');
@@ -58,14 +64,18 @@ describe('CTASection', () => {
   });
 
   it('renders Try Live Demo button', () => {
-    render(<CTASection />);
+    render(<CTASection onOpenDemoModal={function(): void {
+        throw new Error("Function not implemented.");
+    } } />);
 
     const demoButton = screen.getByRole('button', { name: /try live demo/i });
     expect(demoButton).toBeInTheDocument();
   });
 
   it('renders Read Documentation link', () => {
-    render(<CTASection />);
+    render(<CTASection onOpenDemoModal={function(): void {
+        throw new Error("Function not implemented.");
+    } } />);
 
     const docsLink = screen.getByRole('link', { name: /read documentation/i });
     expect(docsLink).toHaveAttribute('href', 'https://github.com/your-org/fast-next-template#documentation');
@@ -74,7 +84,9 @@ describe('CTASection', () => {
   });
 
   it('renders help text with internal links', () => {
-    render(<CTASection />);
+    render(<CTASection onOpenDemoModal={function(): void {
+        throw new Error("Function not implemented.");
+    } } />);
 
     expect(screen.getByText(/Need help getting started\?/i)).toBeInTheDocument();
 
@@ -85,32 +97,21 @@ describe('CTASection', () => {
     expect(adminDashboardLink).toHaveAttribute('href', '/admin');
   });
 
-  it('opens demo modal when Try Live Demo button is clicked', () => {
-    render(<CTASection />);
+  it('calls onOpenDemoModal when Try Live Demo button is clicked', () => {
+    const mockOnOpenDemoModal = jest.fn();
+    render(<CTASection onOpenDemoModal={mockOnOpenDemoModal} />);
 
     const demoButton = screen.getByRole('button', { name: /try live demo/i });
     fireEvent.click(demoButton);
 
-    expect(screen.getByTestId('demo-modal')).toBeInTheDocument();
-  });
-
-  it('closes demo modal when close is called', () => {
-    render(<CTASection />);
-
-    // Open modal
-    const demoButton = screen.getByRole('button', { name: /try live demo/i });
-    fireEvent.click(demoButton);
-    expect(screen.getByTestId('demo-modal')).toBeInTheDocument();
-
-    // Close modal
-    const closeButton = screen.getByText('Close Modal');
-    fireEvent.click(closeButton);
-    expect(screen.queryByTestId('demo-modal')).not.toBeInTheDocument();
+    expect(mockOnOpenDemoModal).toHaveBeenCalledTimes(1);
   });
 
   describe('Accessibility', () => {
     it('has proper external link attributes', () => {
-      render(<CTASection />);
+      render(<CTASection onOpenDemoModal={function(): void {
+          throw new Error("Function not implemented.");
+      } } />);
 
       const externalLinks = [
         screen.getByRole('link', { name: /get started on github/i }),
@@ -124,7 +125,9 @@ describe('CTASection', () => {
     });
 
     it('has descriptive button text', () => {
-      render(<CTASection />);
+      render(<CTASection onOpenDemoModal={function(): void {
+          throw new Error("Function not implemented.");
+      } } />);
 
       expect(screen.getByRole('button', { name: /try live demo/i })).toBeInTheDocument();
     });
