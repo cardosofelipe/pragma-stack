@@ -1,8 +1,5 @@
-import logging
-
-logging.getLogger("passlib").setLevel(logging.ERROR)
-
 import asyncio
+import logging
 import uuid
 from datetime import UTC, datetime, timedelta
 from functools import partial
@@ -14,6 +11,9 @@ from pydantic import ValidationError
 
 from app.core.config import settings
 from app.schemas.users import TokenData, TokenPayload
+
+# Suppress passlib bcrypt warnings about ident
+logging.getLogger("passlib").setLevel(logging.ERROR)
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

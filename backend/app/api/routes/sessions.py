@@ -72,8 +72,11 @@ async def list_my_sessions(
                 decode_token(access_token)
                 # Note: Access tokens don't have JTI by default, but we can try
                 # For now, we'll mark current based on most recent activity
-            except Exception:
-                pass
+            except Exception as e:
+                # Optional token parsing - silently ignore failures
+                logger.debug(
+                    f"Failed to decode access token for session marking: {e!s}"
+                )
 
         # Convert to response format
         session_responses = []

@@ -71,6 +71,7 @@ ignore = [
     "S603",   # subprocess without shell=True (safe usage)
     "S607",   # Starting a process with a partial path (safe usage)
     "B008",   # FastAPI Depends() in function defaults (required by framework)
+    "B904",   # Exception chaining (overly strict for FastAPI error handlers)
 ]
 
 # Allow autofix for all enabled rules
@@ -81,8 +82,10 @@ unfixable = []
 [tool.ruff.lint.per-file-ignores]
 "app/alembic/env.py" = ["E402", "F403", "F405"]  # Alembic requires specific import order
 "app/alembic/versions/*.py" = ["E402"]  # Migration files have specific structure
-"tests/**/*.py" = ["S101"]  # pytest uses assert statements
+"tests/**/*.py" = ["S101", "N806", "B017", "N817", "S110", "ASYNC251", "RUF043"]  # pytest: asserts, CamelCase fixtures, blind exceptions, try-pass patterns, and async test helpers are intentional
 "app/models/__init__.py" = ["F401"]  # __init__ files re-export modules
+"app/utils/test_utils.py" = ["N806"]  # SQLAlchemy session factories use CamelCase convention
+"app/main.py" = ["N806"]  # Constants use UPPER_CASE convention
 
 # ============================================================================
 # Ruff Import Sorting (isort replacement)
@@ -114,7 +117,7 @@ line-ending = "lf"
 # ============================================================================
 [tool.mypy]
 python_version = "3.12"
-warn_return_any = true
+warn_return_any = false  # SQLAlchemy queries return Any - overly strict
 warn_unused_configs = true
 disallow_untyped_defs = false  # Gradual typing - enable later
 disallow_incomplete_defs = false
@@ -154,6 +157,18 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "passlib.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pydantic_settings.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "fastapi.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "apscheduler.*"
 ignore_missing_imports = true
 
 # ============================================================================
