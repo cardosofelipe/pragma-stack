@@ -9,17 +9,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
     UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy
+    UV_LINK_MODE=copy \
+    UV_NO_CACHE=1
 
 # Install system dependencies and uv
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc postgresql-client curl ca-certificates && \
     curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv /root/.local/bin/uv* /usr/local/bin/ && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# Add uv to PATH
-ENV PATH="/root/.cargo/bin:$PATH"
 
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
@@ -51,17 +50,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
     UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy
+    UV_LINK_MODE=copy \
+    UV_NO_CACHE=1
 
 # Install system dependencies and uv
 RUN apt-get update && \
     apt-get install -y --no-install-recommends postgresql-client curl ca-certificates && \
     curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    mv /root/.local/bin/uv* /usr/local/bin/ && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# Add uv to PATH
-ENV PATH="/root/.cargo/bin:$PATH"
 
 # Copy dependency files
 COPY pyproject.toml uv.lock ./

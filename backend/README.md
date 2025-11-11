@@ -12,29 +12,39 @@ Production-ready FastAPI backend featuring:
 - **Multi-tenancy**: Organization-based access control with roles (Owner/Admin/Member)
 - **Testing**: 97%+ coverage with security-focused test suite
 - **Performance**: Async throughout, connection pooling, optimized queries
+- **Modern Tooling**: uv for dependencies, Ruff for linting/formatting, mypy for type checking
 
 ## Quick Start
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.12+
 - PostgreSQL 14+ (or SQLite for development)
-- pip and virtualenv
+- **[uv](https://docs.astral.sh/uv/)** - Modern Python package manager (replaces pip)
 
 ### Installation
 
 ```bash
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Install dependencies
-pip install -r requirements.txt
+# Install all dependencies (production + dev)
+cd backend
+uv sync --extra dev
+
+# Or use the Makefile
+make install-dev
 
 # Copy environment template
 cp .env.example .env
 # Edit .env with your configuration
 ```
+
+**Why uv?**
+- 🚀 10-100x faster than pip
+- 🔒 Reproducible builds via `uv.lock` lockfile
+- 📦 Better dependency resolution
+- ⚡ Built by Astral (creators of Ruff)
 
 ### Database Setup
 
@@ -49,6 +59,11 @@ alembic upgrade head
 ### Run Development Server
 
 ```bash
+# Using uv
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Or activate environment first
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -56,6 +71,170 @@ API will be available at:
 - **API**: http://localhost:8000
 - **Swagger Docs**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
+
+---
+
+## Dependency Management with uv
+
+### Understanding uv
+
+**uv** is the modern standard for Python dependency management, built in Rust for speed and reliability.
+
+**Key files:**
+- `pyproject.toml` - Declares dependencies and tool configurations
+- `uv.lock` - Locks exact versions for reproducible builds (commit to git)
+
+### Common Commands
+
+#### Installing Dependencies
+
+```bash
+# Install all dependencies from lockfile
+uv sync --extra dev
+
+# Install only production dependencies (no dev tools)
+uv sync
+
+# Or use the Makefile
+make install-dev    # Install with dev dependencies
+make sync           # Sync from lockfile
+```
+
+#### Adding Dependencies
+
+```bash
+# Add a production dependency
+uv add httpx
+
+# Add a development dependency
+uv add --dev pytest-mock
+
+# Add with version constraint
+uv add "fastapi>=0.115.0,<0.116.0"
+
+# Add exact version
+uv add "pydantic==2.10.6"
+```
+
+After adding dependencies, **commit both `pyproject.toml` and `uv.lock`** to git.
+
+#### Removing Dependencies
+
+```bash
+# Remove a package
+uv remove httpx
+
+# Remove a dev dependency
+uv remove --dev pytest-mock
+```
+
+#### Updating Dependencies
+
+```bash
+# Update all packages to latest compatible versions
+uv sync --upgrade
+
+# Update a specific package
+uv add --upgrade fastapi
+
+# Check for outdated packages
+uv pip list --outdated
+```
+
+#### Running Commands in uv Environment
+
+```bash
+# Run any Python command via uv (no activation needed)
+uv run python script.py
+uv run pytest
+uv run mypy app/
+
+# Or activate the virtual environment
+source .venv/bin/activate
+python script.py
+pytest
+```
+
+### Makefile Commands
+
+We provide convenient Makefile commands that use uv:
+
+```bash
+# Setup
+make install-dev   # Install all dependencies (prod + dev)
+make sync          # Sync from lockfile
+
+# Code Quality
+make lint          # Run Ruff linter (check only)
+make lint-fix      # Run Ruff with auto-fix
+make format        # Format code with Ruff
+make format-check  # Check if code is formatted
+make type-check    # Run mypy type checking
+make validate      # Run all checks (lint + format + types)
+
+# Testing
+make test          # Run all tests
+make test-cov      # Run tests with coverage report
+
+# Utilities
+make clean         # Remove cache and build artifacts
+make help          # Show all commands
+```
+
+### Dependency Workflow Example
+
+```bash
+# 1. Clone repository
+git clone <repo-url>
+cd backend
+
+# 2. Install dependencies
+make install-dev
+
+# 3. Make changes, add a new dependency
+uv add httpx
+
+# 4. Test your changes
+make test
+
+# 5. Commit (includes uv.lock)
+git add pyproject.toml uv.lock
+git commit -m "Add httpx dependency"
+
+# 6. Other developers pull and sync
+git pull
+make sync  # Uses the committed uv.lock
+```
+
+### Troubleshooting uv
+
+**Dependencies not found after install:**
+```bash
+# Make sure you're using uv run or activated environment
+uv run pytest          # Option 1: Run via uv
+source .venv/bin/activate  # Option 2: Activate first
+pytest
+```
+
+**Lockfile out of sync:**
+```bash
+# Regenerate lockfile
+uv lock
+
+# Force reinstall from lockfile
+uv sync --reinstall
+```
+
+**uv not found:**
+```bash
+# Install uv globally
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Add to PATH if needed
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+---
 
 ## Development
 
@@ -144,20 +323,22 @@ alembic downgrade -1
 ### Testing
 
 ```bash
-# Run all tests
-IS_TEST=True pytest
+# Using Makefile (recommended)
+make test              # Run all tests
+make test-cov          # Run with coverage report
 
-# Run with coverage
-IS_TEST=True pytest --cov=app --cov-report=term-missing -n 0
+# Using uv directly
+IS_TEST=True uv run pytest
+IS_TEST=True uv run pytest --cov=app --cov-report=term-missing -n 0
 
 # Run specific test file
-IS_TEST=True pytest tests/api/test_auth.py -v
+IS_TEST=True uv run pytest tests/api/test_auth.py -v
 
 # Run single test
-IS_TEST=True pytest tests/api/test_auth.py::TestLogin::test_login_success -v
+IS_TEST=True uv run pytest tests/api/test_auth.py::TestLogin::test_login_success -v
 
 # Generate HTML coverage report
-IS_TEST=True pytest --cov=app --cov-report=html -n 0
+IS_TEST=True uv run pytest --cov=app --cov-report=html -n 0
 open htmlcov/index.html
 ```
 
@@ -166,16 +347,25 @@ open htmlcov/index.html
 ### Code Quality
 
 ```bash
-# Type checking
-mypy app
+# Using Makefile (recommended)
+make lint          # Ruff linting
+make format        # Ruff formatting
+make type-check    # mypy type checking
+make validate      # All checks at once
 
-# Linting
-ruff check app
-
-# Format code
-black app
-isort app
+# Using uv directly
+uv run ruff check app/ tests/
+uv run ruff format app/ tests/
+uv run mypy app/
 ```
+
+**Tools:**
+- **Ruff**: All-in-one linting, formatting, and import sorting (replaces Black, Flake8, isort)
+- **mypy**: Static type checking with Pydantic plugin
+
+All configurations are in `pyproject.toml`.
+
+---
 
 ## API Documentation
 
@@ -193,6 +383,8 @@ Once the server is running, interactive API documentation is available:
 - **OpenAPI JSON**: http://localhost:8000/api/v1/openapi.json
   - Raw OpenAPI 3.0 specification
   - Use for client generation
+
+---
 
 ## Authentication
 
@@ -229,6 +421,8 @@ curl -H "Authorization: Bearer <access_token>" \
   - `Admin`: Can manage members (except owners)
   - `Member`: Read-only access
 
+---
+
 ## Common Tasks
 
 ### Create a Superuser
@@ -258,7 +452,11 @@ python migrate.py check
 curl http://localhost:8000/health
 ```
 
+---
+
 ## Docker Support
+
+The Dockerfile uses **uv** for fast, reproducible builds:
 
 ```bash
 # Development with hot reload
@@ -271,17 +469,38 @@ docker-compose up -d
 docker-compose build backend
 ```
 
+**Docker features:**
+- Multi-stage builds (development + production)
+- uv for fast dependency installation
+- `uv.lock` ensures exact versions in containers
+- Development stage includes dev dependencies
+- Production stage optimized for size and security
+
+---
+
 ## Troubleshooting
 
 ### Common Issues
 
 **Module Import Errors**
 ```bash
-# Ensure you're in the backend directory
-cd backend
+# Ensure dependencies are installed
+make install-dev
 
-# Activate virtual environment
-source .venv/bin/activate
+# Or sync from lockfile
+make sync
+
+# Verify Python environment
+uv run python --version
+```
+
+**uv command not found**
+```bash
+# Install uv globally
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Add to PATH (add to ~/.bashrc or ~/.zshrc)
+export PATH="$HOME/.cargo/bin:$PATH"
 ```
 
 **Database Connection Failed**
@@ -306,10 +525,19 @@ alembic upgrade head
 **Tests Failing**
 ```bash
 # Run with verbose output
-IS_TEST=True pytest -vv
+make test
 
 # Run single test to isolate issue
-IS_TEST=True pytest tests/api/test_auth.py::TestLogin::test_login_success -vv
+IS_TEST=True uv run pytest tests/api/test_auth.py::TestLogin::test_login_success -vv
+```
+
+**Dependencies out of sync**
+```bash
+# Regenerate lockfile from pyproject.toml
+uv lock
+
+# Reinstall everything
+make install-dev
 ```
 
 ### Getting Help
@@ -320,6 +548,8 @@ See our detailed documentation:
 - [CODING_STANDARDS.md](docs/CODING_STANDARDS.md) - Code quality guidelines
 - [COMMON_PITFALLS.md](docs/COMMON_PITFALLS.md) - Mistakes to avoid
 - [FEATURE_EXAMPLE.md](docs/FEATURE_EXAMPLE.md) - Adding new features
+
+---
 
 ## Performance
 
@@ -343,6 +573,8 @@ Configured in `app/core/config.py`:
 - Bulk operations for admin actions
 - Indexed foreign keys and common lookups
 
+---
+
 ## Security
 
 ### Built-in Security Features
@@ -360,8 +592,10 @@ Configured in `app/core/config.py`:
 1. **Never commit secrets**: Use `.env` files (git-ignored)
 2. **Strong SECRET_KEY**: Min 32 chars, cryptographically random
 3. **HTTPS in production**: Required for token security
-4. **Regular updates**: Keep dependencies current
+4. **Regular updates**: Keep dependencies current (`uv sync --upgrade`)
 5. **Audit logs**: Monitor authentication events
+
+---
 
 ## Monitoring
 
@@ -388,13 +622,28 @@ logging.basicConfig(level=logging.INFO)
 # In production, use JSON logs for log aggregation
 ```
 
+---
+
 ## Additional Resources
 
-- **FastAPI Documentation**: https://fastapi.tiangolo.com
+### Official Documentation
+- **uv**: https://docs.astral.sh/uv/
+- **FastAPI**: https://fastapi.tiangolo.com
 - **SQLAlchemy 2.0**: https://docs.sqlalchemy.org/en/20/
 - **Pydantic**: https://docs.pydantic.dev/
 - **Alembic**: https://alembic.sqlalchemy.org/
+- **Ruff**: https://docs.astral.sh/ruff/
+
+### Our Documentation
+- [Root README](../README.md) - Project-wide information
+- [CLAUDE.md](../CLAUDE.md) - Comprehensive development guide
 
 ---
 
-**Note**: For project-wide information (license, contributing guidelines, deployment), see the [root README](../README.md).
+**Built with modern Python tooling:**
+- 🚀 **uv** - 10-100x faster dependency management
+- ⚡ **Ruff** - 10-100x faster linting & formatting
+- 🔍 **mypy** - Static type checking
+- ✅ **pytest** - Comprehensive test suite
+
+**All configured in a single `pyproject.toml` file!**
