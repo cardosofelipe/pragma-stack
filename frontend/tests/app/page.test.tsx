@@ -149,8 +149,9 @@ describe('HomePage', () => {
 
     it('renders demo cards', () => {
       render(<Home />);
-      expect(screen.getAllByText('Component Showcase')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Design System Hub')[0]).toBeInTheDocument();
       expect(screen.getAllByText('Authentication Flow')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('User Dashboard')[0]).toBeInTheDocument();
       // Admin Dashboard appears in both Feature Grid and Demo Section, so use getAllByText
       const adminDashboards = screen.getAllByText('Admin Dashboard');
       expect(adminDashboards.length).toBeGreaterThanOrEqual(1);
@@ -230,9 +231,9 @@ describe('HomePage', () => {
       expect(loginLinks.some((link) => link.getAttribute('href') === '/login')).toBe(true);
     });
 
-    it('has component showcase link', () => {
+    it('has design system link', () => {
       render(<Home />);
-      const devLinks = screen.getAllByRole('link', { name: /Component/i });
+      const devLinks = screen.getAllByRole('link', { name: /Design System/i });
       expect(devLinks.some((link) => link.getAttribute('href') === '/dev')).toBe(true);
     });
 

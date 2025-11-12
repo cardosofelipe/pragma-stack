@@ -49,7 +49,7 @@ describe('DemoCredentialsModal', () => {
     expect(screen.getByText('Regular User')).toBeInTheDocument();
     expect(screen.getByText('demo@example.com')).toBeInTheDocument();
     expect(screen.getByText('Demo123!')).toBeInTheDocument();
-    expect(screen.getByText(/Access settings, organizations/i)).toBeInTheDocument();
+    expect(screen.getByText(/User settings & profile/i)).toBeInTheDocument();
   });
 
   it('displays admin user credentials', () => {
@@ -58,7 +58,7 @@ describe('DemoCredentialsModal', () => {
     expect(screen.getByText('Admin User (Superuser)')).toBeInTheDocument();
     expect(screen.getByText('admin@example.com')).toBeInTheDocument();
     expect(screen.getByText('Admin123!')).toBeInTheDocument();
-    expect(screen.getByText(/Full admin panel access/i)).toBeInTheDocument();
+    expect(screen.getByText(/Full admin dashboard/i)).toBeInTheDocument();
   });
 
   it('copies regular user credentials to clipboard', async () => {
@@ -152,17 +152,20 @@ describe('DemoCredentialsModal', () => {
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  it('has a link to login page', () => {
+  it('has links to login page', () => {
     render(<DemoCredentialsModal open={true} onClose={mockOnClose} />);
 
-    const loginLink = screen.getByRole('link', { name: /go to login/i });
-    expect(loginLink).toHaveAttribute('href', '/login');
+    const loginAsUserLink = screen.getByRole('link', { name: /login as user/i });
+    expect(loginAsUserLink).toHaveAttribute('href', '/login');
+    
+    const loginAsAdminLink = screen.getByRole('link', { name: /login as admin/i });
+    expect(loginAsAdminLink).toHaveAttribute('href', '/login');
   });
 
   it('calls onClose when login link is clicked', () => {
     render(<DemoCredentialsModal open={true} onClose={mockOnClose} />);
 
-    const loginLink = screen.getByRole('link', { name: /go to login/i });
+    const loginLink = screen.getByRole('link', { name: /login as user/i });
     fireEvent.click(loginLink);
 
     expect(mockOnClose).toHaveBeenCalled();

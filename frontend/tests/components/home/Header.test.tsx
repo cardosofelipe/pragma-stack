@@ -64,7 +64,8 @@ describe('Header', () => {
         />
       );
 
-      expect(screen.getByRole('link', { name: 'Components' })).toHaveAttribute('href', '/dev');
+      expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
+      expect(screen.getByRole('link', { name: 'Design System' })).toHaveAttribute('href', '/dev');
       expect(screen.getByRole('link', { name: 'Admin Demo' })).toHaveAttribute('href', '/admin');
     });
 
@@ -154,8 +155,8 @@ describe('Header', () => {
 
       // Note: SheetContent is hidden by default in tests, but we can verify the links exist
       // The actual mobile menu behavior is tested in E2E tests
-      const componentsLinks = screen.getAllByRole('link', { name: /components/i });
-      expect(componentsLinks.length).toBeGreaterThan(0);
+      const designSystemLinks = screen.getAllByRole('link', { name: /Design System/i });
+      expect(designSystemLinks.length).toBeGreaterThan(0);
     });
 
     it('mobile menu contains GitHub link', () => {
