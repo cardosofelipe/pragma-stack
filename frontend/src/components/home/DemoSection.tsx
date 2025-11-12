@@ -7,37 +7,49 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Play, Layers, ShieldCheck } from 'lucide-react';
+import { Play, Layers, ShieldCheck, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 const demos = [
   {
     icon: Layers,
-    title: 'Component Showcase',
+    title: 'Design System Hub',
     description:
-      'Browse the complete design system, UI components, and interactive examples built with shadcn/ui and TailwindCSS',
+      'Browse components, layouts, spacing, and forms with live examples built with shadcn/ui and TailwindCSS',
     href: '/dev',
-    cta: 'View Components',
+    cta: 'Explore Design System',
     variant: 'outline' as const,
   },
   {
     icon: ShieldCheck,
     title: 'Authentication Flow',
     description:
-      'Test the complete auth flow: login, session management, password reset. Full security implementation with JWT and refresh tokens',
+      'Test login, registration, password reset, and session management with complete JWT security implementation',
     href: '/login',
     credentials: 'demo@example.com / Demo123!',
-    cta: 'Try Auth Demo',
+    cta: 'Try Auth Flow',
     variant: 'default' as const,
+  },
+  {
+    icon: UserCircle,
+    title: 'User Dashboard',
+    description:
+      'Experience user settings, profile management, password changes, and active sessions monitoring',
+    href: '/settings',
+    credentials: 'demo@example.com / Demo123!',
+    cta: 'View User Features',
+    variant: 'outline' as const,
+    isNew: true,
   },
   {
     icon: Play,
     title: 'Admin Dashboard',
     description:
-      'Experience the admin panel with user management, real-time analytics charts, bulk operations, and session monitoring',
+      'Explore admin panel with user management, real-time analytics charts, bulk operations, and session monitoring',
     href: '/admin',
     credentials: 'admin@example.com / Admin123!',
-    cta: 'Launch Admin',
+    cta: 'Launch Admin Panel',
     variant: 'outline' as const,
   },
 ];
@@ -59,7 +71,7 @@ export function DemoSection() {
         </p>
       </motion.div>
 
-      <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
         {demos.map((demo, index) => (
           <motion.div
             key={demo.title}
@@ -70,9 +82,16 @@ export function DemoSection() {
             transition={{ duration: 0.5, delay: index * 0.1 }}
             whileHover={{ y: -4 }}
           >
-            {/* Icon */}
-            <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/60">
-              <demo.icon className="h-6 w-6 text-primary-foreground" aria-hidden="true" />
+            {/* Icon and Badge */}
+            <div className="flex items-start justify-between mb-4">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/60">
+                <demo.icon className="h-6 w-6 text-primary-foreground" aria-hidden="true" />
+              </div>
+              {demo.isNew && (
+                <Badge variant="default" className="text-xs">
+                  NEW
+                </Badge>
+              )}
             </div>
 
             <h3 className="text-xl font-semibold mb-2">{demo.title}</h3>
@@ -91,6 +110,21 @@ export function DemoSection() {
           </motion.div>
         ))}
       </div>
+
+      {/* See All Demos CTA */}
+      <motion.div
+        className="text-center mt-12"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-100px' }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+      >
+        <Button asChild variant="outline" size="lg" className="gap-2">
+          <Link href="/demos">
+            View Complete Demo Tour →
+          </Link>
+        </Button>
+      </motion.div>
     </section>
   );
 }

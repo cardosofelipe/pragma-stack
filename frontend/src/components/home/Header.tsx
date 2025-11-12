@@ -19,7 +19,8 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: '/dev', label: 'Components' },
+    { href: '/', label: 'Home' },
+    { href: '/dev', label: 'Design System' },
     { href: '/admin', label: 'Admin Demo' },
   ];
 

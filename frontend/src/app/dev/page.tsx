@@ -13,8 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
 export const metadata: Metadata = {
-  title: 'Design System Hub | Dev',
-  description: 'Interactive demonstrations and documentation for the FastNext design system',
+  title: 'Design System Hub | FastNext Template',
+  description: 'Interactive design system demonstrations with live examples - explore components, layouts, spacing, and forms built with shadcn/ui and Tailwind CSS',
 };
 
 const demoPages = [

@@ -86,9 +86,15 @@ export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProp
                 <span className="text-foreground">Demo123!</span>
               </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Access settings, organizations, and user features
-            </p>
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground">What you can access:</p>
+              <ul className="text-xs text-muted-foreground space-y-0.5 list-disc list-inside">
+                <li>User settings & profile</li>
+                <li>Password management</li>
+                <li>Active sessions</li>
+                <li>Personal preferences</li>
+              </ul>
+            </div>
           </div>
 
           {/* Admin User Credentials */}
@@ -120,21 +126,39 @@ export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProp
                 <span className="text-foreground">Admin123!</span>
               </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Full admin panel access: user management, analytics, bulk operations
-            </p>
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground">What you can access:</p>
+              <ul className="text-xs text-muted-foreground space-y-0.5 list-disc list-inside">
+                <li>Full admin dashboard</li>
+                <li>User management</li>
+                <li>Analytics & charts</li>
+                <li>Bulk operations</li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
-            Close
-          </Button>
-          <Button asChild className="w-full sm:w-auto">
-            <Link href="/login" onClick={onClose}>
-              Go to Login →
-            </Link>
-          </Button>
+        <DialogFooter>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+            <Button asChild variant="default" className="w-full">
+              <Link href="/login" onClick={onClose}>
+                Login as User
+              </Link>
+            </Button>
+            <Button asChild variant="default" className="w-full">
+              <Link href="/login" onClick={onClose}>
+                Login as Admin
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/demos" onClick={onClose}>
+                View Demo Tour
+              </Link>
+            </Button>
+            <Button variant="secondary" onClick={onClose} className="w-full">
+              Close
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

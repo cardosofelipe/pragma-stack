@@ -10,7 +10,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Code2, Palette, LayoutDashboard, Box, FileText, BookOpen, Home } from 'lucide-react';
+import { Code2, Palette, LayoutDashboard, Box, FileText, BookOpen, Home, ArrowLeft, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ThemeToggle } from '@/components/theme';
@@ -21,6 +21,12 @@ interface DevLayoutProps {
 }
 
 const navItems = [
+  {
+    title: 'Home',
+    href: '/',
+    icon: ArrowLeft,
+    exact: true,
+  },
   {
     title: 'Hub',
     href: '/dev',
@@ -51,6 +57,11 @@ const navItems = [
     title: 'Docs',
     href: '/dev/docs',
     icon: BookOpen,
+  },
+  {
+    title: 'Live Demos',
+    href: '/demos',
+    icon: Rocket,
   },
 ];
 

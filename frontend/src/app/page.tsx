@@ -7,6 +7,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Header } from '@/components/home/Header';
 import { HeroSection } from '@/components/home/HeroSection';
 import { ContextSection } from '@/components/home/ContextSection';
@@ -69,30 +70,23 @@ export default function Home() {
               © {new Date().getFullYear()} FastNext Template. MIT Licensed.
             </div>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <Link href="/demos" className="hover:text-foreground transition-colors">
+                Demo Tour
+              </Link>
+              <Link href="/dev" className="hover:text-foreground transition-colors">
+                Design System
+              </Link>
               <a
-                href="https://github.com/your-org/fast-next-template"
+                href="https://github.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-foreground transition-colors"
               >
                 GitHub
               </a>
-              <a
-                href="https://github.com/your-org/fast-next-template#documentation"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-foreground transition-colors"
-              >
+              <Link href="/dev/docs" className="hover:text-foreground transition-colors">
                 Documentation
-              </a>
-              <a
-                href="https://github.com/your-org/fast-next-template/issues"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-foreground transition-colors"
-              >
-                Report Issue
-              </a>
+              </Link>
             </div>
           </div>
         </div>
