@@ -1,10 +1,19 @@
-.PHONY: dev prod down clean clean-slate
+.PHONY: dev dev-full prod down clean clean-slate
 
 VERSION ?= latest
 REGISTRY := gitea.pragmazest.com/cardosofelipe/app
 
 
 dev:
+	# Bring up all dev services except the frontend
+	docker compose -f docker-compose.dev.yml up --build -d --scale frontend=0
+	@echo ""
+	@echo "Frontend is not started by 'make dev'."
+	@echo "To run the frontend locally, open a new terminal and run:"
+	@echo "    cd frontend && npm run dev"
+
+dev-full:
+	# Bring up all dev services including the frontend (full stack)
 	docker compose -f docker-compose.dev.yml up --build -d
 
 prod:
