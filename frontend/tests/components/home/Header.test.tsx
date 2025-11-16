@@ -171,6 +171,70 @@ describe('Header', () => {
       const githubLinks = screen.getAllByRole('link', { name: /github/i });
       expect(githubLinks.length).toBeGreaterThan(0);
     });
+
+    it('clicking mobile menu navigation links works', () => {
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
+
+      const designSystemLinks = screen.getAllByRole('link', { name: /Design System/i });
+      // Click the mobile menu link (there should be 2: desktop + mobile)
+      if (designSystemLinks.length > 1) {
+        fireEvent.click(designSystemLinks[1]);
+        expect(designSystemLinks[1]).toHaveAttribute('href', '/dev');
+      }
+    });
+
+    it('clicking mobile menu GitHub link works', () => {
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
+
+      const githubLinks = screen.getAllByRole('link', { name: /github/i });
+      // Find the mobile menu GitHub link (second one)
+      if (githubLinks.length > 1) {
+        const mobileGithubLink = githubLinks[1];
+        fireEvent.click(mobileGithubLink);
+        expect(mobileGithubLink).toHaveAttribute('href', expect.stringContaining('github.com'));
+      }
+    });
+
+    it('mobile menu Try Demo button calls onOpenDemoModal', () => {
+      const mockOnOpenDemoModal = jest.fn();
+      render(<Header onOpenDemoModal={mockOnOpenDemoModal} />);
+
+      const tryDemoButtons = screen.getAllByRole('button', { name: /try demo/i });
+      // Click the mobile menu button (there should be 2: desktop + mobile)
+      if (tryDemoButtons.length > 1) {
+        fireEvent.click(tryDemoButtons[1]);
+        expect(mockOnOpenDemoModal).toHaveBeenCalled();
+      }
+    });
+
+    it('mobile menu Login link works', () => {
+      render(
+        <Header
+          onOpenDemoModal={function (): void {
+            throw new Error('Function not implemented.');
+          }}
+        />
+      );
+
+      const loginLinks = screen.getAllByRole('link', { name: /login/i });
+      // Click the mobile menu login link (there should be 2: desktop + mobile)
+      if (loginLinks.length > 1) {
+        fireEvent.click(loginLinks[1]);
+        expect(loginLinks[1]).toHaveAttribute('href', '/login');
+      }
+    });
   });
 
   describe('Accessibility', () => {

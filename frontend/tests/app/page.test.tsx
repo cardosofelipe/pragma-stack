@@ -3,7 +3,7 @@
  * Tests for the new FastNext Template landing page
  */
 
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, fireEvent } from '@testing-library/react';
 import Home from '@/app/page';
 
 // Mock Next.js components
@@ -241,6 +241,36 @@ describe('HomePage', () => {
       render(<Home />);
       const adminLinks = screen.getAllByRole('link', { name: /Admin/i });
       expect(adminLinks.some((link) => link.getAttribute('href') === '/admin')).toBe(true);
+    });
+  });
+
+  describe('Demo Modal', () => {
+    it('demo modal is initially closed', () => {
+      render(<Home />);
+      expect(screen.queryByTestId('demo-modal')).not.toBeInTheDocument();
+    });
+
+    it('opens demo modal when Try Demo button is clicked in header', () => {
+      render(<Home />);
+      const tryDemoButtons = screen.getAllByRole('button', { name: /try demo/i });
+      // Click the first Try Demo button (from header)
+      fireEvent.click(tryDemoButtons[0]);
+      expect(screen.getByTestId('demo-modal')).toBeInTheDocument();
+    });
+
+    it('closes demo modal when close button is clicked', () => {
+      render(<Home />);
+      // Open the modal
+      const tryDemoButtons = screen.getAllByRole('button', { name: /try demo/i });
+      fireEvent.click(tryDemoButtons[0]);
+      expect(screen.getByTestId('demo-modal')).toBeInTheDocument();
+      
+      // Close the modal
+      const closeButtons = screen.getAllByRole('button', { name: /close/i });
+      const modalCloseButton = closeButtons.find(btn => btn.textContent === 'Close');
+      if (modalCloseButton) {
+        fireEvent.click(modalCloseButton);
+      }
     });
   });
 

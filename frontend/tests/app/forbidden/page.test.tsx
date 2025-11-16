@@ -4,9 +4,15 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import ForbiddenPage from '@/app/forbidden/page';
+import ForbiddenPage, { metadata } from '@/app/forbidden/page';
 
 describe('ForbiddenPage', () => {
+  it('has correct metadata', () => {
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBe('403 - Forbidden');
+    expect(metadata.description).toBe('You do not have permission to access this resource');
+  });
+
   it('renders page heading', () => {
     render(<ForbiddenPage />);
 

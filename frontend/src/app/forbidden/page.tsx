@@ -9,8 +9,7 @@ import Link from 'next/link';
 import { ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-/* istanbul ignore next - Next.js metadata, not executable code */
-export const metadata: Metadata = {
+export const metadata: Metadata = /* istanbul ignore next */ {
   title: '403 - Forbidden',
   description: 'You do not have permission to access this resource',
 };
