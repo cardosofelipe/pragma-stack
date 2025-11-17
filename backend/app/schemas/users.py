@@ -37,6 +37,13 @@ class UserUpdate(BaseModel):
     phone_number: str | None = None
     password: str | None = None
     preferences: dict[str, Any] | None = None
+    locale: str | None = Field(
+        None,
+        max_length=10,
+        pattern=r'^[a-z]{2}(-[A-Z]{2})?$',
+        description="User's preferred locale (BCP 47 format: en, it, en-US, it-IT)",
+        examples=["en", "it", "en-US", "it-IT"]
+    )
     is_active: bool | None = (
         None  # Changed default from True to None to avoid unintended updates
     )
@@ -55,6 +62,24 @@ class UserUpdate(BaseModel):
             return v
         return validate_password_strength(v)
 
+    @field_validator("locale")
+    @classmethod
+    def validate_locale(cls, v: str | None) -> str | None:
+        """Validate locale against supported locales."""
+        if v is None:
+            return v
+        # Only support English and Italian for template showcase
+        # Note: Locales stored in lowercase for case-insensitive matching
+        SUPPORTED_LOCALES = {"en", "it", "en-us", "en-gb", "it-it"}
+        # Normalize to lowercase for comparison and storage
+        v_lower = v.lower()
+        if v_lower not in SUPPORTED_LOCALES:
+            raise ValueError(
+                f"Unsupported locale '{v}'. Supported locales: {sorted(SUPPORTED_LOCALES)}"
+            )
+        # Return normalized lowercase version for consistency
+        return v_lower
+
     @field_validator("is_superuser")
     @classmethod
     def prevent_superuser_modification(cls, v: bool | None) -> bool | None:
@@ -70,6 +95,7 @@ class UserInDB(UserBase):
     is_superuser: bool
     created_at: datetime
     updated_at: datetime | None = None
+    locale: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -80,6 +106,7 @@ class UserResponse(UserBase):
     is_superuser: bool
     created_at: datetime
     updated_at: datetime | None = None
+    locale: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

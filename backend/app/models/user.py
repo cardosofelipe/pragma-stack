@@ -16,6 +16,7 @@ class User(Base, UUIDMixin, TimestampMixin):
     is_active = Column(Boolean, default=True, nullable=False, index=True)
     is_superuser = Column(Boolean, default=False, nullable=False, index=True)
     preferences = Column(JSONB)
+    locale = Column(String(10), nullable=True, index=True)
     deleted_at = Column(DateTime(timezone=True), nullable=True, index=True)
 
     # Relationships
