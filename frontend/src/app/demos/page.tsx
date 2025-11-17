@@ -16,7 +16,6 @@ import {
   LogIn,
   Settings,
   Users,
-  Lock,
   Activity,
   UserCog,
   BarChart3,

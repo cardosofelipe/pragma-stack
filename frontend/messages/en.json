@@ -1,0 +1,165 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear",
+    "required": "Required",
+    "optional": "Optional",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register",
+    "demos": "Demos",
+    "design": "Design System"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "subtitle": "Enter your email below to sign in to your account",
+      "emailLabel": "Email",
+      "emailPlaceholder": "name@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "loginButton": "Sign In",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up",
+      "success": "Successfully logged in",
+      "error": "Invalid email or password"
+    },
+    "register": {
+      "title": "Create an account",
+      "subtitle": "Enter your information to create an account",
+      "firstNameLabel": "First Name",
+      "firstNamePlaceholder": "John",
+      "lastNameLabel": "Last Name",
+      "lastNamePlaceholder": "Doe",
+      "emailLabel": "Email",
+      "emailPlaceholder": "name@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Create a strong password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "phoneLabel": "Phone Number",
+      "phonePlaceholder": "+1 (555) 000-0000",
+      "registerButton": "Create Account",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "success": "Account created successfully",
+      "error": "Failed to create account"
+    },
+    "passwordReset": {
+      "title": "Reset your password",
+      "subtitle": "Enter your email address and we'll send you a reset link",
+      "emailLabel": "Email",
+      "emailPlaceholder": "name@example.com",
+      "sendButton": "Send Reset Link",
+      "backToLogin": "Back to login",
+      "success": "Password reset link sent to your email",
+      "error": "Failed to send reset link"
+    },
+    "passwordChange": {
+      "title": "Change Password",
+      "currentPasswordLabel": "Current Password",
+      "newPasswordLabel": "New Password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "changeButton": "Change Password",
+      "success": "Password changed successfully",
+      "error": "Failed to change password"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Manage your profile information",
+      "firstNameLabel": "First Name",
+      "lastNameLabel": "Last Name",
+      "emailLabel": "Email",
+      "phoneLabel": "Phone Number",
+      "updateButton": "Update Profile",
+      "success": "Profile updated successfully",
+      "error": "Failed to update profile"
+    },
+    "password": {
+      "title": "Password",
+      "subtitle": "Change your account password",
+      "currentPasswordLabel": "Current Password",
+      "newPasswordLabel": "New Password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "updateButton": "Update Password",
+      "success": "Password updated successfully",
+      "error": "Failed to update password"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "subtitle": "Manage your active sessions",
+      "currentSession": "Current Session",
+      "activeSession": "Active",
+      "lastActive": "Last active",
+      "device": "Device",
+      "location": "Location",
+      "revokeButton": "Revoke",
+      "revokeAll": "Revoke All Other Sessions",
+      "success": "Session revoked successfully",
+      "error": "Failed to revoke session"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "subtitle": "Customize your experience",
+      "language": "Language",
+      "languageDescription": "Select your preferred language",
+      "theme": "Theme",
+      "themeDescription": "Choose your color scheme",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System"
+    }
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "notFoundDescription": "The page you're looking for doesn't exist.",
+    "unauthorized": "Unauthorized",
+    "unauthorizedDescription": "You don't have permission to access this page.",
+    "serverError": "Server error",
+    "serverErrorDescription": "Something went wrong on our end.",
+    "networkError": "Network error",
+    "networkErrorDescription": "Please check your internet connection.",
+    "validation": {
+      "required": "This field is required",
+      "email": "Please enter a valid email address",
+      "minLength": "Must be at least {min} characters",
+      "maxLength": "Must be at most {max} characters",
+      "passwordMismatch": "Passwords do not match",
+      "passwordWeak": "Password is too weak"
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Invalid email address",
+    "minLength": "Minimum {count} characters required",
+    "maxLength": "Maximum {count} characters allowed",
+    "pattern": "Invalid format",
+    "passwordMismatch": "Passwords do not match"
+  }
+}

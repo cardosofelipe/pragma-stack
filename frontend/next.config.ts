@@ -1,4 +1,8 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+// Initialize next-intl plugin with i18n request config path
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -21,4 +25,5 @@ const nextConfig: NextConfig = {
   // Note: swcMinify is default in Next.js 15
 };
 
-export default nextConfig;
+// Wrap config with next-intl plugin
+export default withNextIntl(nextConfig);

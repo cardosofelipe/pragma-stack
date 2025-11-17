@@ -1,0 +1,165 @@
+{
+  "common": {
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "success": "Successo",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "delete": "Elimina",
+    "edit": "Modifica",
+    "close": "Chiudi",
+    "confirm": "Conferma",
+    "back": "Indietro",
+    "next": "Avanti",
+    "submit": "Invia",
+    "search": "Cerca",
+    "filter": "Filtra",
+    "clear": "Cancella",
+    "required": "Obbligatorio",
+    "optional": "Facoltativo",
+    "yes": "Sì",
+    "no": "No"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "settings": "Impostazioni",
+    "profile": "Profilo",
+    "logout": "Disconnetti",
+    "login": "Accedi",
+    "register": "Registrati",
+    "demos": "Demo",
+    "design": "Design System"
+  },
+  "auth": {
+    "login": {
+      "title": "Accedi al tuo account",
+      "subtitle": "Inserisci la tua email per accedere al tuo account",
+      "emailLabel": "Email",
+      "emailPlaceholder": "nome@esempio.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Inserisci la tua password",
+      "rememberMe": "Ricordami",
+      "forgotPassword": "Password dimenticata?",
+      "loginButton": "Accedi",
+      "noAccount": "Non hai un account?",
+      "registerLink": "Registrati",
+      "success": "Accesso effettuato con successo",
+      "error": "Email o password non validi"
+    },
+    "register": {
+      "title": "Crea un account",
+      "subtitle": "Inserisci le tue informazioni per creare un account",
+      "firstNameLabel": "Nome",
+      "firstNamePlaceholder": "Mario",
+      "lastNameLabel": "Cognome",
+      "lastNamePlaceholder": "Rossi",
+      "emailLabel": "Email",
+      "emailPlaceholder": "nome@esempio.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Crea una password sicura",
+      "confirmPasswordLabel": "Conferma Password",
+      "confirmPasswordPlaceholder": "Reinserisci la tua password",
+      "phoneLabel": "Numero di Telefono",
+      "phonePlaceholder": "+39 123 456 7890",
+      "registerButton": "Crea Account",
+      "hasAccount": "Hai già un account?",
+      "loginLink": "Accedi",
+      "success": "Account creato con successo",
+      "error": "Impossibile creare l'account"
+    },
+    "passwordReset": {
+      "title": "Reimposta la tua password",
+      "subtitle": "Inserisci il tuo indirizzo email e ti invieremo un link per reimpostare la password",
+      "emailLabel": "Email",
+      "emailPlaceholder": "nome@esempio.com",
+      "sendButton": "Invia Link di Reset",
+      "backToLogin": "Torna al login",
+      "success": "Link di reset password inviato alla tua email",
+      "error": "Impossibile inviare il link di reset"
+    },
+    "passwordChange": {
+      "title": "Cambia Password",
+      "currentPasswordLabel": "Password Attuale",
+      "newPasswordLabel": "Nuova Password",
+      "confirmPasswordLabel": "Conferma Nuova Password",
+      "changeButton": "Cambia Password",
+      "success": "Password cambiata con successo",
+      "error": "Impossibile cambiare la password"
+    }
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "profile": {
+      "title": "Profilo",
+      "subtitle": "Gestisci le informazioni del tuo profilo",
+      "firstNameLabel": "Nome",
+      "lastNameLabel": "Cognome",
+      "emailLabel": "Email",
+      "phoneLabel": "Numero di Telefono",
+      "updateButton": "Aggiorna Profilo",
+      "success": "Profilo aggiornato con successo",
+      "error": "Impossibile aggiornare il profilo"
+    },
+    "password": {
+      "title": "Password",
+      "subtitle": "Cambia la password del tuo account",
+      "currentPasswordLabel": "Password Attuale",
+      "newPasswordLabel": "Nuova Password",
+      "confirmPasswordLabel": "Conferma Nuova Password",
+      "updateButton": "Aggiorna Password",
+      "success": "Password aggiornata con successo",
+      "error": "Impossibile aggiornare la password"
+    },
+    "sessions": {
+      "title": "Sessioni",
+      "subtitle": "Gestisci le tue sessioni attive",
+      "currentSession": "Sessione Corrente",
+      "activeSession": "Attiva",
+      "lastActive": "Ultima attività",
+      "device": "Dispositivo",
+      "location": "Posizione",
+      "revokeButton": "Revoca",
+      "revokeAll": "Revoca Tutte le Altre Sessioni",
+      "success": "Sessione revocata con successo",
+      "error": "Impossibile revocare la sessione"
+    },
+    "preferences": {
+      "title": "Preferenze",
+      "subtitle": "Personalizza la tua esperienza",
+      "language": "Lingua",
+      "languageDescription": "Seleziona la tua lingua preferita",
+      "theme": "Tema",
+      "themeDescription": "Scegli la tua combinazione di colori",
+      "themeLight": "Chiaro",
+      "themeDark": "Scuro",
+      "themeSystem": "Sistema"
+    }
+  },
+  "errors": {
+    "notFound": "Pagina non trovata",
+    "notFoundDescription": "La pagina che stai cercando non esiste.",
+    "unauthorized": "Non autorizzato",
+    "unauthorizedDescription": "Non hai i permessi per accedere a questa pagina.",
+    "serverError": "Errore del server",
+    "serverErrorDescription": "Qualcosa è andato storto dal nostro lato.",
+    "networkError": "Errore di rete",
+    "networkErrorDescription": "Controlla la tua connessione internet.",
+    "validation": {
+      "required": "Questo campo è obbligatorio",
+      "email": "Inserisci un indirizzo email valido",
+      "minLength": "Deve essere di almeno {min} caratteri",
+      "maxLength": "Deve essere al massimo {max} caratteri",
+      "passwordMismatch": "Le password non corrispondono",
+      "passwordWeak": "La password è troppo debole"
+    }
+  },
+  "validation": {
+    "required": "Questo campo è obbligatorio",
+    "email": "Indirizzo email non valido",
+    "minLength": "Minimo {count} caratteri richiesti",
+    "maxLength": "Massimo {count} caratteri consentiti",
+    "pattern": "Formato non valido",
+    "passwordMismatch": "Le password non corrispondono"
+  }
+}
