@@ -117,8 +117,9 @@ async def get_locale(
     if current_user and current_user.locale:
         # Validate that saved locale is still supported
         # (in case SUPPORTED_LOCALES changed after user set preference)
-        if current_user.locale in SUPPORTED_LOCALES:
-            return current_user.locale
+        locale_value = str(current_user.locale)
+        if locale_value in SUPPORTED_LOCALES:
+            return locale_value
 
     # Priority 2: Accept-Language header
     accept_language = request.headers.get("accept-language", "")

@@ -67,9 +67,7 @@ class TestParseAcceptLanguage:
 
     def test_parse_complex_header(self):
         """Test complex Accept-Language header with multiple locales"""
-        result = parse_accept_language(
-            "it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7,fr;q=0.6"
-        )
+        result = parse_accept_language("it-IT,it;q=0.9,en-US;q=0.8,en;q=0.7,fr;q=0.6")
         assert result == "it-it"
 
     def test_parse_whitespace_handling(self):
@@ -199,9 +197,7 @@ class TestGetLocale:
         assert result == "en"
 
     @pytest.mark.asyncio
-    async def test_locale_from_accept_language_header(
-        self, async_user_without_locale
-    ):
+    async def test_locale_from_accept_language_header(self, async_user_without_locale):
         """Test locale detection from Accept-Language header when user has no preference"""
         # Mock request with Italian Accept-Language (it-IT has highest priority)
         mock_request = MagicMock()

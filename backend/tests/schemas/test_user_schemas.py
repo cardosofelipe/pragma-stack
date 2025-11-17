@@ -334,11 +334,7 @@ class TestLocaleValidation:
     def test_locale_in_user_update_with_other_fields(self):
         """Test locale validation works when combined with other fields"""
         # Valid locale with other fields
-        user = UserUpdate(
-            first_name="Mario",
-            last_name="Rossi",
-            locale="it"
-        )
+        user = UserUpdate(first_name="Mario", last_name="Rossi", locale="it")
         assert user.locale == "it"
         assert user.first_name == "Mario"
 
@@ -347,7 +343,7 @@ class TestLocaleValidation:
             UserUpdate(
                 first_name="Pierre",
                 last_name="Dupont",
-                locale="fr"  # Unsupported
+                locale="fr",  # Unsupported
             )
 
     def test_supported_locales_list(self):
@@ -357,7 +353,9 @@ class TestLocaleValidation:
         # Expected output (normalized to lowercase)
         expected_outputs = ["en", "it", "en-us", "en-gb", "it-it"]
 
-        for input_locale, expected_output in zip(input_locales, expected_outputs):
+        for input_locale, expected_output in zip(
+            input_locales, expected_outputs, strict=True
+        ):
             user = UserUpdate(locale=input_locale)
             assert user.locale == expected_output
 

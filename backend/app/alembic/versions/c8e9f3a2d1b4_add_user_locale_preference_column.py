@@ -23,10 +23,7 @@ def upgrade() -> None:
     # VARCHAR(10) supports BCP 47 format (e.g., "en", "it", "en-US", "it-IT")
     # Nullable: NULL means "not set yet", will use Accept-Language header fallback
     # Indexed: For analytics queries and filtering by locale
-    op.add_column(
-        "users",
-        sa.Column("locale", sa.String(length=10), nullable=True)
-    )
+    op.add_column("users", sa.Column("locale", sa.String(length=10), nullable=True))
 
     # Create index on locale column for performance
     op.create_index(

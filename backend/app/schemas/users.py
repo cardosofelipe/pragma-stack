@@ -40,9 +40,9 @@ class UserUpdate(BaseModel):
     locale: str | None = Field(
         None,
         max_length=10,
-        pattern=r'^[a-z]{2}(-[A-Z]{2})?$',
+        pattern=r"^[a-z]{2}(-[A-Z]{2})?$",
         description="User's preferred locale (BCP 47 format: en, it, en-US, it-IT)",
-        examples=["en", "it", "en-US", "it-IT"]
+        examples=["en", "it", "en-US", "it-IT"],
     )
     is_active: bool | None = (
         None  # Changed default from True to None to avoid unintended updates
@@ -70,12 +70,12 @@ class UserUpdate(BaseModel):
             return v
         # Only support English and Italian for template showcase
         # Note: Locales stored in lowercase for case-insensitive matching
-        SUPPORTED_LOCALES = {"en", "it", "en-us", "en-gb", "it-it"}
+        supported_locales = {"en", "it", "en-us", "en-gb", "it-it"}
         # Normalize to lowercase for comparison and storage
         v_lower = v.lower()
-        if v_lower not in SUPPORTED_LOCALES:
+        if v_lower not in supported_locales:
             raise ValueError(
-                f"Unsupported locale '{v}'. Supported locales: {sorted(SUPPORTED_LOCALES)}"
+                f"Unsupported locale '{v}'. Supported locales: {sorted(supported_locales)}"
             )
         # Return normalized lowercase version for consistency
         return v_lower
