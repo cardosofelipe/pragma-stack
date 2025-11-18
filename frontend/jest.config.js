@@ -14,7 +14,7 @@ const customJestConfig = {
   },
   testMatch: ['<rootDir>/tests/**/*.test.ts', '<rootDir>/tests/**/*.test.tsx'],
   transformIgnorePatterns: [
-    'node_modules/(?!(react-syntax-highlighter|refractor|hastscript|hast-.*|unist-.*|property-information|space-separated-tokens|comma-separated-tokens|web-namespaces)/)',
+    'node_modules/(?!(react-syntax-highlighter|refractor|hastscript|hast-.*|unist-.*|property-information|space-separated-tokens|comma-separated-tokens|web-namespaces|next-intl|use-intl)/)',
   ],
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',

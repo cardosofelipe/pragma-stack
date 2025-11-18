@@ -2,10 +2,9 @@
 /**
  * Utility functions for internationalization.
  *
- * This file demonstrates type-safe translation usage.
+ * This file provides pure utility functions for i18n without React dependencies.
+ * For React hooks, see hooks.ts
  */
-
-import { useTranslations } from 'next-intl';
 
 /**
  * Get the display name for a locale code.
@@ -52,28 +51,6 @@ export function getLocaleFlag(locale: string): string {
   };
 
   return flags[locale] || flags.en;
-}
-
-/**
- * Hook to get common translations.
- * This demonstrates type-safe usage of useTranslations.
- *
- * @returns Object with commonly used translation functions
- */
-export function useCommonTranslations() {
-  const t = useTranslations('common');
-
-  return {
-    loading: () => t('loading'),
-    error: () => t('error'),
-    success: () => t('success'),
-    cancel: () => t('cancel'),
-    save: () => t('save'),
-    delete: () => t('delete'),
-    edit: () => t('edit'),
-    close: () => t('close'),
-    confirm: () => t('confirm'),
-  };
 }
 
 /**

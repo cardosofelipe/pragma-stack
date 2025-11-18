@@ -14,7 +14,7 @@
  */
 
 import { getRequestConfig } from 'next-intl/server';
-import { routing } from './routing';
+import { routing } from '@/lib/i18n/routing';
 
 export default getRequestConfig(async ({ locale }) => {
   // Validate that the incoming `locale` parameter is valid
