@@ -5,7 +5,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import PasswordSettingsPage from '@/app/(authenticated)/settings/password/page';
+import PasswordSettingsPage from '@/app/[locale]/(authenticated)/settings/password/page';
 
 describe('PasswordSettingsPage', () => {
   const queryClient = new QueryClient({

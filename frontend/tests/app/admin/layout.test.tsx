@@ -5,7 +5,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import AdminLayout from '@/app/admin/layout';
+import AdminLayout from '@/app/[locale]/admin/layout';
 import { useAuth } from '@/lib/auth/AuthContext';
 
 // Mock dependencies

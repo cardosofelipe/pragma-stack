@@ -4,7 +4,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import RegisterPage from '@/app/(auth)/register/page';
+import RegisterPage from '@/app/[locale]/(auth)/register/page';
 
 // Mock dynamic import
 jest.mock('next/dynamic', () => ({

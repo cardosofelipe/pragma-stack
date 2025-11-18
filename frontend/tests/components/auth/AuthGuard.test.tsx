@@ -6,17 +6,7 @@
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthGuard } from '@/components/auth/AuthGuard';
-
-// Mock Next.js navigation
-const mockPush = jest.fn();
-const mockPathname = '/protected';
-
-jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: mockPush,
-  }),
-  usePathname: () => mockPathname,
-}));
+import { mockUsePathname, mockPush } from 'next-intl/navigation';
 
 // Mock auth state via Context
 let mockAuthState: {
@@ -64,6 +54,10 @@ describe('AuthGuard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
+
+    // Configure pathname mock
+    mockUsePathname.mockReturnValue('/protected');
+
     // Reset to default unauthenticated state
     mockAuthState = {
       isAuthenticated: false,

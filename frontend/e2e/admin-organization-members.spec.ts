@@ -11,7 +11,7 @@ test.describe('Admin Organization Members - Navigation from Organizations List',
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
     await page.waitForSelector('table tbody tr');
   });
 
@@ -24,12 +24,12 @@ test.describe('Admin Organization Members - Navigation from Organizations List',
 
     // Click "View Members"
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
+      page.waitForURL(/\/en\/admin\/organizations\/[^/]+\/members/),
       page.getByText('View Members').click(),
     ]);
 
     // Should be on members page
-    await expect(page).toHaveURL(/\/admin\/organizations\/[^/]+\/members/);
+    await expect(page).toHaveURL(/\/en\/admin\/organizations\/[^/]+\/members/);
   });
 
   test('should navigate to members page when clicking member count', async ({ page }) => {
@@ -39,12 +39,12 @@ test.describe('Admin Organization Members - Navigation from Organizations List',
 
     // Click on member count
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
+      page.waitForURL(/\/en\/admin\/organizations\/[^/]+\/members/),
       memberButton.click(),
     ]);
 
     // Should be on members page
-    await expect(page).toHaveURL(/\/admin\/organizations\/[^/]+\/members/);
+    await expect(page).toHaveURL(/\/en\/admin\/organizations\/[^/]+\/members/);
   });
 });
 
@@ -52,7 +52,7 @@ test.describe('Admin Organization Members - Page Structure', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
     await page.waitForSelector('table tbody tr');
 
     // Navigate to members page
@@ -60,13 +60,13 @@ test.describe('Admin Organization Members - Page Structure', () => {
     await actionButton.click();
 
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
+      page.waitForURL(/\/en\/admin\/organizations\/[^/]+\/members/),
       page.getByText('View Members').click(),
     ]);
   });
 
   test('should display organization members page', async ({ page }) => {
-    await expect(page).toHaveURL(/\/admin\/organizations\/[^/]+\/members/);
+    await expect(page).toHaveURL(/\/en\/admin\/organizations\/[^/]+\/members/);
 
     // Wait for page to load
     await page.waitForSelector('table');
@@ -123,7 +123,7 @@ test.describe('Admin Organization Members - AddMemberDialog E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
     await page.waitForSelector('table tbody tr');
 
     // Navigate to members page
@@ -131,7 +131,7 @@ test.describe('Admin Organization Members - AddMemberDialog E2E Tests', () => {
     await actionButton.click();
 
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
+      page.waitForURL(/\/en\/admin\/organizations\/[^/]+\/members/),
       page.getByText('View Members').click(),
     ]);
 

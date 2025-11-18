@@ -4,7 +4,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import PreferencesPage from '@/app/(authenticated)/settings/preferences/page';
+import PreferencesPage from '@/app/[locale]/(authenticated)/settings/preferences/page';
 
 describe('PreferencesPage', () => {
   it('renders page title', () => {

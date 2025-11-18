@@ -28,7 +28,7 @@ test.describe('Login Flow', () => {
     });
 
     // Navigate to login page before each test
-    await page.goto('/login');
+    await page.goto('/en/login');
   });
 
   test.afterEach(async ({ page }, testInfo) => {
@@ -128,7 +128,7 @@ test.describe('Login Flow', () => {
     await page.waitForTimeout(1000);
 
     // Should stay on login page (validation failed)
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL('/en/login');
   });
 
   test('should show error for invalid credentials', async ({ page }) => {
@@ -162,10 +162,10 @@ test.describe('Login Flow', () => {
     // Click forgot password link - use Promise.all to wait for navigation
     const forgotLink = page.getByRole('link', { name: 'Forgot password?' });
 
-    await Promise.all([page.waitForURL('/password-reset'), forgotLink.click()]);
+    await Promise.all([page.waitForURL('/en/password-reset'), forgotLink.click()]);
 
     // Should be on password reset page
-    await expect(page).toHaveURL('/password-reset');
+    await expect(page).toHaveURL('/en/password-reset');
     await expect(page.locator('h2')).toContainText('Reset your password');
   });
 
@@ -173,10 +173,10 @@ test.describe('Login Flow', () => {
     // Click sign up link - use Promise.all to wait for navigation
     const signupLink = page.getByRole('link', { name: 'Sign up' });
 
-    await Promise.all([page.waitForURL('/register'), signupLink.click()]);
+    await Promise.all([page.waitForURL('/en/register'), signupLink.click()]);
 
     // Should be on register page
-    await expect(page).toHaveURL('/register');
+    await expect(page).toHaveURL('/en/register');
     await expect(page.locator('h2')).toContainText('Create your account');
   });
 

@@ -5,7 +5,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import ProfileSettingsPage from '@/app/(authenticated)/settings/profile/page';
+import ProfileSettingsPage from '@/app/[locale]/(authenticated)/settings/profile/page';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 
 // Mock API hooks

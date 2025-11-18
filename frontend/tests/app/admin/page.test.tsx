@@ -4,7 +4,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import AdminPage from '@/app/admin/page';
+import AdminPage from '@/app/[locale]/admin/page';
 import { useAdminStats } from '@/lib/api/hooks/useAdmin';
 
 // Mock the useAdminStats hook

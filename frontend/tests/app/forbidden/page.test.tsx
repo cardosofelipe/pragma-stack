@@ -4,7 +4,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import ForbiddenPage, { metadata } from '@/app/forbidden/page';
+import ForbiddenPage, { metadata } from '@/app/[locale]/forbidden/page';
 
 describe('ForbiddenPage', () => {
   it('has correct metadata', () => {

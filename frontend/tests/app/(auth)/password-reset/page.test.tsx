@@ -4,7 +4,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import PasswordResetPage from '@/app/(auth)/password-reset/page';
+import PasswordResetPage from '@/app/[locale]/(auth)/password-reset/page';
 
 // Mock dynamic import
 jest.mock('next/dynamic', () => ({

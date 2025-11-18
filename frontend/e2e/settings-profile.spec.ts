@@ -15,7 +15,7 @@ test.describe('Profile Settings', () => {
     // Auth already cached in storage state (loginViaUI removed for performance)
 
     // Navigate to profile page
-    await page.goto('/settings/profile');
+    await page.goto('/en/settings/profile');
 
     // Wait for page to render
     await page.waitForTimeout(1000);

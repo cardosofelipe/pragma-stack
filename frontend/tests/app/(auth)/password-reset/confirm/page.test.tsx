@@ -4,10 +4,10 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import PasswordResetConfirmPage from '@/app/(auth)/password-reset/confirm/page';
+import PasswordResetConfirmPage from '@/app/[locale]/(auth)/password-reset/confirm/page';
 
 // Mock the content component
-jest.mock('@/app/(auth)/password-reset/confirm/PasswordResetConfirmContent', () => ({
+jest.mock('@/app/[locale]/(auth)/password-reset/confirm/PasswordResetConfirmContent', () => ({
   __esModule: true,
   default: () => <div data-testid="password-reset-confirm-content">Content</div>,
 }));

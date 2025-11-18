@@ -4,20 +4,20 @@
  */
 
 import { render, screen, act } from '@testing-library/react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import PasswordResetConfirmContent from '@/app/(auth)/password-reset/confirm/PasswordResetConfirmContent';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from '@/lib/i18n/routing';
+import PasswordResetConfirmContent from '@/app/[locale]/(auth)/password-reset/confirm/PasswordResetConfirmContent';
 
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
-  useRouter: jest.fn(),
   default: jest.fn(),
 }));
 
-// Mock Next.js Link
-jest.mock('next/link', () => ({
-  __esModule: true,
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
+// Mock i18n routing
+jest.mock('@/lib/i18n/routing', () => ({
+  useRouter: jest.fn(),
+  Link: ({ children, href }: { children: React.ReactNode; href: string }) => (
     <a href={href}>{children}</a>
   ),
 }));

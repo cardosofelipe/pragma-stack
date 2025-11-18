@@ -5,7 +5,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import AdminUsersPage from '@/app/admin/users/page';
+import AdminUsersPage from '@/app/[locale]/admin/users/page';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useAdminUsers } from '@/lib/api/hooks/useAdmin';
 

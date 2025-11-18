@@ -100,15 +100,15 @@ export async function loginViaUI(
   email = 'test@example.com',
   password = 'Password123!'
 ): Promise<void> {
-  // Navigate to login page
-  await page.goto('/login');
+  // Navigate to login page (with locale prefix)
+  await page.goto('/en/login');
 
   // Fill login form
   await page.locator('input[name="email"]').fill(email);
   await page.locator('input[name="password"]').fill(password);
 
-  // Submit and wait for navigation to home
-  await Promise.all([page.waitForURL('/'), page.locator('button[type="submit"]').click()]);
+  // Submit and wait for navigation to home (with locale prefix)
+  await Promise.all([page.waitForURL('/en'), page.locator('button[type="submit"]').click()]);
 
   // Wait for auth to settle
   await page.waitForTimeout(500);

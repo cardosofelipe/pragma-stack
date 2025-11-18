@@ -4,7 +4,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import AdminOrganizationsPage from '@/app/admin/organizations/page';
+import AdminOrganizationsPage from '@/app/[locale]/admin/organizations/page';
 
 // Mock the entire OrganizationManagementContent component
 jest.mock('@/components/admin/organizations/OrganizationManagementContent', () => ({

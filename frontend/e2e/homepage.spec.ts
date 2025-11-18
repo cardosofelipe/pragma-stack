@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Homepage - Desktop Navigation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en');
     // Wait for page to be fully loaded
   });
 
@@ -36,11 +36,11 @@ test.describe('Homepage - Desktop Navigation', () => {
 
     // Verify link exists and has correct href
     await expect(componentsLink).toBeVisible();
-    await expect(componentsLink).toHaveAttribute('href', '/dev');
+    await expect(componentsLink).toHaveAttribute('href', '/en/dev');
 
     // Click and wait for navigation
     await componentsLink.click();
-    await page.waitForURL('/dev', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/dev', { timeout: 10000 }).catch(() => {});
 
     // Verify URL (might not navigate if /dev page has issues, that's ok for this test)
     const currentUrl = page.url();
@@ -54,11 +54,11 @@ test.describe('Homepage - Desktop Navigation', () => {
 
     // Verify link exists and has correct href
     await expect(adminLink).toBeVisible();
-    await expect(adminLink).toHaveAttribute('href', '/admin');
+    await expect(adminLink).toHaveAttribute('href', '/en/admin');
 
     // Click and wait for navigation
     await adminLink.click();
-    await page.waitForURL('/admin', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/admin', { timeout: 10000 }).catch(() => {});
 
     // Verify URL (might not navigate if /admin requires auth, that's ok for this test)
     const currentUrl = page.url();
@@ -70,9 +70,9 @@ test.describe('Homepage - Desktop Navigation', () => {
     const header = page.locator('header').first();
     const headerLoginLink = header.getByRole('link', { name: /^Login$/i });
 
-    await Promise.all([page.waitForURL('/login'), headerLoginLink.click()]);
+    await Promise.all([page.waitForURL('/en/login'), headerLoginLink.click()]);
 
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL('/en/login');
   });
 
   test.skip('should open demo credentials modal when clicking Try Demo', async ({ page }) => {
@@ -113,7 +113,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
   test.beforeEach(async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
-    await page.goto('/');
+    await page.goto('/en');
     await page.waitForLoadState('domcontentloaded');
   });
 
@@ -146,11 +146,11 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
     const componentsLink = mobileMenu.getByRole('link', { name: 'Components' });
 
     // Verify link has correct href
-    await expect(componentsLink).toHaveAttribute('href', '/dev');
+    await expect(componentsLink).toHaveAttribute('href', '/en/dev');
 
     // Click and wait for navigation
     await componentsLink.click();
-    await page.waitForURL('/dev', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/dev', { timeout: 10000 }).catch(() => {});
 
     // Verify URL (might not navigate if /dev page has issues, that's ok)
     const currentUrl = page.url();
@@ -164,11 +164,11 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
     const adminLink = mobileMenu.getByRole('link', { name: 'Admin Demo' });
 
     // Verify link has correct href
-    await expect(adminLink).toHaveAttribute('href', '/admin');
+    await expect(adminLink).toHaveAttribute('href', '/en/admin');
 
     // Click and wait for navigation
     await adminLink.click();
-    await page.waitForURL('/admin', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/admin', { timeout: 10000 }).catch(() => {});
 
     // Verify URL (might not navigate if /admin requires auth, that's ok)
     const currentUrl = page.url();
@@ -204,9 +204,9 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
     const loginLink = mobileMenu.getByRole('link', { name: /Login/i });
     await loginLink.waitFor({ state: 'visible' });
 
-    await Promise.all([page.waitForURL('/login'), loginLink.click()]);
+    await Promise.all([page.waitForURL('/en/login'), loginLink.click()]);
 
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL('/en/login');
   });
 
   test.skip('should close mobile menu when clicking outside', async ({ page }) => {
@@ -223,7 +223,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
 
 test.describe('Homepage - Hero Section', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en');
   });
 
   test('should display main headline', async ({ page }) => {
@@ -255,11 +255,11 @@ test.describe('Homepage - Hero Section', () => {
     const exploreLink = page.getByRole('link', { name: /Explore Components/i }).first();
 
     // Verify link has correct href
-    await expect(exploreLink).toHaveAttribute('href', '/dev');
+    await expect(exploreLink).toHaveAttribute('href', '/en/dev');
 
     // Click and try to navigate
     await exploreLink.click();
-    await page.waitForURL('/dev', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/dev', { timeout: 10000 }).catch(() => {});
 
     // Verify URL (flexible to handle auth redirects)
     const currentUrl = page.url();
@@ -269,7 +269,7 @@ test.describe('Homepage - Hero Section', () => {
 
 test.describe('Homepage - Demo Credentials Modal', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en');
   });
 
   test.skip('should display regular and admin credentials', async ({ page }) => {
@@ -321,9 +321,9 @@ test.describe('Homepage - Demo Credentials Modal', () => {
 
     const loginLink = dialog.getByRole('link', { name: /Go to Login/i });
 
-    await Promise.all([page.waitForURL('/login'), loginLink.click()]);
+    await Promise.all([page.waitForURL('/en/login'), loginLink.click()]);
 
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL('/en/login');
   });
 
   test.skip('should close modal when clicking close button', async ({ page }) => {
@@ -344,7 +344,7 @@ test.describe('Homepage - Demo Credentials Modal', () => {
 
 test.describe('Homepage - Animated Terminal', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en');
   });
 
   test('should display terminal section', async ({ page }) => {
@@ -387,11 +387,11 @@ test.describe('Homepage - Animated Terminal', () => {
     const terminalDemoLink = demoLinks.last(); // Last one should be from terminal section
 
     // Verify link has correct href
-    await expect(terminalDemoLink).toHaveAttribute('href', '/login');
+    await expect(terminalDemoLink).toHaveAttribute('href', '/en/login');
 
     // Click and try to navigate
     await terminalDemoLink.click();
-    await page.waitForURL('/login', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/login', { timeout: 10000 }).catch(() => {});
 
     // Verify URL (flexible to handle redirects)
     const currentUrl = page.url();
@@ -401,7 +401,7 @@ test.describe('Homepage - Animated Terminal', () => {
 
 test.describe('Homepage - Feature Sections', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en');
   });
 
   test('should display feature grid section', async ({ page }) => {
@@ -417,11 +417,11 @@ test.describe('Homepage - Feature Sections', () => {
     const authLink = page.getByRole('link', { name: /View Auth Flow/i });
 
     // Verify link has correct href
-    await expect(authLink).toHaveAttribute('href', '/login');
+    await expect(authLink).toHaveAttribute('href', '/en/login');
 
     // Click and try to navigate
     await authLink.click();
-    await page.waitForURL('/login', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/login', { timeout: 10000 }).catch(() => {});
 
     // Verify URL (flexible to handle redirects)
     const currentUrl = page.url();
@@ -432,11 +432,11 @@ test.describe('Homepage - Feature Sections', () => {
     const adminLink = page.getByRole('link', { name: /Try Admin Panel/i });
 
     // Verify link has correct href
-    await expect(adminLink).toHaveAttribute('href', '/admin');
+    await expect(adminLink).toHaveAttribute('href', '/en/admin');
 
     // Click and try to navigate
     await adminLink.click();
-    await page.waitForURL('/admin', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/admin', { timeout: 10000 }).catch(() => {});
 
     // Verify URL (flexible to handle auth redirects)
     const currentUrl = page.url();
@@ -462,7 +462,7 @@ test.describe('Homepage - Feature Sections', () => {
 
 test.describe('Homepage - Footer', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en');
   });
 
   test('should display footer with copyright', async ({ page }) => {
@@ -475,7 +475,7 @@ test.describe('Homepage - Footer', () => {
 
 test.describe('Homepage - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/en');
   });
 
   test('should have proper heading hierarchy', async ({ page }) => {

@@ -4,7 +4,7 @@ test.describe('AuthGuard - Route Protection', () => {
   test.beforeEach(async ({ page, context }) => {
     // Clear storage before each test to ensure clean state
     await context.clearCookies();
-    await page.goto('/');
+    await page.goto('/en');
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
@@ -15,7 +15,7 @@ test.describe('AuthGuard - Route Protection', () => {
     // Try to access a protected route (if you have one)
     // For now, we'll test the root if it's protected
     // Adjust the route based on your actual protected routes
-    await page.goto('/');
+    await page.goto('/en');
 
     // If root is protected, should redirect to login or show homepage
     // Wait for page to stabilize
@@ -28,24 +28,24 @@ test.describe('AuthGuard - Route Protection', () => {
 
   test('should allow access to public routes without auth', async ({ page }) => {
     // Test login page
-    await page.goto('/login');
-    await expect(page).toHaveURL('/login');
+    await page.goto('/en/login');
+    await expect(page).toHaveURL('/en/login');
     await expect(page.locator('h2')).toContainText('Sign in to your account');
 
     // Test register page
-    await page.goto('/register');
-    await expect(page).toHaveURL('/register');
+    await page.goto('/en/register');
+    await expect(page).toHaveURL('/en/register');
     await expect(page.locator('h2')).toContainText('Create your account');
 
     // Test password reset page
-    await page.goto('/password-reset');
-    await expect(page).toHaveURL('/password-reset');
+    await page.goto('/en/password-reset');
+    await expect(page).toHaveURL('/en/password-reset');
     await expect(page.locator('h2')).toContainText('Reset your password');
   });
 
   test('should persist authentication across page reloads', async ({ page }) => {
     // Manually set a mock token in localStorage for testing
-    await page.goto('/');
+    await page.goto('/en');
     await page.evaluate(() => {
       const mockToken = {
         access_token: 'mock-access-token',
@@ -73,7 +73,7 @@ test.describe('AuthGuard - Route Protection', () => {
 
   test('should clear authentication on logout', async ({ page }) => {
     // Set up authenticated state
-    await page.goto('/');
+    await page.goto('/en');
     await page.evaluate(() => {
       const mockToken = {
         access_token: 'mock-access-token',
@@ -110,7 +110,7 @@ test.describe('AuthGuard - Route Protection', () => {
 
   test('should not allow access to auth pages when already logged in', async ({ page }) => {
     // Set up authenticated state
-    await page.goto('/');
+    await page.goto('/en');
     await page.evaluate(() => {
       const mockToken = {
         access_token: 'mock-access-token',
@@ -127,7 +127,7 @@ test.describe('AuthGuard - Route Protection', () => {
     });
 
     // Try to access login page
-    await page.goto('/login');
+    await page.goto('/en/login');
 
     // Wait a bit for potential redirect
     await page.waitForTimeout(2000);
@@ -141,7 +141,7 @@ test.describe('AuthGuard - Route Protection', () => {
 
   test('should handle expired tokens gracefully', async ({ page }) => {
     // Set up authenticated state with expired token
-    await page.goto('/');
+    await page.goto('/en');
     await page.evaluate(() => {
       const expiredToken = {
         access_token: 'expired-access-token',
@@ -171,7 +171,7 @@ test.describe('AuthGuard - Route Protection', () => {
   test('should preserve intended destination after login', async ({ page }) => {
     // This is a nice-to-have feature that requires protected routes
     // For now, just verify the test doesn't crash
-    await page.goto('/');
+    await page.goto('/en');
 
     // Login (via localStorage for testing)
     await page.evaluate(() => {

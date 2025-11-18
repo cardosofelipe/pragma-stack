@@ -10,11 +10,11 @@ test.describe('Admin Dashboard - Page Load', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin');
+    await page.goto('/en/admin');
   });
 
   test('should display admin dashboard page', async ({ page }) => {
-    await expect(page).toHaveURL('/admin');
+    await expect(page).toHaveURL('/en/admin');
 
     await expect(page.getByRole('heading', { name: 'Admin Dashboard' })).toBeVisible();
     await expect(page.getByText('Manage users, organizations, and system settings')).toBeVisible();
@@ -29,7 +29,7 @@ test.describe('Admin Dashboard - Statistics Cards', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin');
+    await page.goto('/en/admin');
   });
 
   test('should display all stat cards', async ({ page }) => {
@@ -62,7 +62,7 @@ test.describe('Admin Dashboard - Quick Actions', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin');
+    await page.goto('/en/admin');
   });
 
   test('should display quick actions section', async ({ page }) => {
@@ -86,9 +86,9 @@ test.describe('Admin Dashboard - Quick Actions', () => {
   test('should navigate to users page when clicking user management', async ({ page }) => {
     const userManagementLink = page.getByRole('link', { name: /User Management/i });
 
-    await Promise.all([page.waitForURL('/admin/users'), userManagementLink.click()]);
+    await Promise.all([page.waitForURL('/en/admin/users'), userManagementLink.click()]);
 
-    await expect(page).toHaveURL('/admin/users');
+    await expect(page).toHaveURL('/en/admin/users');
   });
 
   test('should navigate to organizations page when clicking organizations', async ({ page }) => {
@@ -96,9 +96,9 @@ test.describe('Admin Dashboard - Quick Actions', () => {
     const quickActionsSection = page.locator('h2:has-text("Quick Actions")').locator('..');
     const organizationsLink = quickActionsSection.getByRole('link', { name: /Organizations/i });
 
-    await Promise.all([page.waitForURL('/admin/organizations'), organizationsLink.click()]);
+    await Promise.all([page.waitForURL('/en/admin/organizations'), organizationsLink.click()]);
 
-    await expect(page).toHaveURL('/admin/organizations');
+    await expect(page).toHaveURL('/en/admin/organizations');
   });
 });
 
@@ -106,7 +106,7 @@ test.describe('Admin Dashboard - Analytics Charts', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin');
+    await page.goto('/en/admin');
   });
 
   test('should display analytics overview section', async ({ page }) => {
@@ -151,7 +151,7 @@ test.describe('Admin Dashboard - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin');
+    await page.goto('/en/admin');
   });
 
   test('should have proper heading hierarchy', async ({ page }) => {

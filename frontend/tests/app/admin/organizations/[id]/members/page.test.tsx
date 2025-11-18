@@ -3,7 +3,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import OrganizationMembersPage from '@/app/admin/organizations/[id]/members/page';
+import OrganizationMembersPage from '@/app/[locale]/admin/organizations/[id]/members/page';
 
 // Mock Next.js Link
 jest.mock('next/link', () => ({

@@ -4,7 +4,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import AdminSettingsPage from '@/app/admin/settings/page';
+import AdminSettingsPage from '@/app/[locale]/admin/settings/page';
 
 describe('AdminSettingsPage', () => {
   it('renders page title', () => {

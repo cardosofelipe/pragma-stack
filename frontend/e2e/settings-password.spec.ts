@@ -15,7 +15,7 @@ test.describe('Password Change', () => {
     // Auth already cached in storage state (loginViaUI removed for performance)
 
     // Navigate to password page
-    await page.goto('/settings/password');
+    await page.goto('/en/settings/password');
 
     // Wait for form to be visible
     await page.getByLabel(/current password/i).waitFor({ state: 'visible' });

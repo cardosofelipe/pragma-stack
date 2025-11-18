@@ -10,6 +10,8 @@ const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
+    '^next-intl/routing$': '<rootDir>/tests/__mocks__/next-intl-routing.tsx',
+    '^next-intl/navigation$': '<rootDir>/tests/__mocks__/next-intl-navigation.tsx',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   testMatch: ['<rootDir>/tests/**/*.test.ts', '<rootDir>/tests/**/*.test.tsx'],

@@ -5,18 +5,17 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { OrganizationManagementContent } from '@/components/admin/organizations/OrganizationManagementContent';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useAdminOrganizations } from '@/lib/api/hooks/useAdmin';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { mockPush } from 'next-intl/navigation';
 
 // Mock Next.js navigation
-const mockPush = jest.fn();
 const mockSearchParams = new URLSearchParams();
 
 jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
   useSearchParams: jest.fn(),
 }));
 
@@ -52,7 +51,6 @@ jest.mock('@/components/admin/organizations/OrganizationFormDialog', () => ({
     ) : null,
 }));
 
-const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>;
 const mockUseSearchParams = useSearchParams as jest.MockedFunction<typeof useSearchParams>;
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockUseAdminOrganizations = useAdminOrganizations as jest.MockedFunction<
@@ -100,12 +98,6 @@ describe('OrganizationManagementContent', () => {
     });
 
     jest.clearAllMocks();
-
-    mockUseRouter.mockReturnValue({
-      push: mockPush,
-      replace: jest.fn(),
-      prefetch: jest.fn(),
-    } as any);
 
     mockUseSearchParams.mockReturnValue(mockSearchParams as any);
 

@@ -5,7 +5,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import SessionsPage from '@/app/(authenticated)/settings/sessions/page';
+import SessionsPage from '@/app/[locale]/(authenticated)/settings/sessions/page';
 
 // Mock the API client
 jest.mock('@/lib/api/client', () => ({

@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Password Reset Request Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to password reset page
-    await page.goto('/password-reset');
+    await page.goto('/en/password-reset');
   });
 
   test('should display password reset request form', async ({ page }) => {
@@ -37,7 +37,7 @@ test.describe('Password Reset Request Flow', () => {
     await page.waitForTimeout(1000);
 
     // Should stay on password reset page (validation failed)
-    await expect(page).toHaveURL('/password-reset');
+    await expect(page).toHaveURL('/en/password-reset');
   });
 
   test('should successfully submit password reset request', async ({ page }) => {
@@ -55,10 +55,10 @@ test.describe('Password Reset Request Flow', () => {
     // Click back to login link - use Promise.all to wait for navigation
     const loginLink = page.getByRole('link', { name: 'Back to login' });
 
-    await Promise.all([page.waitForURL('/login'), loginLink.click()]);
+    await Promise.all([page.waitForURL('/en/login'), loginLink.click()]);
 
     // Should be on login page
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL('/en/login');
     await expect(page.locator('h2')).toContainText('Sign in to your account');
   });
 
@@ -84,7 +84,7 @@ test.describe('Password Reset Request Flow', () => {
 test.describe('Password Reset Confirm Flow', () => {
   test('should display error for missing token', async ({ page }) => {
     // Navigate without token
-    await page.goto('/password-reset/confirm');
+    await page.goto('/en/password-reset/confirm');
 
     // Should show error message
     await expect(page.locator('h2')).toContainText(/Invalid/i);
@@ -95,7 +95,7 @@ test.describe('Password Reset Confirm Flow', () => {
 
   test('should display password reset confirm form with valid token', async ({ page }) => {
     // Navigate with token (using a dummy token for UI testing)
-    await page.goto('/password-reset/confirm?token=dummy-test-token-123');
+    await page.goto('/en/password-reset/confirm?token=dummy-test-token-123');
 
     // Check page title
     await expect(page.locator('h2')).toContainText('Set new password');
@@ -108,7 +108,7 @@ test.describe('Password Reset Confirm Flow', () => {
 
   test('should show validation errors for empty form', async ({ page }) => {
     // Navigate with token
-    await page.goto('/password-reset/confirm?token=dummy-test-token-123');
+    await page.goto('/en/password-reset/confirm?token=dummy-test-token-123');
 
     // Click submit without filling form
     await page.locator('button[type="submit"]').click();
@@ -120,7 +120,7 @@ test.describe('Password Reset Confirm Flow', () => {
 
   test('should show validation error for weak password', async ({ page }) => {
     // Navigate with token
-    await page.goto('/password-reset/confirm?token=dummy-test-token-123');
+    await page.goto('/en/password-reset/confirm?token=dummy-test-token-123');
 
     // Fill with weak password
     await page.locator('input[name="new_password"]').fill('weak');
@@ -136,7 +136,7 @@ test.describe('Password Reset Confirm Flow', () => {
 
   test('should show validation error for mismatched passwords', async ({ page }) => {
     // Navigate with token
-    await page.goto('/password-reset/confirm?token=dummy-test-token-123');
+    await page.goto('/en/password-reset/confirm?token=dummy-test-token-123');
 
     // Fill with mismatched passwords
     await page.locator('input[name="new_password"]').fill('Password123!');
@@ -152,7 +152,7 @@ test.describe('Password Reset Confirm Flow', () => {
 
   test('should show error for invalid token', async ({ page }) => {
     // Navigate with invalid token
-    await page.goto('/password-reset/confirm?token=invalid-token');
+    await page.goto('/en/password-reset/confirm?token=invalid-token');
 
     // Fill form with valid passwords
     await page.locator('input[name="new_password"]').fill('NewPassword123!');
@@ -172,7 +172,7 @@ test.describe('Password Reset Confirm Flow', () => {
     // In real scenario, you'd generate a token via API or use a test fixture
 
     // For UI testing, we use a dummy token - backend will reject it
-    await page.goto('/password-reset/confirm?token=valid-test-token-from-backend');
+    await page.goto('/en/password-reset/confirm?token=valid-test-token-from-backend');
 
     // Fill form with valid passwords
     await page.locator('input[name="new_password"]').fill('NewPassword123!');
@@ -188,21 +188,21 @@ test.describe('Password Reset Confirm Flow', () => {
 
   test('should navigate to request new reset link', async ({ page }) => {
     // Navigate without token to trigger error state
-    await page.goto('/password-reset/confirm');
+    await page.goto('/en/password-reset/confirm');
 
     // Click request new reset link - use Promise.all to wait for navigation
     const resetLink = page.getByRole('link', { name: 'Request new reset link' });
 
-    await Promise.all([page.waitForURL('/password-reset'), resetLink.click()]);
+    await Promise.all([page.waitForURL('/en/password-reset'), resetLink.click()]);
 
     // Should be on password reset request page
-    await expect(page).toHaveURL('/password-reset');
+    await expect(page).toHaveURL('/en/password-reset');
     await expect(page.locator('h2')).toContainText('Reset your password');
   });
 
   test('should toggle password visibility', async ({ page }) => {
     // Navigate with token
-    await page.goto('/password-reset/confirm?token=dummy-test-token-123');
+    await page.goto('/en/password-reset/confirm?token=dummy-test-token-123');
 
     const passwordInput = page.locator('input[name="new_password"]');
     const confirmPasswordInput = page.locator('input[name="confirm_password"]');
@@ -216,7 +216,7 @@ test.describe('Password Reset Confirm Flow', () => {
 
   test('should disable submit button while loading', async ({ page }) => {
     // Navigate with token
-    await page.goto('/password-reset/confirm?token=dummy-test-token-123');
+    await page.goto('/en/password-reset/confirm?token=dummy-test-token-123');
 
     // Fill form
     await page.locator('input[name="new_password"]').fill('NewPassword123!');

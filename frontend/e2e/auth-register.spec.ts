@@ -28,7 +28,7 @@ test.describe('Registration Flow', () => {
     });
 
     // Navigate to register page before each test
-    await page.goto('/register');
+    await page.goto('/en/register');
   });
 
   test.afterEach(async ({ page }, testInfo) => {
@@ -222,10 +222,10 @@ test.describe('Registration Flow', () => {
     const loginLink = page.getByRole('link', { name: 'Sign in' });
 
     // Use Promise.all to wait for navigation
-    await Promise.all([page.waitForURL('/login'), loginLink.click()]);
+    await Promise.all([page.waitForURL('/en/login'), loginLink.click()]);
 
     // Should be on login page
-    await expect(page).toHaveURL('/login');
+    await expect(page).toHaveURL('/en/login');
     await expect(page.locator('h2')).toContainText('Sign in to your account');
   });
 

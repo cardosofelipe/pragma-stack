@@ -3,7 +3,7 @@
  */
 
 import { render, screen, within } from '@testing-library/react';
-import DemoTourPage from '@/app/demos/page';
+import DemoTourPage from '@/app/[locale]/demos/page';
 
 // Mock Next.js Link
 jest.mock('next/link', () => ({

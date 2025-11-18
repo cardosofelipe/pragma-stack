@@ -7,17 +7,13 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { usePathname } from 'next/navigation';
+import { mockUsePathname } from 'next-intl/navigation';
 import type { User } from '@/lib/stores/authStore';
 
 // Mock dependencies
 jest.mock('@/lib/auth/AuthContext', () => ({
   useAuth: jest.fn(),
   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
-
-jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(),
 }));
 
 // Helper to create mock user
@@ -39,7 +35,7 @@ function createMockUser(overrides: Partial<User> = {}): User {
 describe('AdminSidebar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (usePathname as jest.Mock).mockReturnValue('/admin');
+    mockUsePathname.mockReturnValue('/admin');
     (useAuth as unknown as jest.Mock).mockReturnValue({
       user: createMockUser(),
     });
@@ -97,7 +93,7 @@ describe('AdminSidebar', () => {
 
   describe('Active State Highlighting', () => {
     it('highlights dashboard link when on /admin', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin');
+      mockUsePathname.mockReturnValue('/admin');
 
       render(<AdminSidebar />);
 
@@ -106,7 +102,7 @@ describe('AdminSidebar', () => {
     });
 
     it('highlights users link when on /admin/users', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       render(<AdminSidebar />);
 
@@ -115,7 +111,7 @@ describe('AdminSidebar', () => {
     });
 
     it('highlights users link when on /admin/users/123', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users/123');
+      mockUsePathname.mockReturnValue('/admin/users/123');
 
       render(<AdminSidebar />);
 
@@ -124,7 +120,7 @@ describe('AdminSidebar', () => {
     });
 
     it('highlights organizations link when on /admin/organizations', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/organizations');
+      mockUsePathname.mockReturnValue('/admin/organizations');
 
       render(<AdminSidebar />);
 
@@ -133,7 +129,7 @@ describe('AdminSidebar', () => {
     });
 
     it('highlights settings link when on /admin/settings', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/settings');
+      mockUsePathname.mockReturnValue('/admin/settings');
 
       render(<AdminSidebar />);
 
@@ -142,7 +138,7 @@ describe('AdminSidebar', () => {
     });
 
     it('does not highlight dashboard when on other admin routes', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       render(<AdminSidebar />);
 

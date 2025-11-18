@@ -10,11 +10,11 @@ test.describe('Admin Organization Management - Page Load', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
   });
 
   test('should display organization management page', async ({ page }) => {
-    await expect(page).toHaveURL('/admin/organizations');
+    await expect(page).toHaveURL('/en/admin/organizations');
 
     // Wait for page to load
     await page.waitForSelector('table');
@@ -41,7 +41,7 @@ test.describe('Admin Organization Management - Organization List Table', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
   });
 
   test('should display organization list table with headers', async ({ page }) => {
@@ -107,7 +107,7 @@ test.describe('Admin Organization Management - Pagination', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
   });
 
   test('should display pagination info', async ({ page }) => {
@@ -127,7 +127,7 @@ test.describe('Admin Organization Management - Create Organization Button', () =
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
   });
 
   test('should display create organization button', async ({ page }) => {
@@ -140,7 +140,7 @@ test.describe('Admin Organization Management - Action Menu', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
     await page.waitForSelector('table tbody tr');
   });
 
@@ -192,12 +192,12 @@ test.describe('Admin Organization Management - Action Menu', () => {
 
     // Click view members - use Promise.all for Next.js Link navigation
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
+      page.waitForURL(/\/en\/admin\/organizations\/[^/]+\/members/),
       page.getByText('View Members').click(),
     ]);
 
     // Should navigate to members page
-    await expect(page).toHaveURL(/\/admin\/organizations\/[^/]+\/members/);
+    await expect(page).toHaveURL(/\/en\/admin\/organizations\/[^/]+\/members/);
   });
 
   test('should show delete confirmation dialog when clicking delete', async ({ page }) => {
@@ -248,7 +248,7 @@ test.describe('Admin Organization Management - Edit Organization Dialog', () => 
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
     await page.waitForSelector('table tbody tr');
   });
 
@@ -297,7 +297,7 @@ test.describe('Admin Organization Management - Member Count Interaction', () => 
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
     await page.waitForSelector('table tbody tr');
   });
 
@@ -308,12 +308,12 @@ test.describe('Admin Organization Management - Member Count Interaction', () => 
 
     // Click on member count - use Promise.all for Next.js Link navigation
     await Promise.all([
-      page.waitForURL(/\/admin\/organizations\/[^/]+\/members/),
+      page.waitForURL(/\/en\/admin\/organizations\/[^/]+\/members/),
       memberButton.click(),
     ]);
 
     // Should navigate to members page
-    await expect(page).toHaveURL(/\/admin\/organizations\/[^/]+\/members/);
+    await expect(page).toHaveURL(/\/en\/admin\/organizations\/[^/]+\/members/);
   });
 });
 
@@ -321,7 +321,7 @@ test.describe('Admin Organization Management - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
   });
 
   test('should have proper heading hierarchy', async ({ page }) => {

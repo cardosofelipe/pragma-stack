@@ -8,12 +8,12 @@ import { test, expect } from '@playwright/test';
 test.describe('Theme Toggle on Public Pages', () => {
   test.beforeEach(async ({ page }) => {
     // Clear localStorage before each test
-    await page.goto('/login');
+    await page.goto('/en/login');
     await page.evaluate(() => localStorage.clear());
   });
 
   test('theme is applied on login page', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/en/login');
 
     // Wait for page to load and theme to be applied
     await page.waitForTimeout(500);
@@ -27,7 +27,7 @@ test.describe('Theme Toggle on Public Pages', () => {
   });
 
   test('theme persists across page navigation', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/en/login');
     await page.waitForTimeout(500);
 
     // Set theme to dark via localStorage
@@ -43,14 +43,14 @@ test.describe('Theme Toggle on Public Pages', () => {
     await expect(page.locator('html')).toHaveClass(/dark/);
 
     // Navigate to register page
-    await page.goto('/register');
+    await page.goto('/en/register');
     await page.waitForTimeout(500);
 
     // Theme should still be dark
     await expect(page.locator('html')).toHaveClass(/dark/);
 
     // Navigate to password reset
-    await page.goto('/password-reset');
+    await page.goto('/en/password-reset');
     await page.waitForTimeout(500);
 
     // Theme should still be dark
@@ -58,7 +58,7 @@ test.describe('Theme Toggle on Public Pages', () => {
   });
 
   test('can switch theme programmatically', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/en/login');
 
     // Set to light theme
     await page.evaluate(() => {

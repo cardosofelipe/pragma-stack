@@ -5,21 +5,17 @@
 
 import { render, screen } from '@testing-library/react';
 import { Breadcrumbs } from '@/components/admin/Breadcrumbs';
-import { usePathname } from 'next/navigation';
-
-// Mock dependencies
-jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(),
-}));
+import { mockUsePathname } from 'next-intl/navigation';
 
 describe('Breadcrumbs', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUsePathname.mockReturnValue('/');
   });
 
   describe('Rendering', () => {
     it('renders breadcrumbs container with correct test id', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin');
+      mockUsePathname.mockReturnValue('/admin');
 
       render(<Breadcrumbs />);
 
@@ -27,7 +23,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('renders breadcrumbs with proper aria-label', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin');
+      mockUsePathname.mockReturnValue('/admin');
 
       render(<Breadcrumbs />);
 
@@ -36,7 +32,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('returns null for empty pathname', () => {
-      (usePathname as jest.Mock).mockReturnValue('');
+      mockUsePathname.mockReturnValue('');
 
       const { container } = render(<Breadcrumbs />);
 
@@ -44,7 +40,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('returns null for root pathname', () => {
-      (usePathname as jest.Mock).mockReturnValue('/');
+      mockUsePathname.mockReturnValue('/');
 
       const { container } = render(<Breadcrumbs />);
 
@@ -54,7 +50,7 @@ describe('Breadcrumbs', () => {
 
   describe('Single Level Navigation', () => {
     it('renders single breadcrumb for /admin', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin');
+      mockUsePathname.mockReturnValue('/admin');
 
       render(<Breadcrumbs />);
 
@@ -63,7 +59,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('renders current page without link', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin');
+      mockUsePathname.mockReturnValue('/admin');
 
       render(<Breadcrumbs />);
 
@@ -75,7 +71,7 @@ describe('Breadcrumbs', () => {
 
   describe('Multi-Level Navigation', () => {
     it('renders breadcrumbs for /admin/users', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       render(<Breadcrumbs />);
 
@@ -84,7 +80,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('renders parent breadcrumbs as links', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       render(<Breadcrumbs />);
 
@@ -94,7 +90,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('renders last breadcrumb as current page', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       render(<Breadcrumbs />);
 
@@ -104,7 +100,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('renders breadcrumbs for /admin/organizations', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/organizations');
+      mockUsePathname.mockReturnValue('/admin/organizations');
 
       render(<Breadcrumbs />);
 
@@ -113,7 +109,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('renders breadcrumbs for /admin/settings', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/settings');
+      mockUsePathname.mockReturnValue('/admin/settings');
 
       render(<Breadcrumbs />);
 
@@ -124,7 +120,7 @@ describe('Breadcrumbs', () => {
 
   describe('Three-Level Navigation', () => {
     it('renders all levels correctly', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users/123');
+      mockUsePathname.mockReturnValue('/admin/users/123');
 
       render(<Breadcrumbs />);
 
@@ -134,7 +130,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('renders all parent links correctly', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users/123');
+      mockUsePathname.mockReturnValue('/admin/users/123');
 
       render(<Breadcrumbs />);
 
@@ -146,7 +142,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('renders last level as current page', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users/123');
+      mockUsePathname.mockReturnValue('/admin/users/123');
 
       render(<Breadcrumbs />);
 
@@ -158,7 +154,7 @@ describe('Breadcrumbs', () => {
 
   describe('Separator Icons', () => {
     it('renders separator between breadcrumbs', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       const { container } = render(<Breadcrumbs />);
 
@@ -168,7 +164,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('does not render separator before first breadcrumb', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin');
+      mockUsePathname.mockReturnValue('/admin');
 
       const { container } = render(<Breadcrumbs />);
 
@@ -178,7 +174,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('renders correct number of separators', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users/123');
+      mockUsePathname.mockReturnValue('/admin/users/123');
 
       const { container } = render(<Breadcrumbs />);
 
@@ -190,7 +186,7 @@ describe('Breadcrumbs', () => {
 
   describe('Label Mapping', () => {
     it('uses predefined label for admin', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin');
+      mockUsePathname.mockReturnValue('/admin');
 
       render(<Breadcrumbs />);
 
@@ -198,7 +194,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('uses predefined label for users', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       render(<Breadcrumbs />);
 
@@ -206,7 +202,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('uses predefined label for organizations', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/organizations');
+      mockUsePathname.mockReturnValue('/admin/organizations');
 
       render(<Breadcrumbs />);
 
@@ -214,7 +210,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('uses predefined label for settings', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/settings');
+      mockUsePathname.mockReturnValue('/admin/settings');
 
       render(<Breadcrumbs />);
 
@@ -222,7 +218,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('uses pathname segment for unmapped paths', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/unknown-path');
+      mockUsePathname.mockReturnValue('/admin/unknown-path');
 
       render(<Breadcrumbs />);
 
@@ -230,7 +226,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('displays numeric IDs as-is', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users/123');
+      mockUsePathname.mockReturnValue('/admin/users/123');
 
       render(<Breadcrumbs />);
 
@@ -240,7 +236,7 @@ describe('Breadcrumbs', () => {
 
   describe('Styling', () => {
     it('applies correct styles to parent links', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       render(<Breadcrumbs />);
 
@@ -250,7 +246,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('applies correct styles to current page', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       render(<Breadcrumbs />);
 
@@ -262,7 +258,7 @@ describe('Breadcrumbs', () => {
 
   describe('Accessibility', () => {
     it('has proper navigation role', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin');
+      mockUsePathname.mockReturnValue('/admin');
 
       render(<Breadcrumbs />);
 
@@ -270,7 +266,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('has aria-label for navigation', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin');
+      mockUsePathname.mockReturnValue('/admin');
 
       render(<Breadcrumbs />);
 
@@ -279,7 +275,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('marks current page with aria-current', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       render(<Breadcrumbs />);
 
@@ -288,7 +284,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('marks separator icons as aria-hidden', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       const { container } = render(<Breadcrumbs />);
 
@@ -299,7 +295,7 @@ describe('Breadcrumbs', () => {
     });
 
     it('parent breadcrumbs are keyboard accessible', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin/users');
+      mockUsePathname.mockReturnValue('/admin/users');
 
       render(<Breadcrumbs />);
 

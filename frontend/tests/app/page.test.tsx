@@ -4,7 +4,7 @@
  */
 
 import { render, screen, within, fireEvent } from '@testing-library/react';
-import Home from '@/app/page';
+import Home from '@/app/[locale]/page';
 
 // Mock Next.js components
 jest.mock('next/image', () => ({

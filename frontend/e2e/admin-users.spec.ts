@@ -10,11 +10,11 @@ test.describe('Admin User Management - Page Load', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
   });
 
   test('should display user management page', async ({ page }) => {
-    await expect(page).toHaveURL('/admin/users');
+    await expect(page).toHaveURL('/en/admin/users');
     await expect(page.locator('h1')).toContainText('User Management');
   });
 
@@ -38,7 +38,7 @@ test.describe('Admin User Management - User List Table', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
   });
 
   test('should display user list table with headers', async ({ page }) => {
@@ -101,7 +101,7 @@ test.describe('Admin User Management - Search and Filters', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
   });
 
   test('should display search input', async ({ page }) => {
@@ -244,7 +244,7 @@ test.describe('Admin User Management - Pagination', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
   });
 
   test('should display pagination info', async ({ page }) => {
@@ -262,7 +262,7 @@ test.describe('Admin User Management - Row Selection', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
     await page.waitForSelector('table tbody tr');
   });
 
@@ -325,7 +325,7 @@ test.describe('Admin User Management - Create User Dialog', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
   });
 
   test('should open create user dialog', async ({ page }) => {
@@ -449,7 +449,7 @@ test.describe('Admin User Management - Action Menu', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
     await page.waitForSelector('table tbody tr');
   });
 
@@ -502,7 +502,7 @@ test.describe('Admin User Management - Edit User Dialog', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
     await page.waitForSelector('table tbody tr');
   });
 
@@ -561,7 +561,7 @@ test.describe('Admin User Management - Bulk Actions', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
     await page.waitForSelector('table tbody tr');
   });
 
@@ -631,7 +631,7 @@ test.describe('Admin User Management - Accessibility', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
   });
 
   test('should have proper heading hierarchy', async ({ page }) => {

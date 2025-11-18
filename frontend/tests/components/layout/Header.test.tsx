@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event';
 import { Header } from '@/components/layout/Header';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useLogout } from '@/lib/api/hooks/useAuth';
-import { usePathname } from 'next/navigation';
+import { mockUsePathname } from 'next-intl/navigation';
 import type { User } from '@/lib/stores/authStore';
 
 // Mock dependencies
@@ -19,10 +19,6 @@ jest.mock('@/lib/auth/AuthContext', () => ({
 
 jest.mock('@/lib/api/hooks/useAuth', () => ({
   useLogout: jest.fn(),
-}));
-
-jest.mock('next/navigation', () => ({
-  usePathname: jest.fn(),
 }));
 
 jest.mock('@/components/theme', () => ({
@@ -51,7 +47,7 @@ describe('Header', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (usePathname as jest.Mock).mockReturnValue('/');
+    mockUsePathname.mockReturnValue('/');
 
     (useLogout as jest.Mock).mockReturnValue({
       mutate: mockLogout,
@@ -156,7 +152,7 @@ describe('Header', () => {
     });
 
     it('highlights active navigation link', () => {
-      (usePathname as jest.Mock).mockReturnValue('/admin');
+      mockUsePathname.mockReturnValue('/admin');
       (useAuth as unknown as jest.Mock).mockReturnValue({
         user: createMockUser({ is_superuser: true }),
       });

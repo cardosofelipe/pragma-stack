@@ -13,7 +13,7 @@ test.describe('Admin Access Control', () => {
     // Auth already cached in storage state (loginViaUI removed for performance)
 
     // Navigate to authenticated page to test authenticated header (not homepage)
-    await page.goto('/settings');
+    await page.goto('/en/settings');
     await page.waitForSelector('h1:has-text("Settings")');
 
     // Should not see admin link in authenticated header navigation
@@ -28,10 +28,10 @@ test.describe('Admin Access Control', () => {
     // Auth already cached in storage state (loginViaUI removed for performance)
 
     // Try to access admin page directly
-    await page.goto('/admin');
+    await page.goto('/en/admin');
 
     // Should be redirected away from admin (to login or home)
-    await page.waitForURL(/\/(auth\/login|$)/);
+    await page.waitForURL(/\/en\/(auth\/login|$)/);
     expect(page.url()).not.toContain('/admin');
   });
 
@@ -43,7 +43,7 @@ test.describe('Admin Access Control', () => {
 
     // Navigate to settings page to ensure user state is loaded
     // (AuthGuard fetches user on protected pages)
-    await page.goto('/settings');
+    await page.goto('/en/settings');
     await page.waitForSelector('h1:has-text("Settings")');
 
     // Should see admin link in header navigation bar
@@ -52,7 +52,7 @@ test.describe('Admin Access Control', () => {
       .locator('header nav')
       .getByRole('link', { name: 'Admin', exact: true });
     await expect(headerAdminLink).toBeVisible();
-    await expect(headerAdminLink).toHaveAttribute('href', '/admin');
+    await expect(headerAdminLink).toHaveAttribute('href', '/en/admin');
   });
 
   test('superuser should be able to access admin dashboard', async ({ page }) => {
@@ -61,10 +61,10 @@ test.describe('Admin Access Control', () => {
     // Auth already cached in storage state (loginViaUI removed for performance)
 
     // Navigate to admin page
-    await page.goto('/admin');
+    await page.goto('/en/admin');
 
     // Should see admin dashboard
-    await expect(page).toHaveURL('/admin');
+    await expect(page).toHaveURL('/en/admin');
     await expect(page.locator('h1')).toContainText('Admin Dashboard');
   });
 });
@@ -73,7 +73,7 @@ test.describe('Admin Dashboard', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin');
+    await page.goto('/en/admin');
   });
 
   test('should display page title and description', async ({ page }) => {
@@ -120,7 +120,7 @@ test.describe('Admin Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await setupSuperuserMocks(page);
     // Auth already cached in storage state (loginViaUI removed for performance)
-    await page.goto('/admin');
+    await page.goto('/en/admin');
   });
 
   test('should display admin sidebar', async ({ page }) => {
@@ -143,9 +143,9 @@ test.describe('Admin Navigation', () => {
   });
 
   test('should navigate to users page', async ({ page }) => {
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
 
-    await expect(page).toHaveURL('/admin/users');
+    await expect(page).toHaveURL('/en/admin/users');
     await expect(page.locator('h1')).toContainText('User Management');
 
     // Breadcrumbs should show Admin > Users
@@ -158,9 +158,9 @@ test.describe('Admin Navigation', () => {
   });
 
   test('should navigate to organizations page', async ({ page }) => {
-    await page.goto('/admin/organizations');
+    await page.goto('/en/admin/organizations');
 
-    await expect(page).toHaveURL('/admin/organizations');
+    await expect(page).toHaveURL('/en/admin/organizations');
     await expect(page.getByRole('heading', { name: 'All Organizations' })).toBeVisible();
 
     // Breadcrumbs should show Admin > Organizations
@@ -173,9 +173,9 @@ test.describe('Admin Navigation', () => {
   });
 
   test('should navigate to settings page', async ({ page }) => {
-    await page.goto('/admin/settings');
+    await page.goto('/en/admin/settings');
 
-    await expect(page).toHaveURL('/admin/settings');
+    await expect(page).toHaveURL('/en/admin/settings');
     await expect(page.locator('h1')).toContainText('System Settings');
 
     // Breadcrumbs should show Admin > Settings
@@ -208,14 +208,14 @@ test.describe('Admin Navigation', () => {
   });
 
   test('should navigate back to dashboard from users page', async ({ page }) => {
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
 
     // Click dashboard link in sidebar
     const dashboardLink = page.getByTestId('nav-dashboard');
     await dashboardLink.click();
 
-    await page.waitForURL('/admin');
-    await expect(page).toHaveURL('/admin');
+    await page.waitForURL('/en/admin');
+    await expect(page).toHaveURL('/en/admin');
     await expect(page.locator('h1')).toContainText('Admin Dashboard');
   });
 });
@@ -227,7 +227,7 @@ test.describe('Admin Breadcrumbs', () => {
   });
 
   test('should show single breadcrumb on dashboard', async ({ page }) => {
-    await page.goto('/admin');
+    await page.goto('/en/admin');
 
     const breadcrumbs = page.getByTestId('breadcrumbs');
     await expect(breadcrumbs).toBeVisible();
@@ -239,12 +239,12 @@ test.describe('Admin Breadcrumbs', () => {
   });
 
   test('should show clickable parent breadcrumb', async ({ page }) => {
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
 
     // 'Admin' should be a clickable link (test ID is on the Link element itself)
     const adminBreadcrumb = page.getByTestId('breadcrumb-admin');
     await expect(adminBreadcrumb).toBeVisible();
-    await expect(adminBreadcrumb).toHaveAttribute('href', '/admin');
+    await expect(adminBreadcrumb).toHaveAttribute('href', '/en/admin');
 
     // 'Users' should be current page (not a link, so it's a span)
     const usersBreadcrumb = page.getByTestId('breadcrumb-users');
@@ -253,13 +253,13 @@ test.describe('Admin Breadcrumbs', () => {
   });
 
   test('should navigate via breadcrumb link', async ({ page }) => {
-    await page.goto('/admin/users');
+    await page.goto('/en/admin/users');
 
     // Click 'Admin' breadcrumb to go back to dashboard
     const adminBreadcrumb = page.getByTestId('breadcrumb-admin');
 
-    await Promise.all([page.waitForURL('/admin'), adminBreadcrumb.click()]);
+    await Promise.all([page.waitForURL('/en/admin'), adminBreadcrumb.click()]);
 
-    await expect(page).toHaveURL('/admin');
+    await expect(page).toHaveURL('/en/admin');
   });
 });
