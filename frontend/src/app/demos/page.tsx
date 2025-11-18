@@ -27,7 +27,8 @@ import { Separator } from '@/components/ui/separator';
 
 export const metadata: Metadata = {
   title: 'Demo Tour | FastNext Template',
-  description: 'Try all features with demo credentials - comprehensive guide to the FastNext template',
+  description:
+    'Try all features with demo credentials - comprehensive guide to the FastNext template',
 };
 
 const demoCategories = [
@@ -36,7 +37,12 @@ const demoCategories = [
     title: 'Design System Hub',
     description: 'Browse components, layouts, spacing, and forms with live examples',
     href: '/dev',
-    features: ['All UI components', 'Layout patterns', 'Spacing philosophy', 'Form implementations'],
+    features: [
+      'All UI components',
+      'Layout patterns',
+      'Spacing philosophy',
+      'Form implementations',
+    ],
     credentials: null,
   },
   {
@@ -260,7 +266,8 @@ export default function DemoTourPage() {
                       {/* CTA */}
                       <Button asChild className="w-full gap-2">
                         <Link href={category.href}>
-                          {category.credentials ? 'Try Now' : 'Explore'} <ArrowRight className="h-4 w-4" />
+                          {category.credentials ? 'Try Now' : 'Explore'}{' '}
+                          <ArrowRight className="h-4 w-4" />
                         </Link>
                       </Button>
                     </CardContent>

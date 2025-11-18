@@ -30,7 +30,10 @@ describe('DemoTourPage', () => {
       const header = screen.getByRole('banner');
       expect(within(header).getByText('Demo Tour')).toBeInTheDocument();
       expect(within(header).getByRole('link', { name: /home/i })).toHaveAttribute('href', '/');
-      expect(within(header).getByRole('link', { name: /start exploring/i })).toHaveAttribute('href', '/login');
+      expect(within(header).getByRole('link', { name: /start exploring/i })).toHaveAttribute(
+        'href',
+        '/login'
+      );
     });
   });
 
@@ -38,7 +41,9 @@ describe('DemoTourPage', () => {
     it('renders hero heading and description', () => {
       render(<DemoTourPage />);
       expect(screen.getByText('Explore All Features')).toBeInTheDocument();
-      expect(screen.getByText(/Try everything with our pre-configured demo accounts/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Try everything with our pre-configured demo accounts/i)
+      ).toBeInTheDocument();
     });
 
     it('renders Interactive Demo badge', () => {
@@ -58,12 +63,14 @@ describe('DemoTourPage', () => {
       render(<DemoTourPage />);
       expect(screen.getByText('Choose a Demo')).toBeInTheDocument();
       expect(screen.getByText(/Browse the demo categories below/i)).toBeInTheDocument();
-      
+
       expect(screen.getByText('Use Credentials')).toBeInTheDocument();
       expect(screen.getByText(/Copy the demo credentials and login/i)).toBeInTheDocument();
-      
+
       expect(screen.getByText('Explore Freely')).toBeInTheDocument();
-      expect(screen.getByText(/Test all features - everything resets automatically/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Test all features - everything resets automatically/i)
+      ).toBeInTheDocument();
     });
   });
 
@@ -77,7 +84,9 @@ describe('DemoTourPage', () => {
     it('renders Design System Hub category', () => {
       render(<DemoTourPage />);
       expect(screen.getByText('Design System Hub')).toBeInTheDocument();
-      expect(screen.getByText(/Browse components, layouts, spacing, and forms/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Browse components, layouts, spacing, and forms/i)
+      ).toBeInTheDocument();
       expect(screen.getByText('All UI components')).toBeInTheDocument();
       expect(screen.getByText('Layout patterns')).toBeInTheDocument();
       expect(screen.getByText('Spacing philosophy')).toBeInTheDocument();
@@ -92,7 +101,7 @@ describe('DemoTourPage', () => {
       expect(screen.getByText('Registration')).toBeInTheDocument();
       expect(screen.getByText('Password reset')).toBeInTheDocument();
       expect(screen.getByText('Session tokens')).toBeInTheDocument();
-      
+
       // Check for credentials
       const authCards = screen.getAllByText(/demo@example\.com/i);
       expect(authCards.length).toBeGreaterThan(0);
@@ -118,7 +127,7 @@ describe('DemoTourPage', () => {
       expect(screen.getByText('Analytics charts')).toBeInTheDocument();
       expect(screen.getByText('Bulk operations')).toBeInTheDocument();
       expect(screen.getByText('Organization control')).toBeInTheDocument();
-      
+
       // Check for admin credentials
       expect(screen.getByText(/admin@example\.com/i)).toBeInTheDocument();
       expect(screen.getByText(/Admin123!/i)).toBeInTheDocument();
@@ -133,17 +142,17 @@ describe('DemoTourPage', () => {
 
     it('has working links to each demo category', () => {
       render(<DemoTourPage />);
-      
+
       // Design System Hub
       const exploreLinks = screen.getAllByRole('link', { name: /explore/i });
-      expect(exploreLinks.some(link => link.getAttribute('href') === '/dev')).toBe(true);
-      
+      expect(exploreLinks.some((link) => link.getAttribute('href') === '/dev')).toBe(true);
+
       // Authentication System
       const tryNowLinks = screen.getAllByRole('link', { name: /try now/i });
       expect(tryNowLinks.length).toBeGreaterThan(0);
-      expect(tryNowLinks.some(link => link.getAttribute('href') === '/login')).toBe(true);
-      expect(tryNowLinks.some(link => link.getAttribute('href') === '/settings')).toBe(true);
-      expect(tryNowLinks.some(link => link.getAttribute('href') === '/admin')).toBe(true);
+      expect(tryNowLinks.some((link) => link.getAttribute('href') === '/login')).toBe(true);
+      expect(tryNowLinks.some((link) => link.getAttribute('href') === '/settings')).toBe(true);
+      expect(tryNowLinks.some((link) => link.getAttribute('href') === '/admin')).toBe(true);
     });
   });
 
@@ -175,16 +184,16 @@ describe('DemoTourPage', () => {
 
     it('exploration path items have links', () => {
       render(<DemoTourPage />);
-      
+
       // Quick Tour links
       const devLinks = screen.getAllByRole('link');
-      const hasDevLink = devLinks.some(link => link.getAttribute('href') === '/dev');
+      const hasDevLink = devLinks.some((link) => link.getAttribute('href') === '/dev');
       expect(hasDevLink).toBe(true);
-      
-      const hasLoginLink = devLinks.some(link => link.getAttribute('href') === '/login');
+
+      const hasLoginLink = devLinks.some((link) => link.getAttribute('href') === '/login');
       expect(hasLoginLink).toBe(true);
-      
-      const hasSettingsLink = devLinks.some(link => link.getAttribute('href') === '/settings');
+
+      const hasSettingsLink = devLinks.some((link) => link.getAttribute('href') === '/settings');
       expect(hasSettingsLink).toBe(true);
     });
   });
@@ -199,12 +208,14 @@ describe('DemoTourPage', () => {
     it('renders Feature Checklist card', () => {
       render(<DemoTourPage />);
       expect(screen.getByText('Feature Checklist')).toBeInTheDocument();
-      expect(screen.getByText(/Try these features to experience the full power/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Try these features to experience the full power/i)
+      ).toBeInTheDocument();
     });
 
     it('renders all checklist items', () => {
       render(<DemoTourPage />);
-      
+
       expect(screen.getByText('Browse design system components')).toBeInTheDocument();
       expect(screen.getByText('Test login/logout flow')).toBeInTheDocument();
       expect(screen.getByText('Register a new account')).toBeInTheDocument();
@@ -224,17 +235,19 @@ describe('DemoTourPage', () => {
     it('renders final CTA heading', () => {
       render(<DemoTourPage />);
       expect(screen.getByText('Ready to Start?')).toBeInTheDocument();
-      expect(screen.getByText(/Pick a demo category above or jump right into the action/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Pick a demo category above or jump right into the action/i)
+      ).toBeInTheDocument();
     });
 
     it('has CTA buttons', () => {
       render(<DemoTourPage />);
-      
+
       const tryAuthLinks = screen.getAllByRole('link', { name: /try authentication flow/i });
-      expect(tryAuthLinks.some(link => link.getAttribute('href') === '/login')).toBe(true);
-      
+      expect(tryAuthLinks.some((link) => link.getAttribute('href') === '/login')).toBe(true);
+
       const browseDesignLinks = screen.getAllByRole('link', { name: /browse design system/i });
-      expect(browseDesignLinks.some(link => link.getAttribute('href') === '/dev')).toBe(true);
+      expect(browseDesignLinks.some((link) => link.getAttribute('href') === '/dev')).toBe(true);
     });
   });
 
@@ -256,14 +269,14 @@ describe('DemoTourPage', () => {
   describe('Navigation Links', () => {
     it('has multiple navigation links throughout the page', () => {
       render(<DemoTourPage />);
-      
+
       const allLinks = screen.getAllByRole('link');
-      
+
       // Should have links to: /, /dev, /login, /settings, /admin, and various /settings/* and /admin/* paths
       expect(allLinks.length).toBeGreaterThan(10);
-      
+
       // Verify key destination paths exist
-      const hrefs = allLinks.map(link => link.getAttribute('href'));
+      const hrefs = allLinks.map((link) => link.getAttribute('href'));
       expect(hrefs).toContain('/');
       expect(hrefs).toContain('/dev');
       expect(hrefs).toContain('/login');

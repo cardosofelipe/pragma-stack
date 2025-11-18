@@ -157,7 +157,7 @@ describe('DemoCredentialsModal', () => {
 
     const loginAsUserLink = screen.getByRole('link', { name: /login as user/i });
     expect(loginAsUserLink).toHaveAttribute('href', '/login');
-    
+
     const loginAsAdminLink = screen.getByRole('link', { name: /login as admin/i });
     expect(loginAsAdminLink).toHaveAttribute('href', '/login');
   });

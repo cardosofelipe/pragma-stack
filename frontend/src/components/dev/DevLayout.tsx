@@ -10,7 +10,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Code2, Palette, LayoutDashboard, Box, FileText, BookOpen, Home, ArrowLeft, Rocket } from 'lucide-react';
+import {
+  Code2,
+  Palette,
+  LayoutDashboard,
+  Box,
+  FileText,
+  BookOpen,
+  Home,
+  ArrowLeft,
+  Rocket,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ThemeToggle } from '@/components/theme';

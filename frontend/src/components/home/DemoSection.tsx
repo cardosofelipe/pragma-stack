@@ -120,9 +120,7 @@ export function DemoSection() {
         transition={{ duration: 0.6, delay: 0.4 }}
       >
         <Button asChild variant="outline" size="lg" className="gap-2">
-          <Link href="/demos">
-            View Complete Demo Tour →
-          </Link>
+          <Link href="/demos">View Complete Demo Tour →</Link>
         </Button>
       </motion.div>
     </section>

@@ -264,10 +264,10 @@ describe('HomePage', () => {
       const tryDemoButtons = screen.getAllByRole('button', { name: /try demo/i });
       fireEvent.click(tryDemoButtons[0]);
       expect(screen.getByTestId('demo-modal')).toBeInTheDocument();
-      
+
       // Close the modal
       const closeButtons = screen.getAllByRole('button', { name: /close/i });
-      const modalCloseButton = closeButtons.find(btn => btn.textContent === 'Close');
+      const modalCloseButton = closeButtons.find((btn) => btn.textContent === 'Close');
       if (modalCloseButton) {
         fireEvent.click(modalCloseButton);
       }
