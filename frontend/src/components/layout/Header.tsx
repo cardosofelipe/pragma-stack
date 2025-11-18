@@ -6,8 +6,8 @@
 
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link } from '@/lib/i18n/routing';
+import { usePathname } from '@/lib/i18n/routing';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useLogout } from '@/lib/api/hooks/useAuth';
 import {

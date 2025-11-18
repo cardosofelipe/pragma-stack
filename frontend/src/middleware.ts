@@ -9,8 +9,9 @@ const intlMiddleware = createMiddleware(routing);
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Block access to /dev routes in production (before locale handling)
-  if (pathname.startsWith('/dev')) {
+  // Block access to /dev routes in production (handles both /dev and /[locale]/dev)
+  // Match: /dev, /en/dev, /it/dev, etc.
+  if (pathname === '/dev' || pathname.match(/^\/[a-z]{2}\/dev($|\/)/)) {
     const isProduction = process.env.NODE_ENV === 'production';
 
     if (isProduction) {

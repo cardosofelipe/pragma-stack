@@ -5,7 +5,7 @@
 
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/lib/i18n/routing';
 import { motion } from 'framer-motion';
 import { Github, Star, Play, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';

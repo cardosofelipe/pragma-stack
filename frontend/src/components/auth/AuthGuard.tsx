@@ -7,7 +7,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from '@/lib/i18n/routing';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useMe } from '@/lib/api/hooks/useAuth';
 import { AuthLoadingSkeleton } from '@/components/layout';

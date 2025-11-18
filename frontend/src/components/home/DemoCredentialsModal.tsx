@@ -6,7 +6,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/lib/i18n/routing';
 import { Copy, Check } from 'lucide-react';
 import {
   Dialog,

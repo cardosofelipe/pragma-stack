@@ -9,7 +9,7 @@ import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Terminal, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { Link } from '@/lib/i18n/routing';
 
 const commands = [
   { text: '# Clone the repository', delay: 0 },

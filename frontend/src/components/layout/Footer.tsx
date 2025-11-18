@@ -5,7 +5,7 @@
 
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/lib/i18n/routing';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();

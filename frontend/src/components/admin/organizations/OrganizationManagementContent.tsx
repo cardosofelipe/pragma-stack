@@ -6,7 +6,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from '@/lib/i18n/routing';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
