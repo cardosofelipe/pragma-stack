@@ -16,6 +16,7 @@
 import { getRequestConfig } from 'next-intl/server';
 import { routing } from '@/lib/i18n/routing';
 
+/* istanbul ignore next - Server-side middleware configuration covered by e2e tests */
 export default getRequestConfig(async ({ locale }) => {
   // Validate that the incoming `locale` parameter is valid
   // Type assertion: we know locale will be a string from the URL parameter

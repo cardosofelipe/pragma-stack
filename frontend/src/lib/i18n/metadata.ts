@@ -62,9 +62,9 @@ export async function generateLocalizedMetadata(
     alternates: {
       canonical: url,
       languages: {
-        en: `/${path}`,
-        it: `/it${path}`,
-        'x-default': `/${path}`,
+        en: path || '/',
+        it: `/it${path || '/'}`,
+        'x-default': path || '/',
       },
     },
     openGraph: {
