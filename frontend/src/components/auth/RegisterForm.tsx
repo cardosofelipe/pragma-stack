@@ -11,6 +11,7 @@ import { Link } from '@/lib/i18n/routing';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,33 +24,34 @@ import config from '@/config/app.config';
 // Validation Schema
 // ============================================================================
 
-const registerSchema = z
-  .object({
-    email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
-    first_name: z
-      .string()
-      .min(1, 'First name is required')
-      .min(2, 'First name must be at least 2 characters')
-      .max(50, 'First name must not exceed 50 characters'),
-    last_name: z
-      .string()
-      .max(50, 'Last name must not exceed 50 characters')
-      .optional()
-      .or(z.literal('')), // Allow empty string
-    password: z
-      .string()
-      .min(1, 'Password is required')
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[0-9]/, 'Password must contain at least one number')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
+const createRegisterSchema = (t: (key: string) => string) =>
+  z
+    .object({
+      email: z.string().min(1, t('validation.required')).email(t('validation.email')),
+      first_name: z
+        .string()
+        .min(1, t('firstNameRequired'))
+        .min(2, t('firstNameMinLength'))
+        .max(50, t('firstNameMaxLength')),
+      last_name: z
+        .string()
+        .max(50, t('lastNameMaxLength'))
+        .optional()
+        .or(z.literal('')), // Allow empty string
+      password: z
+        .string()
+        .min(1, t('passwordRequired'))
+        .min(8, t('passwordMinLength'))
+        .regex(/[0-9]/, t('passwordNumber'))
+        .regex(/[A-Z]/, t('passwordUppercase')),
+      confirmPassword: z.string().min(1, t('confirmPasswordRequired')),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t('passwordMismatch'),
+      path: ['confirmPassword'],
+    });
 
-type RegisterFormData = z.infer<typeof registerSchema>;
+type RegisterFormData = z.infer<ReturnType<typeof createRegisterSchema>>;
 
 // ============================================================================
 // Component
@@ -84,8 +86,17 @@ interface RegisterFormProps {
  * ```
  */
 export function RegisterForm({ onSuccess, showLoginLink = true, className }: RegisterFormProps) {
+  const t = useTranslations('auth.register');
+  const tValidation = useTranslations('validation');
   const [serverError, setServerError] = useState<string | null>(null);
   const registerMutation = useRegister();
+
+  const registerSchema = createRegisterSchema((key: string) => {
+    if (key.startsWith('validation.')) {
+      return tValidation(key.replace('validation.', ''));
+    }
+    return t(key);
+  });
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -133,7 +144,7 @@ export function RegisterForm({ onSuccess, showLoginLink = true, className }: Reg
         });
       } else {
         // Unexpected error format
-        setServerError('An unexpected error occurred. Please try again.');
+        setServerError(t('unexpectedError'));
       }
     }
   };
@@ -159,12 +170,12 @@ export function RegisterForm({ onSuccess, showLoginLink = true, className }: Reg
         {/* First Name Field */}
         <div className="space-y-2">
           <Label htmlFor="first_name">
-            First Name <span className="text-destructive">*</span>
+            {t('firstNameLabel')} <span className="text-destructive">{t('required')}</span>
           </Label>
           <Input
             id="first_name"
             type="text"
-            placeholder="John"
+            placeholder={t('firstNamePlaceholder')}
             autoComplete="given-name"
             disabled={isSubmitting}
             {...form.register('first_name')}
@@ -180,11 +191,11 @@ export function RegisterForm({ onSuccess, showLoginLink = true, className }: Reg
 
         {/* Last Name Field */}
         <div className="space-y-2">
-          <Label htmlFor="last_name">Last Name</Label>
+          <Label htmlFor="last_name">{t('lastNameLabel')}</Label>
           <Input
             id="last_name"
             type="text"
-            placeholder="Doe (optional)"
+            placeholder={t('lastNamePlaceholder')}
             autoComplete="family-name"
             disabled={isSubmitting}
             {...form.register('last_name')}
@@ -201,12 +212,12 @@ export function RegisterForm({ onSuccess, showLoginLink = true, className }: Reg
         {/* Email Field */}
         <div className="space-y-2">
           <Label htmlFor="email">
-            Email <span className="text-destructive">*</span>
+            {t('emailLabel')} <span className="text-destructive">{t('required')}</span>
           </Label>
           <Input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t('emailPlaceholder')}
             autoComplete="email"
             disabled={isSubmitting}
             {...form.register('email')}
@@ -223,12 +234,12 @@ export function RegisterForm({ onSuccess, showLoginLink = true, className }: Reg
         {/* Password Field */}
         <div className="space-y-2">
           <Label htmlFor="password">
-            Password <span className="text-destructive">*</span>
+            {t('passwordLabel')} <span className="text-destructive">{t('required')}</span>
           </Label>
           <Input
             id="password"
             type="password"
-            placeholder="Create a strong password"
+            placeholder={t('passwordPlaceholder')}
             autoComplete="new-password"
             disabled={isSubmitting}
             {...form.register('password')}
@@ -253,21 +264,21 @@ export function RegisterForm({ onSuccess, showLoginLink = true, className }: Reg
                   hasMinLength ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
                 }
               >
-                {hasMinLength ? '✓' : '○'} At least 8 characters
+                {hasMinLength ? '✓' : '○'} {t('passwordRequirements.minLength')}
               </p>
               <p
                 className={
                   hasNumber ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
                 }
               >
-                {hasNumber ? '✓' : '○'} Contains a number
+                {hasNumber ? '✓' : '○'} {t('passwordRequirements.hasNumber')}
               </p>
               <p
                 className={
                   hasUppercase ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
                 }
               >
-                {hasUppercase ? '✓' : '○'} Contains an uppercase letter
+                {hasUppercase ? '✓' : '○'} {t('passwordRequirements.hasUppercase')}
               </p>
             </div>
           )}
@@ -276,12 +287,12 @@ export function RegisterForm({ onSuccess, showLoginLink = true, className }: Reg
         {/* Confirm Password Field */}
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">
-            Confirm Password <span className="text-destructive">*</span>
+            {t('confirmPasswordLabel')} <span className="text-destructive">{t('required')}</span>
           </Label>
           <Input
             id="confirmPassword"
             type="password"
-            placeholder="Confirm your password"
+            placeholder={t('confirmPasswordPlaceholder')}
             autoComplete="new-password"
             disabled={isSubmitting}
             {...form.register('confirmPassword')}
@@ -299,18 +310,18 @@ export function RegisterForm({ onSuccess, showLoginLink = true, className }: Reg
 
         {/* Submit Button */}
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Creating account...' : 'Create account'}
+          {isSubmitting ? t('registerButtonLoading') : t('registerButton')}
         </Button>
 
         {/* Login Link */}
         {showLoginLink && (
           <p className="text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
+            {t('hasAccount')}{' '}
             <Link
               href={config.routes.login}
               className="text-primary underline-offset-4 hover:underline font-medium"
             >
-              Sign in
+              {t('loginLink')}
             </Link>
           </p>
         )}

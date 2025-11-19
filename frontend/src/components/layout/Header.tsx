@@ -10,6 +10,7 @@ import { Link } from '@/lib/i18n/routing';
 import { usePathname } from '@/lib/i18n/routing';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useLogout } from '@/lib/api/hooks/useAuth';
+import { useTranslations } from 'next-intl';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,6 +69,7 @@ function NavLink({
 }
 
 export function Header() {
+  const t = useTranslations('navigation');
   const { user } = useAuth();
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
@@ -87,9 +89,9 @@ export function Header() {
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center space-x-1">
             <NavLink href="/" exact>
-              Home
+              {t('home')}
             </NavLink>
-            {user?.is_superuser && <NavLink href="/admin">Admin</NavLink>}
+            {user?.is_superuser && <NavLink href="/admin">{t('admin')}</NavLink>}
           </nav>
         </div>
 
@@ -120,20 +122,20 @@ export function Header() {
               <DropdownMenuItem asChild>
                 <Link href="/settings/profile" className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
-                  Profile
+                  {t('profile')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/settings/password" className="cursor-pointer">
                   <Settings className="mr-2 h-4 w-4" />
-                  Settings
+                  {t('settings')}
                 </Link>
               </DropdownMenuItem>
               {user?.is_superuser && (
                 <DropdownMenuItem asChild>
                   <Link href="/admin" className="cursor-pointer">
                     <Shield className="mr-2 h-4 w-4" />
-                    Admin Panel
+                    {t('adminPanel')}
                   </Link>
                 </DropdownMenuItem>
               )}
@@ -144,7 +146,7 @@ export function Header() {
                 disabled={isLoggingOut}
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                {isLoggingOut ? 'Logging out...' : 'Log out'}
+                {isLoggingOut ? t('loggingOut') : t('logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

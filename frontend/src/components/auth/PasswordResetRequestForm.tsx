@@ -11,6 +11,7 @@ import { Link } from '@/lib/i18n/routing';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,11 +23,12 @@ import { getGeneralError, getFieldErrors, isAPIErrorArray } from '@/lib/api/erro
 // Validation Schema
 // ============================================================================
 
-const resetRequestSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
-});
+const createResetRequestSchema = (t: (key: string) => string) =>
+  z.object({
+    email: z.string().min(1, t('validation.required')).email(t('validation.email')),
+  });
 
-type ResetRequestFormData = z.infer<typeof resetRequestSchema>;
+type ResetRequestFormData = z.infer<ReturnType<typeof createResetRequestSchema>>;
 
 // ============================================================================
 // Component
@@ -64,9 +66,18 @@ export function PasswordResetRequestForm({
   showLoginLink = true,
   className,
 }: PasswordResetRequestFormProps) {
+  const t = useTranslations('auth.passwordReset');
+  const tValidation = useTranslations('validation');
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const resetMutation = usePasswordResetRequest();
+
+  const resetRequestSchema = createResetRequestSchema((key: string) => {
+    if (key.startsWith('validation.')) {
+      return tValidation(key.replace('validation.', ''));
+    }
+    return t(key);
+  });
 
   const form = useForm<ResetRequestFormData>({
     resolver: zodResolver(resetRequestSchema),
@@ -86,9 +97,7 @@ export function PasswordResetRequestForm({
       await resetMutation.mutateAsync({ email: data.email });
 
       // Show success message
-      setSuccessMessage(
-        'Password reset instructions have been sent to your email address. Please check your inbox.'
-      );
+      setSuccessMessage(t('success'));
 
       // Reset form
       form.reset();
@@ -113,7 +122,7 @@ export function PasswordResetRequestForm({
         });
       } else {
         // Unexpected error format
-        setServerError('An unexpected error occurred. Please try again.');
+        setServerError(t('unexpectedError'));
       }
     }
   };
@@ -138,19 +147,17 @@ export function PasswordResetRequestForm({
         )}
 
         {/* Instructions */}
-        <p className="text-sm text-muted-foreground">
-          Enter your email address and we&apos;ll send you instructions to reset your password.
-        </p>
+        <p className="text-sm text-muted-foreground">{t('instructions')}</p>
 
         {/* Email Field */}
         <div className="space-y-2">
           <Label htmlFor="email">
-            Email <span className="text-destructive">*</span>
+            {t('emailLabel')} <span className="text-destructive">{t('required')}</span>
           </Label>
           <Input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t('emailPlaceholder')}
             autoComplete="email"
             disabled={isSubmitting}
             {...form.register('email')}
@@ -167,18 +174,18 @@ export function PasswordResetRequestForm({
 
         {/* Submit Button */}
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Sending...' : 'Send Reset Instructions'}
+          {isSubmitting ? t('sendButtonLoading') : t('sendButton')}
         </Button>
 
         {/* Login Link */}
         {showLoginLink && (
           <p className="text-center text-sm text-muted-foreground">
-            Remember your password?{' '}
+            {t('rememberPassword')}{' '}
             <Link
               href="/login"
               className="text-primary underline-offset-4 hover:underline font-medium"
             >
-              Back to login
+              {t('backToLogin')}
             </Link>
           </p>
         )}

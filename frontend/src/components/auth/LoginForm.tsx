@@ -11,6 +11,7 @@ import { Link } from '@/lib/i18n/routing';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,17 +24,18 @@ import config from '@/config/app.config';
 // Validation Schema
 // ============================================================================
 
-const loginSchema = z.object({
-  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
-  password: z
-    .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter'),
-});
+const createLoginSchema = (t: (key: string) => string) =>
+  z.object({
+    email: z.string().min(1, t('validation.required')).email(t('validation.email')),
+    password: z
+      .string()
+      .min(1, t('validation.required'))
+      .min(8, t('validation.minLength').replace('{count}', '8'))
+      .regex(/[0-9]/, t('errors.validation.passwordWeak'))
+      .regex(/[A-Z]/, t('errors.validation.passwordWeak')),
+  });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type LoginFormData = z.infer<ReturnType<typeof createLoginSchema>>;
 
 // ============================================================================
 // Component
@@ -74,8 +76,21 @@ export function LoginForm({
   showPasswordResetLink = true,
   className,
 }: LoginFormProps) {
+  const t = useTranslations('auth.login');
+  const tValidation = useTranslations('validation');
+  const tErrors = useTranslations('errors.validation');
   const [serverError, setServerError] = useState<string | null>(null);
   const loginMutation = useLogin();
+
+  const loginSchema = createLoginSchema((key: string) => {
+    if (key.startsWith('validation.')) {
+      return tValidation(key.replace('validation.', ''));
+    }
+    if (key.startsWith('errors.validation.')) {
+      return tErrors(key.replace('errors.validation.', ''));
+    }
+    return key;
+  });
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -116,7 +131,7 @@ export function LoginForm({
         });
       } else {
         // Unexpected error format
-        setServerError('An unexpected error occurred. Please try again.');
+        setServerError(t('unexpectedError'));
       }
     }
   };
@@ -135,11 +150,11 @@ export function LoginForm({
 
         {/* Email Field */}
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t('emailLabel')}</Label>
           <Input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t('emailPlaceholder')}
             autoComplete="email"
             disabled={isSubmitting}
             {...form.register('email')}
@@ -156,20 +171,20 @@ export function LoginForm({
         {/* Password Field */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('passwordLabel')}</Label>
             {showPasswordResetLink && (
               <Link
                 href="/password-reset"
                 className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
               >
-                Forgot password?
+                {t('forgotPassword')}
               </Link>
             )}
           </div>
           <Input
             id="password"
             type="password"
-            placeholder="Enter your password"
+            placeholder={t('passwordPlaceholder')}
             autoComplete="current-password"
             disabled={isSubmitting}
             {...form.register('password')}
@@ -185,18 +200,18 @@ export function LoginForm({
 
         {/* Submit Button */}
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Signing in...' : 'Sign in'}
+          {isSubmitting ? t('loginButtonLoading') : t('loginButton')}
         </Button>
 
         {/* Registration Link */}
         {showRegisterLink && config.features.enableRegistration && (
           <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
+            {t('noAccount')}{' '}
             <Link
               href={config.routes.register}
               className="text-primary underline-offset-4 hover:underline font-medium"
             >
-              Sign up
+              {t('registerLink')}
             </Link>
           </p>
         )}

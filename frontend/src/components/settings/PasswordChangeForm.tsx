@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert } from '@/components/ui/alert';
@@ -22,25 +23,26 @@ import { getGeneralError, getFieldErrors, isAPIErrorArray } from '@/lib/api/erro
 // Validation Schema
 // ============================================================================
 
-const passwordChangeSchema = z
-  .object({
-    current_password: z.string().min(1, 'Current password is required'),
-    new_password: z
-      .string()
-      .min(1, 'New password is required')
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[0-9]/, 'Password must contain at least one number')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-      .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
-    confirm_password: z.string().min(1, 'Please confirm your new password'),
-  })
-  .refine((data) => data.new_password === data.confirm_password, {
-    message: 'Passwords do not match',
-    path: ['confirm_password'],
-  });
+const createPasswordChangeSchema = (t: (key: string) => string) =>
+  z
+    .object({
+      current_password: z.string().min(1, t('currentPasswordRequired')),
+      new_password: z
+        .string()
+        .min(1, t('newPasswordRequired'))
+        .min(8, t('newPasswordMinLength'))
+        .regex(/[0-9]/, t('newPasswordNumber'))
+        .regex(/[A-Z]/, t('newPasswordUppercase'))
+        .regex(/[a-z]/, t('newPasswordLowercase'))
+        .regex(/[^A-Za-z0-9]/, t('newPasswordSpecial')),
+      confirm_password: z.string().min(1, t('confirmPasswordRequired')),
+    })
+    .refine((data) => data.new_password === data.confirm_password, {
+      message: t('passwordMismatch'),
+      path: ['confirm_password'],
+    });
 
-type PasswordChangeFormData = z.infer<typeof passwordChangeSchema>;
+type PasswordChangeFormData = z.infer<ReturnType<typeof createPasswordChangeSchema>>;
 
 // ============================================================================
 // Component
@@ -72,12 +74,15 @@ interface PasswordChangeFormProps {
  * ```
  */
 export function PasswordChangeForm({ onSuccess, className }: PasswordChangeFormProps) {
+  const t = useTranslations('settings.password');
   const [serverError, setServerError] = useState<string | null>(null);
   const passwordChangeMutation = usePasswordChange((message) => {
     toast.success(message);
     form.reset();
     onSuccess?.();
   });
+
+  const passwordChangeSchema = createPasswordChangeSchema((key: string) => t(key));
 
   const form = useForm<PasswordChangeFormData>({
     resolver: zodResolver(passwordChangeSchema),
@@ -122,7 +127,7 @@ export function PasswordChangeForm({ onSuccess, className }: PasswordChangeFormP
         });
       } else {
         // Unexpected error format
-        setServerError('An unexpected error occurred. Please try again.');
+        setServerError(t('unexpectedError'));
       }
     }
   };
@@ -133,10 +138,8 @@ export function PasswordChangeForm({ onSuccess, className }: PasswordChangeFormP
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Change Password</CardTitle>
-        <CardDescription>
-          Update your password to keep your account secure. Make sure it&apos;s strong and unique.
-        </CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('subtitle')}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -149,9 +152,9 @@ export function PasswordChangeForm({ onSuccess, className }: PasswordChangeFormP
 
           {/* Current Password Field */}
           <FormField
-            label="Current Password"
+            label={t('currentPasswordLabel')}
             type="password"
-            placeholder="Enter your current password"
+            placeholder={t('currentPasswordPlaceholder')}
             autoComplete="current-password"
             disabled={isSubmitting}
             required
@@ -161,22 +164,22 @@ export function PasswordChangeForm({ onSuccess, className }: PasswordChangeFormP
 
           {/* New Password Field */}
           <FormField
-            label="New Password"
+            label={t('newPasswordLabel')}
             type="password"
-            placeholder="Enter your new password"
+            placeholder={t('newPasswordPlaceholder')}
             autoComplete="new-password"
             disabled={isSubmitting}
             required
-            description="At least 8 characters with uppercase, lowercase, number, and special character"
+            description={t('newPasswordDescription')}
             error={form.formState.errors.new_password}
             {...form.register('new_password')}
           />
 
           {/* Confirm Password Field */}
           <FormField
-            label="Confirm New Password"
+            label={t('confirmPasswordLabel')}
             type="password"
-            placeholder="Confirm your new password"
+            placeholder={t('confirmPasswordPlaceholder')}
             autoComplete="new-password"
             disabled={isSubmitting}
             required
@@ -187,12 +190,12 @@ export function PasswordChangeForm({ onSuccess, className }: PasswordChangeFormP
           {/* Submit Button */}
           <div className="flex items-center gap-4">
             <Button type="submit" disabled={isSubmitting || !isDirty}>
-              {isSubmitting ? 'Changing Password...' : 'Change Password'}
+              {isSubmitting ? t('updateButtonLoading') : t('updateButton')}
             </Button>
             {/* istanbul ignore next - Cancel button requires isDirty state, tested in E2E */}
             {isDirty && !isSubmitting && (
               <Button type="button" variant="outline" onClick={() => form.reset()}>
-                Cancel
+                {t('cancelButton')}
               </Button>
             )}
           </div>

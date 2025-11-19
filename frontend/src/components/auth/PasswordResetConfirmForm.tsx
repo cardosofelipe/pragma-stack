@@ -11,6 +11,7 @@ import { Link } from '@/lib/i18n/routing';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,23 +23,24 @@ import { getGeneralError, getFieldErrors, isAPIErrorArray } from '@/lib/api/erro
 // Validation Schema
 // ============================================================================
 
-const resetConfirmSchema = z
-  .object({
-    token: z.string().min(1, 'Reset token is required'),
-    new_password: z
-      .string()
-      .min(1, 'New password is required')
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[0-9]/, 'Password must contain at least one number')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter'),
-    confirm_password: z.string().min(1, 'Please confirm your password'),
-  })
-  .refine((data) => data.new_password === data.confirm_password, {
-    message: 'Passwords do not match',
-    path: ['confirm_password'],
-  });
+const createResetConfirmSchema = (t: (key: string) => string) =>
+  z
+    .object({
+      token: z.string().min(1, t('tokenRequired')),
+      new_password: z
+        .string()
+        .min(1, t('passwordRequired'))
+        .min(8, t('passwordMinLength'))
+        .regex(/[0-9]/, t('passwordNumber'))
+        .regex(/[A-Z]/, t('passwordUppercase')),
+      confirm_password: z.string().min(1, t('confirmPasswordRequired')),
+    })
+    .refine((data) => data.new_password === data.confirm_password, {
+      message: t('passwordMismatch'),
+      path: ['confirm_password'],
+    });
 
-type ResetConfirmFormData = z.infer<typeof resetConfirmSchema>;
+type ResetConfirmFormData = z.infer<ReturnType<typeof createResetConfirmSchema>>;
 
 // ============================================================================
 // Helper Functions
@@ -104,9 +106,12 @@ export function PasswordResetConfirmForm({
   showLoginLink = true,
   className,
 }: PasswordResetConfirmFormProps) {
+  const t = useTranslations('auth.passwordResetConfirm');
   const [serverError, setServerError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const resetMutation = usePasswordResetConfirm();
+
+  const resetConfirmSchema = createResetConfirmSchema((key: string) => t(key));
 
   const form = useForm<ResetConfirmFormData>({
     resolver: zodResolver(resetConfirmSchema),
@@ -134,9 +139,7 @@ export function PasswordResetConfirmForm({
       });
 
       // Show success message
-      setSuccessMessage(
-        'Your password has been successfully reset. You can now log in with your new password.'
-      );
+      setSuccessMessage(t('success'));
 
       // Reset form
       form.reset({ token, new_password: '', confirm_password: '' });
@@ -161,7 +164,7 @@ export function PasswordResetConfirmForm({
         });
       } else {
         // Unexpected error format
-        setServerError('An unexpected error occurred. Please try again.');
+        setServerError(t('unexpectedError'));
       }
     }
   };
@@ -186,9 +189,7 @@ export function PasswordResetConfirmForm({
         )}
 
         {/* Instructions */}
-        <p className="text-sm text-muted-foreground">
-          Enter your new password below. Make sure it meets all security requirements.
-        </p>
+        <p className="text-sm text-muted-foreground">{t('instructions')}</p>
 
         {/* Hidden Token Field (for form submission) */}
         <input type="hidden" {...form.register('token')} />
@@ -196,12 +197,12 @@ export function PasswordResetConfirmForm({
         {/* New Password Field */}
         <div className="space-y-2">
           <Label htmlFor="new_password">
-            New Password <span className="text-destructive">*</span>
+            {t('newPasswordLabel')} <span className="text-destructive">{t('required')}</span>
           </Label>
           <Input
             id="new_password"
             type="password"
-            placeholder="Enter new password"
+            placeholder={t('newPasswordPlaceholder')}
             autoComplete="new-password"
             disabled={isSubmitting}
             {...form.register('new_password')}
@@ -240,7 +241,7 @@ export function PasswordResetConfirmForm({
                       : 'text-muted-foreground'
                   }
                 >
-                  {passwordStrength.hasMinLength ? '✓' : '○'} At least 8 characters
+                  {passwordStrength.hasMinLength ? '✓' : '○'} {t('passwordRequirements.minLength')}
                 </li>
                 <li
                   className={
@@ -249,7 +250,7 @@ export function PasswordResetConfirmForm({
                       : 'text-muted-foreground'
                   }
                 >
-                  {passwordStrength.hasNumber ? '✓' : '○'} Contains a number
+                  {passwordStrength.hasNumber ? '✓' : '○'} {t('passwordRequirements.hasNumber')}
                 </li>
                 <li
                   className={
@@ -258,7 +259,8 @@ export function PasswordResetConfirmForm({
                       : 'text-muted-foreground'
                   }
                 >
-                  {passwordStrength.hasUppercase ? '✓' : '○'} Contains an uppercase letter
+                  {passwordStrength.hasUppercase ? '✓' : '○'}{' '}
+                  {t('passwordRequirements.hasUppercase')}
                 </li>
               </ul>
             </div>
@@ -268,12 +270,12 @@ export function PasswordResetConfirmForm({
         {/* Confirm Password Field */}
         <div className="space-y-2">
           <Label htmlFor="confirm_password">
-            Confirm Password <span className="text-destructive">*</span>
+            {t('confirmPasswordLabel')} <span className="text-destructive">{t('required')}</span>
           </Label>
           <Input
             id="confirm_password"
             type="password"
-            placeholder="Re-enter new password"
+            placeholder={t('confirmPasswordPlaceholder')}
             autoComplete="new-password"
             disabled={isSubmitting}
             {...form.register('confirm_password')}
@@ -292,18 +294,18 @@ export function PasswordResetConfirmForm({
 
         {/* Submit Button */}
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Resetting Password...' : 'Reset Password'}
+          {isSubmitting ? t('resetButtonLoading') : t('resetButton')}
         </Button>
 
         {/* Login Link */}
         {showLoginLink && (
           <p className="text-center text-sm text-muted-foreground">
-            Remember your password?{' '}
+            {t('rememberPassword')}{' '}
             <Link
               href="/login"
               className="text-primary underline-offset-4 hover:underline font-medium"
             >
-              Back to login
+              {t('backToLogin')}
             </Link>
           </p>
         )}

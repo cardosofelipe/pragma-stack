@@ -11,6 +11,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert } from '@/components/ui/alert';
@@ -23,21 +24,18 @@ import { getGeneralError, getFieldErrors, isAPIErrorArray } from '@/lib/api/erro
 // Validation Schema
 // ============================================================================
 
-const profileSchema = z.object({
-  first_name: z
-    .string()
-    .min(1, 'First name is required')
-    .min(2, 'First name must be at least 2 characters')
-    .max(50, 'First name must not exceed 50 characters'),
-  last_name: z
-    .string()
-    .max(50, 'Last name must not exceed 50 characters')
-    .optional()
-    .or(z.literal('')),
-  email: z.string().email('Invalid email address'),
-});
+const createProfileSchema = (t: (key: string) => string) =>
+  z.object({
+    first_name: z
+      .string()
+      .min(1, t('firstNameRequired'))
+      .min(2, t('firstNameMinLength'))
+      .max(50, t('firstNameMaxLength')),
+    last_name: z.string().max(50, t('lastNameMaxLength')).optional().or(z.literal('')),
+    email: z.string().email(t('emailInvalid')),
+  });
 
-type ProfileFormData = z.infer<typeof profileSchema>;
+type ProfileFormData = z.infer<ReturnType<typeof createProfileSchema>>;
 
 // ============================================================================
 // Component
@@ -67,12 +65,15 @@ interface ProfileSettingsFormProps {
  * ```
  */
 export function ProfileSettingsForm({ onSuccess, className }: ProfileSettingsFormProps) {
+  const t = useTranslations('settings.profile');
   const [serverError, setServerError] = useState<string | null>(null);
   const currentUser = useCurrentUser();
   const updateProfileMutation = useUpdateProfile((message) => {
     toast.success(message);
     onSuccess?.();
   });
+
+  const profileSchema = createProfileSchema((key: string) => t(key));
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -135,7 +136,7 @@ export function ProfileSettingsForm({ onSuccess, className }: ProfileSettingsFor
         });
       } else {
         // Unexpected error format
-        setServerError('An unexpected error occurred. Please try again.');
+        setServerError(t('unexpectedError'));
       }
     }
   };
@@ -146,10 +147,8 @@ export function ProfileSettingsForm({ onSuccess, className }: ProfileSettingsFor
   return (
     <Card className={className}>
       <CardHeader>
-        <CardTitle>Profile Information</CardTitle>
-        <CardDescription>
-          Update your personal information. Your email address is read-only.
-        </CardDescription>
+        <CardTitle>{t('title')}</CardTitle>
+        <CardDescription>{t('subtitle')}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -162,9 +161,9 @@ export function ProfileSettingsForm({ onSuccess, className }: ProfileSettingsFor
 
           {/* First Name Field */}
           <FormField
-            label="First Name"
+            label={t('firstNameLabel')}
             type="text"
-            placeholder="John"
+            placeholder={t('firstNamePlaceholder')}
             autoComplete="given-name"
             disabled={isSubmitting}
             required
@@ -174,9 +173,9 @@ export function ProfileSettingsForm({ onSuccess, className }: ProfileSettingsFor
 
           {/* Last Name Field */}
           <FormField
-            label="Last Name"
+            label={t('lastNameLabel')}
             type="text"
-            placeholder="Doe"
+            placeholder={t('lastNamePlaceholder')}
             autoComplete="family-name"
             disabled={isSubmitting}
             error={form.formState.errors.last_name}
@@ -185,11 +184,11 @@ export function ProfileSettingsForm({ onSuccess, className }: ProfileSettingsFor
 
           {/* Email Field (Read-only) */}
           <FormField
-            label="Email"
+            label={t('emailLabel')}
             type="email"
             autoComplete="email"
             disabled
-            description="Your email address cannot be changed from this form"
+            description={t('emailDescription')}
             error={form.formState.errors.email}
             {...form.register('email')}
           />
@@ -197,12 +196,12 @@ export function ProfileSettingsForm({ onSuccess, className }: ProfileSettingsFor
           {/* Submit Button */}
           <div className="flex items-center gap-4">
             <Button type="submit" disabled={isSubmitting || !isDirty}>
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+              {isSubmitting ? t('updateButtonLoading') : t('updateButton')}
             </Button>
             {/* istanbul ignore next - Reset button requires isDirty state, tested in E2E */}
             {isDirty && !isSubmitting && (
               <Button type="button" variant="outline" onClick={() => form.reset()}>
-                Reset
+                {t('resetButton')}
               </Button>
             )}
           </div>
