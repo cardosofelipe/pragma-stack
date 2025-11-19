@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { generatePageMetadata, type Locale } from '@/lib/i18n/metadata';
 import { getTranslations } from 'next-intl/server';
 
+/* istanbul ignore next - Next.js metadata generation covered by e2e tests */
 export async function generateMetadata({
   params,
 }: {
