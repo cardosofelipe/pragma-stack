@@ -10,6 +10,7 @@ import { Link } from '@/lib/i18n/routing';
 import { Menu, X, Github, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { LocaleSwitcher } from '@/components/i18n';
 
 interface HeaderProps {
   onOpenDemoModal: () => void;
@@ -63,6 +64,9 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
               </span>
             </a>
 
+            {/* Locale Switcher */}
+            <LocaleSwitcher />
+
             {/* CTAs */}
             <Button onClick={onOpenDemoModal} variant="default" size="sm">
               Try Demo
@@ -113,6 +117,11 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
                 </a>
 
                 <div className="border-t pt-4 mt-4 space-y-3">
+                  {/* Locale Switcher */}
+                  <div className="flex justify-center">
+                    <LocaleSwitcher />
+                  </div>
+
                   <Button
                     onClick={() => {
                       setMobileMenuOpen(false);

@@ -161,5 +161,11 @@
     "maxLength": "Massimo {count} caratteri consentiti",
     "pattern": "Formato non valido",
     "passwordMismatch": "Le password non corrispondono"
+  },
+  "locale": {
+    "en": "Inglese",
+    "it": "Italiano",
+    "switchLanguage": "Cambia lingua",
+    "currentLanguage": "Lingua corrente"
   }
 }

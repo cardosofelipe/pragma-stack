@@ -32,7 +32,7 @@ export default getRequestConfig(async ({ locale }) => {
 
     // Load messages for the requested locale
     // Dynamic import ensures only the requested locale is loaded
-    messages: (await import(`../../messages/${validLocale}.json`)).default,
+    messages: (await import(`../../../messages/${validLocale}.json`)).default,
 
     // Optional: Configure time zone
     // This will be used for date/time formatting

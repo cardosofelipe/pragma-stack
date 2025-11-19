@@ -25,6 +25,7 @@ export function Breadcrumbs() {
   const pathname = usePathname();
 
   // Generate breadcrumb items from pathname
+  // Note: usePathname() from next-intl returns path WITHOUT locale prefix
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
     const segments = pathname.split('/').filter(Boolean);
     const breadcrumbs: BreadcrumbItem[] = [];

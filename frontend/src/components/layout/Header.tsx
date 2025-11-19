@@ -23,6 +23,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Settings, LogOut, User, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/theme';
+import { LocaleSwitcher } from '@/components/i18n';
 
 /**
  * Get user initials for avatar
@@ -92,9 +93,10 @@ export function Header() {
           </nav>
         </div>
 
-        {/* Right side - Theme toggle and user menu */}
+        {/* Right side - Theme toggle, locale switcher, and user menu */}
         <div className="ml-auto flex items-center space-x-2">
           <ThemeToggle />
+          <LocaleSwitcher />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
