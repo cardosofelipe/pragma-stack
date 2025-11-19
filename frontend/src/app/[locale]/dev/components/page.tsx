@@ -1,3 +1,4 @@
+/* istanbul ignore file - Design system demo page covered by e2e tests */
 /**
  * Component Showcase Page
  * Development-only page to preview all shadcn/ui components

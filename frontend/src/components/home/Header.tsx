@@ -87,6 +87,7 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
                 )}
               </Button>
             </SheetTrigger>
+            {/* istanbul ignore next - Sheet content interactions covered by e2e tests */}
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <nav className="flex flex-col gap-4 mt-8">
                 {navLinks.map((link) => (

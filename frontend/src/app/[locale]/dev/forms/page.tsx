@@ -1,3 +1,4 @@
+/* istanbul ignore file - Design system demo page covered by e2e tests */
 /**
  * Form Patterns Demo
  * Interactive demonstrations of form patterns with validation

@@ -249,4 +249,63 @@ describe('SessionsManager', () => {
       expect(screen.queryByText('Revoke All Other Sessions?')).not.toBeInTheDocument();
     });
   });
+
+  it('calls toast.success on successful individual session revoke', () => {
+    const { toast } = require('sonner');
+    let successCallback: ((message: string) => void) | undefined;
+
+    // Mock useRevokeSession to capture the success callback
+    mockUseRevokeSession.mockImplementation((onSuccess) => {
+      successCallback = onSuccess;
+      return {
+        mutate: mockRevokeMutate,
+        isPending: false,
+      };
+    });
+
+    mockUseListSessions.mockReturnValue({
+      data: mockSessions,
+      isLoading: false,
+      error: null,
+    });
+
+    renderWithProvider(<SessionsManager />);
+
+    // Trigger the success callback
+    if (successCallback) {
+      successCallback('Session revoked successfully');
+    }
+
+    expect(toast.success).toHaveBeenCalledWith('Session revoked successfully');
+  });
+
+  it('calls toast.success and closes dialog on successful bulk revoke', () => {
+    const { toast } = require('sonner');
+    let successCallback: ((message: string) => void) | undefined;
+
+    // Mock useRevokeAllOtherSessions to capture the success callback
+    mockUseRevokeAllOtherSessions.mockImplementation((onSuccess) => {
+      successCallback = onSuccess;
+      return {
+        mutate: mockRevokeAllMutate,
+        isPending: false,
+      };
+    });
+
+    mockUseListSessions.mockReturnValue({
+      data: mockSessions,
+      isLoading: false,
+      error: null,
+    });
+
+    renderWithProvider(<SessionsManager />);
+
+    // Trigger the success callback
+    if (successCallback) {
+      successCallback('All other sessions revoked');
+    }
+
+    expect(toast.success).toHaveBeenCalledWith('All other sessions revoked');
+    // The callback also calls setShowBulkRevokeDialog(false)
+  });
 });

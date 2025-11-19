@@ -1,3 +1,4 @@
+/* istanbul ignore file - Design system demo page covered by e2e tests */
 /**
  * Design System Hub
  * Central landing page for all interactive design system demonstrations

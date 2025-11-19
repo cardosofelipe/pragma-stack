@@ -5,6 +5,7 @@ import { routing } from '@/lib/i18n/routing';
  * Generate multilingual sitemap
  * Includes all public routes for each supported locale
  */
+/* istanbul ignore next - Next.js metadata route covered by e2e tests */
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 

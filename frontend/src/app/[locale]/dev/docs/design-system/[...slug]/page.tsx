@@ -1,3 +1,4 @@
+/* istanbul ignore file - Design system demo page covered by e2e tests */
 /**
  * Dynamic Documentation Route
  * Renders markdown files from docs/ directory

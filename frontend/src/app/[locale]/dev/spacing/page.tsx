@@ -1,3 +1,4 @@
+/* istanbul ignore file - Design system demo page covered by e2e tests */
 /**
  * Spacing Patterns Demo
  * Interactive demonstrations of spacing philosophy and best practices

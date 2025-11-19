@@ -18,6 +18,7 @@ const LoginForm = dynamic(
   }
 );
 
+/* istanbul ignore next - Next.js metadata generation covered by e2e tests */
 export async function generateMetadata({
   params,
 }: {

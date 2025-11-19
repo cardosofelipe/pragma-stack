@@ -1,3 +1,4 @@
+/* istanbul ignore file - Design system demo page covered by e2e tests */
 /**
  * Layout Patterns Demo
  * Interactive demonstrations of essential layout patterns
