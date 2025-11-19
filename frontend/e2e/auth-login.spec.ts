@@ -114,9 +114,9 @@ test.describe('Login Flow', () => {
     await expect(page.locator('#email-error')).toBeVisible();
     await expect(page.locator('#password-error')).toBeVisible();
 
-    // Verify error messages
-    await expect(page.locator('#email-error')).toContainText('Email is required');
-    await expect(page.locator('#password-error')).toContainText('Password');
+    // Verify error messages (generic i18n validation messages)
+    await expect(page.locator('#email-error')).toContainText('This field is required');
+    await expect(page.locator('#password-error')).toContainText('This field is required');
   });
 
   test('should show validation error for invalid email', async ({ page }) => {
@@ -142,7 +142,7 @@ test.describe('Login Flow', () => {
 
     // Without backend, we just verify form is still functional (doesn't crash)
     // Should still be on login page
-    await expect(page).toHaveURL(/\/login/);
+    await expect(page).toHaveURL(/\/en\/login/);
   });
 
   test('should successfully login with valid credentials', async ({ page }) => {

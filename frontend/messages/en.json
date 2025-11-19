@@ -241,7 +241,7 @@
   "validation": {
     "required": "This field is required",
     "email": "Invalid email address",
-    "minLength": "Minimum {count} characters required",
+    "minLength": "Must be at least 8 characters",
     "maxLength": "Maximum {count} characters allowed",
     "pattern": "Invalid format",
     "passwordMismatch": "Passwords do not match"

@@ -31,7 +31,7 @@ export function Breadcrumbs() {
     const breadcrumbs: BreadcrumbItem[] = [];
 
     let currentPath = '';
-    segments.forEach((segment) => {
+    segments.forEach((segment: string) => {
       currentPath += `/${segment}`;
       const label = pathLabels[segment] || segment;
       breadcrumbs.push({

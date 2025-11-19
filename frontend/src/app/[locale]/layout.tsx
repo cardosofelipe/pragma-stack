@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/lib/i18n/routing';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
+import { generateLocalizedMetadata, type Locale } from '@/lib/i18n/metadata';
 import '../globals.css';
 import { Providers } from '../providers';
 import { AuthProvider } from '@/lib/auth/AuthContext';
@@ -23,10 +24,14 @@ const geistMono = Geist_Mono({
   preload: false, // Only preload primary font
 });
 
-export const metadata: Metadata = {
-  title: 'FastNext Template',
-  description: 'FastAPI + Next.js Template',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return generateLocalizedMetadata(locale as Locale);
+}
 
 export default async function LocaleLayout({
   children,

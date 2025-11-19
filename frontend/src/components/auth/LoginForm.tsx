@@ -30,7 +30,7 @@ const createLoginSchema = (t: (key: string) => string) =>
     password: z
       .string()
       .min(1, t('validation.required'))
-      .min(8, t('validation.minLength').replace('{count}', '8'))
+      .min(8, t('validation.minLength'))
       .regex(/[0-9]/, t('errors.validation.passwordWeak'))
       .regex(/[A-Z]/, t('errors.validation.passwordWeak')),
   });

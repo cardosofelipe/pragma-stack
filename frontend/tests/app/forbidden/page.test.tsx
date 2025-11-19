@@ -4,15 +4,17 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import ForbiddenPage, { metadata } from '@/app/[locale]/forbidden/page';
+import ForbiddenPage from '@/app/[locale]/forbidden/page';
+
+// Mock next-intl/server to avoid ESM import issues in Jest
+jest.mock('next-intl/server', () => ({
+  getTranslations: jest.fn(async () => ({
+    unauthorized: 'Unauthorized',
+    unauthorizedDescription: "You don't have permission to access this page.",
+  })),
+}));
 
 describe('ForbiddenPage', () => {
-  it('has correct metadata', () => {
-    expect(metadata).toBeDefined();
-    expect(metadata.title).toBe('403 - Forbidden');
-    expect(metadata.description).toBe('You do not have permission to access this resource');
-  });
-
   it('renders page heading', () => {
     render(<ForbiddenPage />);
 

@@ -3,7 +3,10 @@
  * Users enter their email to receive reset instructions
  */
 
+import { Metadata } from 'next';
 import dynamic from 'next/dynamic';
+import { generatePageMetadata, type Locale } from '@/lib/i18n/metadata';
+import { getTranslations } from 'next-intl/server';
 
 // Code-split PasswordResetRequestForm
 const PasswordResetRequestForm = dynamic(
@@ -21,6 +24,17 @@ const PasswordResetRequestForm = dynamic(
     ),
   }
 );
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'auth.passwordReset' });
+
+  return generatePageMetadata(locale as Locale, t('title'), t('subtitle'), '/password-reset');
+}
 
 export default function PasswordResetPage() {
   return (

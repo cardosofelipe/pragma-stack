@@ -3,16 +3,28 @@
  * Displayed when users try to access resources they don't have permission for
  */
 
-/* istanbul ignore next - Next.js type import for metadata */
 import type { Metadata } from 'next';
 import { Link } from '@/lib/i18n/routing';
 import { ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { generatePageMetadata, type Locale } from '@/lib/i18n/metadata';
+import { getTranslations } from 'next-intl/server';
 
-export const metadata: Metadata = /* istanbul ignore next */ {
-  title: '403 - Forbidden',
-  description: 'You do not have permission to access this resource',
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'errors' });
+
+  return generatePageMetadata(
+    locale as Locale,
+    t('unauthorized'),
+    t('unauthorizedDescription'),
+    '/forbidden'
+  );
+}
 
 export default function ForbiddenPage() {
   return (

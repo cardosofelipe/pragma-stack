@@ -72,7 +72,7 @@ describe('ProfileSettingsForm', () => {
     it('renders form with all fields', () => {
       renderWithProvider(<ProfileSettingsForm />);
 
-      expect(screen.getByText('Profile Information')).toBeInTheDocument();
+      expect(screen.getByText('Profile Settings')).toBeInTheDocument();
       expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
@@ -103,7 +103,7 @@ describe('ProfileSettingsForm', () => {
     it('shows email cannot be changed message', () => {
       renderWithProvider(<ProfileSettingsForm />);
 
-      expect(screen.getByText(/cannot be changed from this form/i)).toBeInTheDocument();
+      expect(screen.getByText(/cannot be changed.*contact support/i)).toBeInTheDocument();
     });
 
     it('marks first name as required', () => {

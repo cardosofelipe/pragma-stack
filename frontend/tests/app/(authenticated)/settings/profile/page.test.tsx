@@ -91,7 +91,7 @@ describe('ProfileSettingsPage', () => {
 
   it('renders without crashing', () => {
     renderWithProvider(<ProfileSettingsPage />);
-    expect(screen.getByText('Profile Settings')).toBeInTheDocument();
+    expect(screen.getAllByText('Profile Settings').length).toBeGreaterThan(0);
   });
 
   it('renders heading', () => {

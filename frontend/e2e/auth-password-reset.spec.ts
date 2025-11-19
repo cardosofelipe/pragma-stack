@@ -25,7 +25,7 @@ test.describe('Password Reset Request Flow', () => {
 
     // Should stay on password reset page (validation failed)
     // URL might have query params, so use regex
-    await expect(page).toHaveURL(/\/password-reset/);
+    await expect(page).toHaveURL(/\/en\/password-reset/);
   });
 
   test('should show validation error for invalid email', async ({ page }) => {
@@ -115,7 +115,7 @@ test.describe('Password Reset Confirm Flow', () => {
     await page.waitForTimeout(1000);
 
     // Should stay on password reset confirm page (validation failed)
-    await expect(page).toHaveURL(/\/password-reset\/confirm/);
+    await expect(page).toHaveURL(/\/en\/password-reset\/confirm/);
   });
 
   test('should show validation error for weak password', async ({ page }) => {
@@ -131,7 +131,7 @@ test.describe('Password Reset Confirm Flow', () => {
     await page.waitForTimeout(1000);
 
     // Should stay on password reset confirm page (validation failed)
-    await expect(page).toHaveURL(/\/password-reset\/confirm/);
+    await expect(page).toHaveURL(/\/en\/password-reset\/confirm/);
   });
 
   test('should show validation error for mismatched passwords', async ({ page }) => {
@@ -147,7 +147,7 @@ test.describe('Password Reset Confirm Flow', () => {
     await page.waitForTimeout(1000);
 
     // Should stay on password reset confirm page (validation failed)
-    await expect(page).toHaveURL(/\/password-reset\/confirm/);
+    await expect(page).toHaveURL(/\/en\/password-reset\/confirm/);
   });
 
   test('should show error for invalid token', async ({ page }) => {

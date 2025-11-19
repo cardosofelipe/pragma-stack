@@ -61,7 +61,7 @@ describe('PasswordResetRequestForm', () => {
     render(<PasswordResetRequestForm />, { wrapper: createWrapper() });
 
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /send reset instructions/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sendButton/i })).toBeInTheDocument();
   });
 
   it('shows validation error for empty email', async () => {
@@ -69,12 +69,12 @@ describe('PasswordResetRequestForm', () => {
     render(<PasswordResetRequestForm />, { wrapper: createWrapper() });
 
     const submitButton = screen.getByRole('button', {
-      name: /send reset instructions/i,
+      name: /sendButton/i,
     });
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/email is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/this field is required/i)).toBeInTheDocument();
     });
   });
 
@@ -85,7 +85,9 @@ describe('PasswordResetRequestForm', () => {
     render(<PasswordResetRequestForm />, { wrapper: createWrapper() });
 
     expect(
-      screen.getByText(/enter your email address and we'll send you instructions/i)
+      screen.getByText(
+        /enter your email address and we will send you a link to reset your password/i
+      )
     ).toBeInTheDocument();
   });
 
@@ -101,8 +103,8 @@ describe('PasswordResetRequestForm', () => {
   it('marks email field as required with asterisk', () => {
     render(<PasswordResetRequestForm />, { wrapper: createWrapper() });
 
-    const labels = screen.getAllByText('*');
-    expect(labels.length).toBeGreaterThan(0);
+    // The required indicator is now the word "required" not an asterisk
+    expect(screen.getByText('required')).toBeInTheDocument();
   });
 
   describe('Form submission', () => {
@@ -113,7 +115,7 @@ describe('PasswordResetRequestForm', () => {
       render(<PasswordResetRequestForm />, { wrapper: createWrapper() });
 
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.click(screen.getByRole('button', { name: /send reset instructions/i }));
+      await user.click(screen.getByRole('button', { name: /sendButton/i }));
 
       await waitFor(() => {
         expect(mockMutateAsync).toHaveBeenCalledWith({ email: 'test@example.com' });
@@ -127,10 +129,10 @@ describe('PasswordResetRequestForm', () => {
       render(<PasswordResetRequestForm />, { wrapper: createWrapper() });
 
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.click(screen.getByRole('button', { name: /send reset instructions/i }));
+      await user.click(screen.getByRole('button', { name: /sendButton/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/password reset instructions have been sent/i)).toBeInTheDocument();
+        expect(screen.getByText('success')).toBeInTheDocument();
       });
     });
 
@@ -142,7 +144,7 @@ describe('PasswordResetRequestForm', () => {
 
       const emailInput = screen.getByLabelText(/email/i) as HTMLInputElement;
       await user.type(emailInput, 'test@example.com');
-      await user.click(screen.getByRole('button', { name: /send reset instructions/i }));
+      await user.click(screen.getByRole('button', { name: /sendButton/i }));
 
       await waitFor(() => {
         expect(emailInput.value).toBe('');
@@ -157,7 +159,7 @@ describe('PasswordResetRequestForm', () => {
       render(<PasswordResetRequestForm onSuccess={onSuccess} />, { wrapper: createWrapper() });
 
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.click(screen.getByRole('button', { name: /send reset instructions/i }));
+      await user.click(screen.getByRole('button', { name: /sendButton/i }));
 
       await waitFor(() => {
         expect(onSuccess).toHaveBeenCalled();
@@ -177,7 +179,7 @@ describe('PasswordResetRequestForm', () => {
       render(<PasswordResetRequestForm />, { wrapper: createWrapper() });
 
       await user.type(screen.getByLabelText(/email/i), 'notfound@example.com');
-      await user.click(screen.getByRole('button', { name: /send reset instructions/i }));
+      await user.click(screen.getByRole('button', { name: /sendButton/i }));
 
       await waitFor(() => {
         expect(screen.getByText('User not found')).toBeInTheDocument();
@@ -198,7 +200,7 @@ describe('PasswordResetRequestForm', () => {
       render(<PasswordResetRequestForm />, { wrapper: createWrapper() });
 
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.click(screen.getByRole('button', { name: /send reset instructions/i }));
+      await user.click(screen.getByRole('button', { name: /sendButton/i }));
 
       await waitFor(() => {
         expect(screen.getByText('Invalid email format')).toBeInTheDocument();
@@ -213,7 +215,7 @@ describe('PasswordResetRequestForm', () => {
       render(<PasswordResetRequestForm />, { wrapper: createWrapper() });
 
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.click(screen.getByRole('button', { name: /send reset instructions/i }));
+      await user.click(screen.getByRole('button', { name: /sendButton/i }));
 
       await waitFor(() => {
         expect(
@@ -231,22 +233,20 @@ describe('PasswordResetRequestForm', () => {
 
       const emailInput = screen.getByLabelText(/email/i);
       await user.type(emailInput, 'test@example.com');
-      await user.click(screen.getByRole('button', { name: /send reset instructions/i }));
+      await user.click(screen.getByRole('button', { name: /sendButton/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/password reset instructions have been sent/i)).toBeInTheDocument();
+        expect(screen.getByText('success')).toBeInTheDocument();
       });
 
       // Second submission with error
       mockMutateAsync.mockRejectedValueOnce([{ code: 'USER_001', message: 'User not found' }]);
 
       await user.type(emailInput, 'another@example.com');
-      await user.click(screen.getByRole('button', { name: /send reset instructions/i }));
+      await user.click(screen.getByRole('button', { name: /sendButton/i }));
 
       await waitFor(() => {
-        expect(
-          screen.queryByText(/password reset instructions have been sent/i)
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText('success')).not.toBeInTheDocument();
         expect(screen.getByText('User not found')).toBeInTheDocument();
       });
     });

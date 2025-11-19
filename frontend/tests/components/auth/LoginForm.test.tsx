@@ -82,8 +82,7 @@ describe('LoginForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/email is required/i)).toBeInTheDocument();
-      expect(screen.getByText(/password is required/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/this field is required/i).length).toBeGreaterThanOrEqual(2);
     });
   });
 
@@ -100,7 +99,7 @@ describe('LoginForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/password must be at least 8 characters/i)).toBeInTheDocument();
+      expect(screen.getByText(/must be at least 8 characters/i)).toBeInTheDocument();
     });
   });
 
@@ -233,9 +232,7 @@ describe('LoginForm', () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(
-          screen.getByText('An unexpected error occurred. Please try again.')
-        ).toBeInTheDocument();
+        expect(screen.getByText('unexpectedError')).toBeInTheDocument();
       });
     });
 

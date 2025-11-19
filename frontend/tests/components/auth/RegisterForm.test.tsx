@@ -83,8 +83,9 @@ describe('RegisterForm', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
+      // Check for field-specific validation messages from i18n
       expect(screen.getByText(/first name is required/i)).toBeInTheDocument();
-      expect(screen.getByText(/email is required/i)).toBeInTheDocument();
+      expect(screen.getByText(/this field is required/i)).toBeInTheDocument(); // Email uses generic message
       expect(screen.getByText(/password is required/i)).toBeInTheDocument();
     });
   });

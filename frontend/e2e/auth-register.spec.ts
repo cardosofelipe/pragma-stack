@@ -129,7 +129,7 @@ test.describe('Registration Flow', () => {
 
     // Should stay on register page (validation failed)
     // URL might have query params, so use regex
-    await expect(page).toHaveURL(/\/register/);
+    await expect(page).toHaveURL(/\/en\/register/);
   });
 
   test('should show validation error for short first name', async ({ page }) => {
@@ -145,7 +145,7 @@ test.describe('Registration Flow', () => {
 
     // Should stay on register page (validation failed)
     // URL might have query params, so use regex
-    await expect(page).toHaveURL(/\/register/);
+    await expect(page).toHaveURL(/\/en\/register/);
   });
 
   test('should show validation error for weak password', async ({ page }) => {
@@ -161,7 +161,7 @@ test.describe('Registration Flow', () => {
 
     // Should stay on register page (validation failed)
     // URL might have query params, so use regex
-    await expect(page).toHaveURL(/\/register/);
+    await expect(page).toHaveURL(/\/en\/register/);
   });
 
   test('should show validation error for mismatched passwords', async ({ page }) => {
@@ -177,7 +177,7 @@ test.describe('Registration Flow', () => {
 
     // Should stay on register page (validation failed)
     // URL might have query params, so use regex
-    await expect(page).toHaveURL(/\/register/);
+    await expect(page).toHaveURL(/\/en\/register/);
   });
 
   test('should show error for duplicate email', async ({ page }) => {
