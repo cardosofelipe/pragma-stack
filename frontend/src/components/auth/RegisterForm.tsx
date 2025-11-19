@@ -33,11 +33,7 @@ const createRegisterSchema = (t: (key: string) => string) =>
         .min(1, t('firstNameRequired'))
         .min(2, t('firstNameMinLength'))
         .max(50, t('firstNameMaxLength')),
-      last_name: z
-        .string()
-        .max(50, t('lastNameMaxLength'))
-        .optional()
-        .or(z.literal('')), // Allow empty string
+      last_name: z.string().max(50, t('lastNameMaxLength')).optional().or(z.literal('')), // Allow empty string
       password: z
         .string()
         .min(1, t('passwordRequired'))
