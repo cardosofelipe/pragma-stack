@@ -17,6 +17,17 @@
 
 ---
 
+## 🤖 AI-Friendly Documentation
+
+This project includes comprehensive documentation designed for AI coding assistants:
+
+- **[AGENTS.md](./AGENTS.md)** - Framework-agnostic AI assistant context (works with Claude, Cursor, GitHub Copilot, etc.)
+- **[CLAUDE.md](./CLAUDE.md)** - Claude Code-specific guidance and preferences
+
+These files provide AI assistants with project architecture, development patterns, testing strategies, and best practices to help them work more effectively with this codebase.
+
+---
+
 ## Why This Template?
 
 Building a modern full-stack application from scratch means solving the same problems over and over: authentication, authorization, multi-tenancy, admin panels, session management, database migrations, API documentation, testing infrastructure...
@@ -365,13 +376,17 @@ python migrate.py current
 
 ## 📖 Documentation
 
+### AI Assistant Documentation
+
+- **[AGENTS.md](./AGENTS.md)** - Framework-agnostic AI coding assistant context
+- **[CLAUDE.md](./CLAUDE.md)** - Claude Code-specific guidance and preferences
+
 ### Backend Documentation
 
 - **[ARCHITECTURE.md](./backend/docs/ARCHITECTURE.md)** - System architecture and design patterns
 - **[CODING_STANDARDS.md](./backend/docs/CODING_STANDARDS.md)** - Code quality standards
 - **[COMMON_PITFALLS.md](./backend/docs/COMMON_PITFALLS.md)** - Common mistakes to avoid
 - **[FEATURE_EXAMPLE.md](./backend/docs/FEATURE_EXAMPLE.md)** - Step-by-step feature guide
-- **[CLAUDE.md](./CLAUDE.md)** - Comprehensive development guide
 
 ### Frontend Documentation
 

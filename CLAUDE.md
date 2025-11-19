@@ -1,10 +1,14 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Claude Code context for FastAPI + Next.js Full-Stack Template.
 
-## Critical User Preferences
+**See [AGENTS.md](./AGENTS.md) for project context, architecture, and development commands.**
 
-### File Operations - NEVER Use Heredoc/Cat Append
+## Claude Code-Specific Guidance
+
+### Critical User Preferences
+
+#### File Operations - NEVER Use Heredoc/Cat Append
 **ALWAYS use Read/Write/Edit tools instead of `cat >> file << EOF` commands.**
 
 This triggers manual approval dialogs and disrupts workflow.
@@ -18,215 +22,37 @@ EOF
 # CORRECT ✅ - Use Read, then Write tools
 ```
 
-### Work Style
+#### Work Style
 - User prefers autonomous operation without frequent interruptions
 - Ask for batch permissions upfront for long work sessions
 - Work independently, document decisions clearly
+- Only use emojis if the user explicitly requests it
 
-## Project Architecture
+### When Working with This Stack
 
-This is a **FastAPI + Next.js full-stack application** with the following structure:
+**Dependency Management:**
+- Backend uses **uv** (modern Python package manager), not pip
+- Always use `uv run` prefix: `IS_TEST=True uv run pytest`
+- Or use Makefile commands: `make test`, `make install-dev`
+- Add dependencies: `uv add <package>` or `uv add --dev <package>`
 
-### Backend (FastAPI)
-```
-backend/app/
-├── api/            # API routes organized by version
-│   ├── routes/     # Endpoint implementations (auth, users, sessions, admin, organizations)
-│   └── dependencies/ # FastAPI dependencies (auth, permissions)
-├── core/           # Core functionality
-│   ├── config.py   # Settings (Pydantic BaseSettings)
-│   ├── database.py # SQLAlchemy async engine setup
-│   ├── auth.py     # JWT token generation/validation
-│   └── exceptions.py # Custom exception classes and handlers
-├── crud/           # Database CRUD operations (base, user, session, organization)
-├── models/         # SQLAlchemy ORM models
-├── schemas/        # Pydantic request/response schemas
-├── services/       # Business logic layer (auth_service)
-└── utils/          # Utilities (security, device detection, test helpers)
-```
+**Database Migrations:**
+- Use the `migrate.py` helper script, not Alembic directly
+- Generate + apply: `python migrate.py auto "message"`
+- Never commit migrations without testing them first
+- Check current state: `python migrate.py current`
 
-### Frontend (Next.js 15)
-```
-frontend/src/
-├── app/            # Next.js App Router pages
-├── components/     # React components (auth/, ui/)
-├── lib/
-│   ├── api/        # API client (auto-generated from OpenAPI)
-│   ├── stores/     # Zustand state management
-│   └── utils/      # Utility functions
-└── hooks/          # Custom React hooks
-```
+**Frontend API Client Generation:**
+- Run `npm run generate:api` after backend schema changes
+- Client is auto-generated from OpenAPI spec
+- Located in `frontend/src/lib/api/generated/`
+- NEVER manually edit generated files
 
-## Development Commands
-
-### Backend
-
-#### Setup
-
-**Dependencies are managed with [uv](https://docs.astral.sh/uv/) - the modern, fast Python package manager.**
-
-```bash
-cd backend
-
-# Install uv (if not already installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Install all dependencies (production + dev) from uv.lock
-uv sync --extra dev
-
-# Or use the Makefile
-make install-dev
-```
-
-**Why uv?**
-- 🚀 10-100x faster than pip
-- 🔒 Reproducible builds with `uv.lock`
-- 📦 Modern dependency resolution
-- ⚡ Built by Astral (creators of Ruff)
-
-#### Database Migrations
-```bash
-# Using the migration helper (preferred)
-python migrate.py generate "migration message"  # Generate migration
-python migrate.py apply                         # Apply migrations
-python migrate.py auto "message"                # Generate and apply in one step
-python migrate.py list                          # List all migrations
-python migrate.py current                       # Show current revision
-python migrate.py check                         # Check DB connection
-
-# Or using Alembic directly
-alembic revision --autogenerate -m "message"
-alembic upgrade head
-```
-
-#### Testing
-
-**Test Coverage: High (comprehensive test suite)**
-- Security-focused testing with JWT algorithm attack prevention (CVE-2015-9235)
-- Session hijacking and privilege escalation tests included
-- Missing lines justified as defensive code, error handlers, and production-only code
-
-```bash
-# Run all tests (uses pytest-xdist for parallel execution)
-make test
-
-# Run with coverage report
-make test-cov
-
-# Or run directly with uv
-IS_TEST=True uv run pytest
-
-# Run specific test file
-IS_TEST=True uv run pytest tests/api/test_auth.py -v
-
-# Run single test
-IS_TEST=True uv run pytest tests/api/test_auth.py::TestLogin::test_login_success -v
-```
-
-**Available Make Commands:**
-```bash
-make help          # Show all available commands
-make install-dev   # Install all dependencies
-make validate      # Run lint + format + type checks
-make test          # Run tests
-make test-cov      # Run tests with coverage
-```
-
-#### Running Locally
-```bash
-cd backend
-uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-### Frontend
-
-#### Setup
-```bash
-cd frontend
-npm install
-```
-
-#### Development
-```bash
-npm run dev          # Start dev server on http://localhost:3000
-npm run build        # Production build
-npm run lint         # ESLint
-npm run type-check   # TypeScript checking
-```
-
-#### Testing
-```bash
-# Unit tests (Jest)
-npm test                    # Run all unit tests
-npm run test:watch          # Watch mode
-npm run test:coverage       # With coverage
-
-# E2E tests (Playwright)
-npm run test:e2e            # Run all E2E tests
-npm run test:e2e:ui         # Open Playwright UI
-npm run test:e2e:debug      # Debug mode
-npx playwright test auth-login.spec.ts  # Run specific file
-```
-
-**E2E Test Best Practices:**
-- Use `Promise.all()` pattern for Next.js Link navigation:
-  ```typescript
-  await Promise.all([
-    page.waitForURL('/target', { timeout: 10000 }),
-    link.click()
-  ]);
-  ```
-- Use ID-based selectors for validation errors (e.g., `#email-error`)
-- Error IDs use dashes not underscores (`#new-password-error`)
-- Target `.border-destructive[role="alert"]` to avoid Next.js route announcer conflicts
-- Uses 12 workers in non-CI mode (`workers: 12` in `playwright.config.ts`)
-- URL assertions should use regex to handle query params: `/\/auth\/login/`
-
-### Docker
-
-```bash
-# Development (with hot reload)
-docker-compose -f docker-compose.dev.yml up
-
-# Production
-docker-compose up -d
-
-# Rebuild specific service
-docker-compose build backend
-docker-compose build frontend
-```
-
-## Key Architectural Patterns
-
-### Authentication Flow
-1. **Login**: `POST /api/v1/auth/login` returns access + refresh tokens
-   - Access token: 15 minutes expiry (JWT)
-   - Refresh token: 7 days expiry (JWT with JTI stored in DB)
-   - Session tracking with device info (IP, user agent, device ID)
-
-2. **Token Refresh**: `POST /api/v1/auth/refresh` validates refresh token JTI
-   - Checks session is active in database
-   - Issues new access token (refresh token remains valid)
-   - Updates session `last_used_at`
-
-3. **Authorization**: FastAPI dependencies in `api/dependencies/auth.py`
-   - `get_current_user`: Validates access token, returns User (raises 401 if invalid)
-   - `get_current_active_user`: Requires valid access token + active account
-   - `get_optional_current_user`: Accepts both authenticated and anonymous users (returns User or None)
-   - `get_current_superuser`: Requires superuser flag
-
-### Database Pattern: Async SQLAlchemy
-- **Engine**: Created in `core/database.py` with connection pooling
-- **Sessions**: AsyncSession from `async_sessionmaker`
-- **CRUD**: Base class in `crud/base.py` with common operations
-  - Inherits: `CRUDUser`, `CRUDSession`, `CRUDOrganization`
-  - Pattern: `async def get(db: AsyncSession, id: str) -> Model | None`
-
-### Frontend State Management
-- **Zustand stores**: `lib/stores/` (authStore, etc.)
-- **TanStack Query**: API data fetching/caching
-- **Auto-generated client**: `lib/api/generated/` from OpenAPI spec
-  - Generate with: `npm run generate:api` (runs `scripts/generate-api-client.sh`)
+**Testing Commands:**
+- Backend: `IS_TEST=True uv run pytest` (always prefix with `IS_TEST=True`)
+- Frontend unit: `npm test`
+- Frontend E2E: `npm run test:e2e`
+- Use `make test` or `make test-cov` in backend for convenience
 
 ### 🔴 CRITICAL: Auth Store Dependency Injection Pattern
 
@@ -254,41 +80,54 @@ const { user, isAuthenticated } = useAuth();
 
 **See**: `frontend/docs/ARCHITECTURE_FIX_REPORT.md` for full details.
 
-### Session Management Architecture
-**Database-backed session tracking** (not just JWT):
-- Each refresh token has a corresponding `UserSession` record
-- Tracks: device info, IP, location, last used timestamp
-- Supports session revocation (logout from specific devices)
-- Cleanup job removes expired sessions
+### E2E Test Best Practices
 
-### Permission System
-Three-tier organization roles:
-- **Owner**: Full control (delete org, manage all members)
-- **Admin**: Can add/remove members, assign admin role (not owner)
-- **Member**: Read-only organization access
+When writing or fixing Playwright tests:
 
-Dependencies in `api/dependencies/permissions.py`:
-- `require_organization_owner`
-- `require_organization_admin`
-- `require_organization_member`
-- `can_manage_organization_member` (owner or admin, but not self-demotion)
+**Navigation Pattern:**
+```typescript
+// ✅ CORRECT - Use Promise.all for Next.js Link clicks
+await Promise.all([
+  page.waitForURL('/target', { timeout: 10000 }),
+  link.click()
+]);
+```
 
-## Testing Infrastructure
+**Selectors:**
+- Use ID-based selectors for validation errors: `#email-error`
+- Error IDs use dashes not underscores: `#new-password-error`
+- Target `.border-destructive[role="alert"]` to avoid Next.js route announcer conflicts
+- Avoid generic `[role="alert"]` which matches multiple elements
 
-### Backend Test Patterns
+**URL Assertions:**
+```typescript
+// ✅ Use regex to handle query params
+await expect(page).toHaveURL(/\/auth\/login/);
 
-**Fixtures** (in `tests/conftest.py`):
-- `async_test_db`: Fresh SQLite in-memory database per test
-- `client`: AsyncClient with test database override
-- `async_test_user`: Pre-created regular user
-- `async_test_superuser`: Pre-created superuser
-- `user_token` / `superuser_token`: Access tokens for API calls
+// ❌ Don't use exact strings (fails with query params)
+await expect(page).toHaveURL('/auth/login');
+```
 
-**Database Mocking for Exception Testing**:
+**Configuration:**
+- Uses 12 workers in non-CI mode (`playwright.config.ts`)
+- Reduces to 2 workers in CI for stability
+- Tests are designed to be non-flaky with proper waits
+
+### Important Implementation Details
+
+**Authentication Testing:**
+- Backend fixtures in `tests/conftest.py`:
+  - `async_test_db`: Fresh SQLite per test
+  - `async_test_user` / `async_test_superuser`: Pre-created users
+  - `user_token` / `superuser_token`: Access tokens for API calls
+- Always use `@pytest.mark.asyncio` for async tests
+- Use `@pytest_asyncio.fixture` for async fixtures
+
+**Database Testing:**
 ```python
+# Mock database exceptions correctly
 from unittest.mock import patch, AsyncMock
 
-# Mock database commit to raise exception
 async def mock_commit():
     raise OperationalError("Connection lost", {}, Exception())
 
@@ -299,376 +138,85 @@ with patch.object(session, 'commit', side_effect=mock_commit):
         mock_rollback.assert_called_once()
 ```
 
-**Testing Routes**:
-```python
-@pytest.mark.asyncio
-async def test_endpoint(client, user_token):
-    response = await client.get(
-        "/api/v1/endpoint",
-        headers={"Authorization": f"Bearer {user_token}"}
-    )
-    assert response.status_code == 200
-```
-
-**IMPORTANT**: Use `@pytest_asyncio.fixture` for async fixtures, not `@pytest.fixture`
-
-### Frontend Test Patterns
-
-**Unit Tests (Jest)**:
-```typescript
-// SSR-safe mocking
-jest.mock('@/lib/stores/authStore', () => ({
-  useAuthStore: jest.fn()
-}));
-
-beforeEach(() => {
-  (useAuthStore as jest.Mock).mockReturnValue({
-    user: mockUser,
-    login: mockLogin
-  });
-});
-```
-
-**E2E Tests (Playwright)**:
-```typescript
-test('navigation', async ({ page }) => {
-  await page.goto('/');
-
-  const link = page.getByRole('link', { name: 'Login' });
-  await Promise.all([
-    page.waitForURL(/\/auth\/login/, { timeout: 10000 }),
-    link.click()
-  ]);
-
-  await expect(page).toHaveURL(/\/auth\/login/);
-});
-```
-
-## Configuration
-
-### Environment Variables
-
-**Backend** (`.env`):
-```bash
-# Database
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your_password
-POSTGRES_HOST=db
-POSTGRES_PORT=5432
-POSTGRES_DB=app
-
-# Security
-SECRET_KEY=your-secret-key-min-32-chars
-ENVIRONMENT=development|production
-CSP_MODE=relaxed|strict|disabled
-
-# First Superuser (auto-created on init)
-FIRST_SUPERUSER_EMAIL=admin@example.com
-FIRST_SUPERUSER_PASSWORD=admin123
-
-# CORS
-BACKEND_CORS_ORIGINS=["http://localhost:3000"]
-```
-
-**Frontend** (`.env.local`):
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
-```
-
-### Database Connection Pooling
-Configured in `core/config.py`:
-- `db_pool_size`: 20 (default connections)
-- `db_max_overflow`: 50 (max overflow)
-- `db_pool_timeout`: 30 seconds
-- `db_pool_recycle`: 3600 seconds (recycle after 1 hour)
-
-### Security Headers
-Automatically applied via middleware in `main.py`:
-- `X-Frame-Options: DENY`
-- `X-Content-Type-Options: nosniff`
-- `X-XSS-Protection: 1; mode=block`
-- `Strict-Transport-Security` (production only)
-- Content-Security-Policy (configurable via `CSP_MODE`)
-
-### Rate Limiting
-- Implemented with `slowapi`
-- Default: 60 requests/minute per IP
-- Applied to auth endpoints (login, register, password reset)
-- Override in route decorators: `@limiter.limit("10/minute")`
-
-## Common Workflows
-
-### Adding a New API Endpoint
-
-1. **Create schema** (`backend/app/schemas/`):
-   ```python
-   class ItemCreate(BaseModel):
-       name: str
-       description: Optional[str] = None
-
-   class ItemResponse(BaseModel):
-       id: UUID
-       name: str
-       created_at: datetime
-   ```
-
-2. **Create CRUD operations** (`backend/app/crud/`):
-   ```python
-   class CRUDItem(CRUDBase[Item, ItemCreate, ItemUpdate]):
-       async def get_by_name(self, db: AsyncSession, name: str) -> Item | None:
-           result = await db.execute(select(Item).where(Item.name == name))
-           return result.scalar_one_or_none()
-
-   item = CRUDItem(Item)
-   ```
-
-3. **Create route** (`backend/app/api/routes/items.py`):
-   ```python
-   from app.api.dependencies.auth import get_current_user
-
-   @router.post("/", response_model=ItemResponse)
-   async def create_item(
-       item_in: ItemCreate,
-       current_user: User = Depends(get_current_user),
-       db: AsyncSession = Depends(get_db)
-   ):
-       item = await item_crud.create(db, obj_in=item_in)
-       return item
-   ```
-
-4. **Register router** (`backend/app/api/main.py`):
-   ```python
-   from app.api.routes import items
-   api_router.include_router(items.router, prefix="/items", tags=["Items"])
-   ```
-
-5. **Write tests** (`backend/tests/api/test_items.py`):
-   ```python
-   @pytest.mark.asyncio
-   async def test_create_item(client, user_token):
-       response = await client.post(
-           "/api/v1/items",
-           headers={"Authorization": f"Bearer {user_token}"},
-           json={"name": "Test Item"}
-       )
-       assert response.status_code == 201
-   ```
-
-6. **Generate frontend client**:
-   ```bash
-   cd frontend
-   npm run generate:api
-   ```
-
-### Adding a New React Component
-
-1. **Create component** (`frontend/src/components/`):
-   ```typescript
-   export function MyComponent() {
-     const { user } = useAuthStore();
-     return <div>Hello {user?.firstName}</div>;
-   }
-   ```
-
-2. **Add tests** (`frontend/src/components/__tests__/`):
-   ```typescript
-   import { render, screen } from '@testing-library/react';
-
-   test('renders component', () => {
-     render(<MyComponent />);
-     expect(screen.getByText(/Hello/)).toBeInTheDocument();
-   });
-   ```
-
-3. **Add to page** (`frontend/src/app/page.tsx`):
-   ```typescript
-   import { MyComponent } from '@/components/MyComponent';
-
-   export default function Page() {
-     return <MyComponent />;
-   }
-   ```
-
-## Development Tooling Stack
-
-**State-of-the-art Python tooling (Nov 2025):**
-
-### Dependency Management: uv
-- **Fast**: 10-100x faster than pip
-- **Reliable**: Reproducible builds with `uv.lock` lockfile
-- **Modern**: Built by Astral (Ruff creators) in Rust
-- **Commands**:
-  - `make install-dev` - Install all dependencies
-  - `make sync` - Sync from lockfile
-  - `uv add <package>` - Add new dependency
-  - `uv add --dev <package>` - Add dev dependency
-
-### Code Quality: Ruff + mypy
-- **Ruff**: All-in-one linting, formatting, and import sorting
-  - Replaces: Black, Flake8, isort
-  - **10-100x faster** than alternatives
-  - `make lint`, `make format`, `make validate`
-- **mypy**: Type checking with Pydantic plugin
-  - Gradual typing approach
-  - Strategic per-module configurations
-
-### Configuration: pyproject.toml
-- Single source of truth for all tools
-- Dependencies defined in `[project.dependencies]`
-- Dev dependencies in `[project.optional-dependencies]`
-- Tool configs: Ruff, mypy, pytest, coverage
-
-## Current Project Status (Nov 2025)
-
-### Completed Features
-- ✅ Authentication system (JWT with refresh tokens)
-- ✅ Session management (device tracking, revocation)
-- ✅ User management (CRUD, password change)
-- ✅ Organization system (multi-tenant with roles)
-- ✅ Admin panel (user/org management, bulk operations)
-- ✅ E2E test suite (56 passing, 1 skipped, zero flaky tests)
-
-### Test Coverage
-- **Backend**: 97% overall (743 tests, all passing) ✅
-  - Comprehensive security testing (JWT attacks, session hijacking, privilege escalation)
-  - User CRUD: 100% ✅
-  - Session CRUD: 100% ✅
-  - Auth routes: 99% ✅
-  - Organization routes: 100% ✅
-  - Permissions: 100% ✅
-  - 84 missing lines justified (defensive code, error handlers, production-only code)
-
-- **Frontend E2E**: 56 passing, 1 skipped across 7 files ✅
-  - auth-login.spec.ts (19 tests)
-  - auth-register.spec.ts (14 tests)
-  - auth-password-reset.spec.ts (10 tests)
-  - navigation.spec.ts (10 tests)
-  - settings-password.spec.ts (3 tests)
-  - settings-profile.spec.ts (2 tests)
-  - settings-navigation.spec.ts (5 tests)
-  - settings-sessions.spec.ts (1 skipped - route not yet implemented)
-
-## Email Service Integration
-
-The project includes a **placeholder email service** (`backend/app/services/email_service.py`) designed for easy integration with production email providers.
-
-### Current Implementation
-
-**Console Backend (Default)**:
-- Logs email content to console/logs instead of sending
-- Safe for development and testing
-- No external dependencies required
-
-### Production Integration
-
-To enable email functionality, implement one of these approaches:
-
-**Option 1: SMTP Integration** (Recommended for most use cases)
-```python
-# In app/services/email_service.py, complete the SMTPEmailBackend implementation
-from aiosmtplib import SMTP
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-
-# Add environment variables to .env:
-# SMTP_HOST=smtp.gmail.com
-# SMTP_PORT=587
-# SMTP_USERNAME=your-email@gmail.com
-# SMTP_PASSWORD=your-app-password
-```
-
-**Option 2: Third-Party Service** (SendGrid, AWS SES, Mailgun, etc.)
-```python
-# Create a new backend class, e.g., SendGridEmailBackend
-class SendGridEmailBackend(EmailBackend):
-    def __init__(self, api_key: str):
-        self.api_key = api_key
-        self.client = sendgrid.SendGridAPIClient(api_key)
-
-    async def send_email(self, to, subject, html_content, text_content=None):
-        # Implement SendGrid sending logic
-        pass
-
-# Update global instance in email_service.py:
-# email_service = EmailService(SendGridEmailBackend(settings.SENDGRID_API_KEY))
-```
-
-**Option 3: External Microservice**
-- Use a dedicated email microservice via HTTP API
-- Implement `HTTPEmailBackend` that makes async HTTP requests
-
-### Email Templates Included
-
-The service includes pre-built templates for:
-- **Password Reset**: `send_password_reset_email()` - 1 hour expiry
-- **Email Verification**: `send_email_verification()` - 24 hour expiry
-
-Both include responsive HTML and plain text versions.
-
-### Integration Points
-
-Email sending is called from:
-- `app/api/routes/auth.py` - Password reset flow (placeholder comments)
-- Registration flow - Ready for email verification integration
-
-**Note**: Current auth routes have placeholder comments where email functionality should be integrated. Search for "TODO: Send email" in the codebase.
-
-## API Documentation
-
-Once backend is running:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **OpenAPI JSON**: http://localhost:8000/api/v1/openapi.json
-
-## Troubleshooting
-
-### Tests failing with "Module was never imported"
-Run with single process: `pytest -n 0`
-
-### Coverage not improving despite new tests
-- Verify tests actually execute endpoints (check response.status_code)
-- Generate HTML coverage: `pytest --cov=app --cov-report=html -n 0`
-- Check for dependency override issues in test fixtures
-
-### Frontend type errors
-```bash
-npm run type-check          # Check all types
-npx tsc --noEmit           # Same but shorter
-```
-
-### E2E tests flaking
-- Check worker count (should be 4, not 16+)
-- Use `Promise.all()` for navigation
-- Use regex for URL assertions
-- Target specific selectors (avoid generic `[role="alert"]`)
-
-### Database migration conflicts
-```bash
-python migrate.py list      # Check migration history
-alembic downgrade -1        # Downgrade one revision
-alembic upgrade head        # Re-apply
-```
-
-## Additional Documentation
-
-### Backend Documentation
-- `backend/docs/ARCHITECTURE.md`: System architecture and design patterns
-- `backend/docs/CODING_STANDARDS.md`: Code quality standards and best practices
-- `backend/docs/COMMON_PITFALLS.md`: Common mistakes and how to avoid them
-- `backend/docs/FEATURE_EXAMPLE.md`: Step-by-step feature implementation guide
-
-### Frontend Documentation
-- **`frontend/docs/ARCHITECTURE_FIX_REPORT.md`**: ⭐ Critical DI pattern fixes (READ THIS!)
-- `frontend/e2e/README.md`: E2E testing setup and guidelines
-- **`frontend/docs/design-system/`**: Comprehensive design system documentation
-  - `README.md`: Hub with learning paths (start here)
-  - `00-quick-start.md`: 5-minute crash course
-  - `01-foundations.md`: Colors (OKLCH), typography, spacing, shadows
-  - `02-components.md`: shadcn/ui component library guide
-  - `03-layouts.md`: Layout patterns (Grid vs Flex decision trees)
-  - `04-spacing-philosophy.md`: Parent-controlled spacing strategy
-  - `05-component-creation.md`: When to create vs compose components
-  - `06-forms.md`: Form patterns with react-hook-form + Zod
-  - `07-accessibility.md`: WCAG AA compliance, keyboard navigation, screen readers
-  - `08-ai-guidelines.md`: **AI code generation rules (read this!)**
-  - `99-reference.md`: Quick reference cheat sheet (bookmark this)
+**Frontend Component Development:**
+- Follow design system docs in `frontend/docs/design-system/`
+- Read `08-ai-guidelines.md` for AI code generation rules
+- Use parent-controlled spacing (see `04-spacing-philosophy.md`)
+- WCAG AA compliance required (see `07-accessibility.md`)
+
+**Security Considerations:**
+- Backend has comprehensive security tests (JWT attacks, session hijacking)
+- Never skip security headers in production
+- Rate limiting is configured in route decorators: `@limiter.limit("10/minute")`
+- Session revocation is database-backed, not just JWT expiry
+
+### Common Workflows Guidance
+
+**When Adding a New Feature:**
+1. Start with backend schema and CRUD
+2. Implement API route with proper authorization
+3. Write backend tests (aim for >90% coverage)
+4. Generate frontend API client: `npm run generate:api`
+5. Implement frontend components
+6. Write frontend unit tests
+7. Add E2E tests for critical flows
+8. Update relevant documentation
+
+**When Fixing Tests:**
+- Backend: Check test database isolation and async fixture usage
+- Frontend unit: Verify mocking of `useAuth()` not `useAuthStore`
+- E2E: Use `Promise.all()` pattern and regex URL assertions
+
+**When Debugging:**
+- Backend: Check `IS_TEST=True` environment variable is set
+- Frontend: Run `npm run type-check` first
+- E2E: Use `npm run test:e2e:debug` for step-by-step debugging
+- Check logs: Backend has detailed error logging
+
+### Tool Usage Preferences
+
+**Prefer specialized tools over bash:**
+- Use Read/Write/Edit tools for file operations
+- Never use `cat`, `echo >`, or heredoc for file manipulation
+- Use Task tool with `subagent_type=Explore` for codebase exploration
+- Use Grep tool for code search, not bash `grep`
+
+**When to use parallel tool calls:**
+- Independent git commands: `git status`, `git diff`, `git log`
+- Reading multiple unrelated files
+- Running multiple test suites simultaneously
+- Independent validation steps
+
+## Custom Skills
+
+No Claude Code Skills installed yet. To create one, invoke the built-in "skill-creator" skill.
+
+**Potential skill ideas for this project:**
+- API endpoint generator workflow (schema → CRUD → route → tests → frontend client)
+- Component generator with design system compliance
+- Database migration troubleshooting helper
+- Test coverage analyzer and improvement suggester
+- E2E test generator for new features
+
+## Additional Resources
+
+**Comprehensive Documentation:**
+- [AGENTS.md](./AGENTS.md) - Framework-agnostic AI assistant context
+- [README.md](./README.md) - User-facing project overview
+- `backend/docs/` - Backend architecture, coding standards, common pitfalls
+- `frontend/docs/design-system/` - Complete design system guide
+- `frontend/docs/ARCHITECTURE_FIX_REPORT.md` - Critical DI pattern fixes
+
+**API Documentation (when running):**
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+- OpenAPI JSON: http://localhost:8000/api/v1/openapi.json
+
+**Testing Documentation:**
+- Backend tests: `backend/tests/` (97% coverage)
+- Frontend E2E: `frontend/e2e/README.md`
+- Design system: `frontend/docs/design-system/08-ai-guidelines.md`
+
+---
+
+**For project architecture, development commands, and general context, see [AGENTS.md](./AGENTS.md).**
