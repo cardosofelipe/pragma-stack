@@ -161,14 +161,14 @@ describe('UserListTable', () => {
     });
 
     it('calls onSearch after debounce delay', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null }); // Disable typing delay for debounce test
       render(<UserListTable {...defaultProps} />);
 
       const searchInput = screen.getByPlaceholderText('Search by name or email...');
 
       await user.type(searchInput, 'alice');
 
-      // Should not call immediately
+      // Should not call immediately (debounce is 300ms)
       expect(defaultProps.onSearch).not.toHaveBeenCalled();
 
       // Should call after debounce (300ms)

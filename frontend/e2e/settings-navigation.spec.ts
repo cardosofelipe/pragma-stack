@@ -18,7 +18,7 @@ test.describe('Settings Navigation', () => {
   test('should navigate from home to settings profile', async ({ page }) => {
     // Start at home page (auth already cached in storage state)
     await page.goto('/en');
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL('/en');
 
     // Navigate to settings/profile
     await page.goto('/en/settings/profile');
@@ -33,7 +33,7 @@ test.describe('Settings Navigation', () => {
   test('should navigate from home to settings password', async ({ page }) => {
     // Start at home page (auth already cached in storage state)
     await page.goto('/en');
-    await expect(page).toHaveURL('/');
+    await expect(page).toHaveURL('/en');
 
     // Navigate to settings/password
     await page.goto('/en/settings/password');

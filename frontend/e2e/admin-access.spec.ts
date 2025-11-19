@@ -31,7 +31,7 @@ test.describe('Admin Access Control', () => {
     await page.goto('/en/admin');
 
     // Should be redirected away from admin (to login or home)
-    await page.waitForURL(/\/en\/(auth\/login|$)/);
+    await page.waitForURL(/\/en(\/login)?$/);
     expect(page.url()).not.toContain('/admin');
   });
 

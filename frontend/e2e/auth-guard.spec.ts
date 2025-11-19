@@ -21,9 +21,9 @@ test.describe('AuthGuard - Route Protection', () => {
     // Wait for page to stabilize
     await page.waitForTimeout(1000);
 
-    // Should either be on login or homepage (not crashing)
+    // Should either be on login or homepage (not crashing) - with locale prefix
     const url = page.url();
-    expect(url).toMatch(/\/(login)?$/);
+    expect(url).toMatch(/\/en(\/login)?$/);
   });
 
   test('should allow access to public routes without auth', async ({ page }) => {

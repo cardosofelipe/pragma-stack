@@ -18,7 +18,7 @@ test.describe('Homepage - Desktop Navigation', () => {
 
     // Desktop navigation links should be visible (use locator to find within header)
     const header = page.locator('header').first();
-    await expect(header.getByRole('link', { name: 'Components', exact: true })).toBeVisible();
+    await expect(header.getByRole('link', { name: 'Design System', exact: true })).toBeVisible();
     await expect(header.getByRole('link', { name: 'Admin Demo', exact: true })).toBeVisible();
   });
 
@@ -29,22 +29,22 @@ test.describe('Homepage - Desktop Navigation', () => {
     await expect(githubLink).toHaveAttribute('target', '_blank');
   });
 
-  test('should navigate to components page via header link', async ({ page }) => {
-    // Click the exact Components link in header navigation
+  test('should navigate to design system page via header link', async ({ page }) => {
+    // Click the exact Design System link in header navigation
     const header = page.locator('header').first();
-    const componentsLink = header.getByRole('link', { name: 'Components', exact: true });
+    const designSystemLink = header.getByRole('link', { name: 'Design System', exact: true });
 
     // Verify link exists and has correct href
-    await expect(componentsLink).toBeVisible();
-    await expect(componentsLink).toHaveAttribute('href', '/en/dev');
+    await expect(designSystemLink).toBeVisible();
+    await expect(designSystemLink).toHaveAttribute('href', '/en/dev');
 
     // Click and wait for navigation
-    await componentsLink.click();
+    await designSystemLink.click();
     await page.waitForURL('/en/dev', { timeout: 10000 }).catch(() => {});
 
     // Verify URL (might not navigate if /dev page has issues, that's ok for this test)
     const currentUrl = page.url();
-    expect(currentUrl).toMatch(/\/(dev)?$/);
+    expect(currentUrl).toMatch(/\/en(\/dev)?$/);
   });
 
   test('should navigate to admin demo via header link', async ({ page }) => {
@@ -62,7 +62,7 @@ test.describe('Homepage - Desktop Navigation', () => {
 
     // Verify URL (might not navigate if /admin requires auth, that's ok for this test)
     const currentUrl = page.url();
-    expect(currentUrl).toMatch(/\/(admin)?$/);
+    expect(currentUrl).toMatch(/\/en(\/admin)?$/);
   });
 
   test('should navigate to login page via header button', async ({ page }) => {
@@ -154,7 +154,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
 
     // Verify URL (might not navigate if /dev page has issues, that's ok)
     const currentUrl = page.url();
-    expect(currentUrl).toMatch(/\/(dev)?$/);
+    expect(currentUrl).toMatch(/\/en(\/dev)?$/);
   });
 
   test.skip('should navigate to admin demo from mobile menu', async ({ page }) => {
@@ -172,7 +172,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
 
     // Verify URL (might not navigate if /admin requires auth, that's ok)
     const currentUrl = page.url();
-    expect(currentUrl).toMatch(/\/(admin)?$/);
+    expect(currentUrl).toMatch(/\/en(\/admin)?$/);
   });
 
   test.skip('should display Try Demo button in mobile menu', async ({ page }) => {
@@ -263,7 +263,7 @@ test.describe('Homepage - Hero Section', () => {
 
     // Verify URL (flexible to handle auth redirects)
     const currentUrl = page.url();
-    expect(currentUrl).toMatch(/\/(dev)?$/);
+    expect(currentUrl).toMatch(/\/en(\/dev)?$/);
   });
 });
 
@@ -395,7 +395,7 @@ test.describe('Homepage - Animated Terminal', () => {
 
     // Verify URL (flexible to handle redirects)
     const currentUrl = page.url();
-    expect(currentUrl).toMatch(/\/(login)?$/);
+    expect(currentUrl).toMatch(/\/en(\/login)?$/);
   });
 });
 
@@ -425,7 +425,7 @@ test.describe('Homepage - Feature Sections', () => {
 
     // Verify URL (flexible to handle redirects)
     const currentUrl = page.url();
-    expect(currentUrl).toMatch(/\/(login)?$/);
+    expect(currentUrl).toMatch(/\/en(\/login)?$/);
   });
 
   test('should navigate to admin from admin panel CTA', async ({ page }) => {
@@ -440,7 +440,7 @@ test.describe('Homepage - Feature Sections', () => {
 
     // Verify URL (flexible to handle auth redirects)
     const currentUrl = page.url();
-    expect(currentUrl).toMatch(/\/(admin)?$/);
+    expect(currentUrl).toMatch(/\/en(\/admin)?$/);
   });
 
   test('should display tech stack section', async ({ page }) => {
