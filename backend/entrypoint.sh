@@ -2,6 +2,13 @@
 set -e
 echo "Starting Backend"
 
+# Ensure the project's virtualenv binaries are on PATH so commands like
+# 'uvicorn' work even when not prefixed by 'uv run'. This matches how uv
+# installs the env into /app/.venv in our containers.
+if [ -d "/app/.venv/bin" ]; then
+  export PATH="/app/.venv/bin:$PATH"
+fi
+
 # Apply database migrations
 # Avoid installing the project in editable mode (which tries to write egg-info)
 # when running inside a bind-mounted volume with restricted permissions.
