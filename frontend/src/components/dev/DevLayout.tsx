@@ -11,7 +11,7 @@
 import { Link } from '@/lib/i18n/routing';
 import { usePathname } from '@/lib/i18n/routing';
 import {
-  Code2,
+
   Palette,
   LayoutDashboard,
   Box,
@@ -94,7 +94,7 @@ export function DevLayout({ children }: DevLayoutProps) {
           <div className="flex h-14 items-center justify-between gap-6">
             {/* Left: Logo + Badge */}
             <div className="flex items-center gap-3 shrink-0">
-              <Code2 className="h-5 w-5 text-primary" />
+              <img src="/logo-icon.svg" alt="PragmaStack Logo" className="h-6 w-6" />
               <h1 className="text-base font-semibold">PragmaStack</h1>
               <Badge variant="secondary" className="text-xs">
                 Dev

@@ -14,8 +14,9 @@ export function Footer() {
     <footer className="border-t bg-muted/30">
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
-          <div className="text-center text-sm text-muted-foreground md:text-left">
-            © {currentYear} PragmaStack. All rights reserved.
+          <div className="flex items-center gap-2 text-center text-sm text-muted-foreground md:text-left">
+            <img src="/logo-icon.svg" alt="PragmaStack Logo" className="h-5 w-5 opacity-70" />
+            <span>© {currentYear} PragmaStack. All rights reserved.</span>
           </div>
           <div className="flex space-x-6">
             <Link

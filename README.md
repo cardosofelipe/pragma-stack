@@ -1,5 +1,10 @@
 # PragmaStack
 
+<div align="center">
+  <img src="frontend/public/logo.svg" alt="PragmaStack Logo" width="200" />
+  <br />
+</div>
+
 > **The Pragmatic Full-Stack Template. Production-ready, security-first, and opinionated.**
 
 <!--

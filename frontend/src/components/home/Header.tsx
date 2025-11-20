@@ -30,11 +30,11 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           {/* Logo */}
-          <Link href="/" className="font-bold text-xl hover:opacity-80 transition-opacity">
+          <Link href="/" className="flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity">
+            <img src="/logo-icon.svg" alt="PragmaStack Logo" className="h-8 w-8" />
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               PragmaStack
-            </span>{' '}
-            <span className="text-foreground">Template</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation */}

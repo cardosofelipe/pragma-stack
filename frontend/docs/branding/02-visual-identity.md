@@ -2,7 +2,21 @@
 
 ## Logo & Iconography
 
-_Pending logo design._
+## Logo
+
+The **PragmaStack** logo represents the core values of the project: structure, speed, and clarity.
+
+<div align="center">
+  <img src="../../public/logo.svg" alt="PragmaStack Logo" width="300" />
+  <p><em>The Stack: Geometric layers representing the full-stack architecture.</em></p>
+</div>
+
+### Icon
+For smaller contexts (favicons, headers), we use the simplified icon:
+
+<div align="center">
+  <img src="../../public/logo-icon.svg" alt="PragmaStack Icon" width="64" />
+</div>
 
 For now, we use the **Lucide React** icon set for all iconography. Icons should be used sparingly and meaningfully to enhance understanding, not just for decoration.
 
