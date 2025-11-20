@@ -143,7 +143,7 @@ def check_database_connection():
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(
-        description='Database migration helper for FastNext template'
+        description='Database migration helper for PragmaStack template'
     )
     subparsers = parser.add_subparsers(dest='command', help='Command to run')
 
