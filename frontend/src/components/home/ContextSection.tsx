@@ -11,7 +11,7 @@ import { CheckCircle2 } from 'lucide-react';
 export function ContextSection() {
   const features = [
     'Clone & Deploy in < 5 minutes',
-    '97% Test Coverage (743 tests)',
+    'Comprehensive Test Suite',
     '12+ Documentation Guides',
     'Zero Commercial Dependencies',
   ];
@@ -26,11 +26,11 @@ export function ContextSection() {
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold">What You Get Out of the Box</h2>
+          <h2 className="text-3xl md:text-4xl font-bold">Stop Reinventing the Wheel</h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            This isn&apos;t a boilerplate generator or a paid SaaS template. It&apos;s a complete,
-            production-ready codebase you can clone and customize. Everything you need to build
-            modern web applications without reinventing authentication, authorization, and admin
+            Avoid analysis paralysis and boilerplate fatigue. This is a complete, production-ready
+            codebase you can clone and customize. Everything you need to build modern web
+            applications without reinventing authentication, authorization, and admin
             infrastructure.
           </p>
 

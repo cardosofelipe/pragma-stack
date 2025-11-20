@@ -16,9 +16,9 @@ const wontFind = [
 ];
 
 const willFind = [
-  'Production patterns that actually work',
-  'Comprehensive test coverage (not aspirational)',
-  'Clear, honest documentation',
+  'Pragmatic Speed: Ship features, not config',
+  'Clarity over Magic: Explicit is better than implicit',
+  'Robustness: Security and testing baked in',
   'Active development and improvements',
 ];
 
@@ -33,7 +33,7 @@ export function PhilosophySection() {
           viewport={{ once: true, margin: '-100px' }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Why This Template Exists</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Why PragmaStack?</h2>
           <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
             <p>
               We built this template after rebuilding the same authentication, authorization, and

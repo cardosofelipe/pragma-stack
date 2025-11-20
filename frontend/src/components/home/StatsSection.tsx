@@ -21,31 +21,31 @@ interface Stat {
 const stats: Stat[] = [
   {
     icon: Zap,
-    value: 97,
+    value: 100,
     suffix: '%',
-    label: 'Test Coverage',
-    description: 'Comprehensive testing across backend and frontend',
-  },
-  {
-    icon: TestTube,
-    value: 743,
-    suffix: '',
-    label: 'Passing Tests',
-    description: 'Backend, frontend unit, and E2E tests',
+    label: 'Open Source',
+    description: 'MIT Licensed. No hidden costs or vendor lock-in.',
   },
   {
     icon: CheckCircle2,
+    value: 100,
+    suffix: '%',
+    label: 'Type Safe',
+    description: 'End-to-end type safety with TypeScript & Pydantic',
+  },
+  {
+    icon: TestTube,
     value: 0,
     suffix: '',
-    label: 'Flaky Tests',
-    description: 'Production-stable test suite',
+    label: 'Magic',
+    description: 'Explicit is better than implicit. No hidden logic.',
   },
   {
     icon: FileCode,
-    value: 30,
+    value: 12,
     suffix: '+',
-    label: 'API Endpoints',
-    description: 'Fully documented with OpenAPI',
+    label: 'Doc Guides',
+    description: 'Comprehensive documentation for every feature',
   },
 ];
 

@@ -67,11 +67,11 @@ export function TechStackSection() {
         transition={{ duration: 0.6 }}
       >
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Modern, Type-Safe, Production-Grade Stack
+          A Stack You Can Trust
         </h2>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Built with the best tools for full-stack development. Async architecture, type safety, and
-          developer experience.
+          We chose these tools because they are boring, reliable, and standard. No hype, just
+          results. Async architecture, type safety, and developer experience.
         </p>
       </motion.div>
 
