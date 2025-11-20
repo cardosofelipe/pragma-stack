@@ -82,6 +82,15 @@ Default superuser (change in production):
 - **Auto-generated client**: From OpenAPI spec via `npm run generate:api`
 - **Dependency Injection**: ALWAYS use `useAuth()` from `AuthContext`, NEVER import `useAuthStore` directly
 
+### Internationalization (i18n)
+- **next-intl v4**: Type-safe internationalization library
+- **Locale routing**: `/en/*`, `/it/*` (English and Italian supported)
+- **Translation files**: `frontend/messages/en.json`, `frontend/messages/it.json`
+- **LocaleSwitcher**: Component for seamless language switching
+- **SEO-friendly**: Locale-aware metadata, sitemaps, and robots.txt
+- **Type safety**: Full TypeScript support for translations
+- **Utilities**: `frontend/src/lib/i18n/` (metadata, routing, utils)
+
 ### Organization System
 Three-tier RBAC:
 - **Owner**: Full control (delete org, manage all members)
@@ -224,19 +233,24 @@ docker-compose exec backend python -c "from app.init_db import init_db; import a
 - User management (CRUD, password change)
 - Organization system (multi-tenant with RBAC)
 - Admin panel (user/org management, bulk operations)
+- **Internationalization (i18n)** with English and Italian
 - Comprehensive test coverage (97% backend, 97% frontend unit, 56 E2E tests)
 - Design system documentation
+- **Marketing landing page** with animations
+- **`/dev` documentation portal** with live examples
+- **Toast notifications**, charts, markdown rendering
+- **SEO optimization** (sitemap, robots.txt, locale metadata)
 - Docker deployment
 
 ### In Progress 🚧
 - Frontend admin pages (70% complete)
-- Dark mode theme
 - Email integration (templates ready, SMTP pending)
 
 ### Planned 🔮
 - GitHub Actions CI/CD
+- Additional languages (Spanish, French, German, etc.)
 - Additional authentication methods (OAuth, SSO)
+- Real-time notifications (WebSockets)
 - Webhook system
 - Background job processing
 - File upload/storage
-- Notification system

@@ -66,7 +66,24 @@ Instead of spending weeks on boilerplate, you can focus on building your unique 
 - Comprehensive design system built on shadcn/ui + TailwindCSS
 - Pre-configured theme with dark mode support (coming soon)
 - Responsive, accessible components (WCAG AA compliant)
-- Developer documentation at `/dev` (in progress)
+- Rich marketing landing page with animated components
+- Live component showcase and documentation at `/dev`
+
+### 🌍 **Internationalization (i18n)**
+- Built-in multi-language support with next-intl v4
+- Locale-based routing (`/en/*`, `/it/*`)
+- Seamless language switching with LocaleSwitcher component
+- SEO-friendly URLs and metadata per locale
+- Translation files for English and Italian (easily extensible)
+- Type-safe translations throughout the app
+
+### 🎯 **Content & UX Features**
+- **Toast notifications** with Sonner for elegant user feedback
+- **Smooth animations** powered by Framer Motion
+- **Markdown rendering** with syntax highlighting (GitHub Flavored Markdown)
+- **Charts and visualizations** ready with Recharts
+- **SEO optimization** with dynamic sitemap and robots.txt generation
+- **Session tracking UI** with device information and revocation controls
 
 ### 🧪 **Comprehensive Testing**
 - **Backend Testing**: ~97% unit test coverage
@@ -86,9 +103,10 @@ Instead of spending weeks on boilerplate, you can focus on building your unique 
 ### 📚 **Developer Experience**
 - Auto-generated TypeScript API client from OpenAPI spec
 - Interactive API documentation (Swagger + ReDoc)
-- Database migrations with Alembic
-- Hot reload in development
-- Comprehensive code documentation
+- Database migrations with Alembic helper script
+- Hot reload in development for both frontend and backend
+- Comprehensive code documentation and design system docs
+- Live component playground at `/dev` with code examples
 - Docker support for easy deployment
 - VSCode workspace settings included
 
@@ -100,6 +118,9 @@ Instead of spending weeks on boilerplate, you can focus on building your unique 
 - Health check endpoints
 - Production security headers
 - Rate limiting on sensitive endpoints
+- SEO optimization with dynamic sitemaps and robots.txt
+- Multi-language SEO with locale-specific metadata
+- Performance monitoring and bundle analysis
 
 ---
 
@@ -119,8 +140,13 @@ Instead of spending weeks on boilerplate, you can focus on building your unique 
 - **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript
 - **[TailwindCSS](https://tailwindcss.com/)** - Utility-first CSS framework
 - **[shadcn/ui](https://ui.shadcn.com/)** - Beautiful, accessible component library
+- **[next-intl](https://next-intl.dev/)** - Internationalization (i18n) with type safety
 - **[TanStack Query](https://tanstack.com/query)** - Powerful data fetching/caching
 - **[Zustand](https://zustand-demo.pmnd.rs/)** - Lightweight state management
+- **[Framer Motion](https://www.framer.com/motion/)** - Production-ready animation library
+- **[Sonner](https://sonner.emilkowal.ski/)** - Beautiful toast notifications
+- **[Recharts](https://recharts.org/)** - Composable charting library
+- **[React Markdown](https://github.com/remarkjs/react-markdown)** - Markdown rendering with GFM support
 - **[Playwright](https://playwright.dev/)** - End-to-end testing
 
 ### DevOps
@@ -448,32 +474,37 @@ docker-compose down
 - [x] User management (CRUD, profile, password change)
 - [x] Organization system with RBAC (Owner, Admin, Member)
 - [x] Admin panel (users, organizations, sessions, statistics)
+- [x] **Internationalization (i18n)** with next-intl (English + Italian)
 - [x] Backend testing infrastructure (~97% coverage)
 - [x] Frontend unit testing infrastructure (~97% coverage)
 - [x] Frontend E2E testing (Playwright, zero flaky tests)
 - [x] Design system documentation
-- [x] Database migrations
+- [x] **Marketing landing page** with animated components
+- [x] **`/dev` documentation portal** with live component examples
+- [x] **Toast notifications** system (Sonner)
+- [x] **Charts and visualizations** (Recharts)
+- [x] **Animation system** (Framer Motion)
+- [x] **Markdown rendering** with syntax highlighting
+- [x] **SEO optimization** (sitemap, robots.txt, locale-aware metadata)
+- [x] Database migrations with helper script
 - [x] Docker deployment
 - [x] API documentation (OpenAPI/Swagger)
 
 ### 🚧 In Progress
-- [ ] Frontend admin pages (70% complete)
-- [ ] Dark mode theme
-- [ ] `/dev` documentation page with examples
 - [ ] Email integration (templates ready, SMTP pending)
-- [ ] Chart/visualization components
 
 ### 🔮 Planned
 - [ ] GitHub Actions CI/CD pipelines
 - [ ] Dynamic test coverage badges from CI
 - [ ] E2E test coverage reporting
+- [ ] Additional languages (Spanish, French, German, etc.)
 - [ ] Additional authentication methods (OAuth, SSO)
+- [ ] Real-time notifications with WebSockets
 - [ ] Webhook system
-- [ ] Background job processing
-- [ ] File upload/storage
-- [ ] Notification system
-- [ ] Audit logging
+- [ ] File upload/storage (S3-compatible)
+- [ ] Audit logging system
 - [ ] API versioning example
+
 
 ---
 

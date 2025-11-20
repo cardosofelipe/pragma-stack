@@ -1,3 +1,4 @@
+/* istanbul ignore file - Server-only next-intl middleware covered by E2E */
 // src/i18n/request.ts
 /**
  * Server-side i18n request configuration for next-intl.
