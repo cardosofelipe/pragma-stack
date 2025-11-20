@@ -6,7 +6,7 @@ Production-ready Next.js 15 frontend with TypeScript, authentication, admin pane
 
 ### Core
 
-- ⚡ **Next.js 15** - App Router with React Server Components
+- ⚡ **Next.js 16** - App Router with React Server Components
 - 📘 **TypeScript** - Full type safety
 - 🎨 **Tailwind CSS** - Utility-first styling
 - 🧩 **shadcn/ui** - High-quality component library
@@ -218,7 +218,7 @@ npm run test:e2e:debug
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript 5
 - **Styling**: Tailwind CSS 3 + shadcn/ui
 - **State Management**: Zustand + TanStack Query

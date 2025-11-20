@@ -15,14 +15,9 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // ESLint configuration
-  eslint: {
-    ignoreDuringBuilds: false,
-    dirs: ['src'],
-  },
   // Production optimizations
   reactStrictMode: true,
-  // Note: swcMinify is default in Next.js 15
+  // Note: SWC minification is default in Next.js 16
 };
 
 // Wrap config with next-intl plugin
