@@ -1,6 +1,6 @@
-# FastAPI + Next.js Full-Stack Template
+# PragmaStack
 
-> **Production-ready, security-first, full-stack TypeScript/Python template with authentication, multi-tenancy, and a comprehensive admin panel.**
+> **The Pragmatic Full-Stack Template. Production-ready, security-first, and opinionated.**
 
 <!--
   TODO: Replace these static badges with dynamic CI/CD badges when GitHub Actions is set up
@@ -21,20 +21,25 @@
 
 This project includes comprehensive documentation designed for AI coding assistants:
 
-- **[AGENTS.md](./AGENTS.md)** - Framework-agnostic AI assistant context (works with Claude, Cursor, GitHub Copilot, etc.)
-- **[CLAUDE.md](./CLAUDE.md)** - Claude Code-specific guidance and preferences
+- **[AGENTS.md](./AGENTS.md)** - Framework-agnostic AI assistant context for PragmaStack
+- **[CLAUDE.md](./CLAUDE.md)** - Claude Code-specific guidance
 
-These files provide AI assistants with project architecture, development patterns, testing strategies, and best practices to help them work more effectively with this codebase.
+These files provide AI assistants with the **PragmaStack** architecture, patterns, and best practices.
 
 ---
 
-## Why This Template?
+## Why PragmaStack?
 
-Building a modern full-stack application from scratch means solving the same problems over and over: authentication, authorization, multi-tenancy, admin panels, session management, database migrations, API documentation, testing infrastructure...
+Building a modern full-stack application often leads to "analysis paralysis" or "boilerplate fatigue". You spend weeks setting up authentication, testing, and linting before writing a single line of business logic.
 
-**This template gives you all of that, battle-tested and ready to go.**
+**PragmaStack cuts through the noise.**
 
-Instead of spending weeks on boilerplate, you can focus on building your unique features. Whether you're building a SaaS product, an internal tool, or a side project, this template provides a rock-solid foundation with modern best practices baked in.
+We provide a **pragmatic**, opinionated foundation that prioritizes:
+- **Speed**: Ship features, not config files.
+- **Robustness**: Security and testing are not optional.
+- **Clarity**: Code that is easy to read and maintain.
+
+Whether you're building a SaaS, an internal tool, or a side project, PragmaStack gives you a solid starting point without the bloat.
 
 ---
 
@@ -63,7 +68,7 @@ Instead of spending weeks on boilerplate, you can focus on building your unique 
 
 ### 🎨 **Modern Frontend**
 - Next.js 15 with App Router and React 19
-- Comprehensive design system built on shadcn/ui + TailwindCSS
+- **PragmaStack Design System** built on shadcn/ui + TailwindCSS
 - Pre-configured theme with dark mode support (coming soon)
 - Responsive, accessible components (WCAG AA compliant)
 - Rich marketing landing page with animated components
@@ -416,7 +421,7 @@ python migrate.py current
 
 ### Frontend Documentation
 
-- **[Design System Docs](./frontend/docs/design-system/)** - Complete design system guide
+- **[PragmaStack Design System](./frontend/docs/design-system/)** - Complete design system guide
   - Quick start, foundations (colors, typography, spacing)
   - Component library guide
   - Layout patterns, spacing philosophy
