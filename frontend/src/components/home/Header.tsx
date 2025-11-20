@@ -11,6 +11,7 @@ import { Menu, X, Github, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LocaleSwitcher } from '@/components/i18n';
+import { ThemeToggle } from '@/components/theme';
 
 interface HeaderProps {
   onOpenDemoModal: () => void;
@@ -67,6 +68,9 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
             {/* Locale Switcher */}
             <LocaleSwitcher />
 
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* CTAs */}
             <Button onClick={onOpenDemoModal} variant="default" size="sm">
               Try Demo
@@ -118,9 +122,10 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
                 </a>
 
                 <div className="border-t pt-4 mt-4 space-y-3">
-                  {/* Locale Switcher */}
-                  <div className="flex justify-center">
+                  {/* Locale Switcher & Theme Toggle */}
+                  <div className="flex justify-center gap-4">
                     <LocaleSwitcher />
+                    <ThemeToggle />
                   </div>
 
                   <Button
