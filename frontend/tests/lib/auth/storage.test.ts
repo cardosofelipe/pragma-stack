@@ -240,9 +240,9 @@ describe('Storage Module', () => {
       const descriptor = Object.getOwnPropertyDescriptor(global, 'localStorage');
       Object.defineProperty(global, 'localStorage', { value: undefined, configurable: true });
 
-      await expect(
-        saveTokens({ accessToken: 'a', refreshToken: 'r' })
-      ).rejects.toThrow('localStorage not available - cannot save tokens');
+      await expect(saveTokens({ accessToken: 'a', refreshToken: 'r' })).rejects.toThrow(
+        'localStorage not available - cannot save tokens'
+      );
 
       if (descriptor) Object.defineProperty(global, 'localStorage', descriptor);
     });

@@ -27,8 +27,7 @@ import { Separator } from '@/components/ui/separator';
 
 export const metadata: Metadata = {
   title: 'Demo Tour | PragmaStack',
-  description:
-    'Try all features with demo credentials - comprehensive guide to the PragmaStack',
+  description: 'Try all features with demo credentials - comprehensive guide to the PragmaStack',
 };
 
 const demoCategories = [

@@ -10,7 +10,7 @@ import Home from '@/app/[locale]/page';
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => {
-    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+    // eslint-disable-next-line @next/next/no-img-element
     return <img {...props} />;
   },
 }));

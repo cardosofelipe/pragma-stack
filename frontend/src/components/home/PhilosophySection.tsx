@@ -86,10 +86,7 @@ export function PhilosophySection() {
             <ul className="space-y-3">
               {willFind.map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <Check
-                    className="h-5 w-5 text-success flex-shrink-0 mt-0.5"
-                    aria-hidden="true"
-                  />
+                  <Check className="h-5 w-5 text-success flex-shrink-0 mt-0.5" aria-hidden="true" />
                   <span className="text-muted-foreground">{item}</span>
                 </li>
               ))}

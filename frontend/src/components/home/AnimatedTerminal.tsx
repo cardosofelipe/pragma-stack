@@ -105,14 +105,15 @@ export function AnimatedTerminal() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.2 }}
-                  className={`${line.isSuccess
+                  className={`${
+                    line.isSuccess
                       ? 'text-success'
                       : line.text.startsWith('#')
                         ? 'text-slate-500'
                         : line.text.startsWith('$')
                           ? 'text-primary'
                           : 'text-slate-300'
-                    }`}
+                  }`}
                 >
                   {line.text || '\u00A0'}
                   {index === displayedLines.length - 1 && isAnimating && !line.isSuccess && (

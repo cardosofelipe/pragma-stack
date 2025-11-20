@@ -20,6 +20,7 @@
 ## 📖 Documentation Structure
 
 ### Branding & Identity
+
 - **[Branding Guidelines](../branding/README.md)** 🎨
   - Mission & Values
   - Visual Identity (Logo, Colors, Typography)

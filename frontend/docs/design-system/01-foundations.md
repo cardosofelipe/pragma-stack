@@ -229,7 +229,7 @@ All colors follow the **background/foreground** convention:
 
 **Usage**:
 
-```tsx
+````tsx
 // Delete button
 <Button variant="destructive">Delete Account</Button>
 
@@ -246,7 +246,7 @@ All colors follow the **background/foreground** convention:
 
 --warning: oklch(0.75 0.15 85) /* Yellow/Orange */
 --warning-foreground: oklch(0.1529 0 0) /* Dark text */
-```
+````
 
 **Usage**:
 
@@ -259,23 +259,26 @@ All colors follow the **background/foreground** convention:
   Warning: This action is irreversible.
 </div>
 ```
+
 // Error alert
 <Alert variant="destructive">
-  <AlertCircle className="h-4 w-4" />
-  <AlertTitle>Error</AlertTitle>
-  <AlertDescription>
-    Something went wrong. Please try again.
-  </AlertDescription>
+<AlertCircle className="h-4 w-4" />
+<AlertTitle>Error</AlertTitle>
+<AlertDescription>
+Something went wrong. Please try again.
+</AlertDescription>
 </Alert>
 
 // Form error text
+
 <p className="text-sm text-destructive">
   {errors.email?.message}
 </p>
 
 // Destructive badge
 <Badge variant="destructive">Critical</Badge>
-```
+
+````
 
 **When to use**:
 
@@ -297,7 +300,7 @@ All colors follow the **background/foreground** convention:
   /* Dark Mode */ --card: oklch(0.2686 0 0) /* Dark gray */ --card-foreground: oklch(0.9823 0 0)
   /* Light text */ --popover: oklch(0.2686 0 0) /* Dark gray */
   --popover-foreground: oklch(0.9823 0 0) /* Light text */;
-```
+````
 
 **Usage**:
 
