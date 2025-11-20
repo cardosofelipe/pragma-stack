@@ -213,4 +213,104 @@ describe('Storage Module', () => {
       await expect(clearTokens()).resolves.not.toThrow();
     });
   });
+
+  describe('SSR and guards', () => {
+    const originalLocalStorage = global.localStorage;
+    const originalWindow = global.window;
+
+    afterEach(() => {
+      // Restore globals
+      (global as any).window = originalWindow;
+      (global as any).localStorage = originalLocalStorage;
+    });
+
+    it('returns false on isStorageAvailable and null on getTokens when localStorage is unavailable', async () => {
+      // Simulate SSR/unavailable localStorage by shadowing the global getter
+      const descriptor = Object.getOwnPropertyDescriptor(global, 'localStorage');
+      Object.defineProperty(global, 'localStorage', { value: undefined, configurable: true });
+
+      expect(isStorageAvailable()).toBe(false);
+      await expect(getTokens()).resolves.toBeNull();
+
+      // Restore descriptor
+      if (descriptor) Object.defineProperty(global, 'localStorage', descriptor);
+    });
+
+    it('saveTokens throws when localStorage is unavailable', async () => {
+      const descriptor = Object.getOwnPropertyDescriptor(global, 'localStorage');
+      Object.defineProperty(global, 'localStorage', { value: undefined, configurable: true });
+
+      await expect(
+        saveTokens({ accessToken: 'a', refreshToken: 'r' })
+      ).rejects.toThrow('localStorage not available - cannot save tokens');
+
+      if (descriptor) Object.defineProperty(global, 'localStorage', descriptor);
+    });
+  });
+
+  describe('E2E mode path (skip encryption)', () => {
+    const originalFlag = (global.window as any).__PLAYWRIGHT_TEST__;
+
+    beforeEach(() => {
+      (global.window as any).__PLAYWRIGHT_TEST__ = true;
+      localStorage.clear();
+      clearEncryptionKey();
+    });
+
+    afterEach(() => {
+      (global.window as any).__PLAYWRIGHT_TEST__ = originalFlag;
+    });
+
+    it('stores plain JSON and retrieves it when E2E flag is set', async () => {
+      const tokens = { accessToken: 'plainA', refreshToken: 'plainR' };
+      await saveTokens(tokens);
+
+      // Verify plain JSON persisted
+      const raw = localStorage.getItem('auth_tokens');
+      expect(raw).toContain('plainA');
+
+      const retrieved = await getTokens();
+      expect(retrieved).toEqual(tokens);
+    });
+  });
+
+  describe('Storage method selection and cookie mode', () => {
+    it('falls back to localStorage when invalid method is stored', () => {
+      localStorage.setItem('auth_storage_method', 'invalid');
+      expect(getStorageMethod()).toBe('localStorage');
+    });
+
+    it('does not persist tokens when method is cookie (client-side no-op)', async () => {
+      setStorageMethod('cookie');
+      expect(getStorageMethod()).toBe('cookie');
+
+      await saveTokens({ accessToken: 'A', refreshToken: 'R' });
+      // Should be no-op for client-side
+      expect(localStorage.getItem('auth_tokens')).toBeNull();
+
+      const retrieved = await getTokens();
+      expect(retrieved).toBeNull();
+
+      // clearTokens should not throw in cookie mode
+      await expect(clearTokens()).resolves.not.toThrow();
+    });
+  });
+
+  describe('setStorageMethod error path', () => {
+    it('logs an error if localStorage.setItem throws', () => {
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const originalSetItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = jest.fn(() => {
+        throw new Error('boom');
+      });
+
+      // Should not throw despite underlying error
+      expect(() => setStorageMethod('localStorage')).not.toThrow();
+
+      // Restore and verify log
+      Storage.prototype.setItem = originalSetItem;
+      expect(spy).toHaveBeenCalled();
+      spy.mockRestore();
+    });
+  });
 });
