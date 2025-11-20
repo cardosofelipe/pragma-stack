@@ -55,13 +55,13 @@ export function QuickStartCode() {
           {/* Header with Copy Button */}
           <div className="flex items-center justify-between border-b bg-muted/50 px-4 py-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground font-mono">
-              <span className="inline-block h-2 w-2 rounded-full bg-green-500" aria-hidden="true" />
+              <span className="inline-block h-2 w-2 rounded-full bg-success" aria-hidden="true" />
               <span>bash</span>
             </div>
             <Button variant="ghost" size="sm" onClick={copyToClipboard} className="gap-2">
               {copied ? (
                 <>
-                  <Check className="h-4 w-4 text-green-600" aria-hidden="true" />
+                  <Check className="h-4 w-4 text-success" aria-hidden="true" />
                   <span>Copied!</span>
                 </>
               ) : (

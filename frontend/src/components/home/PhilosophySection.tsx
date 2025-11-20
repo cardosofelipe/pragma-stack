@@ -58,13 +58,13 @@ export function PhilosophySection() {
             transition={{ duration: 0.5 }}
           >
             <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <X className="h-5 w-5 text-red-600" aria-hidden="true" />
+              <X className="h-5 w-5 text-destructive" aria-hidden="true" />
               What You Won&apos;t Find Here
             </h3>
             <ul className="space-y-3">
               {wontFind.map((item) => (
                 <li key={item} className="flex items-start gap-3">
-                  <X className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
+                  <X className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" aria-hidden="true" />
                   <span className="text-muted-foreground">{item}</span>
                 </li>
               ))}
@@ -80,14 +80,14 @@ export function PhilosophySection() {
             transition={{ duration: 0.5 }}
           >
             <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Check className="h-5 w-5 text-green-600" aria-hidden="true" />
+              <Check className="h-5 w-5 text-success" aria-hidden="true" />
               What You Will Find
             </h3>
             <ul className="space-y-3">
               {willFind.map((item) => (
                 <li key={item} className="flex items-start gap-3">
                   <Check
-                    className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5"
+                    className="h-5 w-5 text-success flex-shrink-0 mt-0.5"
                     aria-hidden="true"
                   />
                   <span className="text-muted-foreground">{item}</span>

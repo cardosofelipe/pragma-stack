@@ -1,6 +1,6 @@
 # Quick Reference
 
-**Bookmark this page** for instant lookups of colors, spacing, typography, components, and common patterns. Your go-to cheat sheet for the FastNext design system.
+**Bookmark this page** for instant lookups of colors, spacing, typography, components, and common patterns. Your go-to cheat sheet for the PragmaStack design system.
 
 ---
 

@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get up and running with the FastNext design system immediately. This guide covers the essential patterns you need to build 80% of interfaces.
+Get up and running with the PragmaStack design system immediately. This guide covers the essential patterns you need to build 80% of interfaces.
 
 ---
 

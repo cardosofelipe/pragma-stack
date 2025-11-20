@@ -83,7 +83,7 @@ export function Header() {
         {/* Logo */}
         <div className="flex items-center space-x-8">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-xl font-bold text-foreground">FastNext</span>
+            <span className="text-xl font-bold text-foreground">PragmaStack</span>
           </Link>
 
           {/* Navigation Links */}

@@ -26,9 +26,9 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
 export const metadata: Metadata = {
-  title: 'Demo Tour | FastNext Template',
+  title: 'Demo Tour | PragmaStack',
   description:
-    'Try all features with demo credentials - comprehensive guide to the FastNext template',
+    'Try all features with demo credentials - comprehensive guide to the PragmaStack',
 };
 
 const demoCategories = [

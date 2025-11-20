@@ -38,6 +38,11 @@
 
 ---
 
+---
+
+> [!NOTE]
+> **Branding vs. Design System**: These foundations implement the visual identity defined in the **[Branding Guidelines](../branding/README.md)**. Refer to that document for the "why" behind these choices.
+
 ## Color System (OKLCH)
 
 ### Why OKLCH?
@@ -228,6 +233,32 @@ All colors follow the **background/foreground** convention:
 // Delete button
 <Button variant="destructive">Delete Account</Button>
 
+---
+
+### Success & Warning Colors
+
+**Purpose**: Success states and warning alerts
+
+```css
+/* Light & Dark Mode */
+--success: oklch(0.6231 0.188 145) /* Green */
+--success-foreground: oklch(1 0 0) /* White text */
+
+--warning: oklch(0.75 0.15 85) /* Yellow/Orange */
+--warning-foreground: oklch(0.1529 0 0) /* Dark text */
+```
+
+**Usage**:
+
+```tsx
+// Success badge
+<Badge className="bg-success text-success-foreground">Completed</Badge>
+
+// Warning alert
+<div className="bg-warning text-warning-foreground p-4">
+  Warning: This action is irreversible.
+</div>
+```
 // Error alert
 <Alert variant="destructive">
   <AlertCircle className="h-4 w-4" />

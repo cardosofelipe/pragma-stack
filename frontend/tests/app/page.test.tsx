@@ -1,6 +1,6 @@
 /**
  * Tests for Home Page
- * Tests for the new FastNext Template landing page
+ * Tests for the new PragmaStack landing page
  */
 
 import { render, screen, within, fireEvent } from '@testing-library/react';
@@ -59,14 +59,14 @@ describe('HomePage', () => {
     it('renders header with logo', () => {
       render(<Home />);
       const header = screen.getByRole('banner');
-      expect(within(header).getByText('FastNext')).toBeInTheDocument();
+      expect(within(header).getByText('PragmaStack')).toBeInTheDocument();
       expect(within(header).getByText('Template')).toBeInTheDocument();
     });
 
     it('renders footer with copyright', () => {
       render(<Home />);
       const footer = screen.getByRole('contentinfo');
-      expect(within(footer).getByText(/FastNext Template. MIT Licensed/i)).toBeInTheDocument();
+      expect(within(footer).getByText(/PragmaStack. MIT Licensed/i)).toBeInTheDocument();
     });
   });
 

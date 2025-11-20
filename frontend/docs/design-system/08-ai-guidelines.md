@@ -1,6 +1,6 @@
 # AI Code Generation Guidelines
 
-**For AI Assistants**: This document contains strict rules for generating code in the FastNext Template project. Follow these rules to ensure generated code matches the design system perfectly.
+**For AI Assistants**: This document contains strict rules for generating code in the PragmaStack project. Follow these rules to ensure generated code matches the design system perfectly.
 
 ---
 

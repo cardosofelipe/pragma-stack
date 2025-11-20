@@ -45,7 +45,7 @@ export function ContextSection() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
               >
-                <CheckCircle2 className="h-4 w-4 text-green-600" aria-hidden="true" />
+                <CheckCircle2 className="h-4 w-4 text-success" aria-hidden="true" />
                 <span>{feature}</span>
               </motion.div>
             ))}

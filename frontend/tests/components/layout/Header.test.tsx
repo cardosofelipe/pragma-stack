@@ -63,7 +63,7 @@ describe('Header', () => {
 
       render(<Header />);
 
-      expect(screen.getByText('FastNext')).toBeInTheDocument();
+      expect(screen.getByText('PragmaStack')).toBeInTheDocument();
     });
 
     it('renders theme toggle', () => {

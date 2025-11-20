@@ -20,7 +20,7 @@ describe('Footer', () => {
 
       const currentYear = new Date().getFullYear();
       expect(
-        screen.getByText(`© ${currentYear} FastNext Template. All rights reserved.`)
+        screen.getByText(`© ${currentYear} PragmaStack. All rights reserved.`)
       ).toBeInTheDocument();
     });
 

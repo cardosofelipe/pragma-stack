@@ -14,7 +14,7 @@ test.describe('Homepage - Desktop Navigation', () => {
 
   test('should display header with logo and navigation', async ({ page }) => {
     // Logo should be visible
-    await expect(page.getByRole('link', { name: /FastNext/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /PragmaStack/i })).toBeVisible();
 
     // Desktop navigation links should be visible (use locator to find within header)
     const header = page.locator('header').first();
@@ -40,7 +40,7 @@ test.describe('Homepage - Desktop Navigation', () => {
 
     // Click and wait for navigation
     await designSystemLink.click();
-    await page.waitForURL('/en/dev', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/dev', { timeout: 10000 }).catch(() => { });
 
     // Verify URL (might not navigate if /dev page has issues, that's ok for this test)
     const currentUrl = page.url();
@@ -58,7 +58,7 @@ test.describe('Homepage - Desktop Navigation', () => {
 
     // Click and wait for navigation
     await adminLink.click();
-    await page.waitForURL('/en/admin', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/admin', { timeout: 10000 }).catch(() => { });
 
     // Verify URL (might not navigate if /admin requires auth, that's ok for this test)
     const currentUrl = page.url();
@@ -150,7 +150,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
 
     // Click and wait for navigation
     await componentsLink.click();
-    await page.waitForURL('/en/dev', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/dev', { timeout: 10000 }).catch(() => { });
 
     // Verify URL (might not navigate if /dev page has issues, that's ok)
     const currentUrl = page.url();
@@ -168,7 +168,7 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
 
     // Click and wait for navigation
     await adminLink.click();
-    await page.waitForURL('/en/admin', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/admin', { timeout: 10000 }).catch(() => { });
 
     // Verify URL (might not navigate if /admin requires auth, that's ok)
     const currentUrl = page.url();
@@ -259,7 +259,7 @@ test.describe('Homepage - Hero Section', () => {
 
     // Click and try to navigate
     await exploreLink.click();
-    await page.waitForURL('/en/dev', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/dev', { timeout: 10000 }).catch(() => { });
 
     // Verify URL (flexible to handle auth redirects)
     const currentUrl = page.url();
@@ -391,7 +391,7 @@ test.describe('Homepage - Animated Terminal', () => {
 
     // Click and try to navigate
     await terminalDemoLink.click();
-    await page.waitForURL('/en/login', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/login', { timeout: 10000 }).catch(() => { });
 
     // Verify URL (flexible to handle redirects)
     const currentUrl = page.url();
@@ -421,7 +421,7 @@ test.describe('Homepage - Feature Sections', () => {
 
     // Click and try to navigate
     await authLink.click();
-    await page.waitForURL('/en/login', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/login', { timeout: 10000 }).catch(() => { });
 
     // Verify URL (flexible to handle redirects)
     const currentUrl = page.url();
@@ -436,7 +436,7 @@ test.describe('Homepage - Feature Sections', () => {
 
     // Click and try to navigate
     await adminLink.click();
-    await page.waitForURL('/en/admin', { timeout: 10000 }).catch(() => {});
+    await page.waitForURL('/en/admin', { timeout: 10000 }).catch(() => { });
 
     // Verify URL (flexible to handle auth redirects)
     const currentUrl = page.url();
@@ -469,7 +469,7 @@ test.describe('Homepage - Footer', () => {
     // Scroll to footer
     await page.locator('footer').scrollIntoViewIfNeeded();
 
-    await expect(page.getByText(/FastNext Template. MIT Licensed/i)).toBeVisible();
+    await expect(page.getByText(/PragmaStack. MIT Licensed/i)).toBeVisible();
   });
 });
 

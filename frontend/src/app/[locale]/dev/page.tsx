@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
 export const metadata: Metadata = {
-  title: 'Design System Hub | FastNext Template',
+  title: 'Design System Hub | PragmaStack',
   description:
     'Interactive design system demonstrations with live examples - explore components, layouts, spacing, and forms built with shadcn/ui and Tailwind CSS',
 };
@@ -90,7 +90,7 @@ export default function DesignSystemHub() {
             </div>
             <p className="text-lg text-muted-foreground">
               Interactive demonstrations, live examples, and comprehensive documentation for the
-              FastNext design system. Built with shadcn/ui + Tailwind CSS 4.
+              PragmaStack design system. Built with shadcn/ui + Tailwind CSS 4.
             </p>
           </div>
         </div>

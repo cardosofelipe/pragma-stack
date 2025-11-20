@@ -68,7 +68,7 @@ export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProp
                 className="h-8 gap-2"
               >
                 {copiedRegular ? (
-                  <Check className="h-4 w-4 text-green-600" aria-hidden="true" />
+                  <Check className="h-4 w-4 text-success" aria-hidden="true" />
                 ) : (
                   <Copy className="h-4 w-4" aria-hidden="true" />
                 )}
@@ -108,7 +108,7 @@ export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProp
                 className="h-8 gap-2"
               >
                 {copiedAdmin ? (
-                  <Check className="h-4 w-4 text-green-600" aria-hidden="true" />
+                  <Check className="h-4 w-4 text-success" aria-hidden="true" />
                 ) : (
                   <Copy className="h-4 w-4" aria-hidden="true" />
                 )}

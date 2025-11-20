@@ -37,7 +37,7 @@ describe('Header', () => {
       />
     );
 
-    expect(screen.getByText('FastNext')).toBeInTheDocument();
+    expect(screen.getByText('PragmaStack')).toBeInTheDocument();
     expect(screen.getByText('Template')).toBeInTheDocument();
   });
 
@@ -50,7 +50,7 @@ describe('Header', () => {
       />
     );
 
-    const logoLink = screen.getByRole('link', { name: /fastnext template/i });
+    const logoLink = screen.getByRole('link', { name: /pragmastack template/i });
     expect(logoLink).toHaveAttribute('href', '/');
   });
 

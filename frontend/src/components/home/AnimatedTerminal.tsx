@@ -83,9 +83,9 @@ export function AnimatedTerminal() {
           {/* Terminal Header */}
           <div className="flex items-center gap-2 border-b bg-muted/50 px-4 py-3">
             <div className="flex gap-1.5">
-              <div className="h-3 w-3 rounded-full bg-red-500" aria-hidden="true" />
-              <div className="h-3 w-3 rounded-full bg-yellow-500" aria-hidden="true" />
-              <div className="h-3 w-3 rounded-full bg-green-500" aria-hidden="true" />
+              <div className="h-3 w-3 rounded-full bg-destructive" aria-hidden="true" />
+              <div className="h-3 w-3 rounded-full bg-warning" aria-hidden="true" />
+              <div className="h-3 w-3 rounded-full bg-success" aria-hidden="true" />
             </div>
             <div className="flex items-center gap-2 ml-4 text-sm text-muted-foreground">
               <Terminal className="h-4 w-4" aria-hidden="true" />
@@ -105,15 +105,14 @@ export function AnimatedTerminal() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.2 }}
-                  className={`${
-                    line.isSuccess
-                      ? 'text-green-400'
+                  className={`${line.isSuccess
+                      ? 'text-success'
                       : line.text.startsWith('#')
                         ? 'text-slate-500'
                         : line.text.startsWith('$')
-                          ? 'text-blue-400'
+                          ? 'text-primary'
                           : 'text-slate-300'
-                  }`}
+                    }`}
                 >
                   {line.text || '\u00A0'}
                   {index === displayedLines.length - 1 && isAnimating && !line.isSuccess && (

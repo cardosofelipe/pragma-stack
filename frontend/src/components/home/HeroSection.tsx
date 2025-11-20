@@ -41,7 +41,7 @@ export function HeroSection({ onOpenDemoModal }: HeroSectionProps) {
           >
             <div className="inline-flex items-center gap-2 rounded-full border bg-background/50 px-4 py-1.5 text-sm backdrop-blur">
               <span
-                className="inline-block h-2 w-2 rounded-full bg-green-500 animate-pulse"
+                className="inline-block h-2 w-2 rounded-full bg-success animate-pulse"
                 aria-hidden="true"
               />
               <span className="font-medium">MIT Licensed</span>

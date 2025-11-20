@@ -13,8 +13,8 @@ export type Locale = 'en' | 'it';
  */
 export const siteConfig = {
   name: {
-    en: 'FastNext Template',
-    it: 'FastNext Template',
+    en: 'PragmaStack',
+    it: 'PragmaStack',
   },
   description: {
     en: 'Production-ready FastAPI + Next.js full-stack template with authentication, admin panel, and comprehensive testing',

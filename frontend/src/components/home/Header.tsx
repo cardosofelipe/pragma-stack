@@ -32,7 +32,7 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
           {/* Logo */}
           <Link href="/" className="font-bold text-xl hover:opacity-80 transition-opacity">
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              FastNext
+              PragmaStack
             </span>{' '}
             <span className="text-foreground">Template</span>
           </Link>

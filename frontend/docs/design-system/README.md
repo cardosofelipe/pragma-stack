@@ -1,6 +1,6 @@
 # Design System Documentation
 
-**FastNext Template Design System** - A comprehensive guide to building consistent, accessible, and beautiful user interfaces.
+**PragmaStack Design System** - A comprehensive guide to building consistent, accessible, and beautiful user interfaces.
 
 ---
 
@@ -18,6 +18,11 @@
 ---
 
 ## 📖 Documentation Structure
+
+### Branding & Identity
+- **[Branding Guidelines](../branding/README.md)** 🎨
+  - Mission & Values
+  - Visual Identity (Logo, Colors, Typography)
 
 ### Getting Started
 

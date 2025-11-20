@@ -1,6 +1,6 @@
-# FastNext Template - Frontend
+# PragmaStack - Frontend
 
-Production-ready Next.js 15 frontend with TypeScript, authentication, admin panel, and internationalization.
+Production-ready Next.js 16 frontend with TypeScript, authentication, admin panel, and internationalization.
 
 ## Features
 

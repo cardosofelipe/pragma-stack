@@ -27,8 +27,8 @@ describe('metadata utilities', () => {
     });
 
     it('should have English and Italian names', () => {
-      expect(siteConfig.name.en).toBe('FastNext Template');
-      expect(siteConfig.name.it).toBe('FastNext Template');
+      expect(siteConfig.name.en).toBe('PragmaStack');
+      expect(siteConfig.name.it).toBe('PragmaStack');
     });
 
     it('should have English and Italian descriptions', () => {

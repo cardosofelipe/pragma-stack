@@ -10,7 +10,7 @@ import { Footer } from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | FastNext Template',
+    template: '%s | PragmaStack',
     default: 'Dashboard',
   },
 };

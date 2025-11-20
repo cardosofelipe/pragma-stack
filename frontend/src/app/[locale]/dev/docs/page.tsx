@@ -120,7 +120,7 @@ export default function DocsHub() {
             <h2 className="text-4xl font-bold tracking-tight mb-4">Design System Documentation</h2>
             <p className="text-lg text-muted-foreground mb-8">
               Comprehensive guides, best practices, and references for building consistent,
-              accessible, and maintainable user interfaces with the FastNext design system.
+              accessible, and maintainable user interfaces with the PragmaStack design system.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Link href="/dev/docs/design-system/00-quick-start">

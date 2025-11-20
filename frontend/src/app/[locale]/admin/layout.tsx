@@ -12,7 +12,7 @@ import { AdminSidebar, Breadcrumbs } from '@/components/admin';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Admin | FastNext Template',
+    template: '%s | Admin | PragmaStack',
     default: 'Admin Dashboard',
   },
 };

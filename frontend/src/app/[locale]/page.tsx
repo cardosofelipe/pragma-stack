@@ -1,6 +1,6 @@
 /**
  * Homepage / Landing Page
- * Main landing page for the FastNext Template project
+ * Main landing page for the PragmaStack project
  * Showcases features, tech stack, and provides demos for developers
  */
 
@@ -67,7 +67,7 @@ export default function Home() {
         <div className="container mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} FastNext Template. MIT Licensed.
+              © {new Date().getFullYear()} PragmaStack. MIT Licensed.
             </div>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <Link href="/demos" className="hover:text-foreground transition-colors">

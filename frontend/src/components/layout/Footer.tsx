@@ -15,7 +15,7 @@ export function Footer() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
           <div className="text-center text-sm text-muted-foreground md:text-left">
-            © {currentYear} FastNext Template. All rights reserved.
+            © {currentYear} PragmaStack. All rights reserved.
           </div>
           <div className="flex space-x-6">
             <Link
@@ -25,7 +25,7 @@ export function Footer() {
               Settings
             </Link>
             <a
-              href="https://github.com/yourusername/fastnext-stack"
+              href="https://github.com/cardosofelipe/pragmastack"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
