@@ -1,10 +1,12 @@
-# Backend API
+# PragmaStack Backend API
 
-> FastAPI-based REST API with async SQLAlchemy, JWT authentication, and comprehensive testing.
+> The pragmatic, production-ready FastAPI backend for PragmaStack.
 
 ## Overview
 
-Production-ready FastAPI backend featuring:
+Opinionated, secure, and fast. This backend provides the solid foundation you need to ship features, not boilerplate.
+
+Features:
 
 - **Authentication**: JWT with refresh tokens, session management, device tracking
 - **Database**: Async PostgreSQL with SQLAlchemy 2.0, Alembic migrations
