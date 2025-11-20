@@ -1,7 +1,7 @@
 """add user locale preference column
 
 Revision ID: c8e9f3a2d1b4
-Revises: b76c725fc3cf
+Revises: 1174fffbe3e4
 Create Date: 2025-11-17 18:00:00.000000
 
 """
@@ -13,7 +13,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "c8e9f3a2d1b4"
-down_revision: str | None = "b76c725fc3cf"
+down_revision: str | None = "1174fffbe3e4"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

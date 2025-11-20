@@ -1,2 +1,17 @@
 .venv
 *.iml
+
+# Python build and cache artifacts
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+*.pyo
+
+# Packaging artifacts
+*.egg-info/
+build/
+dist/
+htmlcov/
+.uv_cache/

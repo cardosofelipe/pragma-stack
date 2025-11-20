@@ -1,6 +1,6 @@
 # PragmaStack
 
-<div align="center">
+<div style="text-align: center">
   <img src="frontend/public/logo.svg" alt="PragmaStack Logo" width="200" />
   <br />
 </div>
