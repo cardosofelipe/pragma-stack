@@ -4,8 +4,6 @@
  * Protected by AuthGuard in layout with requireAdmin=true
  */
 
-/* istanbul ignore next - Next.js type import for metadata */
-import type { Metadata } from 'next';
 import { Link } from '@/lib/i18n/routing';
 import { DashboardStats } from '@/components/admin';
 import {
@@ -16,10 +14,8 @@ import {
 } from '@/components/charts';
 import { Users, Building2, Settings } from 'lucide-react';
 
-/* istanbul ignore next - Next.js metadata, not executable code */
-export const metadata: Metadata = {
-  title: 'Admin Dashboard',
-};
+// Re-export server-only metadata from separate, ignored file
+export { metadata } from './metadata';
 
 export default function AdminPage() {
   return (

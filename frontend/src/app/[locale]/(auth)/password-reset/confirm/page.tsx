@@ -3,27 +3,11 @@
  * Users set a new password using the token from their email
  */
 
-import { Metadata } from 'next';
 import { Suspense } from 'react';
-import { generatePageMetadata, type Locale } from '@/lib/i18n/metadata';
-import { getTranslations } from 'next-intl/server';
 import PasswordResetConfirmContent from './PasswordResetConfirmContent';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'auth.passwordResetConfirm' });
-
-  return generatePageMetadata(
-    locale as Locale,
-    t('title'),
-    t('instructions'),
-    '/password-reset/confirm'
-  );
-}
+// Re-export server-only metadata from separate, ignored file
+export { generateMetadata } from './metadata';
 
 export default function PasswordResetConfirmPage() {
   return (

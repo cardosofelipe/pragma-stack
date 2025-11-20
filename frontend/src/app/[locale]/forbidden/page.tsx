@@ -3,29 +3,11 @@
  * Displayed when users try to access resources they don't have permission for
  */
 
-import type { Metadata } from 'next';
 import { Link } from '@/lib/i18n/routing';
 import { ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { generatePageMetadata, type Locale } from '@/lib/i18n/metadata';
-import { getTranslations } from 'next-intl/server';
-
-/* istanbul ignore next - Next.js metadata generation covered by e2e tests */
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'errors' });
-
-  return generatePageMetadata(
-    locale as Locale,
-    t('unauthorized'),
-    t('unauthorizedDescription'),
-    '/forbidden'
-  );
-}
+// Re-export server-only metadata from separate, ignored file
+export { generateMetadata } from './metadata';
 
 export default function ForbiddenPage() {
   return (

@@ -1,7 +1,4 @@
-import { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import { generatePageMetadata, type Locale } from '@/lib/i18n/metadata';
-import { getTranslations } from 'next-intl/server';
 
 // Code-split LoginForm - heavy with react-hook-form + validation
 const LoginForm = dynamic(
@@ -18,17 +15,8 @@ const LoginForm = dynamic(
   }
 );
 
-/* istanbul ignore next - Next.js metadata generation covered by e2e tests */
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'auth.login' });
-
-  return generatePageMetadata(locale as Locale, t('title'), t('subtitle'), '/login');
-}
+// Re-export server-only metadata from separate, ignored file
+export { generateMetadata } from './metadata';
 
 export default function LoginPage() {
   return (

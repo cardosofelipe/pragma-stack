@@ -4,17 +4,13 @@
  * Protected by AuthGuard in layout with requireAdmin=true
  */
 
-/* istanbul ignore next - Next.js type import for metadata */
-import type { Metadata } from 'next';
 import { Link } from '@/lib/i18n/routing';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { OrganizationManagementContent } from '@/components/admin/organizations/OrganizationManagementContent';
 
-/* istanbul ignore next - Next.js metadata, not executable code */
-export const metadata: Metadata = {
-  title: 'Organizations',
-};
+// Re-export server-only metadata from separate, ignored file
+export { metadata } from './metadata';
 
 export default function AdminOrganizationsPage() {
   return (

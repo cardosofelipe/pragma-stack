@@ -1,7 +1,4 @@
-import { Metadata } from 'next';
 import dynamic from 'next/dynamic';
-import { generatePageMetadata, type Locale } from '@/lib/i18n/metadata';
-import { getTranslations } from 'next-intl/server';
 
 // Code-split RegisterForm (313 lines)
 const RegisterForm = dynamic(
@@ -18,17 +15,8 @@ const RegisterForm = dynamic(
   }
 );
 
-/* istanbul ignore next - Next.js metadata generation covered by e2e tests */
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'auth.register' });
-
-  return generatePageMetadata(locale as Locale, t('title'), t('subtitle'), '/register');
-}
+// Re-export server-only metadata from separate, ignored file
+export { generateMetadata } from './metadata';
 
 export default function RegisterPage() {
   return (
