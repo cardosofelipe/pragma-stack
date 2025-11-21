@@ -21,8 +21,8 @@ import { CHART_PALETTES } from '@/lib/chart-colors';
 
 export interface UserGrowthData {
   date: string;
-  totalUsers: number;
-  activeUsers: number;
+  total_users: number;
+  active_users: number;
 }
 
 interface UserGrowthChartProps {
@@ -41,8 +41,8 @@ function generateMockData(): UserGrowthData[] {
     const baseUsers = 100 + i * 3;
     data.push({
       date: format(date, 'MMM d'),
-      totalUsers: baseUsers + Math.floor(Math.random() * 10),
-      activeUsers: Math.floor(baseUsers * 0.8) + Math.floor(Math.random() * 5),
+      total_users: baseUsers + Math.floor(Math.random() * 10),
+      active_users: Math.floor(baseUsers * 0.8) + Math.floor(Math.random() * 5),
     });
   }
 
@@ -89,7 +89,7 @@ export function UserGrowthChart({ data, loading, error }: UserGrowthChartProps) 
           />
           <Line
             type="monotone"
-            dataKey="totalUsers"
+            dataKey="total_users"
             name="Total Users"
             stroke={CHART_PALETTES.line[0]}
             strokeWidth={2}
@@ -98,7 +98,7 @@ export function UserGrowthChart({ data, loading, error }: UserGrowthChartProps) 
           />
           <Line
             type="monotone"
-            dataKey="activeUsers"
+            dataKey="active_users"
             name="Active Users"
             stroke={CHART_PALETTES.line[1]}
             strokeWidth={2}

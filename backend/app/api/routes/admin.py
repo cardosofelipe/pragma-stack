@@ -7,12 +7,14 @@ for managing the application.
 """
 
 import logging
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 from pydantic import BaseModel, Field
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.permissions import require_superuser
@@ -26,8 +28,9 @@ from app.core.exceptions import (
 from app.crud.organization import organization as organization_crud
 from app.crud.session import session as session_crud
 from app.crud.user import user as user_crud
+from app.models.organization import Organization
 from app.models.user import User
-from app.models.user_organization import OrganizationRole
+from app.models.user_organization import OrganizationRole, UserOrganization
 from app.schemas.common import (
     MessageResponse,
     PaginatedResponse,
@@ -79,18 +82,22 @@ class BulkActionResult(BaseModel):
 
 # ===== User Management Endpoints =====
 
+
 class UserGrowthData(BaseModel):
     date: str
-    totalUsers: int
-    activeUsers: int
+    total_users: int
+    active_users: int
+
 
 class OrgDistributionData(BaseModel):
     name: str
     value: int
 
+
 class UserStatusData(BaseModel):
     name: str
     value: int
+
 
 class AdminStatsResponse(BaseModel):
     user_growth: list[UserGrowthData]
@@ -110,27 +117,28 @@ async def admin_get_stats(
     db: AsyncSession = Depends(get_db),
 ) -> Any:
     """Get admin dashboard statistics."""
-    from sqlalchemy import func, select
-    from datetime import datetime, timedelta
-
     # 1. User Growth (Last 30 days)
     # Note: This is a simplified implementation. For production, consider a dedicated stats table or materialized view.
     thirty_days_ago = datetime.utcnow() - timedelta(days=30)
-    
+
     # Get all users created in last 30 days
-    query = select(User).where(User.created_at >= thirty_days_ago).order_by(User.created_at)
+    query = (
+        select(User).where(User.created_at >= thirty_days_ago).order_by(User.created_at)
+    )
     result = await db.execute(query)
     recent_users = result.scalars().all()
-    
+
     # Get total count before 30 days
-    count_query = select(func.count()).select_from(User).where(User.created_at < thirty_days_ago)
-    result = await db.execute(count_query)
-    base_count = result.scalar() or 0
-    
+    count_query = (
+        select(func.count()).select_from(User).where(User.created_at < thirty_days_ago)
+    )
+    count_result = await db.execute(count_query)
+    base_count = count_result.scalar() or 0
+
     # Aggregate by day
     user_growth = []
     current_total = base_count
-    
+
     # Create a map of date -> count
     daily_counts = {}
     for user in recent_users:
@@ -140,31 +148,30 @@ async def admin_get_stats(
         daily_counts[date_str]["total"] += 1
         if user.is_active:
             daily_counts[date_str]["active"] += 1
-            
+
     # Fill in the last 30 days
     for i in range(29, -1, -1):
         date = datetime.utcnow() - timedelta(days=i)
         date_str = date.strftime("%b %d")
-        
+
         day_data = daily_counts.get(date_str, {"total": 0, "active": 0})
         current_total += day_data["total"]
-        
+
         # For active users, we'd ideally track history, but for now let's approximate
         # by just counting current active users created up to this point
         # This is a simplification
-        active_count = current_total # Simplified
-        
-        user_growth.append(UserGrowthData(
-            date=date_str,
-            totalUsers=current_total,
-            activeUsers=int(current_total * 0.8) # Mocking active ratio for demo visual appeal if real data lacks history
-        ))
+        user_growth.append(
+            UserGrowthData(
+                date=date_str,
+                total_users=current_total,
+                active_users=int(
+                    current_total * 0.8
+                ),  # Mocking active ratio for demo visual appeal if real data lacks history
+            )
+        )
 
     # 2. Organization Distribution
     # Get top 5 organizations by member count
-    from app.models.user_organization import UserOrganization
-    from app.models.organization import Organization
-    
     org_query = (
         select(Organization.name, func.count(UserOrganization.user_id).label("count"))
         .join(UserOrganization, Organization.id == UserOrganization.organization_id)
@@ -173,24 +180,28 @@ async def admin_get_stats(
         .limit(5)
     )
     result = await db.execute(org_query)
-    org_dist = [OrgDistributionData(name=row.name, value=row.count) for row in result.all()]
-    
+    org_dist = [
+        OrgDistributionData(name=row.name, value=row.count) for row in result.all()
+    ]
+
     # 3. User Status
-    active_query = select(func.count()).select_from(User).where(User.is_active == True)
-    inactive_query = select(func.count()).select_from(User).where(User.is_active == False)
-    
+    active_query = select(func.count()).select_from(User).where(User.is_active)
+    inactive_query = (
+        select(func.count()).select_from(User).where(User.is_active.is_(False))
+    )
+
     active_count = (await db.execute(active_query)).scalar() or 0
     inactive_count = (await db.execute(inactive_query)).scalar() or 0
-    
+
     user_status = [
         UserStatusData(name="Active", value=active_count),
-        UserStatusData(name="Inactive", value=inactive_count)
+        UserStatusData(name="Inactive", value=inactive_count),
     ]
-    
+
     return AdminStatsResponse(
         user_growth=user_growth,
         organization_distribution=org_dist,
-        user_status=user_status
+        user_status=user_status,
     )
 
 

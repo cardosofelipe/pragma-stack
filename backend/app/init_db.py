@@ -8,6 +8,8 @@ Creates the first superuser if configured and doesn't already exist.
 import asyncio
 import json
 import logging
+import random
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from sqlalchemy import select, text
@@ -137,15 +139,38 @@ async def load_demo_data(session):
                 session, email=user_data["email"]
             )
             if not existing_user:
+                # Create user
                 user_in = UserCreate(
                     email=user_data["email"],
                     password=user_data["password"],
                     first_name=user_data["first_name"],
                     last_name=user_data["last_name"],
                     is_superuser=user_data["is_superuser"],
+                    is_active=user_data.get("is_active", True),
                 )
                 user = await user_crud.create(session, obj_in=user_in)
-                logger.info(f"Created demo user: {user.email}")
+
+                # Randomize created_at for demo data (last 30 days)
+                # This makes the charts look more realistic
+                days_ago = random.randint(0, 30)  # noqa: S311
+                random_time = datetime.utcnow() - timedelta(days=days_ago)
+                # Add some random hours/minutes variation
+                random_time = random_time.replace(
+                    hour=random.randint(0, 23),  # noqa: S311
+                    minute=random.randint(0, 59),  # noqa: S311
+                )
+
+                # Update the timestamp directly in the database
+                await session.execute(
+                    text(
+                        "UPDATE users SET created_at = :created_at WHERE id = :user_id"
+                    ),
+                    {"created_at": random_time, "user_id": user.id},
+                )
+
+                logger.info(
+                    f"Created demo user: {user.email} (created {days_ago} days ago)"
+                )
 
                 # Add to organization if specified
                 org_slug = user_data.get("organization_slug")

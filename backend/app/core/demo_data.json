@@ -34,7 +34,8 @@
             "last_name": "Smith",
             "is_superuser": false,
             "organization_slug": "acme-corp",
-            "role": "admin"
+            "role": "admin",
+            "is_active": true
         },
         {
             "email": "bob@acme.com",
@@ -43,7 +44,18 @@
             "last_name": "Jones",
             "is_superuser": false,
             "organization_slug": "acme-corp",
-            "role": "member"
+            "role": "member",
+            "is_active": true
+        },
+        {
+            "email": "charlie@acme.com",
+            "password": "Demo123!",
+            "first_name": "Charlie",
+            "last_name": "Brown",
+            "is_superuser": false,
+            "organization_slug": "acme-corp",
+            "role": "member",
+            "is_active": false
         },
         {
             "email": "carol@globex.com",
@@ -52,7 +64,18 @@
             "last_name": "Williams",
             "is_superuser": false,
             "organization_slug": "globex",
-            "role": "owner"
+            "role": "owner",
+            "is_active": true
+        },
+        {
+            "email": "dan@globex.com",
+            "password": "Demo123!",
+            "first_name": "Dan",
+            "last_name": "Miller",
+            "is_superuser": false,
+            "organization_slug": "globex",
+            "role": "member",
+            "is_active": true
         },
         {
             "email": "dave@soylent.com",
@@ -61,7 +84,8 @@
             "last_name": "Brown",
             "is_superuser": false,
             "organization_slug": "soylent",
-            "role": "member"
+            "role": "member",
+            "is_active": true
         },
         {
             "email": "eve@initech.com",
@@ -70,7 +94,8 @@
             "last_name": "Davis",
             "is_superuser": false,
             "organization_slug": "initech",
-            "role": "admin"
+            "role": "admin",
+            "is_active": true
         },
         {
             "email": "frank@umbrella.com",
@@ -79,7 +104,18 @@
             "last_name": "Miller",
             "is_superuser": false,
             "organization_slug": "umbrella",
-            "role": "member"
+            "role": "member",
+            "is_active": true
+        },
+        {
+            "email": "george@umbrella.com",
+            "password": "Demo123!",
+            "first_name": "George",
+            "last_name": "Costanza",
+            "is_superuser": false,
+            "organization_slug": "umbrella",
+            "role": "member",
+            "is_active": false
         },
         {
             "email": "grace@example.com",
@@ -88,7 +124,8 @@
             "last_name": "Hopper",
             "is_superuser": false,
             "organization_slug": null,
-            "role": null
+            "role": null,
+            "is_active": true
         },
         {
             "email": "heidi@example.com",
@@ -97,7 +134,18 @@
             "last_name": "Klum",
             "is_superuser": false,
             "organization_slug": null,
-            "role": null
+            "role": null,
+            "is_active": true
+        },
+        {
+            "email": "ivan@example.com",
+            "password": "Demo123!",
+            "first_name": "Ivan",
+            "last_name": "Drago",
+            "is_superuser": false,
+            "organization_slug": null,
+            "role": null,
+            "is_active": false
         }
     ]
 }

@@ -3,8 +3,8 @@ import type { Options } from './generated/sdk.gen';
 
 export interface UserGrowthData {
     date: string;
-    totalUsers: number;
-    activeUsers: number;
+    total_users: number;
+    active_users: number;
 }
 
 export interface OrgDistributionData {

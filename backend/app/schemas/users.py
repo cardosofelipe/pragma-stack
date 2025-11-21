@@ -23,6 +23,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     is_superuser: bool = False
+    is_active: bool = True
 
     @field_validator("password")
     @classmethod
