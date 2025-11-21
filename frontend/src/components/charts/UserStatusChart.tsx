@@ -12,7 +12,7 @@ import { CHART_PALETTES } from '@/lib/chart-colors';
 export interface UserStatusData {
   name: string;
   value: number;
-  color: string;
+  color?: string;
 }
 
 interface UserStatusChartProps {
@@ -38,7 +38,13 @@ const renderLabel = (entry: { percent: number; name: string }) => {
 };
 
 export function UserStatusChart({ data, loading, error }: UserStatusChartProps) {
-  const chartData = data || generateMockData();
+  const rawData = data || generateMockData();
+
+  // Assign colors if missing
+  const chartData = rawData.map((item, index) => ({
+    ...item,
+    color: item.color || CHART_PALETTES.pie[index % CHART_PALETTES.pie.length],
+  }));
 
   return (
     <ChartCard

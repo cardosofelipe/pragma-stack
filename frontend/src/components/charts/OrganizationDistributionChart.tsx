@@ -20,8 +20,7 @@ import { CHART_PALETTES } from '@/lib/chart-colors';
 
 export interface OrganizationDistributionData {
   name: string;
-  members: number;
-  activeMembers: number;
+  value: number;
 }
 
 interface OrganizationDistributionChartProps {
@@ -33,12 +32,12 @@ interface OrganizationDistributionChartProps {
 // Generate mock data for development/demo
 function generateMockData(): OrganizationDistributionData[] {
   return [
-    { name: 'Engineering', members: 45, activeMembers: 42 },
-    { name: 'Marketing', members: 28, activeMembers: 25 },
-    { name: 'Sales', members: 35, activeMembers: 33 },
-    { name: 'Operations', members: 22, activeMembers: 20 },
-    { name: 'HR', members: 15, activeMembers: 14 },
-    { name: 'Finance', members: 18, activeMembers: 17 },
+    { name: 'Engineering', value: 45 },
+    { name: 'Marketing', value: 28 },
+    { name: 'Sales', value: 35 },
+    { name: 'Operations', value: 22 },
+    { name: 'HR', value: 15 },
+    { name: 'Finance', value: 18 },
   ];
 }
 
@@ -85,15 +84,9 @@ export function OrganizationDistributionChart({
             }}
           />
           <Bar
-            dataKey="members"
+            dataKey="value"
             name="Total Members"
             fill={CHART_PALETTES.bar[0]}
-            radius={[4, 4, 0, 0]}
-          />
-          <Bar
-            dataKey="activeMembers"
-            name="Active Members"
-            fill={CHART_PALETTES.bar[1]}
             radius={[4, 4, 0, 0]}
           />
         </BarChart>

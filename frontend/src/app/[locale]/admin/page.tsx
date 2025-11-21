@@ -4,6 +4,8 @@
  * Protected by AuthGuard in layout with requireAdmin=true
  */
 
+'use client';
+
 import { Link } from '@/lib/i18n/routing';
 import { DashboardStats } from '@/components/admin';
 import {
@@ -13,11 +15,18 @@ import {
   UserStatusChart,
 } from '@/components/charts';
 import { Users, Building2, Settings } from 'lucide-react';
-
-// Re-export server-only metadata from separate, ignored file
-export { metadata } from './metadata';
+import { useQuery } from '@tanstack/react-query';
+import { getAdminStats } from '@/lib/api/admin';
 
 export default function AdminPage() {
+  const { data: stats, isLoading, error } = useQuery({
+    queryKey: ['admin', 'stats'],
+    queryFn: async () => {
+      const response = await getAdminStats();
+      return response.data;
+    },
+  });
+
   return (
     <div className="container mx-auto px-6 py-8">
       <div className="space-y-8">
@@ -76,10 +85,22 @@ export default function AdminPage() {
         <div>
           <h2 className="text-xl font-semibold mb-4">Analytics Overview</h2>
           <div className="grid gap-6 md:grid-cols-2">
-            <UserGrowthChart />
+            <UserGrowthChart
+              data={stats?.user_growth}
+              loading={isLoading}
+              error={error ? (error as Error).message : null}
+            />
             <SessionActivityChart />
-            <OrganizationDistributionChart />
-            <UserStatusChart />
+            <OrganizationDistributionChart
+              data={stats?.organization_distribution}
+              loading={isLoading}
+              error={error ? (error as Error).message : null}
+            />
+            <UserStatusChart
+              data={stats?.user_status}
+              loading={isLoading}
+              error={error ? (error as Error).message : null}
+            />
           </div>
         </div>
       </div>
