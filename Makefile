@@ -31,7 +31,7 @@ clean:
 
 # WARNING! THIS REMOVES CONTAINERS AND VOLUMES AS WELL - DO NOT USE THIS UNLESS YOU WANT TO START OVER WITH DATA AND ALL
 clean-slate:
-	docker compose down -v
+	docker compose -f docker-compose.dev.yml down -v --remove-orphans
 
 push-images:
 	docker build -t $(REGISTRY)/backend:$(VERSION) ./backend
