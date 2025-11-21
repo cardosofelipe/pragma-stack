@@ -1,4 +1,4 @@
-.PHONY: dev dev-full prod down clean clean-slate
+.PHONY: dev dev-full prod down logs logs-dev clean clean-slate
 
 VERSION ?= latest
 REGISTRY := gitea.pragmazest.com/cardosofelipe/app
@@ -21,6 +21,12 @@ prod:
 
 down:
 	docker compose down
+
+logs:
+	docker compose logs -f
+
+logs-dev:
+	docker compose -f docker-compose.dev.yml logs -f
 
 deploy:
 	docker compose -f docker-compose.deploy.yml pull
