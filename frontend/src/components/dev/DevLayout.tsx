@@ -8,10 +8,10 @@
 
 'use client';
 
+import Image from 'next/image';
 import { Link } from '@/lib/i18n/routing';
 import { usePathname } from '@/lib/i18n/routing';
 import {
-
   Palette,
   LayoutDashboard,
   Box,
@@ -94,7 +94,13 @@ export function DevLayout({ children }: DevLayoutProps) {
           <div className="flex h-14 items-center justify-between gap-6">
             {/* Left: Logo + Badge */}
             <div className="flex items-center gap-3 shrink-0">
-              <img src="/logo-icon.svg" alt="PragmaStack Logo" className="h-6 w-6" />
+              <Image
+                src="/logo-icon.svg"
+                alt="PragmaStack Logo"
+                width={24}
+                height={24}
+                className="h-6 w-6"
+              />
               <h1 className="text-base font-semibold">PragmaStack</h1>
               <Badge variant="secondary" className="text-xs">
                 Dev

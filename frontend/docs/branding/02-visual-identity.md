@@ -12,6 +12,7 @@ The **PragmaStack** logo represents the core values of the project: structure, s
 </div>
 
 ### Icon
+
 For smaller contexts (favicons, headers), we use the simplified icon:
 
 <div align="center">

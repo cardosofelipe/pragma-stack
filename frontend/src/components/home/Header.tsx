@@ -5,6 +5,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { Link } from '@/lib/i18n/routing';
 import { Menu, X, Github, Star } from 'lucide-react';
@@ -13,12 +14,20 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LocaleSwitcher } from '@/components/i18n';
 import { ThemeToggle } from '@/components/theme';
 
+import { useIsAuthenticated, useLogout } from '@/lib/api/hooks/useAuth';
+
 interface HeaderProps {
   onOpenDemoModal: () => void;
 }
 
 export function Header({ onOpenDemoModal }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isAuthenticated = useIsAuthenticated();
+  const logoutMutation = useLogout();
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   const navLinks = [
     { href: '/', label: 'Home' },
@@ -31,8 +40,17 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity">
-            <img src="/logo-icon.svg" alt="PragmaStack Logo" className="h-8 w-8" />
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity"
+          >
+            <Image
+              src="/logo-icon.svg"
+              alt="PragmaStack Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8"
+            />
             <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               PragmaStack
             </span>
@@ -75,9 +93,16 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
             <Button onClick={onOpenDemoModal} variant="default" size="sm">
               Try Demo
             </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/login">Login</Link>
-            </Button>
+
+            {isAuthenticated ? (
+              <Button onClick={handleLogout} variant="outline" size="sm">
+                Logout
+              </Button>
+            ) : (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/login">Login</Link>
+              </Button>
+            )}
           </nav>
 
           {/* Mobile Menu Toggle */}
@@ -138,11 +163,25 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
                   >
                     Try Demo
                   </Button>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                      Login
-                    </Link>
-                  </Button>
+
+                  {isAuthenticated ? (
+                    <Button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      Logout
+                    </Button>
+                  ) : (
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                        Login
+                      </Link>
+                    </Button>
+                  )}
                 </div>
               </nav>
             </SheetContent>

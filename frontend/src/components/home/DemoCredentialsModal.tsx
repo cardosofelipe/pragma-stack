@@ -141,12 +141,12 @@ export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProp
         <DialogFooter>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
             <Button asChild variant="default" className="w-full">
-              <Link href="/login" onClick={onClose}>
+              <Link href="/login?email=demo@example.com&password=Demo123!" onClick={onClose}>
                 Login as User
               </Link>
             </Button>
             <Button asChild variant="default" className="w-full">
-              <Link href="/login" onClick={onClose}>
+              <Link href="/login?email=admin@example.com&password=Admin123!" onClick={onClose}>
                 Login as Admin
               </Link>
             </Button>

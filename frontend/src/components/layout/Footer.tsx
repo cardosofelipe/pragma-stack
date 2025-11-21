@@ -5,6 +5,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { Link } from '@/lib/i18n/routing';
 
 export function Footer() {
@@ -15,7 +16,13 @@ export function Footer() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col items-center justify-between space-y-4 md:flex-row md:space-y-0">
           <div className="flex items-center gap-2 text-center text-sm text-muted-foreground md:text-left">
-            <img src="/logo-icon.svg" alt="PragmaStack Logo" className="h-5 w-5 opacity-70" />
+            <Image
+              src="/logo-icon.svg"
+              alt="PragmaStack Logo"
+              width={20}
+              height={20}
+              className="h-5 w-5 opacity-70"
+            />
             <span>© {currentYear} PragmaStack. All rights reserved.</span>
           </div>
           <div className="flex space-x-6">

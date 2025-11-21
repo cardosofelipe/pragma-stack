@@ -14,6 +14,10 @@ class Settings(BaseSettings):
         default="development",
         description="Environment: development, staging, or production",
     )
+    DEMO_MODE: bool = Field(
+        default=False,
+        description="Enable demo mode (relaxed security, demo users)",
+    )
 
     # Security: Content Security Policy
     # Set to False to disable CSP entirely (not recommended)
@@ -110,10 +114,20 @@ class Settings(BaseSettings):
 
     @field_validator("FIRST_SUPERUSER_PASSWORD")
     @classmethod
-    def validate_superuser_password(cls, v: str | None) -> str | None:
+    def validate_superuser_password(cls, v: str | None, info) -> str | None:
         """Validate superuser password strength."""
         if v is None:
             return v
+
+        # Get environment from values if available
+        values_data = info.data if info.data else {}
+        demo_mode = values_data.get("DEMO_MODE", False)
+
+        if demo_mode:
+            # In demo mode, allow specific weak passwords for demo accounts
+            demo_passwords = {"Demo123!", "Admin123!"}
+            if v in demo_passwords:
+                return v
 
         if len(v) < 12:
             raise ValueError("FIRST_SUPERUSER_PASSWORD must be at least 12 characters")

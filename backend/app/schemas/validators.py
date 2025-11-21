@@ -60,6 +60,15 @@ def validate_password_strength(password: str) -> str:
         >>> validate_password_strength("MySecureP@ss123")  # Valid
         >>> validate_password_strength("password1")  # Invalid - too weak
     """
+    # Check if we are in demo mode
+    from app.core.config import settings
+
+    if settings.DEMO_MODE:
+        # In demo mode, allow specific weak passwords for demo accounts
+        demo_passwords = {"Demo123!", "Admin123!"}
+        if password in demo_passwords:
+            return password
+
     # Check minimum length
     if len(password) < 12:
         raise ValueError("Password must be at least 12 characters long")

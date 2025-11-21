@@ -57,6 +57,27 @@ async def init_db() -> User | None:
             await session.refresh(user)
 
             logger.info(f"Created first superuser: {user.email}")
+
+            # Create demo user if in demo mode
+            if settings.DEMO_MODE:
+                demo_email = "demo@example.com"
+                demo_password = "Demo123!"
+                
+                existing_demo_user = await user_crud.get_by_email(session, email=demo_email)
+                if not existing_demo_user:
+                    demo_user_in = UserCreate(
+                        email=demo_email,
+                        password=demo_password,
+                        first_name="Demo",
+                        last_name="User",
+                        is_superuser=False,
+                    )
+                    demo_user = await user_crud.create(session, obj_in=demo_user_in)
+                    await session.commit()
+                    logger.info(f"Created demo user: {demo_user.email}")
+                else:
+                    logger.info(f"Demo user already exists: {existing_demo_user.email}")
+
             return user
 
         except Exception as e:

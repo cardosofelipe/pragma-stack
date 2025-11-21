@@ -6,6 +6,7 @@
 
 'use client';
 
+import Image from 'next/image';
 import { Link } from '@/lib/i18n/routing';
 import { usePathname } from '@/lib/i18n/routing';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -83,7 +84,13 @@ export function Header() {
         {/* Logo */}
         <div className="flex items-center space-x-8">
           <Link href="/" className="flex items-center space-x-2">
-            <img src="/logo-icon.svg" alt="PragmaStack Logo" className="h-8 w-8" />
+            <Image
+              src="/logo-icon.svg"
+              alt="PragmaStack Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8"
+            />
             <span className="text-xl font-bold text-foreground">PragmaStack</span>
           </Link>
 

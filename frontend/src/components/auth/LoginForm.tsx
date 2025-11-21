@@ -6,8 +6,9 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from '@/lib/i18n/routing';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -82,6 +83,9 @@ export function LoginForm({
   const [serverError, setServerError] = useState<string | null>(null);
   const loginMutation = useLogin();
 
+  // Get query parameters for demo auto-fill
+  const searchParams = useSearchParams();
+
   const loginSchema = createLoginSchema((key: string) => {
     if (key.startsWith('validation.')) {
       return tValidation(key.replace('validation.', ''));
@@ -101,6 +105,15 @@ export function LoginForm({
       password: '',
     },
   });
+
+  // Auto-fill form from query params (for demo mode)
+  useEffect(() => {
+    const email = searchParams.get('email');
+    const password = searchParams.get('password');
+
+    if (email) form.setValue('email', email);
+    if (password) form.setValue('password', password);
+  }, [searchParams, form]);
 
   const onSubmit = async (data: LoginFormData) => {
     try {

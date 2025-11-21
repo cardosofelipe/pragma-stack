@@ -124,8 +124,6 @@ export function HeroSection({ onOpenDemoModal }: HeroSectionProps) {
               </Link>
             </Button>
           </motion.div>
-
-
         </div>
       </div>
     </section>
