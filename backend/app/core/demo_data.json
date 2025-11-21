@@ -1,0 +1,103 @@
+{
+    "organizations": [
+        {
+            "name": "Acme Corp",
+            "slug": "acme-corp",
+            "description": "A leading provider of coyote-catching equipment."
+        },
+        {
+            "name": "Globex Corporation",
+            "slug": "globex",
+            "description": "We own the East Coast."
+        },
+        {
+            "name": "Soylent Corp",
+            "slug": "soylent",
+            "description": "Making food for the future."
+        },
+        {
+            "name": "Initech",
+            "slug": "initech",
+            "description": "Software for the soul."
+        },
+        {
+            "name": "Umbrella Corporation",
+            "slug": "umbrella",
+            "description": "Our business is life itself."
+        }
+    ],
+    "users": [
+        {
+            "email": "alice@acme.com",
+            "password": "Demo123!",
+            "first_name": "Alice",
+            "last_name": "Smith",
+            "is_superuser": false,
+            "organization_slug": "acme-corp",
+            "role": "admin"
+        },
+        {
+            "email": "bob@acme.com",
+            "password": "Demo123!",
+            "first_name": "Bob",
+            "last_name": "Jones",
+            "is_superuser": false,
+            "organization_slug": "acme-corp",
+            "role": "member"
+        },
+        {
+            "email": "carol@globex.com",
+            "password": "Demo123!",
+            "first_name": "Carol",
+            "last_name": "Williams",
+            "is_superuser": false,
+            "organization_slug": "globex",
+            "role": "owner"
+        },
+        {
+            "email": "dave@soylent.com",
+            "password": "Demo123!",
+            "first_name": "Dave",
+            "last_name": "Brown",
+            "is_superuser": false,
+            "organization_slug": "soylent",
+            "role": "member"
+        },
+        {
+            "email": "eve@initech.com",
+            "password": "Demo123!",
+            "first_name": "Eve",
+            "last_name": "Davis",
+            "is_superuser": false,
+            "organization_slug": "initech",
+            "role": "admin"
+        },
+        {
+            "email": "frank@umbrella.com",
+            "password": "Demo123!",
+            "first_name": "Frank",
+            "last_name": "Miller",
+            "is_superuser": false,
+            "organization_slug": "umbrella",
+            "role": "member"
+        },
+        {
+            "email": "grace@example.com",
+            "password": "Demo123!",
+            "first_name": "Grace",
+            "last_name": "Hopper",
+            "is_superuser": false,
+            "organization_slug": null,
+            "role": null
+        },
+        {
+            "email": "heidi@example.com",
+            "password": "Demo123!",
+            "first_name": "Heidi",
+            "last_name": "Klum",
+            "is_superuser": false,
+            "organization_slug": null,
+            "role": null
+        }
+    ]
+}
