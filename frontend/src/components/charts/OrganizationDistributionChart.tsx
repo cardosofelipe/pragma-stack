@@ -5,17 +5,7 @@
 
 'use client';
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  Rectangle,
-} from 'recharts';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ChartCard } from './ChartCard';
 import { CHART_PALETTES } from '@/lib/chart-colors';
 
@@ -44,11 +34,21 @@ const CustomTooltip = ({ active, payload }: any) => {
           backdropFilter: 'blur(8px)',
         }}
       >
-        <p style={{ color: 'hsl(var(--popover-foreground))', margin: 0, fontSize: '14px', fontWeight: 600 }}>
+        <p
+          style={{
+            color: 'hsl(var(--popover-foreground))',
+            margin: 0,
+            fontSize: '14px',
+            fontWeight: 600,
+          }}
+        >
           {payload[0].payload.name}
         </p>
         <p style={{ color: 'hsl(var(--muted-foreground))', margin: '4px 0 0 0', fontSize: '13px' }}>
-          Members: <span style={{ fontWeight: 600, color: 'hsl(var(--popover-foreground))' }}>{payload[0].value}</span>
+          Members:{' '}
+          <span style={{ fontWeight: 600, color: 'hsl(var(--popover-foreground))' }}>
+            {payload[0].value}
+          </span>
         </p>
       </div>
     );
@@ -86,9 +86,7 @@ export function OrganizationDistributionChart({
               textAnchor="end"
               style={{ fill: 'var(--muted-foreground)', fontSize: '12px' }}
             />
-            <YAxis
-              style={{ fill: 'var(--muted-foreground)', fontSize: '12px' }}
-            />
+            <YAxis style={{ fill: 'var(--muted-foreground)', fontSize: '12px' }} />
             <Tooltip content={<CustomTooltip />} />
             <Bar
               dataKey="value"

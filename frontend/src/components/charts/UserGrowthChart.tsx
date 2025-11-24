@@ -8,14 +8,14 @@
 import { ChartCard } from './ChartCard';
 import { CHART_PALETTES } from '@/lib/chart-colors';
 import {
-  ResponsiveContainer,
-  LineChart,
+  CartesianGrid,
+  Legend,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
 } from 'recharts';
 
 export interface UserGrowthData {
@@ -42,14 +42,29 @@ const CustomTooltip = ({ active, payload }: any) => {
           padding: '8px 12px',
         }}
       >
-        <p style={{ color: 'hsl(var(--popover-foreground))', margin: 0, fontSize: '13px', fontWeight: 600 }}>
+        <p
+          style={{
+            color: 'hsl(var(--popover-foreground))',
+            margin: 0,
+            fontSize: '13px',
+            fontWeight: 600,
+          }}
+        >
           {payload[0].payload.date}
         </p>
-        <p style={{ color: 'hsl(var(--popover-foreground))', margin: '4px 0 0 0', fontSize: '12px' }}>
+        <p
+          style={{ color: 'hsl(var(--popover-foreground))', margin: '4px 0 0 0', fontSize: '12px' }}
+        >
           Total Users: {payload[0].value}
         </p>
         {payload[1] && (
-          <p style={{ color: 'hsl(var(--popover-foreground))', margin: '2px 0 0 0', fontSize: '12px' }}>
+          <p
+            style={{
+              color: 'hsl(var(--popover-foreground))',
+              margin: '2px 0 0 0',
+              fontSize: '12px',
+            }}
+          >
             Active Users: {payload[1].value}
           </p>
         )}

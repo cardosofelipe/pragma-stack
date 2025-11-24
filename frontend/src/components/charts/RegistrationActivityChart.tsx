@@ -6,14 +6,14 @@
 'use client';
 
 import {
-  AreaChart,
   Area,
+  AreaChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
 } from 'recharts';
 import { ChartCard } from './ChartCard';
 import { CHART_PALETTES } from '@/lib/chart-colors';
@@ -29,7 +29,7 @@ interface RegistrationActivityChartProps {
   error?: string | null;
 }
 
-// Custom tooltip with proper theme colors  
+// Custom tooltip with proper theme colors
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -41,10 +41,19 @@ const CustomTooltip = ({ active, payload }: any) => {
           padding: '8px 12px',
         }}
       >
-        <p style={{ color: 'hsl(var(--popover-foreground))', margin: 0, fontSize: '13px', fontWeight: 600 }}>
+        <p
+          style={{
+            color: 'hsl(var(--popover-foreground))',
+            margin: 0,
+            fontSize: '13px',
+            fontWeight: 600,
+          }}
+        >
           {payload[0].payload.date}
         </p>
-        <p style={{ color: 'hsl(var(--popover-foreground))', margin: '4px 0 0 0', fontSize: '12px' }}>
+        <p
+          style={{ color: 'hsl(var(--popover-foreground))', margin: '4px 0 0 0', fontSize: '12px' }}
+        >
           New Registrations: {payload[0].value}
         </p>
       </div>
@@ -83,13 +92,8 @@ export function RegistrationActivityChart({
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" style={{ stroke: 'var(--muted)', opacity: 0.2 }} />
-            <XAxis
-              dataKey="date"
-              style={{ fill: 'var(--muted-foreground)', fontSize: '12px' }}
-            />
-            <YAxis
-              style={{ fill: 'var(--muted-foreground)', fontSize: '12px' }}
-            />
+            <XAxis dataKey="date" style={{ fill: 'var(--muted-foreground)', fontSize: '12px' }} />
+            <YAxis style={{ fill: 'var(--muted-foreground)', fontSize: '12px' }} />
             <Tooltip content={<CustomTooltip />} />
             <Legend
               wrapperStyle={{
