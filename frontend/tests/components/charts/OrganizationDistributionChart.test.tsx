@@ -4,7 +4,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { OrganizationDistributionChart } from '@/components/charts/OrganizationDistributionChart';
-import type { OrganizationDistributionData } from '@/components/charts/OrganizationDistributionChart';
+import type { OrgDistributionData } from '@/components/charts/OrganizationDistributionChart';
 
 // Mock recharts to avoid rendering issues in tests
 jest.mock('recharts', () => {
@@ -18,7 +18,7 @@ jest.mock('recharts', () => {
 });
 
 describe('OrganizationDistributionChart', () => {
-  const mockData: OrganizationDistributionData[] = [
+  const mockData: OrgDistributionData[] = [
     { name: 'Engineering', value: 45 },
     { name: 'Marketing', value: 28 },
     { name: 'Sales', value: 35 },

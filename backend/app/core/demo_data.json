@@ -33,6 +33,16 @@
     ],
     "users": [
         {
+            "email": "demo@example.com",
+            "password": "DemoPass1234!",
+            "first_name": "Demo",
+            "last_name": "User",
+            "is_superuser": false,
+            "organization_slug": "acme-corp",
+            "role": "member",
+            "is_active": true
+        },
+        {
             "email": "alice@acme.com",
             "password": "Demo123!",
             "first_name": "Alice",

@@ -71,6 +71,14 @@ for file in "$OUTPUT_DIR"/**/*.ts "$OUTPUT_DIR"/*.ts; do
 done
 echo -e "${GREEN}✓ ESLint disabled for generated files${NC}"
 
+# Generate MSW handlers from OpenAPI spec
+echo -e "${YELLOW}🎭 Generating MSW handlers...${NC}"
+if npx tsx scripts/generate-msw-handlers.ts /tmp/openapi.json; then
+    echo -e "${GREEN}✓ MSW handlers generated successfully${NC}"
+else
+    echo -e "${YELLOW}⚠ MSW handler generation failed (non-critical)${NC}"
+fi
+
 # Clean up
 rm /tmp/openapi.json
 
@@ -80,8 +88,13 @@ echo -e "${YELLOW}📝 Generated files:${NC}"
 echo -e "  - $OUTPUT_DIR/index.ts"
 echo -e "  - $OUTPUT_DIR/schemas/"
 echo -e "  - $OUTPUT_DIR/services/"
+echo -e "  - src/mocks/handlers/generated.ts (MSW handlers)"
 echo ""
 echo -e "${YELLOW}💡 Next steps:${NC}"
 echo -e "  Import in your code:"
 echo -e "  ${GREEN}import { ApiClient } from '@/lib/api/generated';${NC}"
+echo ""
+echo -e "${YELLOW}🎭 Demo Mode:${NC}"
+echo -e "  MSW handlers are automatically synced with your API"
+echo -e "  Test demo mode: ${GREEN}NEXT_PUBLIC_DEMO_MODE=true npm run dev${NC}"
 echo ""

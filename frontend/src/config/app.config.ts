@@ -124,8 +124,8 @@ export const config = {
     enabled: parseBool(ENV.DEMO_MODE, false),
     // Demo credentials
     credentials: {
-      user: { email: 'demo@example.com', password: 'DemoPass123' },
-      admin: { email: 'admin@example.com', password: 'AdminPass123' },
+      user: { email: 'demo@example.com', password: 'DemoPass1234!' },
+      admin: { email: 'admin@example.com', password: 'AdminPass1234!' },
     },
   },
 

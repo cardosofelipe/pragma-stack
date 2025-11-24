@@ -105,7 +105,7 @@ describe('DemoTourPage', () => {
       // Check for credentials
       const authCards = screen.getAllByText(/demo@example\.com/i);
       expect(authCards.length).toBeGreaterThan(0);
-      const demo123 = screen.getAllByText(/Demo123!/i);
+      const demo123 = screen.getAllByText(/DemoPass1234!/i);
       expect(demo123.length).toBeGreaterThan(0);
     });
 
@@ -130,7 +130,7 @@ describe('DemoTourPage', () => {
 
       // Check for admin credentials
       expect(screen.getByText(/admin@example\.com/i)).toBeInTheDocument();
-      expect(screen.getByText(/Admin123!/i)).toBeInTheDocument();
+      expect(screen.getByText(/AdminPass1234!/i)).toBeInTheDocument();
     });
 
     it('shows Login Required badge for authenticated demos', () => {

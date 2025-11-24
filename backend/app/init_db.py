@@ -37,7 +37,7 @@ async def init_db() -> User | None:
 
     default_password = "AdminPassword123!"
     if settings.DEMO_MODE:
-        default_password = "Admin123!"
+        default_password = "AdminPass1234!"
 
     superuser_password = settings.FIRST_SUPERUSER_PASSWORD or default_password
 

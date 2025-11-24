@@ -27,8 +27,8 @@ export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProp
   const [copiedRegular, setCopiedRegular] = useState(false);
   const [copiedAdmin, setCopiedAdmin] = useState(false);
 
-  const regularCredentials = 'demo@example.com\nDemo123!';
-  const adminCredentials = 'admin@example.com\nAdmin123!';
+  const regularCredentials = 'demo@example.com\nDemoPass1234!';
+  const adminCredentials = 'admin@example.com\nAdminPass1234!';
 
   const copyToClipboard = async (text: string, type: 'regular' | 'admin') => {
     try {
@@ -83,7 +83,7 @@ export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProp
               </p>
               <p className="flex items-center gap-2">
                 <span className="text-xs font-sans text-muted-foreground/70">Password:</span>
-                <span className="text-foreground">Demo123!</span>
+                <span className="text-foreground">DemoPass1234!</span>
               </p>
             </div>
             <div className="space-y-1">
@@ -123,7 +123,7 @@ export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProp
               </p>
               <p className="flex items-center gap-2">
                 <span className="text-xs font-sans text-muted-foreground/70">Password:</span>
-                <span className="text-foreground">Admin123!</span>
+                <span className="text-foreground">AdminPass1234!</span>
               </p>
             </div>
             <div className="space-y-1">
@@ -141,12 +141,12 @@ export function DemoCredentialsModal({ open, onClose }: DemoCredentialsModalProp
         <DialogFooter>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
             <Button asChild variant="default" className="w-full">
-              <Link href="/login?email=demo@example.com&password=Demo123!" onClick={onClose}>
+              <Link href="/login?email=demo@example.com&password=DemoPass1234!" onClick={onClose}>
                 Login as User
               </Link>
             </Button>
             <Button asChild variant="default" className="w-full">
-              <Link href="/login?email=admin@example.com&password=Admin123!" onClick={onClose}>
+              <Link href="/login?email=admin@example.com&password=AdminPass1234!" onClick={onClose}>
                 Login as Admin
               </Link>
             </Button>

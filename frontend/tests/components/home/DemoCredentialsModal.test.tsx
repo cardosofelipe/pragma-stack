@@ -48,7 +48,7 @@ describe('DemoCredentialsModal', () => {
 
     expect(screen.getByText('Regular User')).toBeInTheDocument();
     expect(screen.getByText('demo@example.com')).toBeInTheDocument();
-    expect(screen.getByText('Demo123!')).toBeInTheDocument();
+    expect(screen.getByText('DemoPass1234!')).toBeInTheDocument();
     expect(screen.getByText(/User settings & profile/i)).toBeInTheDocument();
   });
 
@@ -57,7 +57,7 @@ describe('DemoCredentialsModal', () => {
 
     expect(screen.getByText('Admin User (Superuser)')).toBeInTheDocument();
     expect(screen.getByText('admin@example.com')).toBeInTheDocument();
-    expect(screen.getByText('Admin123!')).toBeInTheDocument();
+    expect(screen.getByText('AdminPass1234!')).toBeInTheDocument();
     expect(screen.getByText(/Full admin dashboard/i)).toBeInTheDocument();
   });
 
@@ -70,7 +70,7 @@ describe('DemoCredentialsModal', () => {
     fireEvent.click(regularCopyButton!);
 
     await waitFor(() => {
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('demo@example.com\nDemo123!');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('demo@example.com\nDemoPass1234!');
       const copiedButtons = screen.getAllByRole('button');
       const copiedButton = copiedButtons.find((btn) => btn.textContent?.includes('Copied!'));
       expect(copiedButton).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe('DemoCredentialsModal', () => {
     fireEvent.click(adminCopyButton!);
 
     await waitFor(() => {
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('admin@example.com\nAdmin123!');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('admin@example.com\nAdminPass1234!');
       const copiedButtons = screen.getAllByRole('button');
       const copiedButton = copiedButtons.find((btn) => btn.textContent?.includes('Copied!'));
       expect(copiedButton).toBeInTheDocument();
@@ -158,13 +158,13 @@ describe('DemoCredentialsModal', () => {
     const loginAsUserLink = screen.getByRole('link', { name: /login as user/i });
     expect(loginAsUserLink).toHaveAttribute(
       'href',
-      '/login?email=demo@example.com&password=Demo123!'
+      '/login?email=demo@example.com&password=DemoPass1234!'
     );
 
     const loginAsAdminLink = screen.getByRole('link', { name: /login as admin/i });
     expect(loginAsAdminLink).toHaveAttribute(
       'href',
-      '/login?email=admin@example.com&password=Admin123!'
+      '/login?email=admin@example.com&password=AdminPass1234!'
     );
   });
 

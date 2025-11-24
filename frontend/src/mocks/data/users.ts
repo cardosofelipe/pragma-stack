@@ -8,7 +8,7 @@ import type { UserResponse } from '@/lib/api/client';
 
 /**
  * Demo user (regular user)
- * Credentials: demo@example.com / DemoPass123
+ * Credentials: demo@example.com / DemoPass1234!
  */
 export const demoUser: UserResponse = {
   id: 'demo-user-id-1',
@@ -20,13 +20,11 @@ export const demoUser: UserResponse = {
   is_superuser: false,
   created_at: '2024-01-15T10:00:00Z',
   updated_at: '2024-01-20T15:30:00Z',
-  last_login: '2025-01-24T08:00:00Z',
-  organization_count: 2,
 };
 
 /**
  * Demo admin user (superuser)
- * Credentials: admin@example.com / AdminPass123
+ * Credentials: admin@example.com / AdminPass1234!
  */
 export const demoAdmin: UserResponse = {
   id: 'demo-admin-id-1',
@@ -38,8 +36,6 @@ export const demoAdmin: UserResponse = {
   is_superuser: true,
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-24T10:00:00Z',
-  last_login: '2025-01-24T09:00:00Z',
-  organization_count: 1,
 };
 
 /**
@@ -58,8 +54,6 @@ export const sampleUsers: UserResponse[] = [
     is_superuser: false,
     created_at: '2024-02-01T12:00:00Z',
     updated_at: '2024-02-05T14:30:00Z',
-    last_login: '2025-01-23T16:45:00Z',
-    organization_count: 1,
   },
   {
     id: 'user-4',
@@ -71,8 +65,6 @@ export const sampleUsers: UserResponse[] = [
     is_superuser: false,
     created_at: '2024-03-10T08:30:00Z',
     updated_at: '2024-03-15T11:00:00Z',
-    last_login: '2025-01-22T10:20:00Z',
-    organization_count: 3,
   },
   {
     id: 'user-5',
@@ -84,8 +76,6 @@ export const sampleUsers: UserResponse[] = [
     is_superuser: false,
     created_at: '2024-01-20T14:00:00Z',
     updated_at: '2024-06-01T09:00:00Z',
-    last_login: '2024-06-01T09:00:00Z',
-    organization_count: 0,
   },
 ];
 
@@ -120,23 +110,23 @@ export function updateCurrentUser(updates: Partial<UserResponse>) {
  * In demo mode, we're lenient with passwords to improve UX
  */
 export function validateCredentials(email: string, password: string): UserResponse | null {
-  // Demo user - accept documented password or any password >= 8 chars
+  // Demo user - accept documented password or any password >= 12 chars
   if (email === 'demo@example.com') {
-    if (password === 'DemoPass123' || password.length >= 8) {
+    if (password === 'DemoPass1234!' || password.length >= 12) {
       return demoUser;
     }
   }
 
-  // Demo admin - accept documented password or any password >= 8 chars
+  // Demo admin - accept documented password or any password >= 12 chars
   if (email === 'admin@example.com') {
-    if (password === 'AdminPass123' || password.length >= 8) {
+    if (password === 'AdminPass1234!' || password.length >= 12) {
       return demoAdmin;
     }
   }
 
   // Sample users - accept any valid password (it's a demo!)
   const user = sampleUsers.find((u) => u.email === email);
-  if (user && password.length >= 8) {
+  if (user && password.length >= 12) {
     return user;
   }
 

@@ -172,7 +172,7 @@ class TestProjectConfiguration:
     def test_project_name_default(self):
         """Test that project name is set correctly"""
         settings = Settings(SECRET_KEY="a" * 32)
-        assert settings.PROJECT_NAME == "App"
+        assert settings.PROJECT_NAME == "PragmaStack"
 
     def test_api_version_string(self):
         """Test that API version string is correct"""

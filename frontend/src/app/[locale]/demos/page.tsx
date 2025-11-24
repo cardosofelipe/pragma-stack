@@ -52,7 +52,7 @@ const demoCategories = [
     features: ['Login & logout', 'Registration', 'Password reset', 'Session tokens'],
     credentials: {
       email: 'demo@example.com',
-      password: 'Demo123!',
+      password: 'DemoPass1234!',
       role: 'Regular User',
     },
   },
@@ -64,7 +64,7 @@ const demoCategories = [
     features: ['Profile editing', 'Password changes', 'Active sessions', 'Preferences'],
     credentials: {
       email: 'demo@example.com',
-      password: 'Demo123!',
+      password: 'DemoPass1234!',
       role: 'Regular User',
     },
   },
@@ -76,7 +76,7 @@ const demoCategories = [
     features: ['User management', 'Analytics charts', 'Bulk operations', 'Organization control'],
     credentials: {
       email: 'admin@example.com',
-      password: 'Admin123!',
+      password: 'AdminPass1234!',
       role: 'Admin',
     },
   },

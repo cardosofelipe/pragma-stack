@@ -44,7 +44,7 @@ export function DemoModeBanner() {
           </div>
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground">
-              Demo Credentials (any password ≥8 chars works):
+              Demo Credentials (any password ≥12 chars works):
             </p>
             <div className="space-y-1.5">
               <code className="block rounded bg-muted px-2 py-1.5 text-xs font-mono">

@@ -1,16 +1,21 @@
 /**
  * MSW Handlers Index
  *
- * Exports all request handlers for Mock Service Worker
- * Organized by domain: auth, users, admin
+ * Combines auto-generated handlers with custom overrides.
+ *
+ * Architecture:
+ * - generated.ts: Auto-generated from OpenAPI spec (DO NOT EDIT)
+ * - overrides.ts: Custom handler logic (EDIT AS NEEDED)
+ *
+ * Overrides take precedence over generated handlers.
  */
 
-import { authHandlers } from './auth';
-import { userHandlers } from './users';
-import { adminHandlers } from './admin';
+import { generatedHandlers } from './generated';
+import { overrideHandlers } from './overrides';
 
 /**
  * All request handlers for MSW
- * Order matters: more specific handlers should come first
+ *
+ * Order matters: overrides come first to take precedence
  */
-export const handlers = [...authHandlers, ...userHandlers, ...adminHandlers];
+export const handlers = [...overrideHandlers, ...generatedHandlers];

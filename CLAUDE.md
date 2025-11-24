@@ -177,7 +177,10 @@ with patch.object(session, 'commit', side_effect=mock_commit):
 - Enable: `echo "NEXT_PUBLIC_DEMO_MODE=true" > frontend/.env.local`
 - Uses MSW (Mock Service Worker) to intercept API calls in browser
 - Zero backend required - perfect for Vercel deployments
-- Demo credentials:
+- **Fully Automated**: MSW handlers auto-generated from OpenAPI spec
+  - Run `npm run generate:api` → updates both API client AND MSW handlers
+  - No manual synchronization needed!
+- Demo credentials (any password ≥8 chars works):
   - User: `demo@example.com` / `DemoPass123`
   - Admin: `admin@example.com` / `AdminPass123`
 - **Safe**: MSW never runs during tests (Jest or Playwright)
