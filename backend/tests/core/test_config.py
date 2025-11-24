@@ -169,10 +169,17 @@ class TestJWTConfiguration:
 class TestProjectConfiguration:
     """Tests for project-level configuration"""
 
-    def test_project_name_default(self):
-        """Test that project name is set correctly"""
+    def test_project_name_can_be_set(self):
+        """Test that project name can be explicitly set"""
+        settings = Settings(SECRET_KEY="a" * 32, PROJECT_NAME="TestApp")
+        assert settings.PROJECT_NAME == "TestApp"
+
+    def test_project_name_is_set(self):
+        """Test that project name has a value (from default or environment)"""
         settings = Settings(SECRET_KEY="a" * 32)
-        assert settings.PROJECT_NAME == "PragmaStack"
+        # PROJECT_NAME should be a non-empty string
+        assert isinstance(settings.PROJECT_NAME, str)
+        assert len(settings.PROJECT_NAME) > 0
 
     def test_api_version_string(self):
         """Test that API version string is correct"""

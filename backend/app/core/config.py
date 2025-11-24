@@ -76,6 +76,60 @@ class Settings(BaseSettings):
         description="Frontend application URL for email links",
     )
 
+    # OAuth Configuration
+    OAUTH_ENABLED: bool = Field(
+        default=False,
+        description="Enable OAuth authentication (social login)",
+    )
+    OAUTH_AUTO_LINK_BY_EMAIL: bool = Field(
+        default=True,
+        description="Automatically link OAuth accounts to existing users with matching email",
+    )
+    OAUTH_STATE_EXPIRE_MINUTES: int = Field(
+        default=10,
+        description="OAuth state parameter expiration time in minutes",
+    )
+
+    # Google OAuth
+    OAUTH_GOOGLE_CLIENT_ID: str | None = Field(
+        default=None,
+        description="Google OAuth client ID from Google Cloud Console",
+    )
+    OAUTH_GOOGLE_CLIENT_SECRET: str | None = Field(
+        default=None,
+        description="Google OAuth client secret from Google Cloud Console",
+    )
+
+    # GitHub OAuth
+    OAUTH_GITHUB_CLIENT_ID: str | None = Field(
+        default=None,
+        description="GitHub OAuth client ID from GitHub Developer Settings",
+    )
+    OAUTH_GITHUB_CLIENT_SECRET: str | None = Field(
+        default=None,
+        description="GitHub OAuth client secret from GitHub Developer Settings",
+    )
+
+    # OAuth Provider Mode (for MCP clients - skeleton)
+    OAUTH_PROVIDER_ENABLED: bool = Field(
+        default=False,
+        description="Enable OAuth provider mode (act as authorization server for MCP clients)",
+    )
+    OAUTH_ISSUER: str = Field(
+        default="http://localhost:8000",
+        description="OAuth issuer URL (your API base URL)",
+    )
+
+    @property
+    def enabled_oauth_providers(self) -> list[str]:
+        """Get list of enabled OAuth providers based on configured credentials."""
+        providers = []
+        if self.OAUTH_GOOGLE_CLIENT_ID and self.OAUTH_GOOGLE_CLIENT_SECRET:
+            providers.append("google")
+        if self.OAUTH_GITHUB_CLIENT_ID and self.OAUTH_GITHUB_CLIENT_SECRET:
+            providers.append("github")
+        return providers
+
     # Admin user
     FIRST_SUPERUSER_EMAIL: str | None = Field(
         default=None, description="Email for first superuser account"

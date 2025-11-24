@@ -154,18 +154,25 @@ def test_user_required_fields(db_session):
         db_session.commit()
     db_session.rollback()
 
-    # Missing password_hash
+
+def test_user_oauth_only_without_password(db_session):
+    """Test that OAuth-only users can be created without password_hash."""
+    # OAuth-only users don't have a password set
     user_no_password = User(
         id=uuid.uuid4(),
-        email="nopassword@example.com",
-        # password_hash is missing
-        first_name="Test",
+        email="oauthonly@example.com",
+        password_hash=None,  # OAuth-only user
+        first_name="OAuth",
         last_name="User",
     )
     db_session.add(user_no_password)
-    with pytest.raises(IntegrityError):
-        db_session.commit()
-    db_session.rollback()
+    db_session.commit()
+
+    # Retrieve and verify
+    retrieved = db_session.query(User).filter_by(email="oauthonly@example.com").first()
+    assert retrieved is not None
+    assert retrieved.password_hash is None
+    assert retrieved.has_password is False  # Test has_password property
 
 
 def test_user_defaults(db_session):

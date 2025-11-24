@@ -9,7 +9,8 @@ class User(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "users"
 
     email = Column(String(255), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=False)
+    # Nullable to support OAuth-only users who never set a password
+    password_hash = Column(String(255), nullable=True)
     first_name = Column(String(100), nullable=False, default="user")
     last_name = Column(String(100), nullable=True)
     phone_number = Column(String(20))
@@ -23,6 +24,19 @@ class User(Base, UUIDMixin, TimestampMixin):
     user_organizations = relationship(
         "UserOrganization", back_populates="user", cascade="all, delete-orphan"
     )
+    oauth_accounts = relationship(
+        "OAuthAccount", back_populates="user", cascade="all, delete-orphan"
+    )
+
+    @property
+    def has_password(self) -> bool:
+        """Check if user can login with password (not OAuth-only)."""
+        return self.password_hash is not None
+
+    @property
+    def can_remove_oauth(self) -> bool:
+        """Check if user can safely remove an OAuth account link."""
+        return self.has_password or len(self.oauth_accounts) > 1
 
     def __repr__(self):
         return f"<User {self.email}>"
