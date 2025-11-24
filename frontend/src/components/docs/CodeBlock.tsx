@@ -30,16 +30,18 @@ export function CodeBlock({ children, className, title }: CodeBlockProps) {
   };
 
   return (
-    <div className="group relative my-6">
+    <div className="group relative my-6 rounded-lg border bg-[#282c34] text-slate-50">
       {title && (
-        <div className="flex items-center justify-between rounded-t-lg border border-b-0 bg-muted/50 px-4 py-2">
+        <div className="flex items-center justify-between rounded-t-lg border-b bg-muted/10 px-4 py-2">
           <span className="text-xs font-medium text-muted-foreground">{title}</span>
         </div>
       )}
       <div className={cn('relative', title && 'rounded-t-none')}>
         <pre
           className={cn(
-            'overflow-x-auto rounded-lg border bg-slate-950 p-4 font-mono text-sm',
+            'overflow-x-auto p-4 font-mono text-sm leading-relaxed',
+            // Force transparent background for hljs to avoid double background
+            '[&_.hljs]:!bg-transparent [&_code]:!bg-transparent',
             title && 'rounded-t-none',
             className
           )}
@@ -49,14 +51,14 @@ export function CodeBlock({ children, className, title }: CodeBlockProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-2 h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+          className="absolute right-2 top-2 h-8 w-8 text-muted-foreground opacity-0 transition-all hover:bg-muted/20 hover:text-foreground group-hover:opacity-100"
           onClick={handleCopy}
           aria-label="Copy code"
         >
           {copied ? (
             <Check className="h-4 w-4 text-green-500" />
           ) : (
-            <Copy className="h-4 w-4 text-muted-foreground" />
+            <Copy className="h-4 w-4" />
           )}
         </Button>
       </div>

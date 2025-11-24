@@ -15,6 +15,18 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import { CodeBlock } from './CodeBlock';
 import { cn } from '@/lib/utils';
 import 'highlight.js/styles/atom-one-dark.css';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Info } from 'lucide-react';
 
 interface MarkdownContentProps {
   content: string;
@@ -23,19 +35,35 @@ interface MarkdownContentProps {
 
 export function MarkdownContent({ content, className }: MarkdownContentProps) {
   return (
-    <div className={cn('prose prose-neutral dark:prose-invert max-w-none', className)}>
+    <div className={cn('max-w-none text-foreground', className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[
           rehypeHighlight,
           rehypeSlug,
-          [rehypeAutolinkHeadings, { behavior: 'wrap' }],
+          [
+            rehypeAutolinkHeadings,
+            {
+              behavior: 'append',
+              properties: {
+                className: ['subtle-anchor'],
+                ariaHidden: true,
+                tabIndex: -1,
+              },
+              content: {
+                type: 'element',
+                tagName: 'span',
+                properties: { className: ['icon', 'icon-link'] },
+                children: [{ type: 'text', value: '#' }],
+              },
+            },
+          ],
         ]}
         components={{
           // Headings - improved spacing and visual hierarchy
           h1: ({ children, ...props }) => (
             <h1
-              className="scroll-mt-20 text-4xl font-bold tracking-tight mb-8 mt-12 first:mt-0 border-b-2 border-primary/20 pb-4 text-foreground"
+              className="group scroll-mt-20 text-4xl font-bold tracking-tight mb-8 mt-12 first:mt-0 border-b-2 border-primary/20 pb-4 text-foreground flex items-center gap-2"
               {...props}
             >
               {children}
@@ -43,7 +71,7 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
           ),
           h2: ({ children, ...props }) => (
             <h2
-              className="scroll-mt-20 text-3xl font-semibold tracking-tight mb-6 mt-12 first:mt-0 border-b border-border pb-3 text-foreground"
+              className="group scroll-mt-20 text-3xl font-semibold tracking-tight mb-6 mt-12 first:mt-0 border-b border-border pb-3 text-foreground flex items-center gap-2"
               {...props}
             >
               {children}
@@ -51,7 +79,7 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
           ),
           h3: ({ children, ...props }) => (
             <h3
-              className="scroll-mt-20 text-2xl font-semibold tracking-tight mb-4 mt-10 first:mt-0 text-foreground"
+              className="group scroll-mt-20 text-2xl font-semibold tracking-tight mb-4 mt-10 first:mt-0 text-foreground flex items-center gap-2"
               {...props}
             >
               {children}
@@ -59,11 +87,27 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
           ),
           h4: ({ children, ...props }) => (
             <h4
-              className="scroll-mt-20 text-xl font-semibold tracking-tight mb-3 mt-8 first:mt-0 text-foreground"
+              className="group scroll-mt-20 text-xl font-semibold tracking-tight mb-3 mt-8 first:mt-0 text-foreground flex items-center gap-2"
               {...props}
             >
               {children}
             </h4>
+          ),
+          h5: ({ children, ...props }) => (
+            <h5
+              className="group scroll-mt-20 text-lg font-semibold tracking-tight mb-3 mt-8 first:mt-0 text-foreground flex items-center gap-2"
+              {...props}
+            >
+              {children}
+            </h5>
+          ),
+          h6: ({ children, ...props }) => (
+            <h6
+              className="group scroll-mt-20 text-base font-semibold tracking-tight mb-3 mt-8 first:mt-0 text-foreground flex items-center gap-2"
+              {...props}
+            >
+              {children}
+            </h6>
           ),
 
           // Paragraphs and text - improved readability
@@ -84,15 +128,32 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
           ),
 
           // Links - more prominent with better hover state
-          a: ({ children, href, ...props }) => (
-            <a
-              href={href}
-              className="font-medium text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary/60 hover:text-primary/90 transition-all"
-              {...props}
-            >
-              {children}
-            </a>
-          ),
+          a: ({ children, href, className, ...props }) => {
+            // Check if this is an anchor link generated by rehype-autolink-headings
+            const isAnchor = className?.includes('subtle-anchor');
+
+            if (isAnchor) {
+              return (
+                <a
+                  href={href}
+                  className={cn("opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary ml-2 no-underline", className)}
+                  {...props}
+                >
+                  {children}
+                </a>
+              );
+            }
+
+            return (
+              <a
+                href={href}
+                className={cn("font-medium text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary/60 hover:text-primary/90 transition-all", className)}
+                {...props}
+              >
+                {children}
+              </a>
+            );
+          },
 
           // Lists - improved spacing and hierarchy
           ul: ({ children, ...props }) => (
@@ -127,12 +188,12 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
           }) => {
             if (inline) {
               return (
-                <code
-                  className="relative rounded-md bg-primary/10 border border-primary/20 px-1.5 py-0.5 font-mono text-sm font-medium text-primary"
-                  {...props}
+                <Badge
+                  variant="secondary"
+                  className="font-mono text-sm font-medium px-1.5 py-0.5 h-auto rounded-md"
                 >
                   {children}
-                </code>
+                </Badge>
               );
             }
             return (
@@ -143,58 +204,42 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
           },
           pre: ({ children, ...props }) => <CodeBlock {...props}>{children}</CodeBlock>,
 
-          // Blockquotes - enhanced callout styling
-          blockquote: ({ children, ...props }) => (
-            <blockquote
-              className="my-8 border-l-4 border-primary/50 bg-primary/5 pl-6 pr-4 py-4 italic text-foreground/80 rounded-r-lg"
-              {...props}
-            >
-              {children}
-            </blockquote>
+          // Blockquotes - enhanced callout styling using Alert
+          blockquote: ({ children }) => (
+            <Alert className="my-8 border-l-4 border-l-primary/50 bg-primary/5">
+              <Info className="h-4 w-4" />
+              <AlertDescription className="italic text-foreground/80 ml-2">
+                {children}
+              </AlertDescription>
+            </Alert>
           ),
 
           // Tables - improved styling with better borders and hover states
           table: ({ children, ...props }) => (
             <div className="my-8 w-full overflow-x-auto rounded-lg border">
-              <table className="w-full border-collapse text-sm" {...props}>
-                {children}
-              </table>
+              <Table {...props}>{children}</Table>
             </div>
           ),
           thead: ({ children, ...props }) => (
-            <thead className="bg-muted/80 border-b-2 border-border" {...props}>
+            <TableHeader className="bg-muted/80" {...props}>
               {children}
-            </thead>
+            </TableHeader>
           ),
-          tbody: ({ children, ...props }) => (
-            <tbody className="divide-y divide-border" {...props}>
-              {children}
-            </tbody>
-          ),
-          tr: ({ children, ...props }) => (
-            <tr className="transition-colors hover:bg-muted/40" {...props}>
-              {children}
-            </tr>
-          ),
+          tbody: ({ children, ...props }) => <TableBody {...props}>{children}</TableBody>,
+          tr: ({ children, ...props }) => <TableRow {...props}>{children}</TableRow>,
           th: ({ children, ...props }) => (
-            <th
-              className="px-5 py-3.5 text-left font-semibold text-foreground [&[align=center]]:text-center [&[align=right]]:text-right"
-              {...props}
-            >
+            <TableHead className="font-semibold text-foreground" {...props}>
               {children}
-            </th>
+            </TableHead>
           ),
           td: ({ children, ...props }) => (
-            <td
-              className="px-5 py-3.5 text-foreground/80 [&[align=center]]:text-center [&[align=right]]:text-right"
-              {...props}
-            >
+            <TableCell className="text-foreground/80" {...props}>
               {children}
-            </td>
+            </TableCell>
           ),
 
           // Horizontal rule - more prominent
-          hr: ({ ...props }) => <hr className="my-12 border-t-2 border-border/50" {...props} />,
+          hr: ({ ...props }) => <Separator className="my-12" {...props} />,
 
           // Images - optimized with Next.js Image component
           img: ({ src, alt }) => {
