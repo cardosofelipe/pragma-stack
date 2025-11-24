@@ -119,7 +119,10 @@ test.describe('AuthGuard - Route Protection', () => {
     expect(tokenCleared).toBe(true);
   });
 
-  test('should not allow access to auth pages when already logged in', async ({ page, context }) => {
+  test('should not allow access to auth pages when already logged in', async ({
+    page,
+    context,
+  }) => {
     // Set up authenticated state before navigation
     await context.addInitScript(() => {
       const mockToken = {

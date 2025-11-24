@@ -21,9 +21,9 @@ test.describe('Password Change', () => {
     await page.getByLabel(/current password/i).waitFor({ state: 'visible' });
   });
 
-  test.skip('should display password change form', async ({ page }) => {
+  test('should display password change form', async ({ page }) => {
     // Check page title
-    await expect(page.getByRole('heading', { name: 'Password' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Password Settings' })).toBeVisible();
 
     // Verify all password fields are present
     await expect(page.getByLabel(/current password/i)).toBeVisible();

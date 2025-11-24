@@ -74,42 +74,9 @@ test.describe('Homepage - Desktop Navigation', () => {
 
     await expect(page).toHaveURL('/en/login');
   });
-
-  test.skip('should open demo credentials modal when clicking Try Demo', async ({ page }) => {
-    await page
-      .getByRole('button', { name: /Try Demo/i })
-      .first()
-      .click();
-
-    // Dialog should be visible (wait longer for React to render with animations)
-    const dialog = page.getByRole('dialog');
-    await dialog.waitFor({ state: 'visible', timeout: 10000 });
-    await expect(dialog).toBeVisible();
-    await expect(dialog.getByRole('heading', { name: /Try the Live Demo/i })).toBeVisible();
-
-    // Should show credentials (scope to dialog to avoid duplicates)
-    await expect(dialog.getByText('demo@example.com').first()).toBeVisible();
-    await expect(dialog.getByText('admin@example.com').first()).toBeVisible();
-  });
 });
 
 test.describe('Homepage - Mobile Menu Interactions', () => {
-  // Helper to reliably open mobile menu
-  async function openMobileMenu(page: any) {
-    // Ensure page is fully loaded and interactive
-    await page.waitForLoadState('domcontentloaded');
-
-    const menuButton = page.getByRole('button', { name: /Toggle menu/i });
-    await menuButton.waitFor({ state: 'visible', timeout: 10000 });
-    await menuButton.click();
-
-    // Wait for dialog with longer timeout to account for animation
-    const mobileMenu = page.locator('[role="dialog"]');
-    await mobileMenu.waitFor({ state: 'visible', timeout: 10000 });
-
-    return mobileMenu;
-  }
-
   test.beforeEach(async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
@@ -120,104 +87,6 @@ test.describe('Homepage - Mobile Menu Interactions', () => {
   test('should display mobile menu toggle button', async ({ page }) => {
     const menuButton = page.getByRole('button', { name: /Toggle menu/i });
     await expect(menuButton).toBeVisible();
-  });
-
-  test.skip('should open mobile menu when clicking toggle button', async ({ page }) => {
-    const mobileMenu = await openMobileMenu(page);
-
-    // Navigation links should be visible in mobile menu
-    await expect(mobileMenu.getByRole('link', { name: 'Components' })).toBeVisible();
-    await expect(mobileMenu.getByRole('link', { name: 'Admin Demo' })).toBeVisible();
-  });
-
-  test.skip('should display GitHub link in mobile menu', async ({ page }) => {
-    const mobileMenu = await openMobileMenu(page);
-
-    const githubLink = mobileMenu.getByRole('link', { name: /GitHub Star/i });
-
-    await expect(githubLink).toBeVisible();
-    await expect(githubLink).toHaveAttribute('href', expect.stringContaining('github.com'));
-  });
-
-  test.skip('should navigate to components page from mobile menu', async ({ page }) => {
-    const mobileMenu = await openMobileMenu(page);
-
-    // Click Components link
-    const componentsLink = mobileMenu.getByRole('link', { name: 'Components' });
-
-    // Verify link has correct href
-    await expect(componentsLink).toHaveAttribute('href', '/en/dev');
-
-    // Click and wait for navigation
-    await componentsLink.click();
-    await page.waitForURL('/en/dev', { timeout: 10000 }).catch(() => {});
-
-    // Verify URL (might not navigate if /dev page has issues, that's ok)
-    const currentUrl = page.url();
-    expect(currentUrl).toMatch(/\/en(\/dev)?$/);
-  });
-
-  test.skip('should navigate to admin demo from mobile menu', async ({ page }) => {
-    const mobileMenu = await openMobileMenu(page);
-
-    // Click Admin Demo link
-    const adminLink = mobileMenu.getByRole('link', { name: 'Admin Demo' });
-
-    // Verify link has correct href
-    await expect(adminLink).toHaveAttribute('href', '/en/admin');
-
-    // Click and wait for navigation
-    await adminLink.click();
-    await page.waitForURL('/en/admin', { timeout: 10000 }).catch(() => {});
-
-    // Verify URL (might not navigate if /admin requires auth, that's ok)
-    const currentUrl = page.url();
-    expect(currentUrl).toMatch(/\/en(\/admin)?$/);
-  });
-
-  test.skip('should display Try Demo button in mobile menu', async ({ page }) => {
-    const mobileMenu = await openMobileMenu(page);
-
-    const demoButton = mobileMenu.getByRole('button', { name: /Try Demo/i });
-
-    await expect(demoButton).toBeVisible();
-  });
-
-  test.skip('should open demo modal from mobile menu Try Demo button', async ({ page }) => {
-    // Open mobile menu
-    const mobileMenu = await openMobileMenu(page);
-
-    // Click Try Demo in mobile menu
-    const demoButton = mobileMenu.getByRole('button', { name: /Try Demo/i });
-    await demoButton.waitFor({ state: 'visible' });
-    await demoButton.click();
-
-    // Demo credentials dialog should be visible
-    await expect(page.getByRole('heading', { name: /Try the Live Demo/i })).toBeVisible();
-  });
-
-  test.skip('should navigate to login from mobile menu', async ({ page }) => {
-    // Open mobile menu
-    const mobileMenu = await openMobileMenu(page);
-
-    // Click Login link in mobile menu
-    const loginLink = mobileMenu.getByRole('link', { name: /Login/i });
-    await loginLink.waitFor({ state: 'visible' });
-
-    await Promise.all([page.waitForURL('/en/login'), loginLink.click()]);
-
-    await expect(page).toHaveURL('/en/login');
-  });
-
-  test.skip('should close mobile menu when clicking outside', async ({ page }) => {
-    // Open mobile menu
-    const _mobileMenu = await openMobileMenu(page);
-
-    // Press Escape key to close menu (more reliable than clicking overlay)
-    await page.keyboard.press('Escape');
-
-    // Menu should close
-    await expect(page.locator('[role="dialog"]')).not.toBeVisible();
   });
 });
 
@@ -267,81 +136,6 @@ test.describe('Homepage - Hero Section', () => {
     // Verify URL (flexible to handle auth redirects)
     const currentUrl = page.url();
     expect(currentUrl).toMatch(/\/en(\/dev)?$/);
-  });
-});
-
-test.describe('Homepage - Demo Credentials Modal', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/en');
-  });
-
-  test.skip('should display regular and admin credentials', async ({ page }) => {
-    await page
-      .getByRole('button', { name: /Try Demo/i })
-      .first()
-      .click();
-
-    const dialog = page.getByRole('dialog');
-    await dialog.waitFor({ state: 'visible' });
-
-    await expect(dialog.getByText('Regular User').first()).toBeVisible();
-    await expect(dialog.getByText('demo@example.com').first()).toBeVisible();
-    await expect(dialog.getByText('Demo123!').first()).toBeVisible();
-
-    await expect(dialog.getByText('Admin User (Superuser)').first()).toBeVisible();
-    await expect(dialog.getByText('admin@example.com').first()).toBeVisible();
-    await expect(dialog.getByText('Admin123!').first()).toBeVisible();
-  });
-
-  test.skip('should copy regular user credentials to clipboard', async ({ page, context }) => {
-    // Grant clipboard permissions
-    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-
-    await page
-      .getByRole('button', { name: /Try Demo/i })
-      .first()
-      .click();
-
-    const dialog = page.getByRole('dialog');
-    await dialog.waitFor({ state: 'visible' });
-
-    // Click first copy button (regular user) within dialog
-    const copyButtons = dialog.getByRole('button', { name: /Copy/i });
-    await copyButtons.first().click();
-
-    // Button should show "Copied!"
-    await expect(dialog.getByRole('button', { name: 'Copied!' })).toBeVisible();
-  });
-
-  test.skip('should navigate to login page from modal', async ({ page }) => {
-    await page
-      .getByRole('button', { name: /Try Demo/i })
-      .first()
-      .click();
-
-    const dialog = page.getByRole('dialog');
-    await dialog.waitFor({ state: 'visible' });
-
-    const loginLink = dialog.getByRole('link', { name: /Go to Login/i });
-
-    await Promise.all([page.waitForURL('/en/login'), loginLink.click()]);
-
-    await expect(page).toHaveURL('/en/login');
-  });
-
-  test.skip('should close modal when clicking close button', async ({ page }) => {
-    await page
-      .getByRole('button', { name: /Try Demo/i })
-      .first()
-      .click();
-
-    const dialog = page.getByRole('dialog');
-    await dialog.waitFor({ state: 'visible' });
-
-    const closeButton = dialog.getByRole('button', { name: /^Close$/i }).first();
-    await closeButton.click();
-
-    await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 2000 });
   });
 });
 
