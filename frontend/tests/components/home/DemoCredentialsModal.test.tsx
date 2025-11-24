@@ -86,7 +86,9 @@ describe('DemoCredentialsModal', () => {
     fireEvent.click(adminCopyButton!);
 
     await waitFor(() => {
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('admin@example.com\nAdminPass1234!');
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+        'admin@example.com\nAdminPass1234!'
+      );
       const copiedButtons = screen.getAllByRole('button');
       const copiedButton = copiedButtons.find((btn) => btn.textContent?.includes('Copied!'));
       expect(copiedButton).toBeInTheDocument();

@@ -1,6 +1,7 @@
 # Keeping MSW Handlers Synced with OpenAPI Spec
 
 ## Problem
+
 MSW handlers can drift out of sync with the backend API as it evolves.
 
 ## Solution Options
@@ -60,6 +61,7 @@ Add to `package.json`:
 Our MSW handlers currently cover:
 
 **Auth Endpoints:**
+
 - POST `/api/v1/auth/register`
 - POST `/api/v1/auth/login`
 - POST `/api/v1/auth/refresh`
@@ -70,6 +72,7 @@ Our MSW handlers currently cover:
 - POST `/api/v1/auth/change-password`
 
 **User Endpoints:**
+
 - GET `/api/v1/users/me`
 - PATCH `/api/v1/users/me`
 - DELETE `/api/v1/users/me`
@@ -80,6 +83,7 @@ Our MSW handlers currently cover:
 - DELETE `/api/v1/sessions/:id`
 
 **Admin Endpoints:**
+
 - GET `/api/v1/admin/stats`
 - GET `/api/v1/admin/users`
 - GET `/api/v1/admin/users/:id`

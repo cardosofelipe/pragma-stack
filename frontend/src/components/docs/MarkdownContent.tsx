@@ -136,7 +136,10 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
               return (
                 <a
                   href={href}
-                  className={cn("opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary ml-2 no-underline", className)}
+                  className={cn(
+                    'opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary ml-2 no-underline',
+                    className
+                  )}
                   {...props}
                 >
                   {children}
@@ -147,7 +150,10 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
             return (
               <a
                 href={href}
-                className={cn("font-medium text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary/60 hover:text-primary/90 transition-all", className)}
+                className={cn(
+                  'font-medium text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary/60 hover:text-primary/90 transition-all',
+                  className
+                )}
                 {...props}
               >
                 {children}

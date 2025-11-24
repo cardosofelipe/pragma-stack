@@ -28,11 +28,13 @@ src/mocks/handlers/
 ### 1. Automatic Generation
 
 When you run:
+
 ```bash
 npm run generate:api
 ```
 
 The system:
+
 1. Fetches `/api/v1/openapi.json` from backend
 2. Generates TypeScript API client (`src/lib/api/generated/`)
 3. **NEW:** Generates MSW handlers (`src/mocks/handlers/generated.ts`)
@@ -42,12 +44,14 @@ The system:
 The generator (`scripts/generate-msw-handlers.ts`) creates handlers with:
 
 **Smart Response Logic:**
+
 - **Auth endpoints** → Use `validateCredentials()` and `setCurrentUser()`
 - **User endpoints** → Use `currentUser` and mock data
 - **Admin endpoints** → Check `is_superuser` + return paginated data
 - **Generic endpoints** → Return success response
 
 **Example Generated Handler:**
+
 ```typescript
 /**
  * Login
@@ -91,10 +95,7 @@ export const overrideHandlers = [
   http.post(`${API_BASE_URL}/api/v1/auth/login`, async ({ request }) => {
     // 10% chance of rate limit
     if (Math.random() < 0.1) {
-      return HttpResponse.json(
-        { detail: 'Too many login attempts' },
-        { status: 429 }
-      );
+      return HttpResponse.json({ detail: 'Too many login attempts' }, { status: 429 });
     }
     // Fall through to generated handler
   }),
@@ -105,10 +106,7 @@ export const overrideHandlers = [
 
     // Custom validation logic
     if (body.email.endsWith('@blocked.com')) {
-      return HttpResponse.json(
-        { detail: 'Email domain not allowed' },
-        { status: 400 }
-      );
+      return HttpResponse.json({ detail: 'Email domain not allowed' }, { status: 400 });
     }
 
     // Fall through to generated handler
@@ -124,6 +122,7 @@ Overrides are applied FIRST, so they take precedence over generated handlers.
 ### ✅ Zero Manual Work
 
 **Before:**
+
 ```bash
 # Backend adds new endpoint
 # 1. Run npm run generate:api
@@ -134,6 +133,7 @@ Overrides are applied FIRST, so they take precedence over generated handlers.
 ```
 
 **After:**
+
 ```bash
 # Backend adds new endpoint
 npm run generate:api  # Done! MSW auto-synced
@@ -160,6 +160,7 @@ import { adminStats } from '../data/stats';
 ### ✅ Batteries Included
 
 Generated handlers include:
+
 - ✅ Network delays (300ms - realistic UX)
 - ✅ Auth checks (401/403 responses)
 - ✅ Pagination support
@@ -218,6 +219,7 @@ If generated handler doesn't fit your needs:
 3. **Override takes precedence** automatically
 
 Example:
+
 ```typescript
 // overrides.ts
 export const overrideHandlers = [
@@ -227,10 +229,7 @@ export const overrideHandlers = [
 
     // Simulate 2FA requirement for admin users
     if (body.email.includes('admin') && !body.two_factor_code) {
-      return HttpResponse.json(
-        { detail: 'Two-factor authentication required' },
-        { status: 403 }
-      );
+      return HttpResponse.json({ detail: 'Two-factor authentication required' }, { status: 403 });
     }
 
     // Fall through to generated handler
@@ -254,6 +253,7 @@ export const demoUser: UserResponse = {
 ```
 
 **To update:**
+
 1. Edit `data/*.ts` files
 2. Handlers automatically use updated data
 3. No regeneration needed!
@@ -263,6 +263,7 @@ export const demoUser: UserResponse = {
 The generator (`scripts/generate-msw-handlers.ts`) does:
 
 1. **Parse OpenAPI spec**
+
    ```typescript
    const spec = JSON.parse(fs.readFileSync(specPath, 'utf-8'));
    ```
@@ -284,12 +285,14 @@ The generator (`scripts/generate-msw-handlers.ts`) does:
 ### Generated handler doesn't work
 
 **Check:**
+
 1. Is backend running? (`npm run generate:api` requires backend)
 2. Check console for `[MSW]` warnings
 3. Verify `generated.ts` exists and has your endpoint
 4. Check path parameters match exactly
 
 **Debug:**
+
 ```bash
 # See what endpoints were generated
 cat src/mocks/handlers/generated.ts | grep "http\."

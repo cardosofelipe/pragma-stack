@@ -68,7 +68,12 @@ export async function startMockServiceWorker() {
         }
 
         // Ignore locale routes (Next.js i18n)
-        if (url.pathname === '/en' || url.pathname === '/it' || url.pathname.startsWith('/en/') || url.pathname.startsWith('/it/')) {
+        if (
+          url.pathname === '/en' ||
+          url.pathname === '/it' ||
+          url.pathname.startsWith('/en/') ||
+          url.pathname.startsWith('/it/')
+        ) {
           return;
         }
 
