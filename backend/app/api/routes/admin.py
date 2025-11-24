@@ -120,7 +120,7 @@ def _generate_demo_stats() -> AdminStatsResponse:
     total = 10
     for i in range(29, -1, -1):
         date = datetime.now(UTC) - timedelta(days=i)
-        total += randint(0, 3)
+        total += randint(0, 3)  # noqa: S311
         user_growth.append(
             UserGrowthData(
                 date=date.strftime("%b %d"),
@@ -146,7 +146,7 @@ def _generate_demo_stats() -> AdminStatsResponse:
         registration_activity.append(
             RegistrationActivityData(
                 date=date.strftime("%b %d"),
-                registrations=randint(0, 5),
+                registrations=randint(0, 5),  # noqa: S311
             )
         )
 
@@ -205,13 +205,17 @@ async def admin_get_stats(
         # Count all users created before end of this day
         # Make comparison timezone-aware
         total_users_on_date = sum(
-            1 for u in all_users
+            1
+            for u in all_users
             if u.created_at and u.created_at.replace(tzinfo=UTC) < date_end
         )
         # Count active users created before end of this day
         active_users_on_date = sum(
-            1 for u in all_users
-            if u.created_at and u.created_at.replace(tzinfo=UTC) < date_end and u.is_active
+            1
+            for u in all_users
+            if u.created_at
+            and u.created_at.replace(tzinfo=UTC) < date_end
+            and u.is_active
         )
 
         user_growth.append(
@@ -245,8 +249,10 @@ async def admin_get_stats(
         # Count users created on this specific day
         # Make comparison timezone-aware
         day_registrations = sum(
-            1 for u in all_users
-            if u.created_at and date_start <= u.created_at.replace(tzinfo=UTC) < date_end
+            1
+            for u in all_users
+            if u.created_at
+            and date_start <= u.created_at.replace(tzinfo=UTC) < date_end
         )
 
         registration_activity.append(
@@ -265,7 +271,9 @@ async def admin_get_stats(
     active_count = (await db.execute(active_query)).scalar() or 0
     inactive_count = (await db.execute(inactive_query)).scalar() or 0
 
-    logger.info(f"User status counts - Active: {active_count}, Inactive: {inactive_count}")
+    logger.info(
+        f"User status counts - Active: {active_count}, Inactive: {inactive_count}"
+    )
 
     user_status = [
         UserStatusData(name="Active", value=active_count),

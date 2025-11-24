@@ -166,7 +166,11 @@ async def load_demo_data(session):
                     text(
                         "UPDATE users SET created_at = :created_at, is_active = :is_active WHERE id = :user_id"
                     ),
-                    {"created_at": random_time, "is_active": user_data.get("is_active", True), "user_id": user.id},
+                    {
+                        "created_at": random_time,
+                        "is_active": user_data.get("is_active", True),
+                        "user_id": user.id,
+                    },
                 )
 
                 logger.info(
