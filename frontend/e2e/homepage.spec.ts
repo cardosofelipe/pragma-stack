@@ -227,22 +227,25 @@ test.describe('Homepage - Hero Section', () => {
   });
 
   test('should display main headline', async ({ page }) => {
-    await expect(
-      page.getByRole('heading', { name: /Everything You Need to Build/i }).first()
-    ).toBeVisible();
-    await expect(page.getByText(/Modern Web Applications/i).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: /The Pragmatic/i }).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Full-Stack Template/i }).first()).toBeVisible();
   });
 
   test('should display badge with key highlights', async ({ page }) => {
     await expect(page.getByText('MIT Licensed').first()).toBeVisible();
-    await expect(page.getByText(/97% Test Coverage/).first()).toBeVisible();
-    await expect(page.getByText('Production Ready').first()).toBeVisible();
+    await expect(page.getByText('Comprehensive Tests').first()).toBeVisible();
+    await expect(page.getByText('Pragmatic by Design').first()).toBeVisible();
   });
 
-  test('should display test coverage stats', async ({ page }) => {
-    await expect(page.getByText('97%').first()).toBeVisible();
-    await expect(page.getByText('743').first()).toBeVisible();
-    await expect(page.getByText(/Passing Tests/).first()).toBeVisible();
+  test('should display quality stats section', async ({ page }) => {
+    // Scroll to stats section to trigger animations
+    const statsSection = page.getByText('Built with Quality in Mind').first();
+    await statsSection.scrollIntoViewIfNeeded();
+    await expect(statsSection).toBeVisible();
+
+    // Wait for animated counter to render (it starts at 0 and counts up)
+    await page.waitForTimeout(500);
+    await expect(page.getByText('Open Source').first()).toBeVisible();
   });
 
   test('should navigate to GitHub when clicking View on GitHub', async ({ page }) => {
@@ -444,19 +447,17 @@ test.describe('Homepage - Feature Sections', () => {
   });
 
   test('should display tech stack section', async ({ page }) => {
-    await expect(
-      page.getByRole('heading', { name: /Modern, Type-Safe, Production-Grade Stack/i })
-    ).toBeVisible();
+    await expect(page.getByRole('heading', { name: /A Stack You Can Trust/i })).toBeVisible();
 
     // Check for key technologies
     await expect(page.getByText('FastAPI').first()).toBeVisible();
-    await expect(page.getByText('Next.js 15').first()).toBeVisible();
+    await expect(page.getByText('Next.js').first()).toBeVisible();
     await expect(page.getByText('PostgreSQL').first()).toBeVisible();
   });
 
   test('should display philosophy section', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /Why This Template Exists/i })).toBeVisible();
-    await expect(page.getByText(/Free forever, MIT licensed/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Why PragmaStack/i })).toBeVisible();
+    await expect(page.getByText(/MIT licensed/i).first()).toBeVisible();
   });
 });
 

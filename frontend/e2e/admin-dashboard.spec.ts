@@ -114,13 +114,19 @@ test.describe('Admin Dashboard - Analytics Charts', () => {
   });
 
   test('should display user growth chart', async ({ page }) => {
-    await expect(page.getByText('User Growth')).toBeVisible();
+    // Scroll to charts section and wait for it to load
+    const chartsHeading = page.getByRole('heading', { name: 'Analytics Overview' });
+    await chartsHeading.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500); // Wait for any lazy-loaded components
+
+    const userGrowthHeading = page.getByText('User Growth');
+    await expect(userGrowthHeading).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('Total and active users over the last 30 days')).toBeVisible();
   });
 
-  test('should display session activity chart', async ({ page }) => {
-    await expect(page.getByText('Session Activity')).toBeVisible();
-    await expect(page.getByText('Active and new sessions over the last 14 days')).toBeVisible();
+  test('should display registration activity chart', async ({ page }) => {
+    await expect(page.getByText('User Registration Activity')).toBeVisible();
+    await expect(page.getByText('New user registrations over the last 14 days')).toBeVisible();
   });
 
   test('should display organization distribution chart', async ({ page }) => {
@@ -134,16 +140,21 @@ test.describe('Admin Dashboard - Analytics Charts', () => {
   });
 
   test('should display all four charts in grid layout', async ({ page }) => {
+    // Scroll to charts section and wait for lazy-loaded components
+    const chartsHeading = page.getByRole('heading', { name: 'Analytics Overview' });
+    await chartsHeading.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+
     // All charts should be visible
     const userGrowthChart = page.getByText('User Growth');
-    const sessionActivityChart = page.getByText('Session Activity');
+    const registrationActivityChart = page.getByText('User Registration Activity');
     const orgDistributionChart = page.getByText('Organization Distribution');
     const userStatusChart = page.getByText('User Status Distribution');
 
-    await expect(userGrowthChart).toBeVisible();
-    await expect(sessionActivityChart).toBeVisible();
-    await expect(orgDistributionChart).toBeVisible();
-    await expect(userStatusChart).toBeVisible();
+    await expect(userGrowthChart).toBeVisible({ timeout: 10000 });
+    await expect(registrationActivityChart).toBeVisible({ timeout: 10000 });
+    await expect(orgDistributionChart).toBeVisible({ timeout: 10000 });
+    await expect(userStatusChart).toBeVisible({ timeout: 10000 });
   });
 });
 

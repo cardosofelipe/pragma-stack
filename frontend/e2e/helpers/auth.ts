@@ -353,17 +353,50 @@ export async function setupSuperuserMocks(page: Page): Promise<void> {
     }
   });
 
-  // Mock GET /api/v1/admin/stats - Get dashboard statistics
+  // Mock GET /api/v1/admin/stats - Get dashboard statistics with chart data
   await page.route(`${baseURL}/api/v1/admin/stats`, async (route: Route) => {
     if (route.request().method() === 'GET') {
+      // Generate user growth data for last 30 days
+      const userGrowth = [];
+      const today = new Date();
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        userGrowth.push({
+          date: date.toISOString().split('T')[0],
+          total_users: 50 + Math.floor((29 - i) * 1.5),
+          active_users: Math.floor((50 + (29 - i) * 1.5) * 0.8),
+        });
+      }
+
+      // Generate registration activity for last 14 days
+      const registrationActivity = [];
+      for (let i = 13; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        registrationActivity.push({
+          date: date.toISOString().split('T')[0],
+          count: Math.floor(Math.random() * 5) + 1,
+        });
+      }
+
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          total_users: 150,
-          active_users: 120,
-          total_organizations: 25,
-          active_sessions: 45,
+          user_growth: userGrowth,
+          registration_activity: registrationActivity,
+          organization_distribution: [
+            { name: 'Acme Corporation', value: 12 },
+            { name: 'Tech Innovators', value: 8 },
+            { name: 'Global Solutions Inc', value: 25 },
+            { name: 'Startup Ventures', value: 5 },
+            { name: 'Inactive Corp', value: 3 },
+          ],
+          user_status: [
+            { name: 'Active', value: 89 },
+            { name: 'Inactive', value: 11 },
+          ],
         }),
       });
     } else {
