@@ -21,7 +21,12 @@ interface OrganizationDistributionChartProps {
 }
 
 // Custom tooltip with proper theme colors
-const CustomTooltip = ({ active, payload }: any) => {
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: OrgDistributionData; value: number }>;
+}
+
+const CustomTooltip = ({ active, payload }: TooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div

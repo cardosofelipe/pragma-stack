@@ -7,10 +7,8 @@
 
 'use client';
 
-import { useState } from 'react';
 import config from '@/config/app.config';
 import { Sparkles } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export function DemoModeBanner() {

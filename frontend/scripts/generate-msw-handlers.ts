@@ -66,7 +66,7 @@ function convertPathToMSWPattern(path: string): string {
   return path.replace(/\{([^}]+)\}/g, ':$1');
 }
 
-function shouldSkipEndpoint(path: string, method: string): boolean {
+function shouldSkipEndpoint(path: string, _method: string): boolean {
   // Skip health check and root endpoints
   if (path === '/' || path === '/health') return true;
 
@@ -83,7 +83,7 @@ function getHandlerCategory(path: string): 'auth' | 'users' | 'admin' | 'organiz
   return 'users';
 }
 
-function generateMockResponse(path: string, method: string, operation: any): string {
+function generateMockResponse(path: string, method: string, _operation: any): string {
   const category = getHandlerCategory(path);
 
   // Auth endpoints
@@ -267,7 +267,6 @@ function generateMockResponse(path: string, method: string, operation: any): str
 
 function generateHandlers(spec: OpenAPISpec): string {
   const handlers: string[] = [];
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
   for (const [pathPattern, pathItem] of Object.entries(spec.paths)) {
     for (const [method, operation] of Object.entries(pathItem)) {

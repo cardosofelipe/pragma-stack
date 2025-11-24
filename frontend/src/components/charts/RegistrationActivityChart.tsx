@@ -30,7 +30,12 @@ interface RegistrationActivityChartProps {
 }
 
 // Custom tooltip with proper theme colors
-const CustomTooltip = ({ active, payload }: any) => {
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{ payload: RegistrationActivityData; value: number }>;
+}
+
+const CustomTooltip = ({ active, payload }: TooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div
