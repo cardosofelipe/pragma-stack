@@ -94,6 +94,28 @@ export type AdminSessionResponse = {
 };
 
 /**
+ * AdminStatsResponse
+ */
+export type AdminStatsResponse = {
+    /**
+     * User Growth
+     */
+    user_growth: Array<UserGrowthData>;
+    /**
+     * Organization Distribution
+     */
+    organization_distribution: Array<OrgDistributionData>;
+    /**
+     * Registration Activity
+     */
+    registration_activity: Array<RegistrationActivityData>;
+    /**
+     * User Status
+     */
+    user_status: Array<UserStatusData>;
+};
+
+/**
  * Body_login_oauth
  */
 export type BodyLoginOauth = {
@@ -232,6 +254,20 @@ export type MessageResponse = {
      * Human-readable message
      */
     message: string;
+};
+
+/**
+ * OrgDistributionData
+ */
+export type OrgDistributionData = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Value
+     */
+    value: number;
 };
 
 /**
@@ -551,6 +587,20 @@ export type RefreshTokenRequest = {
 };
 
 /**
+ * RegistrationActivityData
+ */
+export type RegistrationActivityData = {
+    /**
+     * Date
+     */
+    date: string;
+    /**
+     * Registrations
+     */
+    registrations: number;
+};
+
+/**
  * SessionListResponse
  *
  * Response containing list of sessions.
@@ -682,6 +732,28 @@ export type UserCreate = {
      * Is Superuser
      */
     is_superuser?: boolean;
+    /**
+     * Is Active
+     */
+    is_active?: boolean;
+};
+
+/**
+ * UserGrowthData
+ */
+export type UserGrowthData = {
+    /**
+     * Date
+     */
+    date: string;
+    /**
+     * Total Users
+     */
+    total_users: number;
+    /**
+     * Active Users
+     */
+    active_users: number;
 };
 
 /**
@@ -724,6 +796,24 @@ export type UserResponse = {
      * Updated At
      */
     updated_at?: string | null;
+    /**
+     * Locale
+     */
+    locale?: string | null;
+};
+
+/**
+ * UserStatusData
+ */
+export type UserStatusData = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Value
+     */
+    value: number;
 };
 
 /**
@@ -752,6 +842,12 @@ export type UserUpdate = {
     preferences?: {
         [key: string]: unknown;
     } | null;
+    /**
+     * Locale
+     *
+     * User's preferred locale (BCP 47 format: en, it, en-US, it-IT)
+     */
+    locale?: string | null;
     /**
      * Is Active
      */
@@ -1269,6 +1365,22 @@ export type CleanupExpiredSessionsResponses = {
 };
 
 export type CleanupExpiredSessionsResponse = CleanupExpiredSessionsResponses[keyof CleanupExpiredSessionsResponses];
+
+export type AdminGetStatsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/admin/stats';
+};
+
+export type AdminGetStatsResponses = {
+    /**
+     * Successful Response
+     */
+    200: AdminStatsResponse;
+};
+
+export type AdminGetStatsResponse = AdminGetStatsResponses[keyof AdminGetStatsResponses];
 
 export type AdminListUsersData = {
     body?: never;

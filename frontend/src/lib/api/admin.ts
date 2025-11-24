@@ -12,6 +12,11 @@ export interface OrgDistributionData {
   value: number;
 }
 
+export interface RegistrationActivityData {
+  date: string;
+  registrations: number;
+}
+
 export interface UserStatusData {
   name: string;
   value: number;
@@ -20,6 +25,7 @@ export interface UserStatusData {
 export interface AdminStatsResponse {
   user_growth: UserGrowthData[];
   organization_distribution: OrgDistributionData[];
+  registration_activity: RegistrationActivityData[];
   user_status: UserStatusData[];
 }
 
