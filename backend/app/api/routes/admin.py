@@ -7,7 +7,7 @@ for managing the application.
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any
 from uuid import UUID
@@ -94,6 +94,11 @@ class OrgDistributionData(BaseModel):
     value: int
 
 
+class RegistrationActivityData(BaseModel):
+    date: str
+    registrations: int
+
+
 class UserStatusData(BaseModel):
     name: str
     value: int
@@ -102,7 +107,61 @@ class UserStatusData(BaseModel):
 class AdminStatsResponse(BaseModel):
     user_growth: list[UserGrowthData]
     organization_distribution: list[OrgDistributionData]
+    registration_activity: list[RegistrationActivityData]
     user_status: list[UserStatusData]
+
+
+def _generate_demo_stats() -> AdminStatsResponse:
+    """Generate demo statistics for empty databases."""
+    from random import randint
+
+    # Demo user growth (last 30 days)
+    user_growth = []
+    total = 10
+    for i in range(29, -1, -1):
+        date = datetime.now(UTC) - timedelta(days=i)
+        total += randint(0, 3)
+        user_growth.append(
+            UserGrowthData(
+                date=date.strftime("%b %d"),
+                total_users=total,
+                active_users=int(total * 0.85),
+            )
+        )
+
+    # Demo organization distribution
+    org_dist = [
+        OrgDistributionData(name="Engineering", value=12),
+        OrgDistributionData(name="Product", value=8),
+        OrgDistributionData(name="Sales", value=15),
+        OrgDistributionData(name="Marketing", value=6),
+        OrgDistributionData(name="Support", value=5),
+        OrgDistributionData(name="Operations", value=4),
+    ]
+
+    # Demo registration activity (last 14 days)
+    registration_activity = []
+    for i in range(13, -1, -1):
+        date = datetime.now(UTC) - timedelta(days=i)
+        registration_activity.append(
+            RegistrationActivityData(
+                date=date.strftime("%b %d"),
+                registrations=randint(0, 5),
+            )
+        )
+
+    # Demo user status
+    user_status = [
+        UserStatusData(name="Active", value=45),
+        UserStatusData(name="Inactive", value=5),
+    ]
+
+    return AdminStatsResponse(
+        user_growth=user_growth,
+        organization_distribution=org_dist,
+        registration_activity=registration_activity,
+        user_status=user_status,
+    )
 
 
 @router.get(
@@ -116,75 +175,88 @@ async def admin_get_stats(
     admin: User = Depends(require_superuser),
     db: AsyncSession = Depends(get_db),
 ) -> Any:
-    """Get admin dashboard statistics."""
-    # 1. User Growth (Last 30 days)
-    # Note: This is a simplified implementation. For production, consider a dedicated stats table or materialized view.
-    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    """Get admin dashboard statistics with real data from database."""
+    from app.core.config import settings
 
-    # Get all users created in last 30 days
-    query = (
-        select(User).where(User.created_at >= thirty_days_ago).order_by(User.created_at)
-    )
-    result = await db.execute(query)
-    recent_users = result.scalars().all()
+    # Check if we have any data
+    total_users_query = select(func.count()).select_from(User)
+    total_users = (await db.execute(total_users_query)).scalar() or 0
 
-    # Get total count before 30 days
-    count_query = (
-        select(func.count()).select_from(User).where(User.created_at < thirty_days_ago)
-    )
-    count_result = await db.execute(count_query)
-    base_count = count_result.scalar() or 0
+    # If database is essentially empty (only admin user), return demo data
+    if total_users <= 1 and settings.DEMO_MODE:
+        logger.info("Returning demo stats data (empty database in demo mode)")
+        return _generate_demo_stats()
 
-    # Aggregate by day
+    # 1. User Growth (Last 30 days) - Improved calculation
+    datetime.now(UTC) - timedelta(days=30)
+
+    # Get all users with their creation dates
+    all_users_query = select(User).order_by(User.created_at)
+    result = await db.execute(all_users_query)
+    all_users = result.scalars().all()
+
+    # Build cumulative counts per day
     user_growth = []
-    current_total = base_count
-
-    # Create a map of date -> count
-    daily_counts = {}
-    for user in recent_users:
-        date_str = user.created_at.strftime("%b %d")
-        if date_str not in daily_counts:
-            daily_counts[date_str] = {"total": 0, "active": 0}
-        daily_counts[date_str]["total"] += 1
-        if user.is_active:
-            daily_counts[date_str]["active"] += 1
-
-    # Fill in the last 30 days
     for i in range(29, -1, -1):
-        date = datetime.utcnow() - timedelta(days=i)
-        date_str = date.strftime("%b %d")
+        date = datetime.now(UTC) - timedelta(days=i)
+        date_start = date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=UTC)
+        date_end = date_start + timedelta(days=1)
 
-        day_data = daily_counts.get(date_str, {"total": 0, "active": 0})
-        current_total += day_data["total"]
+        # Count all users created before end of this day
+        # Make comparison timezone-aware
+        total_users_on_date = sum(
+            1 for u in all_users
+            if u.created_at and u.created_at.replace(tzinfo=UTC) < date_end
+        )
+        # Count active users created before end of this day
+        active_users_on_date = sum(
+            1 for u in all_users
+            if u.created_at and u.created_at.replace(tzinfo=UTC) < date_end and u.is_active
+        )
 
-        # For active users, we'd ideally track history, but for now let's approximate
-        # by just counting current active users created up to this point
-        # This is a simplification
         user_growth.append(
             UserGrowthData(
-                date=date_str,
-                total_users=current_total,
-                active_users=int(
-                    current_total * 0.8
-                ),  # Mocking active ratio for demo visual appeal if real data lacks history
+                date=date.strftime("%b %d"),
+                total_users=total_users_on_date,
+                active_users=active_users_on_date,
             )
         )
 
-    # 2. Organization Distribution
-    # Get top 5 organizations by member count
+    # 2. Organization Distribution - Top 6 organizations by member count
     org_query = (
         select(Organization.name, func.count(UserOrganization.user_id).label("count"))
         .join(UserOrganization, Organization.id == UserOrganization.organization_id)
         .group_by(Organization.name)
         .order_by(func.count(UserOrganization.user_id).desc())
-        .limit(5)
+        .limit(6)
     )
     result = await db.execute(org_query)
     org_dist = [
         OrgDistributionData(name=row.name, value=row.count) for row in result.all()
     ]
 
-    # 3. User Status
+    # 3. User Registration Activity (Last 14 days) - NEW
+    registration_activity = []
+    for i in range(13, -1, -1):
+        date = datetime.now(UTC) - timedelta(days=i)
+        date_start = date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=UTC)
+        date_end = date_start + timedelta(days=1)
+
+        # Count users created on this specific day
+        # Make comparison timezone-aware
+        day_registrations = sum(
+            1 for u in all_users
+            if u.created_at and date_start <= u.created_at.replace(tzinfo=UTC) < date_end
+        )
+
+        registration_activity.append(
+            RegistrationActivityData(
+                date=date.strftime("%b %d"),
+                registrations=day_registrations,
+            )
+        )
+
+    # 4. User Status - Active vs Inactive
     active_query = select(func.count()).select_from(User).where(User.is_active)
     inactive_query = (
         select(func.count()).select_from(User).where(User.is_active.is_(False))
@@ -192,6 +264,8 @@ async def admin_get_stats(
 
     active_count = (await db.execute(active_query)).scalar() or 0
     inactive_count = (await db.execute(inactive_query)).scalar() or 0
+
+    logger.info(f"User status counts - Active: {active_count}, Inactive: {inactive_count}")
 
     user_status = [
         UserStatusData(name="Active", value=active_count),
@@ -201,6 +275,7 @@ async def admin_get_stats(
     return AdminStatsResponse(
         user_growth=user_growth,
         organization_distribution=org_dist,
+        registration_activity=registration_activity,
         user_status=user_status,
     )
 

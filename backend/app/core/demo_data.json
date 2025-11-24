@@ -24,6 +24,11 @@
             "name": "Umbrella Corporation",
             "slug": "umbrella",
             "description": "Our business is life itself."
+        },
+        {
+            "name": "Massive Dynamic",
+            "slug": "massive-dynamic",
+            "description": "What don't we do?"
         }
     ],
     "users": [
@@ -58,6 +63,16 @@
             "is_active": false
         },
         {
+            "email": "diana@acme.com",
+            "password": "Demo123!",
+            "first_name": "Diana",
+            "last_name": "Prince",
+            "is_superuser": false,
+            "organization_slug": "acme-corp",
+            "role": "member",
+            "is_active": true
+        },
+        {
             "email": "carol@globex.com",
             "password": "Demo123!",
             "first_name": "Carol",
@@ -78,6 +93,26 @@
             "is_active": true
         },
         {
+            "email": "ellen@globex.com",
+            "password": "Demo123!",
+            "first_name": "Ellen",
+            "last_name": "Ripley",
+            "is_superuser": false,
+            "organization_slug": "globex",
+            "role": "member",
+            "is_active": true
+        },
+        {
+            "email": "fred@globex.com",
+            "password": "Demo123!",
+            "first_name": "Fred",
+            "last_name": "Flintstone",
+            "is_superuser": false,
+            "organization_slug": "globex",
+            "role": "member",
+            "is_active": true
+        },
+        {
             "email": "dave@soylent.com",
             "password": "Demo123!",
             "first_name": "Dave",
@@ -85,6 +120,26 @@
             "is_superuser": false,
             "organization_slug": "soylent",
             "role": "member",
+            "is_active": true
+        },
+        {
+            "email": "gina@soylent.com",
+            "password": "Demo123!",
+            "first_name": "Gina",
+            "last_name": "Torres",
+            "is_superuser": false,
+            "organization_slug": "soylent",
+            "role": "member",
+            "is_active": true
+        },
+        {
+            "email": "harry@soylent.com",
+            "password": "Demo123!",
+            "first_name": "Harry",
+            "last_name": "Potter",
+            "is_superuser": false,
+            "organization_slug": "soylent",
+            "role": "admin",
             "is_active": true
         },
         {
@@ -96,6 +151,26 @@
             "organization_slug": "initech",
             "role": "admin",
             "is_active": true
+        },
+        {
+            "email": "iris@initech.com",
+            "password": "Demo123!",
+            "first_name": "Iris",
+            "last_name": "West",
+            "is_superuser": false,
+            "organization_slug": "initech",
+            "role": "member",
+            "is_active": true
+        },
+        {
+            "email": "jack@initech.com",
+            "password": "Demo123!",
+            "first_name": "Jack",
+            "last_name": "Sparrow",
+            "is_superuser": false,
+            "organization_slug": "initech",
+            "role": "member",
+            "is_active": false
         },
         {
             "email": "frank@umbrella.com",
@@ -116,6 +191,76 @@
             "organization_slug": "umbrella",
             "role": "member",
             "is_active": false
+        },
+        {
+            "email": "kate@umbrella.com",
+            "password": "Demo123!",
+            "first_name": "Kate",
+            "last_name": "Bishop",
+            "is_superuser": false,
+            "organization_slug": "umbrella",
+            "role": "member",
+            "is_active": true
+        },
+        {
+            "email": "leo@massive.com",
+            "password": "Demo123!",
+            "first_name": "Leo",
+            "last_name": "Messi",
+            "is_superuser": false,
+            "organization_slug": "massive-dynamic",
+            "role": "owner",
+            "is_active": true
+        },
+        {
+            "email": "mary@massive.com",
+            "password": "Demo123!",
+            "first_name": "Mary",
+            "last_name": "Jane",
+            "is_superuser": false,
+            "organization_slug": "massive-dynamic",
+            "role": "member",
+            "is_active": true
+        },
+        {
+            "email": "nathan@massive.com",
+            "password": "Demo123!",
+            "first_name": "Nathan",
+            "last_name": "Drake",
+            "is_superuser": false,
+            "organization_slug": "massive-dynamic",
+            "role": "member",
+            "is_active": true
+        },
+        {
+            "email": "olivia@massive.com",
+            "password": "Demo123!",
+            "first_name": "Olivia",
+            "last_name": "Dunham",
+            "is_superuser": false,
+            "organization_slug": "massive-dynamic",
+            "role": "admin",
+            "is_active": true
+        },
+        {
+            "email": "peter@massive.com",
+            "password": "Demo123!",
+            "first_name": "Peter",
+            "last_name": "Parker",
+            "is_superuser": false,
+            "organization_slug": "massive-dynamic",
+            "role": "member",
+            "is_active": true
+        },
+        {
+            "email": "quinn@massive.com",
+            "password": "Demo123!",
+            "first_name": "Quinn",
+            "last_name": "Mallory",
+            "is_superuser": false,
+            "organization_slug": "massive-dynamic",
+            "role": "member",
+            "is_active": true
         },
         {
             "email": "grace@example.com",
@@ -146,6 +291,66 @@
             "organization_slug": null,
             "role": null,
             "is_active": false
+        },
+        {
+            "email": "rachel@example.com",
+            "password": "Demo123!",
+            "first_name": "Rachel",
+            "last_name": "Green",
+            "is_superuser": false,
+            "organization_slug": null,
+            "role": null,
+            "is_active": true
+        },
+        {
+            "email": "sam@example.com",
+            "password": "Demo123!",
+            "first_name": "Sam",
+            "last_name": "Wilson",
+            "is_superuser": false,
+            "organization_slug": null,
+            "role": null,
+            "is_active": true
+        },
+        {
+            "email": "tony@example.com",
+            "password": "Demo123!",
+            "first_name": "Tony",
+            "last_name": "Stark",
+            "is_superuser": false,
+            "organization_slug": null,
+            "role": null,
+            "is_active": true
+        },
+        {
+            "email": "una@example.com",
+            "password": "Demo123!",
+            "first_name": "Una",
+            "last_name": "Chin-Riley",
+            "is_superuser": false,
+            "organization_slug": null,
+            "role": null,
+            "is_active": false
+        },
+        {
+            "email": "victor@example.com",
+            "password": "Demo123!",
+            "first_name": "Victor",
+            "last_name": "Von Doom",
+            "is_superuser": false,
+            "organization_slug": null,
+            "role": null,
+            "is_active": true
+        },
+        {
+            "email": "wanda@example.com",
+            "password": "Demo123!",
+            "first_name": "Wanda",
+            "last_name": "Maximoff",
+            "is_superuser": false,
+            "organization_slug": null,
+            "role": null,
+            "is_active": true
         }
     ]
 }

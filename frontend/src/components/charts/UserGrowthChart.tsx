@@ -5,19 +5,18 @@
 
 'use client';
 
+import { ChartCard } from './ChartCard';
+import { CHART_PALETTES } from '@/lib/chart-colors';
 import {
+  ResponsiveContainer,
   LineChart,
   Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { ChartCard } from './ChartCard';
-import { format, subDays } from 'date-fns';
-import { CHART_PALETTES } from '@/lib/chart-colors';
 
 export interface UserGrowthData {
   date: string;
@@ -25,32 +24,46 @@ export interface UserGrowthData {
   active_users: number;
 }
 
-interface UserGrowthChartProps {
+export interface UserGrowthChartProps {
   data?: UserGrowthData[];
   loading?: boolean;
   error?: string | null;
 }
 
-// Generate mock data for development/demo
-function generateMockData(): UserGrowthData[] {
-  const data: UserGrowthData[] = [];
-  const today = new Date();
-
-  for (let i = 29; i >= 0; i--) {
-    const date = subDays(today, i);
-    const baseUsers = 100 + i * 3;
-    data.push({
-      date: format(date, 'MMM d'),
-      total_users: baseUsers + Math.floor(Math.random() * 10),
-      active_users: Math.floor(baseUsers * 0.8) + Math.floor(Math.random() * 5),
-    });
+// Custom tooltip with proper theme colors
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div
+        style={{
+          backgroundColor: 'hsl(var(--popover))',
+          border: '1px solid hsl(var(--border))',
+          borderRadius: '6px',
+          padding: '8px 12px',
+        }}
+      >
+        <p style={{ color: 'hsl(var(--popover-foreground))', margin: 0, fontSize: '13px', fontWeight: 600 }}>
+          {payload[0].payload.date}
+        </p>
+        <p style={{ color: 'hsl(var(--popover-foreground))', margin: '4px 0 0 0', fontSize: '12px' }}>
+          Total Users: {payload[0].value}
+        </p>
+        {payload[1] && (
+          <p style={{ color: 'hsl(var(--popover-foreground))', margin: '2px 0 0 0', fontSize: '12px' }}>
+            Active Users: {payload[1].value}
+          </p>
+        )}
+      </div>
+    );
   }
-
-  return data;
-}
+  return null;
+};
 
 export function UserGrowthChart({ data, loading, error }: UserGrowthChartProps) {
-  const chartData = data || generateMockData();
+  // Show empty chart if no data available
+  const rawData = data || [];
+  const hasData =
+    rawData.length > 0 && rawData.some((d) => d.total_users > 0 || d.active_users > 0);
 
   return (
     <ChartCard
@@ -59,54 +72,51 @@ export function UserGrowthChart({ data, loading, error }: UserGrowthChartProps) 
       loading={loading}
       error={error}
     >
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-          <XAxis
-            dataKey="date"
-            stroke="hsl(var(--border))"
-            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-            tickLine={{ stroke: 'hsl(var(--border))' }}
-          />
-          <YAxis
-            stroke="hsl(var(--border))"
-            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-            tickLine={{ stroke: 'hsl(var(--border))' }}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: 'hsl(var(--popover))',
-              border: '1px solid hsl(var(--border))',
-              borderRadius: '6px',
-              color: 'hsl(var(--popover-foreground))',
-            }}
-            labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
-          />
-          <Legend
-            wrapperStyle={{
-              paddingTop: '20px',
-            }}
-          />
-          <Line
-            type="monotone"
-            dataKey="total_users"
-            name="Total Users"
-            stroke={CHART_PALETTES.line[0]}
-            strokeWidth={2}
-            dot={false}
-            activeDot={{ r: 6 }}
-          />
-          <Line
-            type="monotone"
-            dataKey="active_users"
-            name="Active Users"
-            stroke={CHART_PALETTES.line[1]}
-            strokeWidth={2}
-            dot={false}
-            activeDot={{ r: 6 }}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+      {!hasData && !loading && !error ? (
+        <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+          <p>No user growth data available</p>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={rawData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" style={{ stroke: 'var(--muted)', opacity: 0.2 }} />
+            <XAxis dataKey="date" style={{ fill: 'var(--muted-foreground)', fontSize: '12px' }} />
+            <YAxis
+              style={{ fill: 'var(--muted-foreground)', fontSize: '12px' }}
+              label={{
+                value: 'Users',
+                angle: -90,
+                position: 'insideLeft',
+                style: { fill: 'var(--muted-foreground)', textAnchor: 'middle' },
+              }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend
+              wrapperStyle={{
+                paddingTop: '20px',
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey="total_users"
+              name="Total Users"
+              stroke={CHART_PALETTES.line[0]}
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 6 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="active_users"
+              name="Active Users"
+              stroke={CHART_PALETTES.line[1]}
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      )}
     </ChartCard>
   );
 }

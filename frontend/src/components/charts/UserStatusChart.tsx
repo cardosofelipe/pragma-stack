@@ -21,16 +21,6 @@ interface UserStatusChartProps {
   error?: string | null;
 }
 
-// Generate mock data for development/demo
-function generateMockData(): UserStatusData[] {
-  return [
-    { name: 'Active', value: 142, color: CHART_PALETTES.pie[0] },
-    { name: 'Inactive', value: 28, color: CHART_PALETTES.pie[1] },
-    { name: 'Pending', value: 15, color: CHART_PALETTES.pie[2] },
-    { name: 'Suspended', value: 5, color: CHART_PALETTES.pie[3] },
-  ];
-}
-
 // Custom label component to show percentages
 const renderLabel = (entry: { percent: number; name: string }) => {
   const percent = (entry.percent * 100).toFixed(0);
@@ -38,7 +28,9 @@ const renderLabel = (entry: { percent: number; name: string }) => {
 };
 
 export function UserStatusChart({ data, loading, error }: UserStatusChartProps) {
-  const rawData = data || generateMockData();
+  // Show empty chart if no data available
+  const rawData = data || [];
+  const hasData = rawData.length > 0 && rawData.some((d) => d.value > 0);
 
   // Assign colors if missing
   const chartData = rawData.map((item, index) => ({
@@ -53,41 +45,47 @@ export function UserStatusChart({ data, loading, error }: UserStatusChartProps) 
       loading={loading}
       error={error}
     >
-      <ResponsiveContainer width="100%" height={300}>
-        <PieChart>
-          <Pie
-            data={chartData}
-            cx="50%"
-            cy="50%"
-            labelLine={false}
-            label={renderLabel}
-            outerRadius={80}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            {chartData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip
-            contentStyle={{
-              backgroundColor: 'hsl(var(--popover))',
-              border: '1px solid hsl(var(--border))',
-              borderRadius: '6px',
-              color: 'hsl(var(--popover-foreground))',
-            }}
-            labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
-          />
-          <Legend
-            verticalAlign="bottom"
-            height={36}
-            wrapperStyle={{
-              paddingTop: '20px',
-              color: 'hsl(var(--foreground))',
-            }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+      {!hasData && !loading && !error ? (
+        <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+          <p>No user status data available</p>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              label={renderLabel}
+              outerRadius={80}
+              fill="#8884d8"
+              dataKey="value"
+            >
+              {chartData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'hsl(var(--popover))',
+                border: '1px solid hsl(var(--border))',
+                borderRadius: '6px',
+                color: 'hsl(var(--popover-foreground))',
+              }}
+              labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
+            />
+            <Legend
+              verticalAlign="bottom"
+              height={36}
+              wrapperStyle={{
+                paddingTop: '20px',
+                color: 'hsl(var(--foreground))',
+              }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      )}
     </ChartCard>
   );
 }

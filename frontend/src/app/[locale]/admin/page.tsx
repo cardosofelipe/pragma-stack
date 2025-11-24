@@ -11,7 +11,7 @@ import { DashboardStats } from '@/components/admin';
 import {
   UserGrowthChart,
   OrganizationDistributionChart,
-  SessionActivityChart,
+  RegistrationActivityChart,
   UserStatusChart,
 } from '@/components/charts';
 import { Users, Building2, Settings } from 'lucide-react';
@@ -19,16 +19,40 @@ import { useQuery } from '@tanstack/react-query';
 import { getAdminStats } from '@/lib/api/admin';
 
 export default function AdminPage() {
+  console.log('[AdminPage] Component rendering');
+
   const {
     data: stats,
     isLoading,
     error,
+    status,
+    fetchStatus,
   } = useQuery({
-    queryKey: ['admin', 'stats'],
+    queryKey: ['admin', 'analytics'], // Changed from 'stats' to avoid collision with useAdminStats hook
     queryFn: async () => {
-      const response = await getAdminStats();
-      return response.data;
+      console.log('[AdminPage] QueryFn executing - fetching stats...');
+      try {
+        const response = await getAdminStats();
+        console.log('[AdminPage] Stats response received:', response);
+        return response.data;
+      } catch (err) {
+        console.error('[AdminPage] Error fetching stats:', err);
+        throw err;
+      }
     },
+    enabled: true, // Explicitly enable the query
+    retry: 1,
+    staleTime: 60000, // Cache for 1 minute
+  });
+
+  console.log('[AdminPage] Current state:', {
+    isLoading,
+    hasError: Boolean(error),
+    error: error?.message,
+    hasData: Boolean(stats),
+    dataKeys: stats ? Object.keys(stats) : null,
+    status,
+    fetchStatus,
   });
 
   return (
@@ -94,7 +118,11 @@ export default function AdminPage() {
               loading={isLoading}
               error={error ? (error as Error).message : null}
             />
-            <SessionActivityChart />
+            <RegistrationActivityChart
+              data={stats?.registration_activity}
+              loading={isLoading}
+              error={error ? (error as Error).message : null}
+            />
             <OrganizationDistributionChart
               data={stats?.organization_distribution}
               loading={isLoading}
