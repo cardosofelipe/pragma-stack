@@ -156,10 +156,16 @@ describe('DemoCredentialsModal', () => {
     render(<DemoCredentialsModal open={true} onClose={mockOnClose} />);
 
     const loginAsUserLink = screen.getByRole('link', { name: /login as user/i });
-    expect(loginAsUserLink).toHaveAttribute('href', '/login');
+    expect(loginAsUserLink).toHaveAttribute(
+      'href',
+      '/login?email=demo@example.com&password=Demo123!'
+    );
 
     const loginAsAdminLink = screen.getByRole('link', { name: /login as admin/i });
-    expect(loginAsAdminLink).toHaveAttribute('href', '/login');
+    expect(loginAsAdminLink).toHaveAttribute(
+      'href',
+      '/login?email=admin@example.com&password=Admin123!'
+    );
   });
 
   it('calls onClose when login link is clicked', () => {

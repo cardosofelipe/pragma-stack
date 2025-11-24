@@ -47,8 +47,8 @@ describe('HeroSection', () => {
     );
 
     expect(screen.getByText('MIT Licensed')).toBeInTheDocument();
-    expect(screen.getAllByText('97% Test Coverage')[0]).toBeInTheDocument();
-    expect(screen.getByText('Production Ready')).toBeInTheDocument();
+    expect(screen.getByText('Comprehensive Tests')).toBeInTheDocument();
+    expect(screen.getByText('Pragmatic by Design')).toBeInTheDocument();
   });
 
   it('renders main headline', () => {
@@ -60,8 +60,8 @@ describe('HeroSection', () => {
       />
     );
 
-    expect(screen.getAllByText(/Everything You Need to Build/i)[0]).toBeInTheDocument();
-    expect(screen.getAllByText(/Modern Web Applications/i)[0]).toBeInTheDocument();
+    expect(screen.getByText(/The Pragmatic/i)).toBeInTheDocument();
+    expect(screen.getByText(/Full-Stack Template/i)).toBeInTheDocument();
   });
 
   it('renders subheadline with key messaging', () => {
@@ -73,7 +73,7 @@ describe('HeroSection', () => {
       />
     );
 
-    expect(screen.getByText(/Production-ready FastAPI \+ Next.js template/i)).toBeInTheDocument();
+    expect(screen.getByText(/Opinionated, secure, and production-ready/i)).toBeInTheDocument();
     expect(screen.getByText(/Start building features on day one/i)).toBeInTheDocument();
   });
 
@@ -116,26 +116,6 @@ describe('HeroSection', () => {
 
     const componentsLink = screen.getByRole('link', { name: /explore components/i });
     expect(componentsLink).toHaveAttribute('href', '/dev');
-  });
-
-  it('displays test coverage stats', () => {
-    render(
-      <HeroSection
-        onOpenDemoModal={function (): void {
-          throw new Error('Function not implemented.');
-        }}
-      />
-    );
-
-    const coverageTexts = screen.getAllByText('97%');
-    expect(coverageTexts.length).toBeGreaterThan(0);
-
-    const testCountTexts = screen.getAllByText('743');
-    expect(testCountTexts.length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Passing Tests/i)[0]).toBeInTheDocument();
-
-    expect(screen.getByText('0')).toBeInTheDocument();
-    expect(screen.getByText(/Flaky Tests/i)).toBeInTheDocument();
   });
 
   it('calls onOpenDemoModal when Try Live Demo button is clicked', () => {

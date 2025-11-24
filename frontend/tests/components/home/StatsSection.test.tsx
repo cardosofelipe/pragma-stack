@@ -35,21 +35,25 @@ describe('StatsSection', () => {
   it('renders all stat cards', () => {
     render(<StatsSection />);
 
-    expect(screen.getByText('Test Coverage')).toBeInTheDocument();
-    expect(screen.getByText('Passing Tests')).toBeInTheDocument();
-    expect(screen.getByText('Flaky Tests')).toBeInTheDocument();
-    expect(screen.getByText('API Endpoints')).toBeInTheDocument();
+    expect(screen.getByText('Open Source')).toBeInTheDocument();
+    expect(screen.getByText('Type Safe')).toBeInTheDocument();
+    expect(screen.getByText('Doc Guides')).toBeInTheDocument();
+    expect(screen.getByText('Magic')).toBeInTheDocument();
   });
 
   it('displays stat descriptions', () => {
     render(<StatsSection />);
 
     expect(
-      screen.getByText(/Comprehensive testing across backend and frontend/i)
+      screen.getByText(/MIT Licensed. No hidden costs or vendor lock-in/i)
     ).toBeInTheDocument();
-    expect(screen.getByText(/Backend, frontend unit, and E2E tests/i)).toBeInTheDocument();
-    expect(screen.getByText(/Production-stable test suite/i)).toBeInTheDocument();
-    expect(screen.getByText(/Fully documented with OpenAPI/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/End-to-end type safety with TypeScript & Pydantic/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Comprehensive documentation for every feature/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Explicit is better than implicit. No hidden logic/i)
+    ).toBeInTheDocument();
   });
 
   it('renders animated counters with correct suffixes', () => {
@@ -69,7 +73,7 @@ describe('StatsSection', () => {
 
     // After animation, we should see the final values
     // The component should eventually show the stat values
-    const statsSection = screen.getByText('Test Coverage').parentElement;
+    const statsSection = screen.getByText('Open Source').parentElement;
     expect(statsSection).toBeInTheDocument();
   });
 
@@ -78,17 +82,17 @@ describe('StatsSection', () => {
 
     // Icons are rendered via lucide-react components
     // We can verify the stat cards are rendered with proper structure
-    const testCoverageCard = screen.getByText('Test Coverage').closest('div');
-    expect(testCoverageCard).toBeInTheDocument();
+    const openSourceCard = screen.getByText('Open Source').closest('div');
+    expect(openSourceCard).toBeInTheDocument();
 
-    const passingTestsCard = screen.getByText('Passing Tests').closest('div');
-    expect(passingTestsCard).toBeInTheDocument();
+    const typeSafeCard = screen.getByText('Type Safe').closest('div');
+    expect(typeSafeCard).toBeInTheDocument();
 
-    const flakyTestsCard = screen.getByText('Flaky Tests').closest('div');
-    expect(flakyTestsCard).toBeInTheDocument();
+    const docGuidesCard = screen.getByText('Doc Guides').closest('div');
+    expect(docGuidesCard).toBeInTheDocument();
 
-    const apiEndpointsCard = screen.getByText('API Endpoints').closest('div');
-    expect(apiEndpointsCard).toBeInTheDocument();
+    const magicCard = screen.getByText('Magic').closest('div');
+    expect(magicCard).toBeInTheDocument();
   });
 
   describe('Accessibility', () => {
@@ -102,7 +106,7 @@ describe('StatsSection', () => {
     it('has descriptive labels for stats', () => {
       render(<StatsSection />);
 
-      const statLabels = ['Test Coverage', 'Passing Tests', 'Flaky Tests', 'API Endpoints'];
+      const statLabels = ['Open Source', 'Type Safe', 'Doc Guides', 'Magic'];
 
       statLabels.forEach((label) => {
         expect(screen.getByText(label)).toBeInTheDocument();

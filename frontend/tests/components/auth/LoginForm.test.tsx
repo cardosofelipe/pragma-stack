@@ -33,9 +33,13 @@ jest.mock('@/lib/api/hooks/useAuth', () => ({
 }));
 
 // Mock router
+// Mock router
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
+  }),
+  useSearchParams: () => ({
+    get: jest.fn(),
   }),
 }));
 

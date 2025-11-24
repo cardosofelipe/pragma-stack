@@ -47,6 +47,34 @@ jest.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
   vscDarkPlus: {},
 }));
 
+// Mock auth hooks
+jest.mock('@/lib/api/hooks/useAuth', () => ({
+  useIsAuthenticated: jest.fn(() => false),
+  useLogout: jest.fn(() => ({
+    mutate: jest.fn(),
+  })),
+}));
+
+// Mock Theme components
+jest.mock('@/components/theme', () => ({
+  ThemeToggle: () => <div data-testid="theme-toggle">Theme Toggle</div>,
+}));
+
+// Mock LocaleSwitcher
+jest.mock('@/components/i18n', () => ({
+  LocaleSwitcher: () => <div data-testid="locale-switcher">Locale Switcher</div>,
+}));
+
+// Mock DemoCredentialsModal
+jest.mock('@/components/home/DemoCredentialsModal', () => ({
+  DemoCredentialsModal: ({ open, onClose }: any) =>
+    open ? (
+      <div data-testid="demo-modal">
+        <button onClick={onClose}>Close</button>
+      </div>
+    ) : null,
+}));
+
 describe('HomePage', () => {
   describe('Page Structure', () => {
     it('renders without crashing', () => {
@@ -60,7 +88,6 @@ describe('HomePage', () => {
       render(<Home />);
       const header = screen.getByRole('banner');
       expect(within(header).getByText('PragmaStack')).toBeInTheDocument();
-      expect(within(header).getByText('Template')).toBeInTheDocument();
     });
 
     it('renders footer with copyright', () => {
@@ -79,30 +106,26 @@ describe('HomePage', () => {
 
     it('renders production-ready messaging', () => {
       render(<Home />);
-      expect(screen.getByText(/Production-ready FastAPI/i)).toBeInTheDocument();
+      expect(screen.getByText(/Opinionated, secure, and production-ready/i)).toBeInTheDocument();
     });
 
-    it('renders test coverage stats', () => {
+    it('renders badges', () => {
       render(<Home />);
-      const coverageTexts = screen.getAllByText('97%');
-      expect(coverageTexts.length).toBeGreaterThan(0);
-      expect(screen.getAllByText(/Test Coverage/i)[0]).toBeInTheDocument();
-      const testCountTexts = screen.getAllByText('743');
-      expect(testCountTexts.length).toBeGreaterThan(0);
-      expect(screen.getAllByText(/Passing Tests/i)[0]).toBeInTheDocument();
+      expect(screen.getByText('Comprehensive Tests')).toBeInTheDocument();
+      expect(screen.getByText('Pragmatic by Design')).toBeInTheDocument();
     });
   });
 
   describe('Context Section', () => {
     it('renders what you get message', () => {
       render(<Home />);
-      expect(screen.getByText(/What You Get Out of the Box/i)).toBeInTheDocument();
+      expect(screen.getByText(/Stop Reinventing the Wheel/i)).toBeInTheDocument();
     });
 
     it('renders key features', () => {
       render(<Home />);
       expect(screen.getAllByText(/Clone & Deploy in < 5 minutes/i)[0]).toBeInTheDocument();
-      expect(screen.getAllByText(/97% Test Coverage \(743 tests\)/i)[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/Comprehensive Test Suite/i)[0]).toBeInTheDocument();
       expect(screen.getAllByText(/12\+ Documentation Guides/i)[0]).toBeInTheDocument();
       expect(screen.getAllByText(/Zero Commercial Dependencies/i)[0]).toBeInTheDocument();
     });
@@ -167,7 +190,7 @@ describe('HomePage', () => {
   describe('Tech Stack Section', () => {
     it('renders tech stack heading', () => {
       render(<Home />);
-      expect(screen.getByText(/Modern, Type-Safe, Production-Grade Stack/i)).toBeInTheDocument();
+      expect(screen.getByText(/A Stack You Can Trust/i)).toBeInTheDocument();
     });
 
     it('renders all technologies', () => {
@@ -186,7 +209,7 @@ describe('HomePage', () => {
   describe('Philosophy Section', () => {
     it('renders why this template exists', () => {
       render(<Home />);
-      expect(screen.getByText(/Why This Template Exists/i)).toBeInTheDocument();
+      expect(screen.getByText(/Why PragmaStack\?/i)).toBeInTheDocument();
     });
 
     it('renders what you wont find section', () => {
@@ -198,7 +221,7 @@ describe('HomePage', () => {
     it('renders what you will find section', () => {
       render(<Home />);
       expect(screen.getByText(/What You Will Find/i)).toBeInTheDocument();
-      expect(screen.getByText(/Production patterns that actually work/i)).toBeInTheDocument();
+      expect(screen.getByText(/Pragmatic Speed: Ship features, not config/i)).toBeInTheDocument();
     });
   });
 

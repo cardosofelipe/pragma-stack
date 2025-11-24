@@ -5,10 +5,26 @@
 
 import { render, screen } from '@testing-library/react';
 import AdminPage from '@/app/[locale]/admin/page';
-import { useAdminStats } from '@/lib/api/hooks/useAdmin';
+import { getAdminStats } from '@/lib/api/admin';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// Mock the API client
+jest.mock('@/lib/api/admin');
 
 // Mock the useAdminStats hook
-jest.mock('@/lib/api/hooks/useAdmin');
+jest.mock('@/lib/api/hooks/useAdmin', () => ({
+  useAdminStats: () => ({
+    data: {
+      totalUsers: 100,
+      activeUsers: 80,
+      totalOrganizations: 20,
+      totalSessions: 30,
+    },
+    isLoading: false,
+    isError: false,
+    error: null,
+  }),
+}));
 
 // Mock chart components
 jest.mock('@/components/charts', () => ({
@@ -22,23 +38,31 @@ jest.mock('@/components/charts', () => ({
   UserStatusChart: () => <div data-testid="user-status-chart">User Status Chart</div>,
 }));
 
-const mockUseAdminStats = useAdminStats as jest.MockedFunction<typeof useAdminStats>;
+const mockGetAdminStats = getAdminStats as jest.MockedFunction<typeof getAdminStats>;
 
 // Helper function to render with default mocked stats
 function renderWithMockedStats() {
-  mockUseAdminStats.mockReturnValue({
+  mockGetAdminStats.mockResolvedValue({
     data: {
-      totalUsers: 100,
-      activeUsers: 80,
-      totalOrganizations: 20,
-      totalSessions: 30,
+      user_growth: [],
+      organization_distribution: [],
+      user_status: [],
     },
-    isLoading: false,
-    isError: false,
-    error: null,
   } as any);
 
-  return render(<AdminPage />);
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <AdminPage />
+    </QueryClientProvider>
+  );
 }
 
 describe('AdminPage', () => {

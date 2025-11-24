@@ -27,6 +27,24 @@ jest.mock('@/components/home/DemoCredentialsModal', () => ({
     ) : null,
 }));
 
+// Mock auth hooks
+jest.mock('@/lib/api/hooks/useAuth', () => ({
+  useIsAuthenticated: jest.fn(() => false),
+  useLogout: jest.fn(() => ({
+    mutate: jest.fn(),
+  })),
+}));
+
+// Mock Theme components
+jest.mock('@/components/theme', () => ({
+  ThemeToggle: () => <div data-testid="theme-toggle">Theme Toggle</div>,
+}));
+
+// Mock LocaleSwitcher
+jest.mock('@/components/i18n', () => ({
+  LocaleSwitcher: () => <div data-testid="locale-switcher">Locale Switcher</div>,
+}));
+
 describe('Header', () => {
   it('renders logo', () => {
     render(
@@ -38,7 +56,6 @@ describe('Header', () => {
     );
 
     expect(screen.getByText('PragmaStack')).toBeInTheDocument();
-    expect(screen.getByText('Template')).toBeInTheDocument();
   });
 
   it('logo links to homepage', () => {
@@ -50,7 +67,7 @@ describe('Header', () => {
       />
     );
 
-    const logoLink = screen.getByRole('link', { name: /pragmastack template/i });
+    const logoLink = screen.getByRole('link', { name: /PragmaStack/i });
     expect(logoLink).toHaveAttribute('href', '/');
   });
 
