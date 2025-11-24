@@ -41,7 +41,7 @@ describe('UserGrowthChart', () => {
     render(<UserGrowthChart />);
 
     expect(screen.getByText('User Growth')).toBeInTheDocument();
-    expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
+    expect(screen.getByText('No user growth data available')).toBeInTheDocument();
   });
 
   it('shows loading state', () => {
@@ -67,6 +67,6 @@ describe('UserGrowthChart', () => {
     render(<UserGrowthChart data={[]} />);
 
     expect(screen.getByText('User Growth')).toBeInTheDocument();
-    expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
+    expect(screen.getByText('No user growth data available')).toBeInTheDocument();
   });
 });

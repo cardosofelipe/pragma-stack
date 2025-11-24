@@ -60,7 +60,7 @@ describe('UserStatusChart', () => {
     render(<UserStatusChart />);
 
     expect(screen.getByText('User Status Distribution')).toBeInTheDocument();
-    expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
+    expect(screen.getByText('No user status data available')).toBeInTheDocument();
   });
 
   it('shows loading state', () => {
@@ -86,7 +86,7 @@ describe('UserStatusChart', () => {
     render(<UserStatusChart data={[]} />);
 
     expect(screen.getByText('User Status Distribution')).toBeInTheDocument();
-    expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
+    expect(screen.getByText('No user status data available')).toBeInTheDocument();
   });
 
   describe('renderLabel function', () => {

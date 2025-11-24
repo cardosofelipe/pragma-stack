@@ -32,8 +32,8 @@ jest.mock('@/components/charts', () => ({
   OrganizationDistributionChart: () => (
     <div data-testid="org-distribution-chart">Org Distribution Chart</div>
   ),
-  SessionActivityChart: () => (
-    <div data-testid="session-activity-chart">Session Activity Chart</div>
+  RegistrationActivityChart: () => (
+    <div data-testid="registration-activity-chart">Registration Activity Chart</div>
   ),
   UserStatusChart: () => <div data-testid="user-status-chart">User Status Chart</div>,
 }));
@@ -141,7 +141,7 @@ describe('AdminPage', () => {
 
     expect(screen.getByTestId('user-growth-chart')).toBeInTheDocument();
     expect(screen.getByTestId('org-distribution-chart')).toBeInTheDocument();
-    expect(screen.getByTestId('session-activity-chart')).toBeInTheDocument();
+    expect(screen.getByTestId('registration-activity-chart')).toBeInTheDocument();
     expect(screen.getByTestId('user-status-chart')).toBeInTheDocument();
   });
 });

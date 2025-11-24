@@ -41,7 +41,7 @@ describe('OrganizationDistributionChart', () => {
     render(<OrganizationDistributionChart />);
 
     expect(screen.getByText('Organization Distribution')).toBeInTheDocument();
-    expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
+    expect(screen.getByText('No organization data available')).toBeInTheDocument();
   });
 
   it('shows loading state', () => {
@@ -67,6 +67,6 @@ describe('OrganizationDistributionChart', () => {
     render(<OrganizationDistributionChart data={[]} />);
 
     expect(screen.getByText('Organization Distribution')).toBeInTheDocument();
-    expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
+    expect(screen.getByText('No organization data available')).toBeInTheDocument();
   });
 });
