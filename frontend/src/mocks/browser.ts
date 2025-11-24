@@ -53,14 +53,37 @@ export async function startMockServiceWorker() {
 
   try {
     await worker.start({
-      onUnhandledRequest: 'warn', // Warn about unmocked requests
+      // Only intercept requests to the API, bypass everything else (Next.js routes, etc.)
+      onUnhandledRequest(request, print) {
+        // Ignore Next.js internal requests
+        const url = new URL(request.url);
+        if (
+          url.pathname.startsWith('/_next') ||
+          url.pathname.startsWith('/__next') ||
+          url.pathname.startsWith('/api/') ||
+          url.pathname === '/favicon.ico' ||
+          url.pathname.match(/\.(js|css|png|jpg|svg|woff|woff2)$/)
+        ) {
+          return;
+        }
+
+        // Ignore locale routes (Next.js i18n)
+        if (url.pathname === '/en' || url.pathname === '/it' || url.pathname.startsWith('/en/') || url.pathname.startsWith('/it/')) {
+          return;
+        }
+
+        // Only warn about actual API requests we might have missed
+        if (url.hostname.includes('localhost') && url.port === '8000') {
+          print.warning();
+        }
+      },
       serviceWorker: {
         url: '/mockServiceWorker.js',
       },
     });
 
     console.log('%c[MSW] Demo Mode Active', 'color: #00bfa5; font-weight: bold;');
-    console.log('[MSW] All API calls are mocked (no backend required)');
+    console.log('[MSW] All API calls to localhost:8000 are mocked');
     console.log('[MSW] Demo credentials:');
     console.log('  Regular user: demo@example.com / DemoPass123');
     console.log('  Admin user: admin@example.com / AdminPass123');

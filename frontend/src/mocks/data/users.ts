@@ -117,21 +117,26 @@ export function updateCurrentUser(updates: Partial<UserResponse>) {
 
 /**
  * Validate demo credentials
+ * In demo mode, we're lenient with passwords to improve UX
  */
 export function validateCredentials(email: string, password: string): UserResponse | null {
-  // Demo user
-  if (email === 'demo@example.com' && password === 'DemoPass123') {
-    return demoUser;
+  // Demo user - accept documented password or any password >= 8 chars
+  if (email === 'demo@example.com') {
+    if (password === 'DemoPass123' || password.length >= 8) {
+      return demoUser;
+    }
   }
 
-  // Demo admin
-  if (email === 'admin@example.com' && password === 'AdminPass123') {
-    return demoAdmin;
+  // Demo admin - accept documented password or any password >= 8 chars
+  if (email === 'admin@example.com') {
+    if (password === 'AdminPass123' || password.length >= 8) {
+      return demoAdmin;
+    }
   }
 
-  // Sample users (generic password for demo)
+  // Sample users - accept any valid password (it's a demo!)
   const user = sampleUsers.find((u) => u.email === email);
-  if (user && password === 'DemoPass123') {
+  if (user && password.length >= 8) {
     return user;
   }
 

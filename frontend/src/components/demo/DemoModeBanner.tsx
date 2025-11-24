@@ -43,7 +43,9 @@ export function DemoModeBanner() {
             </p>
           </div>
           <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">Demo Credentials:</p>
+            <p className="text-xs font-medium text-muted-foreground">
+              Demo Credentials (any password ≥8 chars works):
+            </p>
             <div className="space-y-1.5">
               <code className="block rounded bg-muted px-2 py-1.5 text-xs font-mono">
                 <span className="text-muted-foreground">user:</span>{' '}
