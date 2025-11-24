@@ -71,6 +71,7 @@ const ENV = {
   ENABLE_REGISTRATION: process.env.NEXT_PUBLIC_ENABLE_REGISTRATION,
   ENABLE_SESSION_MANAGEMENT: process.env.NEXT_PUBLIC_ENABLE_SESSION_MANAGEMENT,
   DEBUG_API: process.env.NEXT_PUBLIC_DEBUG_API,
+  DEMO_MODE: process.env.NEXT_PUBLIC_DEMO_MODE,
   NODE_ENV: process.env.NODE_ENV || 'development',
 } as const;
 
@@ -116,6 +117,16 @@ export const config = {
 
   debug: {
     api: parseBool(ENV.DEBUG_API, false) && ENV.NODE_ENV === 'development',
+  },
+
+  demo: {
+    // Enable demo mode (uses Mock Service Worker instead of real backend)
+    enabled: parseBool(ENV.DEMO_MODE, false),
+    // Demo credentials
+    credentials: {
+      user: { email: 'demo@example.com', password: 'DemoPass123' },
+      admin: { email: 'admin@example.com', password: 'AdminPass123' },
+    },
   },
 
   env: {

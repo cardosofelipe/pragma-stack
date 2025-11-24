@@ -134,6 +134,38 @@ Whether you're building a SaaS, an internal tool, or a side project, PragmaStack
 
 ---
 
+## 🎭 Demo Mode
+
+**Try the frontend without a backend!** Perfect for:
+- **Free deployment** on Vercel (no backend costs)
+- **Portfolio showcasing** with live demos
+- **Client presentations** without infrastructure setup
+
+### Quick Start
+
+```bash
+cd frontend
+echo "NEXT_PUBLIC_DEMO_MODE=true" > .env.local
+npm run dev
+```
+
+**Demo Credentials:**
+- Regular user: `demo@example.com` / `DemoPass123`
+- Admin user: `admin@example.com` / `AdminPass123`
+
+Demo mode uses [Mock Service Worker (MSW)](https://mswjs.io/) to intercept API calls in the browser. Your code remains unchanged - the same components work with both real and mocked backends.
+
+**Key Features:**
+- ✅ Zero backend required
+- ✅ All features functional (auth, admin, stats)
+- ✅ Realistic network delays and errors
+- ✅ Does NOT interfere with tests (97%+ coverage maintained)
+- ✅ One-line toggle: `NEXT_PUBLIC_DEMO_MODE=true`
+
+📖 **[Complete Demo Mode Documentation](./frontend/docs/DEMO_MODE.md)**
+
+---
+
 ## 🚀 Tech Stack
 
 ### Backend

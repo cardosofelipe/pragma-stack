@@ -37,6 +37,9 @@ const customJestConfig = {
     '!src/**/index.{js,jsx,ts,tsx}', // Re-export index files - no logic to test
     '!src/lib/utils/cn.ts', // Simple utility function from shadcn
     '!src/middleware.ts', // middleware.ts - no logic to test
+    '!src/mocks/**', // MSW mock data (demo mode only, not production code)
+    '!src/components/providers/MSWProvider.tsx', // MSW provider - demo mode only
+    '!src/components/demo/**', // Demo mode UI components - demo mode only
   ],
   coverageThreshold: {
     global: {

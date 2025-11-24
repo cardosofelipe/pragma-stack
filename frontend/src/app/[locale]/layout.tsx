@@ -9,6 +9,8 @@ import '../globals.css';
 import { Providers } from '../providers';
 import { AuthProvider } from '@/lib/auth/AuthContext';
 import { AuthInitializer } from '@/components/auth';
+import { MSWProvider } from '@/components/providers/MSWProvider';
+import { DemoModeBanner } from '@/components/demo';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -82,10 +84,13 @@ export default async function LocaleLayout({
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextIntlClientProvider messages={messages}>
-          <AuthProvider>
-            <AuthInitializer />
-            <Providers>{children}</Providers>
-          </AuthProvider>
+          <MSWProvider>
+            <DemoModeBanner />
+            <AuthProvider>
+              <AuthInitializer />
+              <Providers>{children}</Providers>
+            </AuthProvider>
+          </MSWProvider>
         </NextIntlClientProvider>
       </body>
     </html>

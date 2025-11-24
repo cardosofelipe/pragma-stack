@@ -173,6 +173,17 @@ with patch.object(session, 'commit', side_effect=mock_commit):
 - E2E: Use `npm run test:e2e:debug` for step-by-step debugging
 - Check logs: Backend has detailed error logging
 
+**Demo Mode (Frontend-Only Showcase):**
+- Enable: `echo "NEXT_PUBLIC_DEMO_MODE=true" > frontend/.env.local`
+- Uses MSW (Mock Service Worker) to intercept API calls in browser
+- Zero backend required - perfect for Vercel deployments
+- Demo credentials:
+  - User: `demo@example.com` / `DemoPass123`
+  - Admin: `admin@example.com` / `AdminPass123`
+- **Safe**: MSW never runs during tests (Jest or Playwright)
+- **Coverage**: Mock files excluded from linting and coverage
+- **Documentation**: `frontend/docs/DEMO_MODE.md` for complete guide
+
 ### Tool Usage Preferences
 
 **Prefer specialized tools over bash:**
