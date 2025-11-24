@@ -19,7 +19,11 @@ import { useQuery } from '@tanstack/react-query';
 import { getAdminStats } from '@/lib/api/admin';
 
 export default function AdminPage() {
-  const { data: stats, isLoading, error } = useQuery({
+  const {
+    data: stats,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['admin', 'stats'],
     queryFn: async () => {
       const response = await getAdminStats();

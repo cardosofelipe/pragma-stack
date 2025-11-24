@@ -19,9 +19,9 @@ jest.mock('recharts', () => {
 
 describe('UserGrowthChart', () => {
   const mockData: UserGrowthData[] = [
-    { date: 'Jan 1', totalUsers: 100, activeUsers: 80 },
-    { date: 'Jan 2', totalUsers: 105, activeUsers: 85 },
-    { date: 'Jan 3', totalUsers: 110, activeUsers: 90 },
+    { date: 'Jan 1', total_users: 100, active_users: 80 },
+    { date: 'Jan 2', total_users: 105, active_users: 85 },
+    { date: 'Jan 3', total_users: 110, active_users: 90 },
   ];
 
   it('renders chart card with title and description', () => {

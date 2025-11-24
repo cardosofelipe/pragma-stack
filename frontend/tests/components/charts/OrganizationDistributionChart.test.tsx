@@ -19,9 +19,9 @@ jest.mock('recharts', () => {
 
 describe('OrganizationDistributionChart', () => {
   const mockData: OrganizationDistributionData[] = [
-    { name: 'Engineering', members: 45, activeMembers: 42 },
-    { name: 'Marketing', members: 28, activeMembers: 25 },
-    { name: 'Sales', members: 35, activeMembers: 33 },
+    { name: 'Engineering', value: 45 },
+    { name: 'Marketing', value: 28 },
+    { name: 'Sales', value: 35 },
   ];
 
   it('renders chart card with title and description', () => {
