@@ -122,9 +122,9 @@ def async_postgres_url(postgres_url) -> str:
     Testcontainers returns postgresql+psycopg2:// format.
     """
     # Testcontainers uses psycopg2 by default, convert to asyncpg
-    return postgres_url.replace("postgresql+psycopg2://", "postgresql+asyncpg://").replace(
-        "postgresql://", "postgresql+asyncpg://"
-    )
+    return postgres_url.replace(
+        "postgresql+psycopg2://", "postgresql+asyncpg://"
+    ).replace("postgresql://", "postgresql+asyncpg://")
 
 
 @pytest_asyncio.fixture

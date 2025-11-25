@@ -15,8 +15,8 @@ Note: Schemathesis v4.x API - filtering is done via include/exclude methods.
 import pytest
 
 try:
+    from hypothesis import settings
     from schemathesis import openapi
-    from hypothesis import Phase, settings
 
     SCHEMATHESIS_AVAILABLE = True
 except ImportError:

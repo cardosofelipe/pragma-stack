@@ -40,7 +40,9 @@ class TestUserRegistrationWorkflow:
             },
         )
 
-        assert response.status_code in [200, 201], f"Registration failed: {response.text}"
+        assert response.status_code in [200, 201], (
+            f"Registration failed: {response.text}"
+        )
         data = response.json()
         assert data["email"] == email
         assert "id" in data
@@ -93,7 +95,9 @@ class TestAuthenticationWorkflow:
                 "last_name": "Test",
             },
         )
-        assert reg_resp.status_code in [200, 201], f"Registration failed: {reg_resp.text}"
+        assert reg_resp.status_code in [200, 201], (
+            f"Registration failed: {reg_resp.text}"
+        )
 
         # 2. Login
         login_resp = await e2e_client.post(
