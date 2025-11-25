@@ -53,6 +53,18 @@ export default function OAuthCallbackPage() {
       return;
     }
 
+    // SECURITY: Validate state parameter against stored value (CSRF protection)
+    // This prevents cross-site request forgery attacks
+    const storedState = sessionStorage.getItem('oauth_state');
+    if (!storedState || storedState !== state) {
+      // Clean up stored state on mismatch
+      sessionStorage.removeItem('oauth_state');
+      sessionStorage.removeItem('oauth_mode');
+      sessionStorage.removeItem('oauth_provider');
+      setError(t('stateMismatch') || 'Invalid OAuth state. Please try again.');
+      return;
+    }
+
     hasProcessed.current = true;
 
     // Process the OAuth callback

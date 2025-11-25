@@ -42,7 +42,7 @@ Default superuser (change in production):
 │   │   ├── schemas/        # Pydantic request/response schemas
 │   │   ├── services/       # Business logic layer
 │   │   └── utils/          # Utilities (security, device detection)
-│   ├── tests/              # 97% coverage, 743 tests
+│   ├── tests/              # 96% coverage, 987 tests
 │   └── alembic/            # Database migrations
 │
 └── frontend/               # Next.js 15 frontend
@@ -128,7 +128,7 @@ Permission dependencies in `api/dependencies/permissions.py`:
 ### Testing Infrastructure
 
 **Backend Unit/Integration (pytest + SQLite):**
-- 97% coverage, 743+ tests
+- 96% coverage, 987 tests
 - Security-focused: JWT attacks, session hijacking, privilege escalation
 - Async fixtures in `tests/conftest.py`
 - Run: `IS_TEST=True uv run pytest` or `make test`
@@ -265,7 +265,7 @@ docker-compose exec backend python -c "from app.init_db import init_db; import a
 - Organization system (multi-tenant with RBAC)
 - Admin panel (user/org management, bulk operations)
 - **Internationalization (i18n)** with English and Italian
-- Comprehensive test coverage (97% backend, 97% frontend unit, 56 E2E tests)
+- Comprehensive test coverage (96% backend, 97% frontend unit, 56 E2E tests)
 - Design system documentation
 - **Marketing landing page** with animations
 - **`/dev` documentation portal** with live examples

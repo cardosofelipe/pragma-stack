@@ -1,6 +1,6 @@
 """OAuth authorization code model for OAuth provider mode."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -83,7 +83,13 @@ class OAuthAuthorizationCode(Base, UUIDMixin, TimestampMixin):
     @property
     def is_expired(self) -> bool:
         """Check if the authorization code has expired."""
-        return datetime.utcnow() > self.expires_at.replace(tzinfo=None)
+        # Use timezone-aware comparison (datetime.utcnow() is deprecated)
+        now = datetime.now(UTC)
+        expires_at = self.expires_at
+        # Handle both timezone-aware and naive datetimes from DB
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=UTC)
+        return now > expires_at
 
     @property
     def is_valid(self) -> bool:

@@ -22,7 +22,7 @@ pytestmark = [
 ]
 
 
-async def register_and_login(client, email: str, password: str = "SecurePassword123!"):
+async def register_and_login(client, email: str, password: str = "SecurePassword123!"):  # noqa: S107
     """Helper to register a user and get tokens."""
     # Register
     await client.post(

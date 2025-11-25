@@ -451,6 +451,7 @@ class TestHandleCallbackComplete:
                 state="valid_state_login",
                 provider="google",
                 code_verifier="test_verifier",
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)
@@ -533,6 +534,7 @@ class TestHandleCallbackComplete:
             state_data = OAuthStateCreate(
                 state="valid_state_inactive",
                 provider="google",
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)
@@ -583,6 +585,7 @@ class TestHandleCallbackComplete:
                 state="valid_state_linking",
                 provider="github",
                 user_id=async_test_user.id,  # User is logged in
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)
@@ -648,6 +651,7 @@ class TestHandleCallbackComplete:
                 state="valid_state_bad_user",
                 provider="google",
                 user_id=uuid4(),  # Non-existent user
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)
@@ -707,6 +711,7 @@ class TestHandleCallbackComplete:
                 state="valid_state_already_linked",
                 provider="google",
                 user_id=async_test_user.id,
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)
@@ -769,6 +774,7 @@ class TestHandleCallbackComplete:
             state_data = OAuthStateCreate(
                 state="valid_state_autolink",
                 provider="google",
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)
@@ -832,6 +838,7 @@ class TestHandleCallbackComplete:
             state_data = OAuthStateCreate(
                 state="valid_state_new_user",
                 provider="google",
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)
@@ -904,6 +911,7 @@ class TestHandleCallbackComplete:
             state_data = OAuthStateCreate(
                 state="valid_state_no_email",
                 provider="github",
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)
@@ -961,6 +969,7 @@ class TestHandleCallbackComplete:
             state_data = OAuthStateCreate(
                 state="valid_state_token_fail",
                 provider="google",
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)
@@ -1004,6 +1013,7 @@ class TestHandleCallbackComplete:
             state_data = OAuthStateCreate(
                 state="valid_state_userinfo_fail",
                 provider="google",
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)
@@ -1047,6 +1057,7 @@ class TestHandleCallbackComplete:
             state_data = OAuthStateCreate(
                 state="valid_state_no_token",
                 provider="google",
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)
@@ -1090,6 +1101,7 @@ class TestHandleCallbackComplete:
             state_data = OAuthStateCreate(
                 state="valid_state_no_user_id",
                 provider="google",
+                redirect_uri="http://localhost:3000/callback",
                 expires_at=datetime.now(UTC) + timedelta(minutes=10),
             )
             await oauth_state.create_state(session, obj_in=state_data)

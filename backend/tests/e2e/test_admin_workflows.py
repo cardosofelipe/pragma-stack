@@ -21,7 +21,7 @@ pytestmark = [
 ]
 
 
-async def register_user(client, email: str, password: str = "SecurePassword123!"):
+async def register_user(client, email: str, password: str = "SecurePassword123!"):  # noqa: S107
     """Helper to register a user."""
     resp = await client.post(
         "/api/v1/auth/register",
@@ -35,7 +35,7 @@ async def register_user(client, email: str, password: str = "SecurePassword123!"
     return resp.json()
 
 
-async def login_user(client, email: str, password: str = "SecurePassword123!"):
+async def login_user(client, email: str, password: str = "SecurePassword123!"):  # noqa: S107
     """Helper to login a user."""
     resp = await client.post(
         "/api/v1/auth/login",

@@ -349,22 +349,51 @@ async def exchange_authorization_code(
         InvalidGrantError: If code is invalid, expired, or already used
         InvalidClientError: If client validation fails
     """
-    # Get and validate authorization code
-    result = await db.execute(
-        select(OAuthAuthorizationCode).where(OAuthAuthorizationCode.code == code)
-    )
-    auth_code = result.scalar_one_or_none()
+    # Atomically mark code as used and fetch it (prevents race condition)
+    # RFC 6749 Section 4.1.2: Authorization codes MUST be single-use
+    from sqlalchemy import update
 
-    if not auth_code:
-        raise InvalidGrantError("Invalid authorization code")
-
-    if auth_code.used:
-        # Code reuse is a security incident - revoke all tokens for this grant
-        logger.warning(
-            f"Authorization code reuse detected for client {auth_code.client_id}"
+    # First, atomically mark the code as used and get affected count
+    update_stmt = (
+        update(OAuthAuthorizationCode)
+        .where(
+            and_(
+                OAuthAuthorizationCode.code == code,
+                OAuthAuthorizationCode.used == False,  # noqa: E712
+            )
         )
-        await revoke_tokens_for_user_client(db, auth_code.user_id, auth_code.client_id)
-        raise InvalidGrantError("Authorization code has already been used")
+        .values(used=True)
+        .returning(OAuthAuthorizationCode.id)
+    )
+    result = await db.execute(update_stmt)
+    updated_id = result.scalar_one_or_none()
+
+    if not updated_id:
+        # Either code doesn't exist or was already used
+        # Check if it exists to provide appropriate error
+        check_result = await db.execute(
+            select(OAuthAuthorizationCode).where(OAuthAuthorizationCode.code == code)
+        )
+        existing_code = check_result.scalar_one_or_none()
+
+        if existing_code and existing_code.used:
+            # Code reuse is a security incident - revoke all tokens for this grant
+            logger.warning(
+                f"Authorization code reuse detected for client {existing_code.client_id}"
+            )
+            await revoke_tokens_for_user_client(
+                db, existing_code.user_id, existing_code.client_id
+            )
+            raise InvalidGrantError("Authorization code has already been used")
+        else:
+            raise InvalidGrantError("Invalid authorization code")
+
+    # Now fetch the full auth code record
+    result = await db.execute(
+        select(OAuthAuthorizationCode).where(OAuthAuthorizationCode.id == updated_id)
+    )
+    auth_code = result.scalar_one()
+    await db.commit()
 
     if auth_code.is_expired:
         raise InvalidGrantError("Authorization code has expired")
@@ -375,13 +404,19 @@ async def exchange_authorization_code(
     if auth_code.redirect_uri != redirect_uri:
         raise InvalidGrantError("redirect_uri mismatch")
 
-    # Validate client
-    client = await validate_client(
-        db,
-        client_id,
-        client_secret,
-        require_secret=(client_secret is not None),
-    )
+    # Validate client - ALWAYS require secret for confidential clients
+    client = await get_client(db, client_id)
+    if not client:
+        raise InvalidClientError("Unknown client_id")
+
+    # Confidential clients MUST authenticate (RFC 6749 Section 3.2.1)
+    if client.client_type == "confidential":
+        if not client_secret:
+            raise InvalidClientError("Client secret required for confidential clients")
+        client = await validate_client(db, client_id, client_secret, require_secret=True)
+    elif client_secret:
+        # Public client provided secret - validate it if given
+        client = await validate_client(db, client_id, client_secret, require_secret=True)
 
     # Verify PKCE
     if auth_code.code_challenge:
@@ -396,10 +431,6 @@ async def exchange_authorization_code(
     elif client.client_type == "public":
         # Public clients without PKCE - this shouldn't happen if we validated on authorize
         raise InvalidGrantError("PKCE required for public clients")
-
-    # Mark code as used (single-use)
-    auth_code.used = True
-    await db.commit()
 
     # Get user
     user_result = await db.execute(select(User).where(User.id == auth_code.user_id))

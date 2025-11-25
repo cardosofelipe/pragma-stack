@@ -214,9 +214,6 @@ async def e2e_superuser(e2e_client):
     """
     from uuid import uuid4
 
-    from app.crud.user import user as user_crud
-    from app.schemas.users import UserCreate
-
     email = f"admin-{uuid4().hex[:8]}@example.com"
     password = "SuperAdmin123!"
 

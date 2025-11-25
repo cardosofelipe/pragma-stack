@@ -153,6 +153,7 @@
       "authFailed": "Autenticazione Fallita",
       "providerError": "Il provider di autenticazione ha restituito un errore",
       "missingParams": "Parametri di autenticazione mancanti",
+      "stateMismatch": "Stato OAuth non valido. Riprova.",
       "unexpectedError": "Si è verificato un errore durante l'autenticazione",
       "backToLogin": "Torna al Login"
     }

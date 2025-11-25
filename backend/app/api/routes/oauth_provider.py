@@ -169,11 +169,12 @@ async def authorize(
             detail="invalid_request: response_type must be 'code'",
         )
 
-    # Validate PKCE method if provided
-    if code_challenge_method and code_challenge_method not in ["S256", "plain"]:
+    # Validate PKCE method if provided - ONLY S256 is allowed (RFC 7636 Section 4.3)
+    # "plain" method provides no security benefit and MUST NOT be used
+    if code_challenge_method and code_challenge_method != "S256":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="invalid_request: code_challenge_method must be 'S256'",
+            detail="invalid_request: code_challenge_method must be 'S256' (plain is not supported)",
         )
 
     # Validate client
@@ -441,8 +442,12 @@ async def token(
             try:
                 decoded = base64.b64decode(auth_header[6:]).decode()
                 client_id, client_secret = decoded.split(":", 1)
-            except Exception:  # noqa: S110 - Intentional: malformed Basic auth falls back to form body
-                pass
+            except Exception as e:
+                # Log malformed Basic auth for security monitoring
+                logger.warning(
+                    f"Malformed Basic auth header in token request: {type(e).__name__}"
+                )
+                # Fall back to form body
 
     if not client_id:
         raise HTTPException(
@@ -547,8 +552,12 @@ async def revoke(
             try:
                 decoded = base64.b64decode(auth_header[6:]).decode()
                 client_id, client_secret = decoded.split(":", 1)
-            except Exception:  # noqa: S110 - Intentional: malformed Basic auth falls back to form body
-                pass
+            except Exception as e:
+                # Log malformed Basic auth for security monitoring
+                logger.warning(
+                    f"Malformed Basic auth header in revoke request: {type(e).__name__}"
+                )
+                # Fall back to form body
 
     try:
         await provider_service.revoke_token(
@@ -613,8 +622,12 @@ async def introspect(
             try:
                 decoded = base64.b64decode(auth_header[6:]).decode()
                 client_id, client_secret = decoded.split(":", 1)
-            except Exception:  # noqa: S110 - Intentional: malformed Basic auth falls back to form body
-                pass
+            except Exception as e:
+                # Log malformed Basic auth for security monitoring
+                logger.warning(
+                    f"Malformed Basic auth header in introspect request: {type(e).__name__}"
+                )
+                # Fall back to form body
 
     try:
         result = await provider_service.introspect_token(

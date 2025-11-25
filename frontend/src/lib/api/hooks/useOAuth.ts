@@ -56,6 +56,44 @@ export function useOAuthProviders() {
 // OAuth Flow Mutations
 // ============================================================================
 
+// Allowed OAuth provider domains for security validation
+const ALLOWED_OAUTH_DOMAINS = [
+  'accounts.google.com',
+  'github.com',
+  'www.facebook.com', // For future Facebook support
+  'login.microsoftonline.com', // For future Microsoft support
+];
+
+/**
+ * Validate OAuth authorization URL
+ * SECURITY: Prevents open redirect attacks by only allowing known OAuth provider domains
+ */
+function isValidOAuthUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    // Only allow HTTPS for OAuth (security requirement)
+    if (parsed.protocol !== 'https:') {
+      return false;
+    }
+    // Check if domain is in allowlist
+    return ALLOWED_OAUTH_DOMAINS.includes(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Extract state parameter from OAuth authorization URL
+ */
+function extractStateFromUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    return parsed.searchParams.get('state');
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Start OAuth login/registration flow
  * Redirects user to the OAuth provider
@@ -77,12 +115,27 @@ export function useOAuthStart() {
       });
 
       if (response.data) {
-        // Store mode in sessionStorage for callback handling
-        sessionStorage.setItem('oauth_mode', mode);
-        sessionStorage.setItem('oauth_provider', provider);
-
         // Response is { [key: string]: unknown }, so cast authorization_url
         const authUrl = (response.data as { authorization_url: string }).authorization_url;
+
+        // SECURITY: Validate the authorization URL before redirecting
+        // This prevents open redirect attacks if the backend is compromised
+        if (!isValidOAuthUrl(authUrl)) {
+          throw new Error('Invalid OAuth authorization URL');
+        }
+
+        // SECURITY: Extract and store the state parameter for CSRF validation
+        // The callback page will verify this matches the state in the response
+        const state = extractStateFromUrl(authUrl);
+        if (!state) {
+          throw new Error('Missing state parameter in authorization URL');
+        }
+
+        // Store mode, provider, and state in sessionStorage for callback handling
+        sessionStorage.setItem('oauth_mode', mode);
+        sessionStorage.setItem('oauth_provider', provider);
+        sessionStorage.setItem('oauth_state', state);
+
         // Redirect to OAuth provider
         window.location.href = authUrl;
       }
@@ -151,14 +204,16 @@ export function useOAuthCallback() {
         queryClient.invalidateQueries({ queryKey: ['user'] });
       }
 
-      // Clean up session storage
+      // Clean up session storage (including state for security)
       sessionStorage.removeItem('oauth_mode');
       sessionStorage.removeItem('oauth_provider');
+      sessionStorage.removeItem('oauth_state');
     },
     onError: () => {
       // Clean up session storage on error too
       sessionStorage.removeItem('oauth_mode');
       sessionStorage.removeItem('oauth_provider');
+      sessionStorage.removeItem('oauth_state');
     },
   });
 }
@@ -199,12 +254,25 @@ export function useOAuthLink() {
       });
 
       if (response.data) {
-        // Store mode in sessionStorage for callback handling
-        sessionStorage.setItem('oauth_mode', 'link');
-        sessionStorage.setItem('oauth_provider', provider);
-
         // Response is { [key: string]: unknown }, so cast authorization_url
         const authUrl = (response.data as { authorization_url: string }).authorization_url;
+
+        // SECURITY: Validate the authorization URL before redirecting
+        if (!isValidOAuthUrl(authUrl)) {
+          throw new Error('Invalid OAuth authorization URL');
+        }
+
+        // SECURITY: Extract and store the state parameter for CSRF validation
+        const state = extractStateFromUrl(authUrl);
+        if (!state) {
+          throw new Error('Missing state parameter in authorization URL');
+        }
+
+        // Store mode, provider, and state in sessionStorage for callback handling
+        sessionStorage.setItem('oauth_mode', 'link');
+        sessionStorage.setItem('oauth_provider', provider);
+        sessionStorage.setItem('oauth_state', state);
+
         // Redirect to OAuth provider
         window.location.href = authUrl;
       }

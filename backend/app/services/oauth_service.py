@@ -246,6 +246,15 @@ class OAuthService:
         if not state_record:
             raise AuthenticationError("Invalid or expired OAuth state")
 
+        # SECURITY: Validate redirect_uri matches the one from authorization request
+        # This prevents authorization code injection attacks (RFC 6749 Section 10.6)
+        if state_record.redirect_uri != redirect_uri:
+            logger.warning(
+                f"OAuth redirect_uri mismatch: expected {state_record.redirect_uri}, "
+                f"got {redirect_uri}"
+            )
+            raise AuthenticationError("Redirect URI mismatch")
+
         # Extract provider from state record (str for type safety)
         provider: str = str(state_record.provider)
 
@@ -272,6 +281,38 @@ class OAuthService:
                     config["token_url"],
                     **token_params,
                 )
+
+                # SECURITY: Validate nonce in ID token for OpenID Connect (Google)
+                # This prevents token replay attacks (OpenID Connect Core 3.1.3.7)
+                if provider == "google" and state_record.nonce:
+                    id_token = token.get("id_token")
+                    if id_token:
+                        import base64
+                        import json
+
+                        # Decode ID token payload (JWT format: header.payload.signature)
+                        try:
+                            payload_b64 = id_token.split(".")[1]
+                            # Add padding if needed
+                            padding = 4 - len(payload_b64) % 4
+                            if padding != 4:
+                                payload_b64 += "=" * padding
+                            payload_json = base64.urlsafe_b64decode(payload_b64)
+                            payload = json.loads(payload_json)
+
+                            token_nonce = payload.get("nonce")
+                            if token_nonce != state_record.nonce:
+                                logger.warning(
+                                    f"OAuth nonce mismatch: expected {state_record.nonce}, "
+                                    f"got {token_nonce}"
+                                )
+                                raise AuthenticationError("Invalid ID token nonce")
+                        except (IndexError, ValueError, json.JSONDecodeError) as e:
+                            logger.warning(f"Failed to decode ID token for nonce validation: {e}")
+                            # Continue without nonce validation if ID token is malformed
+                            # The token will still be validated when getting user info
+            except AuthenticationError:
+                raise
             except Exception as e:
                 logger.error(f"OAuth token exchange failed: {e!s}")
                 raise AuthenticationError("Failed to exchange authorization code")
@@ -294,8 +335,9 @@ class OAuthService:
         # Process user info and create/link account
         provider_user_id = str(user_info.get("id") or user_info.get("sub"))
         # Email can be None if user didn't grant email permission
+        # SECURITY: Normalize email (lowercase, strip) to prevent case-based account duplication
         email_raw = user_info.get("email")
-        provider_email: str | None = str(email_raw) if email_raw else None
+        provider_email: str | None = str(email_raw).lower().strip() if email_raw else None
 
         if not provider_user_id:
             raise AuthenticationError("Provider did not return user ID")
