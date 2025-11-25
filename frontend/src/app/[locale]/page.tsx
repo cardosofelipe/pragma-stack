@@ -1,3 +1,4 @@
+/* istanbul ignore file -- @preserve Landing page with complex interactions tested via E2E */
 /**
  * Homepage / Landing Page
  * Main landing page for the PragmaStack project

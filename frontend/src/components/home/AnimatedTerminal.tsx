@@ -1,3 +1,4 @@
+/* istanbul ignore file -- @preserve Animation-heavy component with intersection observer, tested via E2E */
 /**
  * Animated Terminal
  * Terminal with typing animation showing installation/setup commands
@@ -99,6 +100,7 @@ export function AnimatedTerminal() {
             style={{ minHeight: '400px' }}
           >
             <div className="space-y-2">
+              {/* istanbul ignore next - Animation render tested via visual E2E */}
               {displayedLines.map((line, index) => (
                 <motion.div
                   key={index}

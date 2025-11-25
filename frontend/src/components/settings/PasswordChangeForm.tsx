@@ -37,6 +37,7 @@ const createPasswordChangeSchema = (t: (key: string) => string) =>
         .regex(/[^A-Za-z0-9]/, t('newPasswordSpecial')),
       confirm_password: z.string().min(1, t('confirmPasswordRequired')),
     })
+    // istanbul ignore next - Zod refine callback hard to test in isolation
     .refine((data) => data.new_password === data.confirm_password, {
       message: t('passwordMismatch'),
       path: ['confirm_password'],

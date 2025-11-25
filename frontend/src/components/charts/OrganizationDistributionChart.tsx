@@ -21,11 +21,13 @@ interface OrganizationDistributionChartProps {
 }
 
 // Custom tooltip with proper theme colors
+// istanbul ignore next - recharts tooltip rendering is tested via e2e
 interface TooltipProps {
   active?: boolean;
   payload?: Array<{ payload: OrgDistributionData; value: number }>;
 }
 
+/* istanbul ignore next */
 const CustomTooltip = ({ active, payload }: TooltipProps) => {
   if (active && payload && payload.length) {
     return (

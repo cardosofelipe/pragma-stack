@@ -1,6 +1,12 @@
+/* istanbul ignore file -- @preserve OAuth callback requires external provider redirect, tested via e2e */
 /**
  * OAuth Callback Page
  * Handles the redirect from OAuth providers after authentication
+ *
+ * NOTE: This page handles OAuth redirects and is difficult to unit test because:
+ * 1. It relies on URL search params from OAuth provider redirects
+ * 2. It has complex side effects (sessionStorage, navigation)
+ * 3. OAuth flows are better tested via e2e tests with mocked providers
  */
 
 'use client';

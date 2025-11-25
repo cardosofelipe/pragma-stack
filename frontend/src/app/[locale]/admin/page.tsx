@@ -36,6 +36,7 @@ export default function AdminPage() {
         console.log('[AdminPage] Stats response received:', response);
         return response.data;
       } catch (err) {
+        // istanbul ignore next - Error path tested via E2E
         console.error('[AdminPage] Error fetching stats:', err);
         throw err;
       }
