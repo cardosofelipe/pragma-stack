@@ -203,3 +203,171 @@ async def e2e_client(async_postgres_url):
 
     app.dependency_overrides.clear()
     await engine.dispose()
+
+
+@pytest_asyncio.fixture
+async def e2e_superuser(e2e_client):
+    """
+    Create a superuser and return credentials + tokens.
+
+    Returns dict with: email, password, tokens, user_id
+    """
+    from uuid import uuid4
+
+    from app.crud.user import user as user_crud
+    from app.schemas.users import UserCreate
+
+    email = f"admin-{uuid4().hex[:8]}@example.com"
+    password = "SuperAdmin123!"
+
+    # Register via API first to get proper password hashing
+    await e2e_client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": email,
+            "password": password,
+            "first_name": "Super",
+            "last_name": "Admin",
+        },
+    )
+
+    # Login to get tokens
+    login_resp = await e2e_client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": password},
+    )
+    tokens = login_resp.json()
+
+    # Now we need to make this user a superuser directly via SQL
+    # Get the db session from the client's override
+    from sqlalchemy import text
+
+    from app.core.database import get_db
+    from app.main import app
+
+    async for db in app.dependency_overrides[get_db]():
+        # Update user to be superuser
+        await db.execute(
+            text("UPDATE users SET is_superuser = true WHERE email = :email"),
+            {"email": email},
+        )
+        await db.commit()
+
+        # Get user ID
+        result = await db.execute(
+            text("SELECT id FROM users WHERE email = :email"),
+            {"email": email},
+        )
+        user_id = str(result.scalar())
+        break
+
+    return {
+        "email": email,
+        "password": password,
+        "tokens": tokens,
+        "user_id": user_id,
+    }
+
+
+@pytest_asyncio.fixture
+async def e2e_org_with_members(e2e_client, e2e_superuser):
+    """
+    Create an organization with owner and member.
+
+    Returns dict with: org_id, org_slug, owner (tokens), member (tokens)
+    """
+    from uuid import uuid4
+
+    # Create organization via admin API
+    org_name = f"Test Org {uuid4().hex[:8]}"
+    org_slug = f"test-org-{uuid4().hex[:8]}"
+
+    create_resp = await e2e_client.post(
+        "/api/v1/admin/organizations",
+        headers={"Authorization": f"Bearer {e2e_superuser['tokens']['access_token']}"},
+        json={
+            "name": org_name,
+            "slug": org_slug,
+            "description": "Test organization for E2E tests",
+        },
+    )
+    org_data = create_resp.json()
+    org_id = org_data["id"]
+
+    # Create owner user
+    owner_email = f"owner-{uuid4().hex[:8]}@example.com"
+    owner_password = "OwnerPass123!"
+
+    await e2e_client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": owner_email,
+            "password": owner_password,
+            "first_name": "Org",
+            "last_name": "Owner",
+        },
+    )
+    owner_login = await e2e_client.post(
+        "/api/v1/auth/login",
+        json={"email": owner_email, "password": owner_password},
+    )
+    owner_tokens = owner_login.json()
+
+    # Get owner user ID
+    owner_me = await e2e_client.get(
+        "/api/v1/users/me",
+        headers={"Authorization": f"Bearer {owner_tokens['access_token']}"},
+    )
+    owner_id = owner_me.json()["id"]
+
+    # Add owner to organization as owner role
+    await e2e_client.post(
+        f"/api/v1/admin/organizations/{org_id}/members",
+        headers={"Authorization": f"Bearer {e2e_superuser['tokens']['access_token']}"},
+        json={"user_id": owner_id, "role": "owner"},
+    )
+
+    # Create member user
+    member_email = f"member-{uuid4().hex[:8]}@example.com"
+    member_password = "MemberPass123!"
+
+    await e2e_client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": member_email,
+            "password": member_password,
+            "first_name": "Org",
+            "last_name": "Member",
+        },
+    )
+    member_login = await e2e_client.post(
+        "/api/v1/auth/login",
+        json={"email": member_email, "password": member_password},
+    )
+    member_tokens = member_login.json()
+
+    # Get member user ID
+    member_me = await e2e_client.get(
+        "/api/v1/users/me",
+        headers={"Authorization": f"Bearer {member_tokens['access_token']}"},
+    )
+    member_id = member_me.json()["id"]
+
+    # Add member to organization
+    await e2e_client.post(
+        f"/api/v1/admin/organizations/{org_id}/members",
+        headers={"Authorization": f"Bearer {e2e_superuser['tokens']['access_token']}"},
+        json={"user_id": member_id, "role": "member"},
+    )
+
+    return {
+        "org_id": org_id,
+        "org_slug": org_slug,
+        "org_name": org_name,
+        "owner": {"email": owner_email, "tokens": owner_tokens, "user_id": owner_id},
+        "member": {
+            "email": member_email,
+            "tokens": member_tokens,
+            "user_id": member_id,
+        },
+    }

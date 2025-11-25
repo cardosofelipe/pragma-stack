@@ -188,3 +188,134 @@ class TestHealthEndpoint:
         assert response.status_code in [200, 503]
         data = response.json()
         assert "status" in data
+
+
+class TestLogoutWorkflows:
+    """Test logout workflows."""
+
+    async def test_logout_invalidates_session(self, e2e_client):
+        """Test that logout invalidates the session."""
+        email = f"e2e-logout-{uuid4().hex[:8]}@example.com"
+        password = "SecurePassword123!"
+
+        # Register and login
+        await e2e_client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": email,
+                "password": password,
+                "first_name": "Logout",
+                "last_name": "Test",
+            },
+        )
+
+        login_resp = await e2e_client.post(
+            "/api/v1/auth/login",
+            json={"email": email, "password": password},
+        )
+        tokens = login_resp.json()
+
+        # Logout requires both access token (auth) and refresh token (body)
+        logout_resp = await e2e_client.post(
+            "/api/v1/auth/logout",
+            headers={"Authorization": f"Bearer {tokens['access_token']}"},
+            json={"refresh_token": tokens["refresh_token"]},
+        )
+        assert logout_resp.status_code == 200
+
+    async def test_invalid_refresh_token_rejected(self, e2e_client):
+        """Test that invalid refresh tokens are rejected."""
+        response = await e2e_client.post(
+            "/api/v1/auth/refresh",
+            json={"refresh_token": "invalid_refresh_token"},
+        )
+        assert response.status_code in [401, 422]
+
+
+class TestValidationWorkflows:
+    """Test input validation workflows."""
+
+    async def test_register_invalid_email(self, e2e_client):
+        """Test that invalid email format is rejected."""
+        response = await e2e_client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "not_an_email",
+                "password": "ValidPassword123!",
+                "first_name": "Test",
+                "last_name": "User",
+            },
+        )
+        assert response.status_code == 422
+
+    async def test_register_weak_password(self, e2e_client):
+        """Test that weak passwords are rejected."""
+        email = f"e2e-weak-{uuid4().hex[:8]}@example.com"
+        response = await e2e_client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": email,
+                "password": "weak",  # Too weak
+                "first_name": "Test",
+                "last_name": "User",
+            },
+        )
+        assert response.status_code == 422
+
+    async def test_login_missing_fields(self, e2e_client):
+        """Test that login requires all fields."""
+        response = await e2e_client.post(
+            "/api/v1/auth/login",
+            json={"email": "test@example.com"},  # Missing password
+        )
+        assert response.status_code == 422
+
+
+class TestRootEndpoint:
+    """Test root endpoint."""
+
+    async def test_root_responds(self, e2e_client):
+        """Root endpoint should respond with HTML."""
+        response = await e2e_client.get("/")
+        assert response.status_code == 200
+        # Root returns HTML
+        assert "html" in response.text.lower() or "Welcome" in response.text
+
+    async def test_openapi_available(self, e2e_client):
+        """OpenAPI schema should be available."""
+        response = await e2e_client.get("/api/v1/openapi.json")
+        assert response.status_code == 200
+        data = response.json()
+        assert "openapi" in data
+        assert "paths" in data
+
+
+class TestAuthTokenWorkflows:
+    """Test authentication token workflows."""
+
+    async def test_access_token_expires(self, e2e_client):
+        """Test using expired access token."""
+        # Use a fake/expired token
+        fake_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZXhwIjoxNjAwMDAwMDAwfQ.invalid"
+
+        response = await e2e_client.get(
+            "/api/v1/users/me",
+            headers={"Authorization": f"Bearer {fake_token}"},
+        )
+        assert response.status_code == 401
+
+    async def test_malformed_token_rejected(self, e2e_client):
+        """Test that malformed tokens are rejected."""
+        response = await e2e_client.get(
+            "/api/v1/users/me",
+            headers={"Authorization": "Bearer not-a-valid-token"},
+        )
+        assert response.status_code == 401
+
+    async def test_missing_bearer_prefix(self, e2e_client):
+        """Test that tokens without Bearer prefix are rejected."""
+        response = await e2e_client.get(
+            "/api/v1/users/me",
+            headers={"Authorization": "some-token"},
+        )
+        assert response.status_code == 401

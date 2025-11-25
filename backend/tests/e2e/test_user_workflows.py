@@ -274,3 +274,78 @@ class TestUserUpdateWorkflows:
         )
 
         assert response.status_code == 403
+
+
+class TestAdminUserListWorkflows:
+    """Test admin user list workflows via /users endpoint."""
+
+    async def test_superuser_can_list_all_users(self, e2e_client, e2e_superuser):
+        """Superuser can list all users via /users endpoint."""
+        response = await e2e_client.get(
+            "/api/v1/users",
+            headers={
+                "Authorization": f"Bearer {e2e_superuser['tokens']['access_token']}"
+            },
+        )
+
+        assert response.status_code == 200
+        data = response.json()
+        assert "data" in data
+        assert "pagination" in data
+
+    async def test_regular_user_cannot_list_users(self, e2e_client):
+        """Regular users cannot list all users."""
+        email = f"e2e-{uuid4().hex[:8]}@example.com"
+        tokens = await register_and_login(e2e_client, email)
+
+        response = await e2e_client.get(
+            "/api/v1/users",
+            headers={"Authorization": f"Bearer {tokens['access_token']}"},
+        )
+
+        assert response.status_code == 403
+
+
+class TestDeactivatedUserWorkflows:
+    """Test workflows involving deactivated users."""
+
+    async def test_deactivated_user_cannot_login(self, e2e_client, e2e_superuser):
+        """Deactivated users cannot login."""
+        # Create user
+        email = f"deactivate-login-{uuid4().hex[:8]}@example.com"
+        password = "DeactivatePass123!"
+        await e2e_client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": email,
+                "password": password,
+                "first_name": "Deactivate",
+                "last_name": "Login",
+            },
+        )
+
+        # Get user ID
+        list_resp = await e2e_client.get(
+            "/api/v1/admin/users",
+            headers={
+                "Authorization": f"Bearer {e2e_superuser['tokens']['access_token']}"
+            },
+        )
+        users = list_resp.json()["data"]
+        target_user = next(u for u in users if u["email"] == email)
+
+        # Deactivate user
+        await e2e_client.post(
+            f"/api/v1/admin/users/{target_user['id']}/deactivate",
+            headers={
+                "Authorization": f"Bearer {e2e_superuser['tokens']['access_token']}"
+            },
+        )
+
+        # Try to login - should fail
+        response = await e2e_client.post(
+            "/api/v1/auth/login",
+            json={"email": email, "password": password},
+        )
+
+        assert response.status_code in [401, 403]
