@@ -1,0 +1,77 @@
+# Backend E2E Tests CI Pipeline
+#
+# Runs end-to-end tests with real PostgreSQL via Testcontainers
+# and validates API contracts with Schemathesis.
+#
+# To enable: Rename this file to backend-e2e-tests.yml
+
+name: Backend E2E Tests
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-e2e-tests.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    # E2E test failures don't block merge - they're advisory
+    continue-on-error: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('backend/uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+
+      - name: Install dependencies (with E2E)
+        working-directory: ./backend
+        run: uv sync --extra dev --extra e2e
+
+      - name: Check Docker availability
+        id: docker-check
+        run: |
+          if docker info > /dev/null 2>&1; then
+            echo "available=true" >> $GITHUB_OUTPUT
+            echo "Docker is available"
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+            echo "::warning::Docker not available - E2E tests will be skipped"
+          fi
+
+      - name: Run E2E tests
+        if: steps.docker-check.outputs.available == 'true'
+        working-directory: ./backend
+        env:
+          IS_TEST: "True"
+          SECRET_KEY: "e2e-test-secret-key-minimum-32-characters-long"
+          PYTHONPATH: "."
+        run: |
+          uv run pytest tests/e2e/ -v --tb=short
+
+      - name: E2E tests skipped
+        if: steps.docker-check.outputs.available != 'true'
+        run: echo "E2E tests were skipped due to Docker unavailability"

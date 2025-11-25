@@ -49,10 +49,20 @@ EOF
 - NEVER manually edit generated files
 
 **Testing Commands:**
-- Backend: `IS_TEST=True uv run pytest` (always prefix with `IS_TEST=True`)
+- Backend unit/integration: `IS_TEST=True uv run pytest` (always prefix with `IS_TEST=True`)
+- Backend E2E (requires Docker): `make test-e2e`
 - Frontend unit: `npm test`
 - Frontend E2E: `npm run test:e2e`
 - Use `make test` or `make test-cov` in backend for convenience
+
+**Backend E2E Testing (requires Docker):**
+- Install deps: `make install-e2e`
+- Run all E2E tests: `make test-e2e`
+- Run schema tests only: `make test-e2e-schema`
+- Run all tests: `make test-all` (unit + E2E)
+- Uses Testcontainers (real PostgreSQL) + Schemathesis (OpenAPI contract testing)
+- Markers: `@pytest.mark.e2e`, `@pytest.mark.postgres`, `@pytest.mark.schemathesis`
+- See: `backend/docs/E2E_TESTING.md` for complete guide
 
 ### 🔴 CRITICAL: Auth Store Dependency Injection Pattern
 

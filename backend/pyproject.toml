@@ -75,6 +75,12 @@ dev = [
     "mypy>=1.8.0",  # Type checking
 ]
 
+# E2E testing with real PostgreSQL (requires Docker)
+e2e = [
+    "testcontainers[postgres]>=4.0.0",
+    "schemathesis>=3.30.0",
+]
+
 # ============================================================================
 # Ruff Configuration - All-in-one linting, formatting, and import sorting
 # ============================================================================
@@ -313,6 +319,8 @@ addopts = [
 markers = [
     "sqlite: marks tests that should run on SQLite (mocked).",
     "postgres: marks tests that require a real PostgreSQL database.",
+    "e2e: marks end-to-end tests requiring Docker containers.",
+    "schemathesis: marks Schemathesis-generated API tests.",
 ]
 asyncio_default_fixture_loop_scope = "function"
 

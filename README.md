@@ -217,9 +217,8 @@ The fastest way to get started is with Docker:
 git clone https://github.com/yourusername/fast-next-template.git
 cd fast-next-template
 
-# Copy environment files
-cp backend/.env.example backend/.env
-cp frontend/.env.local.example frontend/.env.local
+# Copy environment file
+cp .env.template .env
 
 # Start all services (backend, frontend, database)
 docker-compose up

@@ -105,12 +105,20 @@ Permission dependencies in `api/dependencies/permissions.py`:
 
 ### Testing Infrastructure
 
-**Backend (pytest):**
-- 97% coverage, 743 tests
+**Backend Unit/Integration (pytest + SQLite):**
+- 97% coverage, 743+ tests
 - Security-focused: JWT attacks, session hijacking, privilege escalation
 - Async fixtures in `tests/conftest.py`
-- Run: `IS_TEST=True uv run pytest`
-- Coverage: `IS_TEST=True uv run pytest --cov=app --cov-report=term-missing`
+- Run: `IS_TEST=True uv run pytest` or `make test`
+- Coverage: `make test-cov`
+
+**Backend E2E (pytest + Testcontainers + Schemathesis):**
+- Real PostgreSQL via Docker containers
+- OpenAPI contract testing with Schemathesis
+- Install: `make install-e2e`
+- Run: `make test-e2e`
+- Schema tests: `make test-e2e-schema`
+- Docs: `backend/docs/E2E_TESTING.md`
 
 **Frontend Unit Tests (Jest):**
 - 97% coverage
@@ -118,7 +126,7 @@ Permission dependencies in `api/dependencies/permissions.py`:
 - Run: `npm test`
 - Coverage: `npm run test:coverage`
 
-**E2E Tests (Playwright):**
+**Frontend E2E Tests (Playwright):**
 - 56 passing, 1 skipped (zero flaky tests)
 - Complete user flows (auth, navigation, settings)
 - Run: `npm run test:e2e`
