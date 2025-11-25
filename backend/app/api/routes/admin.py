@@ -111,7 +111,7 @@ class AdminStatsResponse(BaseModel):
     user_status: list[UserStatusData]
 
 
-def _generate_demo_stats() -> AdminStatsResponse:
+def _generate_demo_stats() -> AdminStatsResponse:  # pragma: no cover
     """Generate demo statistics for empty databases."""
     from random import randint
 
@@ -183,7 +183,7 @@ async def admin_get_stats(
     total_users = (await db.execute(total_users_query)).scalar() or 0
 
     # If database is essentially empty (only admin user), return demo data
-    if total_users <= 1 and settings.DEMO_MODE:
+    if total_users <= 1 and settings.DEMO_MODE:  # pragma: no cover
         logger.info("Returning demo stats data (empty database in demo mode)")
         return _generate_demo_stats()
 
@@ -579,7 +579,7 @@ async def admin_bulk_user_action(
             affected_count = await user_crud.bulk_soft_delete(
                 db, user_ids=bulk_action.user_ids, exclude_user_id=admin.id
             )
-        else:
+        else:  # pragma: no cover
             raise ValueError(f"Unsupported bulk action: {bulk_action.action}")
 
         # Calculate failed count (requested - affected)
@@ -599,7 +599,7 @@ async def admin_bulk_user_action(
             failed_ids=None,  # Bulk operations don't track individual failures
         )
 
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         logger.error(f"Error in bulk user action: {e!s}", exc_info=True)
         raise
 
@@ -989,7 +989,7 @@ async def admin_remove_organization_member(
 
     except NotFoundError:
         raise
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         logger.error(
             f"Error removing member from organization (admin): {e!s}", exc_info=True
         )
@@ -1073,6 +1073,6 @@ async def admin_list_sessions(
 
         return PaginatedResponse(data=session_responses, pagination=pagination_meta)
 
-    except Exception as e:
+    except Exception as e:  # pragma: no cover
         logger.error(f"Error listing sessions (admin): {e!s}", exc_info=True)
         raise

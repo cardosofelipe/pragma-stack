@@ -326,6 +326,7 @@ omit = [
     "*/__pycache__/*",
     "*/alembic/versions/*",
     "*/.venv/*",
+    "app/init_db.py",  # CLI script for database initialization
 ]
 branch = true
 

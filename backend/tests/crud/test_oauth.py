@@ -535,3 +535,66 @@ class TestOAuthClientCRUD:
                 client_secret="wrong_secret",
             )
             assert invalid is False
+
+    @pytest.mark.asyncio
+    async def test_deactivate_nonexistent_client(self, async_test_db):
+        """Test deactivating non-existent client returns None."""
+        _test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            result = await oauth_client.deactivate_client(
+                session, client_id="nonexistent_client_id"
+            )
+            assert result is None
+
+    @pytest.mark.asyncio
+    async def test_validate_redirect_uri_nonexistent_client(self, async_test_db):
+        """Test validate_redirect_uri returns False for non-existent client."""
+        _test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            valid = await oauth_client.validate_redirect_uri(
+                session,
+                client_id="nonexistent_client_id",
+                redirect_uri="http://localhost:3000/callback",
+            )
+            assert valid is False
+
+    @pytest.mark.asyncio
+    async def test_verify_secret_nonexistent_client(self, async_test_db):
+        """Test verify_client_secret returns False for non-existent client."""
+        _test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            valid = await oauth_client.verify_client_secret(
+                session,
+                client_id="nonexistent_client_id",
+                client_secret="any_secret",
+            )
+            assert valid is False
+
+    @pytest.mark.asyncio
+    async def test_verify_secret_public_client(self, async_test_db):
+        """Test verify_client_secret returns False for public client (no secret)."""
+        _test_engine, AsyncTestingSessionLocal = async_test_db
+
+        async with AsyncTestingSessionLocal() as session:
+            client_data = OAuthClientCreate(
+                client_name="Public Client",
+                redirect_uris=["http://localhost:3000/callback"],
+                allowed_scopes=["read:users"],
+                client_type="public",  # Public client - no secret
+            )
+            client, secret = await oauth_client.create_client(
+                session, obj_in=client_data
+            )
+            assert secret is None
+
+        async with AsyncTestingSessionLocal() as session:
+            # Public clients don't have secrets, so verification should fail
+            valid = await oauth_client.verify_client_secret(
+                session,
+                client_id=client.client_id,
+                client_secret="any_secret",
+            )
+            assert valid is False

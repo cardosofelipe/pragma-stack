@@ -923,6 +923,27 @@ class TestAdminRemoveOrganizationMember:
 
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
+    @pytest.mark.asyncio
+    async def test_admin_remove_organization_member_user_not_found(
+        self, client, async_test_superuser, async_test_db, superuser_token
+    ):
+        """Test removing non-existent user from organization."""
+        _test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create organization
+        async with AsyncTestingSessionLocal() as session:
+            org = Organization(name="User Not Found Org", slug="user-not-found-org")
+            session.add(org)
+            await session.commit()
+            org_id = org.id
+
+        response = await client.delete(
+            f"/api/v1/admin/organizations/{org_id}/members/{uuid4()}",
+            headers={"Authorization": f"Bearer {superuser_token}"},
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
 
 # ===== SESSION MANAGEMENT TESTS =====
 
@@ -1093,6 +1114,105 @@ class TestAdminListSessions:
         """Test that non-admin users cannot access admin sessions endpoint."""
         response = await client.get(
             "/api/v1/admin/sessions?page=1&limit=10",
+            headers={"Authorization": f"Bearer {user_token}"},
+        )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+# ===== ADMIN STATS TESTS =====
+
+
+class TestAdminStats:
+    """Tests for GET /admin/stats endpoint."""
+
+    @pytest.mark.asyncio
+    async def test_admin_get_stats_with_data(
+        self,
+        client,
+        async_test_superuser,
+        async_test_user,
+        async_test_db,
+        superuser_token,
+    ):
+        """Test getting admin stats with real data in database."""
+        _test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create multiple users and organizations with members
+        async with AsyncTestingSessionLocal() as session:
+            from app.core.auth import get_password_hash
+            from app.models.user import User
+
+            # Create several users
+            for i in range(5):
+                user = User(
+                    email=f"statsuser{i}@example.com",
+                    password_hash=get_password_hash("TestPassword123!"),
+                    first_name=f"Stats{i}",
+                    last_name="User",
+                    is_active=i % 2 == 0,  # Mix of active/inactive
+                )
+                session.add(user)
+            await session.commit()
+
+        # Create organizations with members
+        async with AsyncTestingSessionLocal() as session:
+            orgs = []
+            for i in range(3):
+                org = Organization(name=f"Stats Org {i}", slug=f"stats-org-{i}")
+                session.add(org)
+                orgs.append(org)
+            await session.flush()
+
+            # Add some members to organizations
+            user_org = UserOrganization(
+                user_id=async_test_user.id,
+                organization_id=orgs[0].id,
+                role=OrganizationRole.MEMBER,
+                is_active=True,
+            )
+            session.add(user_org)
+            await session.commit()
+
+        response = await client.get(
+            "/api/v1/admin/stats",
+            headers={"Authorization": f"Bearer {superuser_token}"},
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+
+        # Verify response structure
+        assert "user_growth" in data
+        assert "organization_distribution" in data
+        assert "registration_activity" in data
+        assert "user_status" in data
+
+        # Verify user_growth has 30 days of data
+        assert len(data["user_growth"]) == 30
+        for item in data["user_growth"]:
+            assert "date" in item
+            assert "total_users" in item
+            assert "active_users" in item
+
+        # Verify registration_activity has 14 days of data
+        assert len(data["registration_activity"]) == 14
+        for item in data["registration_activity"]:
+            assert "date" in item
+            assert "registrations" in item
+
+        # Verify user_status has active/inactive counts
+        assert len(data["user_status"]) == 2
+        status_names = {item["name"] for item in data["user_status"]}
+        assert status_names == {"Active", "Inactive"}
+
+    @pytest.mark.asyncio
+    async def test_admin_get_stats_unauthorized(
+        self, client, async_test_user, user_token
+    ):
+        """Test that non-admin users cannot access stats endpoint."""
+        response = await client.get(
+            "/api/v1/admin/stats",
             headers={"Authorization": f"Bearer {user_token}"},
         )
 

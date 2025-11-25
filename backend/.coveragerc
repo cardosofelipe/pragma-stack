@@ -14,6 +14,9 @@ omit =
     app/crud/base_async.py
     app/core/database_async.py
 
+    # CLI scripts - run manually, not tested
+    app/init_db.py
+
     # __init__ files with no logic
     app/__init__.py
     app/api/__init__.py
