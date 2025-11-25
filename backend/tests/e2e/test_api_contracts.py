@@ -40,56 +40,150 @@ if SCHEMATHESIS_AVAILABLE:
     # Load schema from the FastAPI app using schemathesis.openapi (v4.x API)
     schema = openapi.from_asgi("/api/v1/openapi.json", app=app)
 
-    # Test root endpoint (simple, always works)
+    # =========================================================================
+    # Public Endpoints (No Auth Required)
+    # =========================================================================
+
+    # Test root endpoint
     root_schema = schema.include(path="/")
 
     @root_schema.parametrize()
     @settings(max_examples=5)
     def test_root_endpoint_schema(case):
-        """
-        Root endpoint schema compliance.
-
-        Tests that the root endpoint returns responses matching its schema.
-        """
+        """Root endpoint schema compliance."""
         response = case.call()
-        # Just verify we get a response and no 5xx errors
         assert response.status_code < 500, f"Server error: {response.text}"
 
+    # Test health endpoint
+    health_schema = schema.include(path="/health")
+
+    @health_schema.parametrize()
+    @settings(max_examples=3)
+    def test_health_endpoint_schema(case):
+        """Health endpoint schema compliance."""
+        response = case.call()
+        # Health check may return 200 or 503 depending on DB
+        assert response.status_code < 500 or response.status_code == 503
+
     # Test auth registration endpoint
-    # Note: This tests schema validation, not actual database operations
     auth_register_schema = schema.include(path="/api/v1/auth/register")
 
     @auth_register_schema.parametrize()
     @settings(max_examples=10)
     def test_register_endpoint_validates_input(case):
-        """
-        Registration endpoint input validation.
-
-        Schemathesis generates various inputs to test validation.
-        The endpoint should never return 5xx errors for invalid input.
-        """
+        """Registration endpoint input validation."""
         response = case.call()
-        # Registration returns 200/201 (success), 400/422 (validation), 409 (conflict)
-        # Never a 5xx error for validation issues
+        # 200/201 (success), 400/422 (validation), 409 (conflict)
         assert response.status_code < 500, f"Server error: {response.text}"
+
+    # Note: Login and refresh endpoints require database, so they're tested
+    # in test_database_workflows.py instead of here. Schemathesis tests run
+    # without the testcontainers database fixtures.
+
+    # =========================================================================
+    # Protected Endpoints - Manual tests for auth requirements
+    # (Schemathesis parametrize tests all methods, manual tests are clearer)
+    # =========================================================================
+
+    class TestProtectedEndpointsRequireAuth:
+        """Test that protected endpoints return proper auth errors."""
+
+        def test_users_me_requires_auth(self):
+            """Users/me GET endpoint requires authentication."""
+            from starlette.testclient import TestClient
+
+            with TestClient(app) as client:
+                response = client.get("/api/v1/users/me")
+                assert response.status_code == 401
+
+        def test_sessions_me_requires_auth(self):
+            """Sessions/me GET endpoint requires authentication."""
+            from starlette.testclient import TestClient
+
+            with TestClient(app) as client:
+                response = client.get("/api/v1/sessions/me")
+                assert response.status_code == 401
+
+        def test_organizations_me_requires_auth(self):
+            """Organizations/me GET endpoint requires authentication."""
+            from starlette.testclient import TestClient
+
+            with TestClient(app) as client:
+                response = client.get("/api/v1/organizations/me")
+                assert response.status_code == 401
+
+        def test_admin_users_requires_auth(self):
+            """Admin users GET endpoint requires authentication."""
+            from starlette.testclient import TestClient
+
+            with TestClient(app) as client:
+                response = client.get("/api/v1/admin/users")
+                assert response.status_code == 401
+
+        def test_admin_stats_requires_auth(self):
+            """Admin stats GET endpoint requires authentication."""
+            from starlette.testclient import TestClient
+
+            with TestClient(app) as client:
+                response = client.get("/api/v1/admin/stats")
+                assert response.status_code == 401
+
+        def test_admin_organizations_requires_auth(self):
+            """Admin organizations GET endpoint requires authentication."""
+            from starlette.testclient import TestClient
+
+            with TestClient(app) as client:
+                response = client.get("/api/v1/admin/organizations")
+                assert response.status_code == 401
+
+    # =========================================================================
+    # Schema Validation Tests
+    # =========================================================================
 
     class TestSchemaValidation:
         """Manual validation tests for schema structure."""
 
         def test_schema_loaded_successfully(self):
             """Verify schema was loaded from the app."""
-            # Count operations to verify schema loaded
             ops = list(schema.get_all_operations())
             assert len(ops) > 0, "No operations found in schema"
 
         def test_multiple_endpoints_documented(self):
             """Verify multiple endpoints are documented in schema."""
             ops = list(schema.get_all_operations())
-            # Should have at least 10 operations in a real API
             assert len(ops) >= 10, f"Only {len(ops)} operations found"
 
         def test_schema_has_auth_operations(self):
             """Verify auth-related operations exist."""
-            # Filter for auth endpoints
             auth_ops = list(schema.include(path_regex=r".*auth.*").get_all_operations())
             assert len(auth_ops) > 0, "No auth operations found"
+
+        def test_schema_has_user_operations(self):
+            """Verify user-related operations exist."""
+            user_ops = list(schema.include(path_regex=r".*users.*").get_all_operations())
+            assert len(user_ops) > 0, "No user operations found"
+
+        def test_schema_has_organization_operations(self):
+            """Verify organization-related operations exist."""
+            org_ops = list(
+                schema.include(path_regex=r".*organizations.*").get_all_operations()
+            )
+            assert len(org_ops) > 0, "No organization operations found"
+
+        def test_schema_has_admin_operations(self):
+            """Verify admin-related operations exist."""
+            admin_ops = list(schema.include(path_regex=r".*admin.*").get_all_operations())
+            assert len(admin_ops) > 0, "No admin operations found"
+
+        def test_schema_has_session_operations(self):
+            """Verify session-related operations exist."""
+            session_ops = list(
+                schema.include(path_regex=r".*sessions.*").get_all_operations()
+            )
+            assert len(session_ops) > 0, "No session operations found"
+
+        def test_total_endpoint_count(self):
+            """Verify expected number of endpoints are documented."""
+            ops = list(schema.get_all_operations())
+            # We expect at least 40+ endpoints in this comprehensive API
+            assert len(ops) >= 40, f"Only {len(ops)} operations found, expected 40+"
