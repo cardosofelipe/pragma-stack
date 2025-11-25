@@ -19,6 +19,7 @@ import { Alert } from '@/components/ui/alert';
 import { useRegister } from '@/lib/api/hooks/useAuth';
 import { getGeneralError, getFieldErrors, isAPIErrorArray } from '@/lib/api/errors';
 import config from '@/config/app.config';
+import { OAuthButtons } from './OAuthButtons';
 
 // ============================================================================
 // Validation Schema
@@ -58,6 +59,8 @@ interface RegisterFormProps {
   onSuccess?: () => void;
   /** Show login link */
   showLoginLink?: boolean;
+  /** Show OAuth provider buttons */
+  showOAuthButtons?: boolean;
   /** Custom className for form container */
   className?: string;
 }
@@ -81,7 +84,12 @@ interface RegisterFormProps {
  * />
  * ```
  */
-export function RegisterForm({ onSuccess, showLoginLink = true, className }: RegisterFormProps) {
+export function RegisterForm({
+  onSuccess,
+  showLoginLink = true,
+  showOAuthButtons = true,
+  className,
+}: RegisterFormProps) {
   const t = useTranslations('auth.register');
   const tValidation = useTranslations('validation');
   const [serverError, setServerError] = useState<string | null>(null);
@@ -308,6 +316,9 @@ export function RegisterForm({ onSuccess, showLoginLink = true, className }: Reg
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? t('registerButtonLoading') : t('registerButton')}
         </Button>
+
+        {/* OAuth Buttons */}
+        {showOAuthButtons && <OAuthButtons mode="register" showDivider />}
 
         {/* Login Link */}
         {showLoginLink && (

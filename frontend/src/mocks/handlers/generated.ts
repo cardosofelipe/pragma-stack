@@ -8,7 +8,7 @@
  *
  * For custom handler behavior, use src/mocks/handlers/overrides.ts
  *
- * Generated: 2025-11-24T17:58:16.943Z
+ * Generated: 2025-11-25T00:22:46.981Z
  */
 
 import { http, HttpResponse, delay } from 'msw';
@@ -93,7 +93,6 @@ export const generatedHandlers = [
       refresh_token: refreshToken,
       token_type: 'bearer',
       expires_in: 900,
-      user: user,
     });
   }),
 

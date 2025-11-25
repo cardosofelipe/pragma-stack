@@ -115,6 +115,24 @@ export const config = {
     enableSessionManagement: parseBool(ENV.ENABLE_SESSION_MANAGEMENT, true),
   },
 
+  oauth: {
+    // OAuth callback URL (for redirects after OAuth provider auth)
+    callbackPath: '/auth/callback',
+    // Providers configuration (icons and display names)
+    providers: {
+      google: {
+        name: 'Google',
+        icon: 'google',
+        color: '#4285F4',
+      },
+      github: {
+        name: 'GitHub',
+        icon: 'github',
+        color: '#24292F',
+      },
+    } as Record<string, { name: string; icon: string; color: string }>,
+  },
+
   debug: {
     api: parseBool(ENV.DEBUG_API, false) && ENV.NODE_ENV === 'development',
   },

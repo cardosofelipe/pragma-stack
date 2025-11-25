@@ -20,6 +20,7 @@ import { Alert } from '@/components/ui/alert';
 import { useLogin } from '@/lib/api/hooks/useAuth';
 import { getGeneralError, getFieldErrors, isAPIErrorArray } from '@/lib/api/errors';
 import config from '@/config/app.config';
+import { OAuthButtons } from './OAuthButtons';
 
 // ============================================================================
 // Validation Schema
@@ -49,6 +50,8 @@ interface LoginFormProps {
   showRegisterLink?: boolean;
   /** Show password reset link */
   showPasswordResetLink?: boolean;
+  /** Show OAuth provider buttons */
+  showOAuthButtons?: boolean;
   /** Custom className for form container */
   className?: string;
 }
@@ -75,6 +78,7 @@ export function LoginForm({
   onSuccess,
   showRegisterLink = true,
   showPasswordResetLink = true,
+  showOAuthButtons = true,
   className,
 }: LoginFormProps) {
   const t = useTranslations('auth.login');
@@ -215,6 +219,9 @@ export function LoginForm({
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? t('loginButtonLoading') : t('loginButton')}
         </Button>
+
+        {/* OAuth Buttons */}
+        {showOAuthButtons && <OAuthButtons mode="login" showDivider />}
 
         {/* Registration Link */}
         {showRegisterLink && config.features.enableRegistration && (

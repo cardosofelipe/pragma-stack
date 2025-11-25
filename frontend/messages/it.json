@@ -143,6 +143,18 @@
         "hasNumber": "Contiene un numero",
         "hasUppercase": "Contiene una lettera maiuscola"
       }
+    },
+    "oauth": {
+      "divider": "Oppure continua con",
+      "loading": "Caricamento provider...",
+      "continueWith": "Continua con {provider}",
+      "signUpWith": "Registrati con {provider}",
+      "processing": "Completamento autenticazione...",
+      "authFailed": "Autenticazione Fallita",
+      "providerError": "Il provider di autenticazione ha restituito un errore",
+      "missingParams": "Parametri di autenticazione mancanti",
+      "unexpectedError": "Si è verificato un errore durante l'autenticazione",
+      "backToLogin": "Torna al Login"
     }
   },
   "settings": {
@@ -218,6 +230,17 @@
       "themeLight": "Chiaro",
       "themeDark": "Scuro",
       "themeSystem": "Sistema"
+    },
+    "linkedAccounts": {
+      "pageTitle": "Account Collegati",
+      "pageSubtitle": "Gestisci i tuoi account social collegati",
+      "title": "Account Connessi",
+      "description": "Collega il tuo account con i provider social per un accesso più semplice",
+      "linked": "Connesso",
+      "link": "Connetti",
+      "unlink": "Scollega",
+      "linkError": "Impossibile connettere l'account",
+      "unlinkError": "Impossibile scollegare l'account"
     }
   },
   "errors": {

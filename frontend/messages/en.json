@@ -143,6 +143,18 @@
         "hasNumber": "Contains a number",
         "hasUppercase": "Contains an uppercase letter"
       }
+    },
+    "oauth": {
+      "divider": "Or continue with",
+      "loading": "Loading providers...",
+      "continueWith": "Continue with {provider}",
+      "signUpWith": "Sign up with {provider}",
+      "processing": "Completing authentication...",
+      "authFailed": "Authentication Failed",
+      "providerError": "The authentication provider returned an error",
+      "missingParams": "Missing authentication parameters",
+      "unexpectedError": "An unexpected error occurred during authentication",
+      "backToLogin": "Back to Login"
     }
   },
   "settings": {
@@ -218,6 +230,17 @@
       "themeLight": "Light",
       "themeDark": "Dark",
       "themeSystem": "System"
+    },
+    "linkedAccounts": {
+      "pageTitle": "Linked Accounts",
+      "pageSubtitle": "Manage your linked social accounts",
+      "title": "Connected Accounts",
+      "description": "Connect your account with social providers for easier sign-in",
+      "linked": "Connected",
+      "link": "Connect",
+      "unlink": "Disconnect",
+      "linkError": "Failed to connect account",
+      "unlinkError": "Failed to disconnect account"
     }
   },
   "errors": {

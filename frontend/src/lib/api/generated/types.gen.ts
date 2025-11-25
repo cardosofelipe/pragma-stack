@@ -146,6 +146,108 @@ export type BodyLoginOauth = {
 };
 
 /**
+ * Body_oauth_provider_revoke
+ */
+export type BodyOauthProviderRevoke = {
+    /**
+     * Token
+     *
+     * Token to revoke
+     */
+    token: string;
+    /**
+     * Token Type Hint
+     *
+     * Token type hint (access_token, refresh_token)
+     */
+    token_type_hint?: string | null;
+    /**
+     * Client Id
+     *
+     * Client ID
+     */
+    client_id?: string | null;
+    /**
+     * Client Secret
+     *
+     * Client secret
+     */
+    client_secret?: string | null;
+};
+
+/**
+ * Body_oauth_provider_token
+ */
+export type BodyOauthProviderToken = {
+    /**
+     * Grant Type
+     *
+     * Grant type (authorization_code)
+     */
+    grant_type: string;
+    /**
+     * Code
+     *
+     * Authorization code
+     */
+    code?: string | null;
+    /**
+     * Redirect Uri
+     *
+     * Redirect URI
+     */
+    redirect_uri?: string | null;
+    /**
+     * Client Id
+     *
+     * Client ID
+     */
+    client_id?: string | null;
+    /**
+     * Client Secret
+     *
+     * Client secret
+     */
+    client_secret?: string | null;
+    /**
+     * Code Verifier
+     *
+     * PKCE code verifier
+     */
+    code_verifier?: string | null;
+    /**
+     * Refresh Token
+     *
+     * Refresh token
+     */
+    refresh_token?: string | null;
+};
+
+/**
+ * Body_register_oauth_client
+ */
+export type BodyRegisterOauthClient = {
+    /**
+     * Client Name
+     *
+     * Client application name
+     */
+    client_name: string;
+    /**
+     * Redirect Uris
+     *
+     * Comma-separated list of redirect URIs
+     */
+    redirect_uris: string;
+    /**
+     * Client Type
+     *
+     * public or confidential
+     */
+    client_type?: string;
+};
+
+/**
  * BulkAction
  *
  * Supported bulk actions.
@@ -252,6 +354,230 @@ export type MessageResponse = {
      * Message
      *
      * Human-readable message
+     */
+    message: string;
+};
+
+/**
+ * OAuthAccountResponse
+ *
+ * Schema for OAuth account response to clients.
+ */
+export type OAuthAccountResponse = {
+    /**
+     * Provider
+     *
+     * OAuth provider name
+     */
+    provider: string;
+    /**
+     * Provider Email
+     *
+     * Email from OAuth provider
+     */
+    provider_email?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * OAuthAccountsListResponse
+ *
+ * Response containing list of linked OAuth accounts.
+ */
+export type OAuthAccountsListResponse = {
+    /**
+     * Accounts
+     */
+    accounts: Array<OAuthAccountResponse>;
+};
+
+/**
+ * OAuthCallbackRequest
+ *
+ * Request parameters for OAuth callback.
+ */
+export type OAuthCallbackRequest = {
+    /**
+     * Code
+     *
+     * Authorization code from provider
+     */
+    code: string;
+    /**
+     * State
+     *
+     * State parameter for CSRF protection
+     */
+    state: string;
+};
+
+/**
+ * OAuthCallbackResponse
+ *
+ * Response after successful OAuth authentication.
+ */
+export type OAuthCallbackResponse = {
+    /**
+     * Access Token
+     *
+     * JWT access token
+     */
+    access_token: string;
+    /**
+     * Refresh Token
+     *
+     * JWT refresh token
+     */
+    refresh_token: string;
+    /**
+     * Token Type
+     */
+    token_type?: string;
+    /**
+     * Expires In
+     *
+     * Token expiration in seconds
+     */
+    expires_in: number;
+    /**
+     * Is New User
+     *
+     * Whether a new user was created
+     */
+    is_new_user?: boolean;
+};
+
+/**
+ * OAuthProviderInfo
+ *
+ * Information about an available OAuth provider.
+ */
+export type OAuthProviderInfo = {
+    /**
+     * Provider
+     *
+     * Provider identifier (google, github)
+     */
+    provider: string;
+    /**
+     * Name
+     *
+     * Human-readable provider name
+     */
+    name: string;
+    /**
+     * Icon
+     *
+     * Icon identifier for frontend
+     */
+    icon?: string | null;
+};
+
+/**
+ * OAuthProvidersResponse
+ *
+ * Response containing list of enabled OAuth providers.
+ */
+export type OAuthProvidersResponse = {
+    /**
+     * Enabled
+     *
+     * Whether OAuth is globally enabled
+     */
+    enabled: boolean;
+    /**
+     * Providers
+     *
+     * List of enabled providers
+     */
+    providers?: Array<OAuthProviderInfo>;
+};
+
+/**
+ * OAuthServerMetadata
+ *
+ * OAuth 2.0 Authorization Server Metadata (RFC 8414).
+ */
+export type OAuthServerMetadata = {
+    /**
+     * Issuer
+     *
+     * Authorization server issuer URL
+     */
+    issuer: string;
+    /**
+     * Authorization Endpoint
+     *
+     * Authorization endpoint URL
+     */
+    authorization_endpoint: string;
+    /**
+     * Token Endpoint
+     *
+     * Token endpoint URL
+     */
+    token_endpoint: string;
+    /**
+     * Registration Endpoint
+     *
+     * Dynamic client registration endpoint
+     */
+    registration_endpoint?: string | null;
+    /**
+     * Revocation Endpoint
+     *
+     * Token revocation endpoint
+     */
+    revocation_endpoint?: string | null;
+    /**
+     * Scopes Supported
+     *
+     * Supported scopes
+     */
+    scopes_supported?: Array<string>;
+    /**
+     * Response Types Supported
+     *
+     * Supported response types
+     */
+    response_types_supported?: Array<string>;
+    /**
+     * Grant Types Supported
+     *
+     * Supported grant types
+     */
+    grant_types_supported?: Array<string>;
+    /**
+     * Code Challenge Methods Supported
+     *
+     * Supported PKCE methods
+     */
+    code_challenge_methods_supported?: Array<string>;
+};
+
+/**
+ * OAuthUnlinkResponse
+ *
+ * Response after unlinking an OAuth account.
+ */
+export type OAuthUnlinkResponse = {
+    /**
+     * Success
+     *
+     * Whether the unlink was successful
+     */
+    success: boolean;
+    /**
+     * Message
+     *
+     * Status message
      */
     message: string;
 };
@@ -1096,6 +1422,352 @@ export type LogoutAllResponses = {
 };
 
 export type LogoutAllResponse = LogoutAllResponses[keyof LogoutAllResponses];
+
+export type ListOauthProvidersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/oauth/providers';
+};
+
+export type ListOauthProvidersResponses = {
+    /**
+     * Successful Response
+     */
+    200: OAuthProvidersResponse;
+};
+
+export type ListOauthProvidersResponse = ListOauthProvidersResponses[keyof ListOauthProvidersResponses];
+
+export type GetOauthAuthorizationUrlData = {
+    body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
+    path: {
+        /**
+         * Provider
+         */
+        provider: string;
+    };
+    query: {
+        /**
+         * Redirect Uri
+         *
+         * Frontend callback URL after OAuth completes
+         */
+        redirect_uri: string;
+    };
+    url: '/api/v1/oauth/authorize/{provider}';
+};
+
+export type GetOauthAuthorizationUrlErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetOauthAuthorizationUrlError = GetOauthAuthorizationUrlErrors[keyof GetOauthAuthorizationUrlErrors];
+
+export type GetOauthAuthorizationUrlResponses = {
+    /**
+     * Response Get Oauth Authorization Url
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type GetOauthAuthorizationUrlResponse = GetOauthAuthorizationUrlResponses[keyof GetOauthAuthorizationUrlResponses];
+
+export type HandleOauthCallbackData = {
+    body: OAuthCallbackRequest;
+    path: {
+        /**
+         * Provider
+         */
+        provider: string;
+    };
+    query: {
+        /**
+         * Redirect Uri
+         *
+         * Must match the redirect_uri used in authorization
+         */
+        redirect_uri: string;
+    };
+    url: '/api/v1/oauth/callback/{provider}';
+};
+
+export type HandleOauthCallbackErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type HandleOauthCallbackError = HandleOauthCallbackErrors[keyof HandleOauthCallbackErrors];
+
+export type HandleOauthCallbackResponses = {
+    /**
+     * Successful Response
+     */
+    200: OAuthCallbackResponse;
+};
+
+export type HandleOauthCallbackResponse = HandleOauthCallbackResponses[keyof HandleOauthCallbackResponses];
+
+export type ListOauthAccountsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/oauth/accounts';
+};
+
+export type ListOauthAccountsResponses = {
+    /**
+     * Successful Response
+     */
+    200: OAuthAccountsListResponse;
+};
+
+export type ListOauthAccountsResponse = ListOauthAccountsResponses[keyof ListOauthAccountsResponses];
+
+export type UnlinkOauthAccountData = {
+    body?: never;
+    path: {
+        /**
+         * Provider
+         */
+        provider: string;
+    };
+    query?: never;
+    url: '/api/v1/oauth/accounts/{provider}';
+};
+
+export type UnlinkOauthAccountErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UnlinkOauthAccountError = UnlinkOauthAccountErrors[keyof UnlinkOauthAccountErrors];
+
+export type UnlinkOauthAccountResponses = {
+    /**
+     * Successful Response
+     */
+    200: OAuthUnlinkResponse;
+};
+
+export type UnlinkOauthAccountResponse = UnlinkOauthAccountResponses[keyof UnlinkOauthAccountResponses];
+
+export type StartOauthLinkData = {
+    body?: never;
+    path: {
+        /**
+         * Provider
+         */
+        provider: string;
+    };
+    query: {
+        /**
+         * Redirect Uri
+         *
+         * Frontend callback URL after OAuth completes
+         */
+        redirect_uri: string;
+    };
+    url: '/api/v1/oauth/link/{provider}';
+};
+
+export type StartOauthLinkErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type StartOauthLinkError = StartOauthLinkErrors[keyof StartOauthLinkErrors];
+
+export type StartOauthLinkResponses = {
+    /**
+     * Response Start Oauth Link
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type StartOauthLinkResponse = StartOauthLinkResponses[keyof StartOauthLinkResponses];
+
+export type GetOauthServerMetadataData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/oauth/.well-known/oauth-authorization-server';
+};
+
+export type GetOauthServerMetadataResponses = {
+    /**
+     * Successful Response
+     */
+    200: OAuthServerMetadata;
+};
+
+export type GetOauthServerMetadataResponse = GetOauthServerMetadataResponses[keyof GetOauthServerMetadataResponses];
+
+export type OauthProviderAuthorizeData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Response Type
+         *
+         * Must be 'code'
+         */
+        response_type: string;
+        /**
+         * Client Id
+         *
+         * OAuth client ID
+         */
+        client_id: string;
+        /**
+         * Redirect Uri
+         *
+         * Redirect URI
+         */
+        redirect_uri: string;
+        /**
+         * Scope
+         *
+         * Requested scopes
+         */
+        scope?: string;
+        /**
+         * State
+         *
+         * CSRF state parameter
+         */
+        state?: string;
+        /**
+         * Code Challenge
+         *
+         * PKCE code challenge
+         */
+        code_challenge?: string | null;
+        /**
+         * Code Challenge Method
+         *
+         * PKCE method (S256)
+         */
+        code_challenge_method?: string | null;
+    };
+    url: '/api/v1/oauth/provider/authorize';
+};
+
+export type OauthProviderAuthorizeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OauthProviderAuthorizeError = OauthProviderAuthorizeErrors[keyof OauthProviderAuthorizeErrors];
+
+export type OauthProviderAuthorizeResponses = {
+    /**
+     * Response Oauth Provider Authorize
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type OauthProviderTokenData = {
+    body: BodyOauthProviderToken;
+    path?: never;
+    query?: never;
+    url: '/api/v1/oauth/provider/token';
+};
+
+export type OauthProviderTokenErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OauthProviderTokenError = OauthProviderTokenErrors[keyof OauthProviderTokenErrors];
+
+export type OauthProviderTokenResponses = {
+    /**
+     * Response Oauth Provider Token
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type OauthProviderRevokeData = {
+    body: BodyOauthProviderRevoke;
+    path?: never;
+    query?: never;
+    url: '/api/v1/oauth/provider/revoke';
+};
+
+export type OauthProviderRevokeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OauthProviderRevokeError = OauthProviderRevokeErrors[keyof OauthProviderRevokeErrors];
+
+export type OauthProviderRevokeResponses = {
+    /**
+     * Response Oauth Provider Revoke
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type RegisterOauthClientData = {
+    body: BodyRegisterOauthClient;
+    path?: never;
+    query?: never;
+    url: '/api/v1/oauth/provider/clients';
+};
+
+export type RegisterOauthClientErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RegisterOauthClientError = RegisterOauthClientErrors[keyof RegisterOauthClientErrors];
+
+export type RegisterOauthClientResponses = {
+    /**
+     * Response Register Oauth Client
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type ListUsersData = {
     body?: never;
