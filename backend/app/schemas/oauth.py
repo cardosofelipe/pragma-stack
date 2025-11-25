@@ -339,9 +339,7 @@ class OAuthTokenResponse(BaseModel):
     token_type: str = Field(
         default="Bearer", description="The type of token (typically 'Bearer')"
     )
-    expires_in: int | None = Field(
-        None, description="Token lifetime in seconds"
-    )
+    expires_in: int | None = Field(None, description="Token lifetime in seconds")
     refresh_token: str | None = Field(
         None, description="Refresh token for obtaining new access tokens"
     )
@@ -365,39 +363,21 @@ class OAuthTokenResponse(BaseModel):
 class OAuthTokenIntrospectionResponse(BaseModel):
     """OAuth 2.0 Token Introspection Response (RFC 7662)."""
 
-    active: bool = Field(
-        ..., description="Whether the token is currently active"
-    )
-    scope: str | None = Field(
-        None, description="Space-separated list of scopes"
-    )
-    client_id: str | None = Field(
-        None, description="Client identifier for the token"
-    )
+    active: bool = Field(..., description="Whether the token is currently active")
+    scope: str | None = Field(None, description="Space-separated list of scopes")
+    client_id: str | None = Field(None, description="Client identifier for the token")
     username: str | None = Field(
         None, description="Human-readable identifier for the resource owner"
     )
     token_type: str | None = Field(
         None, description="Type of the token (e.g., 'Bearer')"
     )
-    exp: int | None = Field(
-        None, description="Token expiration time (Unix timestamp)"
-    )
-    iat: int | None = Field(
-        None, description="Token issue time (Unix timestamp)"
-    )
-    nbf: int | None = Field(
-        None, description="Token not-before time (Unix timestamp)"
-    )
-    sub: str | None = Field(
-        None, description="Subject of the token (user ID)"
-    )
-    aud: str | None = Field(
-        None, description="Intended audience of the token"
-    )
-    iss: str | None = Field(
-        None, description="Issuer of the token"
-    )
+    exp: int | None = Field(None, description="Token expiration time (Unix timestamp)")
+    iat: int | None = Field(None, description="Token issue time (Unix timestamp)")
+    nbf: int | None = Field(None, description="Token not-before time (Unix timestamp)")
+    sub: str | None = Field(None, description="Subject of the token (user ID)")
+    aud: str | None = Field(None, description="Intended audience of the token")
+    iss: str | None = Field(None, description="Issuer of the token")
 
     model_config = ConfigDict(
         json_schema_extra={

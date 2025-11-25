@@ -515,11 +515,11 @@ class CRUDOAuthClient(CRUDBase[OAuthClient, OAuthClientCreate, EmptySchema]):
             client_secret_hash = None
             if obj_in.client_type == "confidential":
                 client_secret = secrets.token_urlsafe(48)
-                # In production, use proper password hashing (bcrypt)
-                # For now, we store a hash placeholder
-                import hashlib
+                # SECURITY: Use bcrypt for secret storage (not SHA-256)
+                # bcrypt is computationally expensive, making brute-force attacks infeasible
+                from app.core.auth import get_password_hash
 
-                client_secret_hash = hashlib.sha256(client_secret.encode()).hexdigest()
+                client_secret_hash = get_password_hash(client_secret)
 
             db_obj = OAuthClient(
                 client_id=client_id,
@@ -632,13 +632,22 @@ class CRUDOAuthClient(CRUDBase[OAuthClient, OAuthClientCreate, EmptySchema]):
             if client is None or client.client_secret_hash is None:
                 return False
 
-            # Verify secret
-            import hashlib
+            # SECURITY: Verify secret using bcrypt (not SHA-256)
+            # This supports both old SHA-256 hashes (for migration) and new bcrypt hashes
+            from app.core.auth import verify_password
 
-            secret_hash = hashlib.sha256(client_secret.encode()).hexdigest()
-            # Cast to str for type safety with compare_digest
             stored_hash: str = str(client.client_secret_hash)
-            return secrets.compare_digest(stored_hash, secret_hash)
+
+            # Check if it's a bcrypt hash (starts with $2b$) or legacy SHA-256
+            if stored_hash.startswith("$2"):
+                # New bcrypt format
+                return verify_password(client_secret, stored_hash)
+            else:
+                # Legacy SHA-256 format - still support for migration
+                import hashlib
+
+                secret_hash = hashlib.sha256(client_secret.encode()).hexdigest()
+                return secrets.compare_digest(stored_hash, secret_hash)
         except Exception as e:  # pragma: no cover
             logger.error(f"Error verifying client secret: {e!s}")
             return False

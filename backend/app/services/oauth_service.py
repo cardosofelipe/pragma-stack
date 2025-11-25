@@ -282,35 +282,16 @@ class OAuthService:
                     **token_params,
                 )
 
-                # SECURITY: Validate nonce in ID token for OpenID Connect (Google)
-                # This prevents token replay attacks (OpenID Connect Core 3.1.3.7)
+                # SECURITY: Validate ID token signature and nonce for OpenID Connect
+                # This prevents token forgery and replay attacks (OIDC Core 3.1.3.7)
                 if provider == "google" and state_record.nonce:
                     id_token = token.get("id_token")
                     if id_token:
-                        import base64
-                        import json
-
-                        # Decode ID token payload (JWT format: header.payload.signature)
-                        try:
-                            payload_b64 = id_token.split(".")[1]
-                            # Add padding if needed
-                            padding = 4 - len(payload_b64) % 4
-                            if padding != 4:
-                                payload_b64 += "=" * padding
-                            payload_json = base64.urlsafe_b64decode(payload_b64)
-                            payload = json.loads(payload_json)
-
-                            token_nonce = payload.get("nonce")
-                            if token_nonce != state_record.nonce:
-                                logger.warning(
-                                    f"OAuth nonce mismatch: expected {state_record.nonce}, "
-                                    f"got {token_nonce}"
-                                )
-                                raise AuthenticationError("Invalid ID token nonce")
-                        except (IndexError, ValueError, json.JSONDecodeError) as e:
-                            logger.warning(f"Failed to decode ID token for nonce validation: {e}")
-                            # Continue without nonce validation if ID token is malformed
-                            # The token will still be validated when getting user info
+                        await OAuthService._verify_google_id_token(
+                            id_token=str(id_token),
+                            expected_nonce=str(state_record.nonce),
+                            client_id=client_id,
+                        )
             except AuthenticationError:
                 raise
             except Exception as e:
@@ -337,7 +318,9 @@ class OAuthService:
         # Email can be None if user didn't grant email permission
         # SECURITY: Normalize email (lowercase, strip) to prevent case-based account duplication
         email_raw = user_info.get("email")
-        provider_email: str | None = str(email_raw).lower().strip() if email_raw else None
+        provider_email: str | None = (
+            str(email_raw).lower().strip() if email_raw else None
+        )
 
         if not provider_user_id:
             raise AuthenticationError("Provider did not return user ID")
@@ -520,6 +503,106 @@ class OAuthService:
                     break
 
         return user_info
+
+    # Google's OIDC configuration endpoints
+    GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs"
+    GOOGLE_ISSUERS = ("https://accounts.google.com", "accounts.google.com")
+
+    @staticmethod
+    async def _verify_google_id_token(
+        id_token: str,
+        expected_nonce: str,
+        client_id: str,
+    ) -> dict[str, object]:
+        """
+        Verify Google ID token signature and claims.
+
+        SECURITY: This properly verifies the ID token by:
+        1. Fetching Google's public keys (JWKS)
+        2. Verifying the JWT signature against the public key
+        3. Validating issuer, audience, expiry, and nonce claims
+
+        Args:
+            id_token: The ID token JWT string
+            expected_nonce: The nonce we sent in the authorization request
+            client_id: Our OAuth client ID (expected audience)
+
+        Returns:
+            Decoded ID token payload
+
+        Raises:
+            AuthenticationError: If verification fails
+        """
+        import httpx
+        from jose import jwt as jose_jwt
+        from jose.exceptions import JWTError
+
+        try:
+            # Fetch Google's public keys (JWKS)
+            # In production, consider caching this with TTL matching Cache-Control header
+            async with httpx.AsyncClient() as client:
+                jwks_response = await client.get(
+                    OAuthService.GOOGLE_JWKS_URL,
+                    timeout=10.0,
+                )
+                jwks_response.raise_for_status()
+                jwks = jwks_response.json()
+
+            # Get the key ID from the token header
+            unverified_header = jose_jwt.get_unverified_header(id_token)
+            kid = unverified_header.get("kid")
+            if not kid:
+                raise AuthenticationError("ID token missing key ID (kid)")
+
+            # Find the matching public key
+            public_key = None
+            for key in jwks.get("keys", []):
+                if key.get("kid") == kid:
+                    public_key = key
+                    break
+
+            if not public_key:
+                raise AuthenticationError("ID token signed with unknown key")
+
+            # Verify the token signature and decode claims
+            # jose library will verify signature against the JWK
+            payload = jose_jwt.decode(
+                id_token,
+                public_key,
+                algorithms=["RS256"],  # Google uses RS256
+                audience=client_id,
+                issuer=OAuthService.GOOGLE_ISSUERS,
+                options={
+                    "verify_signature": True,
+                    "verify_aud": True,
+                    "verify_iss": True,
+                    "verify_exp": True,
+                    "verify_iat": True,
+                },
+            )
+
+            # Verify nonce (OIDC replay attack protection)
+            token_nonce = payload.get("nonce")
+            if token_nonce != expected_nonce:
+                logger.warning(
+                    f"OAuth ID token nonce mismatch: expected {expected_nonce}, "
+                    f"got {token_nonce}"
+                )
+                raise AuthenticationError("Invalid ID token nonce")
+
+            logger.debug("Google ID token verified successfully")
+            return payload
+
+        except JWTError as e:
+            logger.warning(f"Google ID token verification failed: {e}")
+            raise AuthenticationError("Invalid ID token signature")
+        except httpx.HTTPError as e:
+            logger.error(f"Failed to fetch Google JWKS: {e}")
+            # If we can't verify the ID token, fail closed for security
+            raise AuthenticationError("Failed to verify ID token")
+        except Exception as e:
+            logger.error(f"Unexpected error verifying Google ID token: {e}")
+            raise AuthenticationError("ID token verification error")
 
     @staticmethod
     async def _create_oauth_user(

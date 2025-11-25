@@ -21,6 +21,24 @@ import { Loader2 } from 'lucide-react';
 import { useOAuthCallback } from '@/lib/api/hooks/useOAuth';
 import config from '@/config/app.config';
 
+/**
+ * SECURITY: Constant-time string comparison to prevent timing attacks.
+ * JavaScript's === operator may short-circuit, potentially leaking information.
+ * While timing attacks on frontend state are less critical (state is in URL),
+ * this provides defense-in-depth.
+ */
+function constantTimeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 export default function OAuthCallbackPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -55,8 +73,9 @@ export default function OAuthCallbackPage() {
 
     // SECURITY: Validate state parameter against stored value (CSRF protection)
     // This prevents cross-site request forgery attacks
+    // Use constant-time comparison for defense-in-depth
     const storedState = sessionStorage.getItem('oauth_state');
-    if (!storedState || storedState !== state) {
+    if (!storedState || !constantTimeCompare(storedState, state)) {
       // Clean up stored state on mismatch
       sessionStorage.removeItem('oauth_state');
       sessionStorage.removeItem('oauth_mode');
