@@ -227,6 +227,43 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
     }
   });
 
+  // Mock GET /api/v1/oauth/providers - Get available OAuth providers
+  await page.route(`${baseURL}/api/v1/oauth/providers`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          enabled: true,
+          providers: [
+            { provider: 'google', name: 'Google' },
+            { provider: 'github', name: 'GitHub' },
+          ],
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock GET /api/v1/oauth/authorize/:provider - Get OAuth authorization URL
+  await page.route(`${baseURL}/api/v1/oauth/authorize/*`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      const url = route.request().url();
+      const provider = url.match(/authorize\/(\w+)/)?.[1] || 'google';
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          authorization_url: `https://mock-oauth.example.com/authorize?provider=${provider}`,
+          state: 'mock-state-token',
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
   /**
    * E2E tests now use the REAL auth store with mocked API routes.
    * We inject authentication by calling setAuth() directly in the page context.
@@ -574,6 +611,43 @@ export async function setupSuperuserMocks(page: Page): Promise<void> {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ message: 'Password changed successfully' }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock GET /api/v1/oauth/providers - Get available OAuth providers
+  await page.route(`${baseURL}/api/v1/oauth/providers`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          enabled: true,
+          providers: [
+            { provider: 'google', name: 'Google' },
+            { provider: 'github', name: 'GitHub' },
+          ],
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock GET /api/v1/oauth/authorize/:provider - Get OAuth authorization URL
+  await page.route(`${baseURL}/api/v1/oauth/authorize/*`, async (route: Route) => {
+    if (route.request().method() === 'GET') {
+      const url = route.request().url();
+      const provider = url.match(/authorize\/(\w+)/)?.[1] || 'google';
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          authorization_url: `https://mock-oauth.example.com/authorize?provider=${provider}`,
+          state: 'mock-state-token',
+        }),
       });
     } else {
       await route.continue();
