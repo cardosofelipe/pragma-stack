@@ -69,6 +69,27 @@ Default superuser (change in production):
   - `get_optional_current_user`: Accepts authenticated or anonymous
   - `get_current_superuser`: Requires superuser flag
 
+### OAuth Provider Mode (MCP Integration)
+Full OAuth 2.0 Authorization Server for MCP (Model Context Protocol) clients:
+- **Authorization Code Flow with PKCE**: RFC 7636 compliant
+- **JWT access tokens**: Self-contained, no DB lookup required
+- **Opaque refresh tokens**: Stored hashed in database, supports rotation
+- **Token introspection**: RFC 7662 compliant endpoint
+- **Token revocation**: RFC 7009 compliant endpoint
+- **Server metadata**: RFC 8414 compliant discovery endpoint
+- **Consent management**: User can review and revoke app permissions
+
+**API endpoints:**
+- `GET /.well-known/oauth-authorization-server` - Server metadata
+- `GET /oauth/provider/authorize` - Authorization endpoint
+- `POST /oauth/provider/authorize/consent` - Consent submission
+- `POST /oauth/provider/token` - Token endpoint
+- `POST /oauth/provider/revoke` - Token revocation
+- `POST /oauth/provider/introspect` - Token introspection
+- Client management endpoints (admin only)
+
+**Scopes supported:** `openid`, `profile`, `email`, `read:users`, `write:users`, `admin`
+
 ### Database Pattern
 - **Async SQLAlchemy 2.0** with PostgreSQL
 - **Connection pooling**: 20 base connections, 50 max overflow
@@ -238,6 +259,7 @@ docker-compose exec backend python -c "from app.init_db import init_db; import a
 
 ### Completed Features ✅
 - Authentication system (JWT with refresh tokens, OAuth/social login)
+- **OAuth Provider Mode (MCP-ready)**: Full OAuth 2.0 Authorization Server
 - Session management (device tracking, revocation)
 - User management (CRUD, password change)
 - Organization system (multi-tenant with RBAC)

@@ -344,8 +344,8 @@ class TestOAuthProviderEndpoints:
             assert response.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_provider_authorize_skeleton(self, client, async_test_db):
-        """Test provider authorize returns not implemented (skeleton)."""
+    async def test_provider_authorize_requires_auth(self, client, async_test_db):
+        """Test provider authorize requires authentication."""
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create a test client
@@ -374,12 +374,12 @@ class TestOAuthProviderEndpoints:
                     "redirect_uri": "http://localhost:3000/callback",
                 },
             )
-            # Should return 501 Not Implemented (skeleton)
-            assert response.status_code == 501
+            # Authorize endpoint requires authentication
+            assert response.status_code == 401
 
     @pytest.mark.asyncio
-    async def test_provider_token_skeleton(self, client):
-        """Test provider token returns not implemented (skeleton)."""
+    async def test_provider_token_requires_client_id(self, client):
+        """Test provider token requires client_id."""
         with patch("app.api.routes.oauth_provider.settings") as mock_settings:
             mock_settings.OAUTH_PROVIDER_ENABLED = True
 
@@ -390,5 +390,5 @@ class TestOAuthProviderEndpoints:
                     "code": "test_code",
                 },
             )
-            # Should return 501 Not Implemented (skeleton)
-            assert response.status_code == 501
+            # Missing client_id returns 401 (invalid_client)
+            assert response.status_code == 401

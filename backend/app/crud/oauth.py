@@ -643,6 +643,62 @@ class CRUDOAuthClient(CRUDBase[OAuthClient, OAuthClientCreate, EmptySchema]):
             logger.error(f"Error verifying client secret: {e!s}")
             return False
 
+    async def get_all_clients(
+        self, db: AsyncSession, *, include_inactive: bool = False
+    ) -> list[OAuthClient]:
+        """
+        Get all OAuth clients.
+
+        Args:
+            db: Database session
+            include_inactive: Whether to include inactive clients
+
+        Returns:
+            List of OAuthClient objects
+        """
+        try:
+            query = select(OAuthClient).order_by(OAuthClient.created_at.desc())
+            if not include_inactive:
+                query = query.where(OAuthClient.is_active == True)  # noqa: E712
+
+            result = await db.execute(query)
+            return list(result.scalars().all())
+        except Exception as e:  # pragma: no cover
+            logger.error(f"Error getting all OAuth clients: {e!s}")
+            raise
+
+    async def delete_client(self, db: AsyncSession, *, client_id: str) -> bool:
+        """
+        Delete an OAuth client permanently.
+
+        Note: This will cascade delete related records (tokens, consents, etc.)
+        due to foreign key constraints.
+
+        Args:
+            db: Database session
+            client_id: OAuth client ID
+
+        Returns:
+            True if deleted, False if not found
+        """
+        try:
+            result = await db.execute(
+                delete(OAuthClient).where(OAuthClient.client_id == client_id)
+            )
+            await db.commit()
+
+            deleted = result.rowcount > 0
+            if deleted:
+                logger.info(f"OAuth client deleted: {client_id}")
+            else:
+                logger.warning(f"OAuth client not found for deletion: {client_id}")
+
+            return deleted
+        except Exception as e:  # pragma: no cover
+            await db.rollback()
+            logger.error(f"Error deleting OAuth client {client_id}: {e!s}")
+            raise
+
 
 # ============================================================================
 # Singleton instances

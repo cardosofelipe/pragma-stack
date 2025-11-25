@@ -8,9 +8,13 @@ from app.core.database import Base
 
 from .base import TimestampMixin, UUIDMixin
 
-# OAuth models
+# OAuth models (client mode - authenticate via Google/GitHub)
 from .oauth_account import OAuthAccount
+
+# OAuth provider models (server mode - act as authorization server for MCP)
+from .oauth_authorization_code import OAuthAuthorizationCode
 from .oauth_client import OAuthClient
+from .oauth_provider_token import OAuthConsent, OAuthProviderRefreshToken
 from .oauth_state import OAuthState
 from .organization import Organization
 
@@ -22,7 +26,10 @@ from .user_session import UserSession
 __all__ = [
     "Base",
     "OAuthAccount",
+    "OAuthAuthorizationCode",
     "OAuthClient",
+    "OAuthConsent",
+    "OAuthProviderRefreshToken",
     "OAuthState",
     "Organization",
     "OrganizationRole",

@@ -284,6 +284,9 @@ class OAuthServerMetadata(BaseModel):
     revocation_endpoint: str | None = Field(
         None, description="Token revocation endpoint"
     )
+    introspection_endpoint: str | None = Field(
+        None, description="Token introspection endpoint (RFC 7662)"
+    )
     scopes_supported: list[str] = Field(
         default_factory=list, description="Supported scopes"
     )
@@ -297,6 +300,10 @@ class OAuthServerMetadata(BaseModel):
     code_challenge_methods_supported: list[str] = Field(
         default_factory=lambda: ["S256"], description="Supported PKCE methods"
     )
+    token_endpoint_auth_methods_supported: list[str] = Field(
+        default_factory=lambda: ["client_secret_basic", "client_secret_post", "none"],
+        description="Supported client authentication methods",
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -304,10 +311,105 @@ class OAuthServerMetadata(BaseModel):
                 "issuer": "https://api.example.com",
                 "authorization_endpoint": "https://api.example.com/oauth/authorize",
                 "token_endpoint": "https://api.example.com/oauth/token",
+                "revocation_endpoint": "https://api.example.com/oauth/revoke",
+                "introspection_endpoint": "https://api.example.com/oauth/introspect",
                 "scopes_supported": ["openid", "profile", "email", "read:users"],
                 "response_types_supported": ["code"],
                 "grant_types_supported": ["authorization_code", "refresh_token"],
                 "code_challenge_methods_supported": ["S256"],
+                "token_endpoint_auth_methods_supported": [
+                    "client_secret_basic",
+                    "client_secret_post",
+                    "none",
+                ],
+            }
+        }
+    )
+
+
+# ============================================================================
+# OAuth Token Responses (RFC 6749)
+# ============================================================================
+
+
+class OAuthTokenResponse(BaseModel):
+    """OAuth 2.0 Token Response (RFC 6749 Section 5.1)."""
+
+    access_token: str = Field(..., description="The access token issued by the server")
+    token_type: str = Field(
+        default="Bearer", description="The type of token (typically 'Bearer')"
+    )
+    expires_in: int | None = Field(
+        None, description="Token lifetime in seconds"
+    )
+    refresh_token: str | None = Field(
+        None, description="Refresh token for obtaining new access tokens"
+    )
+    scope: str | None = Field(
+        None, description="Space-separated list of granted scopes"
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "token_type": "Bearer",
+                "expires_in": 3600,
+                "refresh_token": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...",
+                "scope": "openid profile email",
+            }
+        }
+    )
+
+
+class OAuthTokenIntrospectionResponse(BaseModel):
+    """OAuth 2.0 Token Introspection Response (RFC 7662)."""
+
+    active: bool = Field(
+        ..., description="Whether the token is currently active"
+    )
+    scope: str | None = Field(
+        None, description="Space-separated list of scopes"
+    )
+    client_id: str | None = Field(
+        None, description="Client identifier for the token"
+    )
+    username: str | None = Field(
+        None, description="Human-readable identifier for the resource owner"
+    )
+    token_type: str | None = Field(
+        None, description="Type of the token (e.g., 'Bearer')"
+    )
+    exp: int | None = Field(
+        None, description="Token expiration time (Unix timestamp)"
+    )
+    iat: int | None = Field(
+        None, description="Token issue time (Unix timestamp)"
+    )
+    nbf: int | None = Field(
+        None, description="Token not-before time (Unix timestamp)"
+    )
+    sub: str | None = Field(
+        None, description="Subject of the token (user ID)"
+    )
+    aud: str | None = Field(
+        None, description="Intended audience of the token"
+    )
+    iss: str | None = Field(
+        None, description="Issuer of the token"
+    )
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "active": True,
+                "scope": "openid profile",
+                "client_id": "client123",
+                "username": "user@example.com",
+                "token_type": "Bearer",
+                "exp": 1735689600,
+                "iat": 1735686000,
+                "sub": "user-uuid-here",
             }
         }
     )
