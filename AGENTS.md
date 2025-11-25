@@ -60,6 +60,7 @@ Default superuser (change in production):
 
 ### Authentication Flow
 - **JWT-based**: Access tokens (15 min) + refresh tokens (7 days)
+- **OAuth/Social Login**: Google and GitHub with PKCE support
 - **Session tracking**: Database-backed with device info, IP, user agent
 - **Token refresh**: Validates JTI in database, not just JWT signature
 - **Authorization**: FastAPI dependencies in `api/dependencies/auth.py`
@@ -236,7 +237,7 @@ docker-compose exec backend python -c "from app.init_db import init_db; import a
 ## Current Status (Nov 2025)
 
 ### Completed Features ✅
-- Authentication system (JWT with refresh tokens)
+- Authentication system (JWT with refresh tokens, OAuth/social login)
 - Session management (device tracking, revocation)
 - User management (CRUD, password change)
 - Organization system (multi-tenant with RBAC)
@@ -257,7 +258,7 @@ docker-compose exec backend python -c "from app.init_db import init_db; import a
 ### Planned 🔮
 - GitHub Actions CI/CD
 - Additional languages (Spanish, French, German, etc.)
-- Additional authentication methods (OAuth, SSO)
+- SSO/SAML authentication
 - Real-time notifications (WebSockets)
 - Webhook system
 - Background job processing

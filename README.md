@@ -52,6 +52,7 @@ Whether you're building a SaaS, an internal tool, or a side project, PragmaStack
 
 ### 🔐 **Authentication & Security**
 - JWT-based authentication with access + refresh tokens
+- **OAuth/Social Login** (Google, GitHub) with PKCE support
 - Session management with device tracking and revocation
 - Password reset flow (email integration ready)
 - Secure password hashing (bcrypt)
@@ -511,7 +512,7 @@ docker-compose down
 ## 🛣️ Roadmap & Status
 
 ### ✅ Completed
-- [x] Authentication system (JWT, refresh tokens, session management)
+- [x] Authentication system (JWT, refresh tokens, session management, OAuth)
 - [x] User management (CRUD, profile, password change)
 - [x] Organization system with RBAC (Owner, Admin, Member)
 - [x] Admin panel (users, organizations, sessions, statistics)
@@ -539,7 +540,7 @@ docker-compose down
 - [ ] Dynamic test coverage badges from CI
 - [ ] E2E test coverage reporting
 - [ ] Additional languages (Spanish, French, German, etc.)
-- [ ] Additional authentication methods (OAuth, SSO)
+- [ ] SSO/SAML authentication
 - [ ] Real-time notifications with WebSockets
 - [ ] Webhook system
 - [ ] File upload/storage (S3-compatible)
