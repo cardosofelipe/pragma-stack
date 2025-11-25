@@ -429,6 +429,7 @@ class TestAdminSessionManagement:
         data = response.json()
         assert "data" in data
 
+
 class TestAdminDeleteOperations:
     """Test admin delete operations."""
 
@@ -645,5 +646,3 @@ class TestAdminSearchAndFilter:
         assert response.status_code == 200
         data = response.json()
         assert len(data["data"]) >= 1
-
-

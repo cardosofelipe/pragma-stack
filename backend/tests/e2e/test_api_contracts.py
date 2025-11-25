@@ -160,7 +160,9 @@ if SCHEMATHESIS_AVAILABLE:
 
         def test_schema_has_user_operations(self):
             """Verify user-related operations exist."""
-            user_ops = list(schema.include(path_regex=r".*users.*").get_all_operations())
+            user_ops = list(
+                schema.include(path_regex=r".*users.*").get_all_operations()
+            )
             assert len(user_ops) > 0, "No user operations found"
 
         def test_schema_has_organization_operations(self):
@@ -172,7 +174,9 @@ if SCHEMATHESIS_AVAILABLE:
 
         def test_schema_has_admin_operations(self):
             """Verify admin-related operations exist."""
-            admin_ops = list(schema.include(path_regex=r".*admin.*").get_all_operations())
+            admin_ops = list(
+                schema.include(path_regex=r".*admin.*").get_all_operations()
+            )
             assert len(admin_ops) > 0, "No admin operations found"
 
         def test_schema_has_session_operations(self):

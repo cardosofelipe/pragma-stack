@@ -73,9 +73,12 @@ async def public_client(db):
 
 @pytest_asyncio.fixture
 async def confidential_client(db):
-    """Create a test confidential OAuth client."""
+    """Create a test confidential OAuth client using bcrypt."""
+    from app.core.auth import get_password_hash
+
     secret = "test_client_secret"
-    secret_hash = hashlib.sha256(secret.encode()).hexdigest()
+    # Use bcrypt for new client secret hashing (security improvement)
+    secret_hash = get_password_hash(secret)
     client = OAuthClient(
         id=uuid4(),
         client_id="test_confidential_client",
@@ -84,6 +87,28 @@ async def confidential_client(db):
         client_secret_hash=secret_hash,
         redirect_uris=["http://localhost:3000/callback"],
         allowed_scopes=["openid", "profile", "email"],
+        is_active=True,
+    )
+    db.add(client)
+    await db.commit()
+    await db.refresh(client)
+    return client, secret
+
+
+@pytest_asyncio.fixture
+async def confidential_client_legacy_hash(db):
+    """Create a test confidential OAuth client with legacy SHA-256 hash."""
+    # This tests backward compatibility with old SHA-256 hashed secrets
+    secret = "test_legacy_secret"
+    secret_hash = hashlib.sha256(secret.encode()).hexdigest()
+    client = OAuthClient(
+        id=uuid4(),
+        client_id="test_legacy_client",
+        client_name="Test Legacy Client",
+        client_type="confidential",
+        client_secret_hash=secret_hash,
+        redirect_uris=["http://localhost:3000/callback"],
+        allowed_scopes=["openid", "profile"],
         is_active=True,
     )
     db.add(client)
@@ -170,11 +195,12 @@ class TestPKCEVerification:
 
         assert service.verify_pkce(wrong_verifier, code_challenge, "S256") is False
 
-    def test_verify_pkce_plain(self):
-        """Test PKCE verification with plain method."""
+    def test_verify_pkce_plain_rejected(self):
+        """Test PKCE verification rejects 'plain' method for security."""
+        # SECURITY: 'plain' method provides no security benefit and must be rejected
+        # per RFC 7636 Section 4.3 - only S256 is allowed
         code_verifier = "test_verifier"
-        assert service.verify_pkce(code_verifier, code_verifier, "plain") is True
-        assert service.verify_pkce(code_verifier, "wrong", "plain") is False
+        assert service.verify_pkce(code_verifier, code_verifier, "plain") is False
 
     def test_verify_pkce_unknown_method(self):
         """Test PKCE verification with unknown method returns False."""
@@ -231,11 +257,31 @@ class TestClientValidation:
             await service.validate_client(db, client.client_id, "wrong_secret")
 
     @pytest.mark.asyncio
-    async def test_validate_client_confidential_no_secret(self, db, confidential_client):
+    async def test_validate_client_confidential_no_secret(
+        self, db, confidential_client
+    ):
         """Test validating a confidential client without secret."""
         client, _ = confidential_client
         with pytest.raises(service.InvalidClientError, match="Client secret required"):
             await service.validate_client(db, client.client_id)
+
+    @pytest.mark.asyncio
+    async def test_validate_client_legacy_sha256_hash(
+        self, db, confidential_client_legacy_hash
+    ):
+        """Test validating a client with legacy SHA-256 hash (backward compatibility)."""
+        client, secret = confidential_client_legacy_hash
+        validated = await service.validate_client(db, client.client_id, secret)
+        assert validated.client_id == client.client_id
+
+    @pytest.mark.asyncio
+    async def test_validate_client_legacy_sha256_wrong_secret(
+        self, db, confidential_client_legacy_hash
+    ):
+        """Test legacy SHA-256 client rejects wrong secret."""
+        client, _ = confidential_client_legacy_hash
+        with pytest.raises(service.InvalidClientError, match="Invalid client secret"):
+            await service.validate_client(db, client.client_id, "wrong_secret")
 
     def test_validate_redirect_uri_success(self, public_client):
         """Test validating a registered redirect URI."""

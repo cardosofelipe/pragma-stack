@@ -23,7 +23,10 @@ pytestmark = [
 
 
 async def register_and_login(
-    client, email: str, password: str = "SecurePassword123!", user_agent: str = None
+    client,
+    email: str,
+    password: str = "SecurePassword123!",  # noqa: S107
+    user_agent: str | None = None,
 ):
     """Helper to register a user and get tokens."""
     await client.post(
@@ -117,13 +120,12 @@ class TestSessionListingWorkflows:
             )
         ).json()
 
-        tokens2 = (
-            await e2e_client.post(
-                "/api/v1/auth/login",
-                json={"email": email, "password": password},
-                headers={"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0)"},
-            )
-        ).json()
+        # Second login to create another session
+        await e2e_client.post(
+            "/api/v1/auth/login",
+            json={"email": email, "password": password},
+            headers={"User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0)"},
+        )
 
         # Check sessions using first token
         response = await e2e_client.get(
@@ -162,12 +164,11 @@ class TestSessionRevocationWorkflows:
             )
         ).json()
 
-        tokens2 = (
-            await e2e_client.post(
-                "/api/v1/auth/login",
-                json={"email": email, "password": password},
-            )
-        ).json()
+        # Second login to create another session
+        await e2e_client.post(
+            "/api/v1/auth/login",
+            json={"email": email, "password": password},
+        )
 
         # Get sessions
         sessions_resp = await e2e_client.get(

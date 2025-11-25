@@ -165,7 +165,9 @@ class TestOrganizationWithMembers:
         org = e2e_org_with_members
         response = await e2e_client.get(
             f"/api/v1/organizations/{org['org_id']}",
-            headers={"Authorization": f"Bearer {org['owner']['tokens']['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {org['owner']['tokens']['access_token']}"
+            },
         )
 
         assert response.status_code == 200
@@ -178,7 +180,9 @@ class TestOrganizationWithMembers:
         org = e2e_org_with_members
         response = await e2e_client.get(
             f"/api/v1/organizations/{org['org_id']}",
-            headers={"Authorization": f"Bearer {org['member']['tokens']['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {org['member']['tokens']['access_token']}"
+            },
         )
 
         assert response.status_code == 200
@@ -190,7 +194,9 @@ class TestOrganizationWithMembers:
         org = e2e_org_with_members
         response = await e2e_client.get(
             f"/api/v1/organizations/{org['org_id']}/members",
-            headers={"Authorization": f"Bearer {org['owner']['tokens']['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {org['owner']['tokens']['access_token']}"
+            },
         )
 
         assert response.status_code == 200
@@ -203,17 +209,23 @@ class TestOrganizationWithMembers:
         org = e2e_org_with_members
         response = await e2e_client.get(
             f"/api/v1/organizations/{org['org_id']}/members",
-            headers={"Authorization": f"Bearer {org['member']['tokens']['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {org['member']['tokens']['access_token']}"
+            },
         )
 
         assert response.status_code == 200
 
-    async def test_owner_appears_in_my_organizations(self, e2e_client, e2e_org_with_members):
+    async def test_owner_appears_in_my_organizations(
+        self, e2e_client, e2e_org_with_members
+    ):
         """Owner sees organization in their organizations list."""
         org = e2e_org_with_members
         response = await e2e_client.get(
             "/api/v1/organizations/me",
-            headers={"Authorization": f"Bearer {org['owner']['tokens']['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {org['owner']['tokens']['access_token']}"
+            },
         )
 
         assert response.status_code == 200
@@ -221,12 +233,16 @@ class TestOrganizationWithMembers:
         org_ids = [o["id"] for o in data]
         assert org["org_id"] in org_ids
 
-    async def test_member_appears_in_my_organizations(self, e2e_client, e2e_org_with_members):
+    async def test_member_appears_in_my_organizations(
+        self, e2e_client, e2e_org_with_members
+    ):
         """Member sees organization in their organizations list."""
         org = e2e_org_with_members
         response = await e2e_client.get(
             "/api/v1/organizations/me",
-            headers={"Authorization": f"Bearer {org['member']['tokens']['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {org['member']['tokens']['access_token']}"
+            },
         )
 
         assert response.status_code == 200
@@ -234,14 +250,18 @@ class TestOrganizationWithMembers:
         org_ids = [o["id"] for o in data]
         assert org["org_id"] in org_ids
 
-    async def test_owner_can_update_organization(self, e2e_client, e2e_org_with_members):
+    async def test_owner_can_update_organization(
+        self, e2e_client, e2e_org_with_members
+    ):
         """Organization owner can update organization details."""
         org = e2e_org_with_members
         new_description = f"Updated at {uuid4().hex[:8]}"
 
         response = await e2e_client.put(
             f"/api/v1/organizations/{org['org_id']}",
-            headers={"Authorization": f"Bearer {org['owner']['tokens']['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {org['owner']['tokens']['access_token']}"
+            },
             json={"description": new_description},
         )
 
@@ -249,13 +269,17 @@ class TestOrganizationWithMembers:
         data = response.json()
         assert data["description"] == new_description
 
-    async def test_member_cannot_update_organization(self, e2e_client, e2e_org_with_members):
+    async def test_member_cannot_update_organization(
+        self, e2e_client, e2e_org_with_members
+    ):
         """Regular member cannot update organization details."""
         org = e2e_org_with_members
 
         response = await e2e_client.put(
             f"/api/v1/organizations/{org['org_id']}",
-            headers={"Authorization": f"Bearer {org['member']['tokens']['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {org['member']['tokens']['access_token']}"
+            },
             json={"description": "Should fail"},
         )
 
