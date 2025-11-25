@@ -110,6 +110,7 @@ export default defineConfig({
         /auth-login\.spec\.ts/,
         /auth-register\.spec\.ts/,
         /auth-password-reset\.spec\.ts/,
+        /auth-flows\.spec\.ts/,
         /theme-toggle\.spec\.ts/,
       ],
       use: { ...devices['Desktop Chrome'] },

@@ -212,6 +212,21 @@ export async function setupAuthenticatedMocks(page: Page): Promise<void> {
     }
   });
 
+  // Mock POST /api/v1/auth/logout - Logout endpoint
+  await page.route(`${baseURL}/api/v1/auth/logout`, async (route: Route) => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          message: 'Logged out successfully',
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
   /**
    * E2E tests now use the REAL auth store with mocked API routes.
    * We inject authentication by calling setAuth() directly in the page context.
@@ -466,6 +481,99 @@ export async function setupSuperuserMocks(page: Page): Promise<void> {
             has_prev: false,
           },
         }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock POST /api/v1/auth/logout - Logout endpoint
+  await page.route(`${baseURL}/api/v1/auth/logout`, async (route: Route) => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Logged out successfully' }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock POST /api/v1/admin/users - Create user
+  await page.route(`${baseURL}/api/v1/admin/users`, async (route: Route) => {
+    if (route.request().method() === 'POST') {
+      const postData = route.request().postDataJSON();
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          id: '00000000-0000-0000-0000-000000000099',
+          email: postData.email,
+          first_name: postData.first_name,
+          last_name: postData.last_name || '',
+          is_active: postData.is_active ?? true,
+          is_superuser: postData.is_superuser ?? false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock PATCH /api/v1/admin/users/:id - Update user
+  await page.route(`${baseURL}/api/v1/admin/users/*`, async (route: Route) => {
+    const url = route.request().url();
+    const isUserEndpoint = url.match(/\/admin\/users\/[0-9a-f-]+\/?$/i);
+
+    if (route.request().method() === 'PATCH' && isUserEndpoint) {
+      const postData = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          ...MOCK_USER,
+          ...postData,
+          updated_at: new Date().toISOString(),
+        }),
+      });
+    } else if (route.request().method() === 'DELETE' && isUserEndpoint) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'User deleted successfully' }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock POST /api/v1/admin/users/bulk-action - Bulk operations
+  await page.route(`${baseURL}/api/v1/admin/users/bulk-action`, async (route: Route) => {
+    if (route.request().method() === 'POST') {
+      const postData = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          message: `Successfully ${postData.action}d ${postData.user_ids?.length || 0} users`,
+          affected_count: postData.user_ids?.length || 0,
+        }),
+      });
+    } else {
+      await route.continue();
+    }
+  });
+
+  // Mock POST /api/v1/auth/change-password - Change password (for superuser)
+  await page.route(`${baseURL}/api/v1/auth/change-password`, async (route: Route) => {
+    if (route.request().method() === 'POST') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Password changed successfully' }),
       });
     } else {
       await route.continue();

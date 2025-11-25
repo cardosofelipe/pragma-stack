@@ -657,3 +657,111 @@ test.describe('Admin User Management - Accessibility', () => {
     await expect(actionButton).toBeVisible();
   });
 });
+
+test.describe('Admin User Management - CRUD Operations', () => {
+  test.beforeEach(async ({ page }) => {
+    await setupSuperuserMocks(page);
+    await page.goto('/en/admin/users');
+    await page.waitForSelector('table tbody tr');
+  });
+
+  test('should successfully create a new user', async ({ page }) => {
+    // Open create dialog
+    const createButton = page.getByRole('button', { name: /Create User/i });
+    await createButton.click();
+
+    // Wait for dialog
+    await expect(page.getByText('Create New User')).toBeVisible();
+
+    // Fill form with valid data
+    await page.getByLabel('Email *').fill('newuser@example.com');
+    await page.getByLabel('First Name *').fill('John');
+    await page.getByLabel('Last Name').fill('Doe');
+    await page.getByLabel(/Password \*/).fill('SecurePassword123!');
+
+    // Submit form
+    await page.getByRole('button', { name: 'Create User' }).click();
+
+    // Wait for dialog to close (indicates success)
+    await expect(page.getByText('Create New User')).not.toBeVisible({ timeout: 3000 });
+
+    // Verify no error was shown
+    const errorAlert = page.locator('[role="alert"]').filter({ hasText: /error|failed/i });
+    await expect(errorAlert).not.toBeVisible();
+  });
+
+  test('should successfully update an existing user', async ({ page }) => {
+    // Open action menu for first user
+    const actionButton = page.getByRole('button', { name: /Actions for/i }).first();
+    await actionButton.click();
+
+    // Click edit
+    await page.getByText('Edit User').click();
+
+    // Wait for edit dialog
+    await expect(page.getByText('Update user information')).toBeVisible();
+
+    // Modify first name
+    const firstNameInput = page.getByLabel('First Name *');
+    await firstNameInput.clear();
+    await firstNameInput.fill('UpdatedJohn');
+
+    // Submit form
+    await page.getByRole('button', { name: 'Update User' }).click();
+
+    // Wait for dialog to close (indicates success)
+    await expect(page.getByText('Update user information')).not.toBeVisible({ timeout: 3000 });
+
+    // Verify no error was shown
+    const errorAlert = page.locator('[role="alert"]').filter({ hasText: /error|failed/i });
+    await expect(errorAlert).not.toBeVisible();
+  });
+
+  test('should execute bulk deactivate action', async ({ page }) => {
+    // Select first user
+    const firstCheckbox = page.locator('table tbody').getByRole('checkbox').first();
+    await firstCheckbox.click();
+
+    // Wait for toolbar to appear
+    await expect(page.getByTestId('bulk-action-toolbar')).toBeVisible();
+
+    // Click deactivate button
+    await page.getByRole('button', { name: /Deactivate/i }).click();
+
+    // Confirmation dialog should appear
+    await expect(page.getByText('Deactivate Users')).toBeVisible();
+
+    // Confirm the action
+    await page.getByRole('button', { name: 'Deactivate' }).click();
+
+    // Dialog should close after success
+    await expect(page.getByText('Deactivate Users')).not.toBeVisible({ timeout: 3000 });
+
+    // Toolbar should be hidden (selection cleared)
+    await expect(page.getByTestId('bulk-action-toolbar')).not.toBeVisible();
+  });
+
+  test('should cancel bulk action when clicking cancel', async ({ page }) => {
+    // Select first user
+    const firstCheckbox = page.locator('table tbody').getByRole('checkbox').first();
+    await firstCheckbox.click();
+
+    // Wait for toolbar to appear
+    await expect(page.getByTestId('bulk-action-toolbar')).toBeVisible();
+
+    // Click delete button
+    await page.getByRole('button', { name: /Delete/i }).click();
+
+    // Confirmation dialog should appear
+    await expect(page.getByText('Delete Users')).toBeVisible();
+
+    // Click cancel
+    await page.getByRole('button', { name: 'Cancel' }).click();
+
+    // Dialog should close
+    await expect(page.getByText('Delete Users')).not.toBeVisible();
+
+    // Selection should still be there
+    await expect(firstCheckbox).toBeChecked();
+  });
+});
