@@ -11,8 +11,8 @@ import { CheckCircle2 } from 'lucide-react';
 export function ContextSection() {
   const features = [
     'Clone & Deploy in < 5 minutes',
-    'Comprehensive Test Suite',
-    '12+ Documentation Guides',
+    'OAuth 2.0 + Social Login',
+    'i18n Ready (EN, IT)',
     'Zero Commercial Dependencies',
   ];
 

@@ -14,8 +14,8 @@ const features = [
     icon: Shield,
     title: 'Authentication & Security',
     description:
-      'JWT authentication with refresh tokens, session management, password reset flow, rate limiting, CSRF protection, and comprehensive security tests preventing common attacks (CVE-2015-9235, session hijacking)',
-    highlight: 'Battle-tested security',
+      'JWT with refresh tokens, OAuth social login (Google, GitHub with PKCE), OAuth Provider mode for MCP clients, session management, rate limiting, and comprehensive security tests',
+    highlight: 'OAuth 2.0 + MCP ready',
     ctaText: 'View Auth Flow',
     ctaHref: '/login',
   },
@@ -59,8 +59,8 @@ const features = [
     icon: Code,
     title: 'Developer Experience',
     description:
-      'Auto-generated TypeScript API client from OpenAPI spec, hot reload in development, migration helpers (python migrate.py auto), VS Code settings, and comprehensive component library',
-    highlight: 'Delightful DX',
+      'Auto-generated TypeScript API client, i18n with next-intl (English, Italian), hot reload, migration helpers, VS Code settings, and a comprehensive component library',
+    highlight: 'Delightful DX + i18n',
     ctaText: 'Explore Components',
     ctaHref: '/dev',
   },

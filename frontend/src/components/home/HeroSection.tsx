@@ -46,7 +46,7 @@ export function HeroSection({ onOpenDemoModal }: HeroSectionProps) {
               />
               <span className="font-medium">MIT Licensed</span>
               <span className="text-muted-foreground">•</span>
-              <span className="font-medium">Comprehensive Tests</span>
+              <span className="font-medium">OAuth 2.0 + i18n</span>
               <span className="text-muted-foreground">•</span>
               <span className="font-medium">Pragmatic by Design</span>
             </div>

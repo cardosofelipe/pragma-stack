@@ -35,24 +35,24 @@ const technologies: Tech[] = [
     color: 'from-blue-500 to-blue-700',
   },
   {
-    name: 'Docker',
-    description: 'Containerized deployment',
-    color: 'from-blue-400 to-blue-600',
+    name: 'OAuth 2.0',
+    description: 'Social login + MCP Provider mode with PKCE',
+    color: 'from-orange-500 to-red-600',
   },
   {
-    name: 'TailwindCSS',
-    description: 'Utility-first styling with OKLCH colors',
-    color: 'from-cyan-500 to-blue-500',
-  },
-  {
-    name: 'shadcn/ui',
-    description: 'Accessible component library (New York variant)',
-    color: 'from-slate-800 to-slate-600',
+    name: 'next-intl',
+    description: 'Type-safe internationalization (EN, IT)',
+    color: 'from-violet-500 to-purple-600',
   },
   {
     name: 'Playwright',
-    description: 'Reliable E2E testing (zero flaky tests)',
+    description: 'Frontend E2E testing (zero flaky tests)',
     color: 'from-green-600 to-emerald-700',
+  },
+  {
+    name: 'pytest',
+    description: 'Backend testing with Testcontainers',
+    color: 'from-yellow-500 to-orange-500',
   },
 ];
 
