@@ -8,7 +8,8 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  testEnvironment: 'jest-environment-jsdom',
+  // Custom environment that suppresses jsdom VirtualConsole XMLHttpRequest errors
+  testEnvironment: '<rootDir>/jest.environment.js',
   moduleNameMapper: {
     '^next-intl$': '<rootDir>/tests/__mocks__/next-intl.tsx',
     '^next-intl/routing$': '<rootDir>/tests/__mocks__/next-intl-routing.tsx',
