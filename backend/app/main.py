@@ -14,6 +14,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from app.api.main import api_router
+from app.api.routes.oauth_provider import wellknown_router as oauth_wellknown_router
 from app.core.config import settings
 from app.core.database import check_database_health
 from app.core.exceptions import (
@@ -324,3 +325,7 @@ async def health_check() -> JSONResponse:
 
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# OAuth 2.0 well-known endpoint at root level per RFC 8414
+# This allows MCP clients to discover the OAuth server metadata at /.well-known/oauth-authorization-server
+app.include_router(oauth_wellknown_router)

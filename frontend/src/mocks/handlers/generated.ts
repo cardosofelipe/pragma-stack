@@ -8,7 +8,7 @@
  *
  * For custom handler behavior, use src/mocks/handlers/overrides.ts
  *
- * Generated: 2025-11-25T00:22:46.981Z
+ * Generated: 2025-11-26T12:21:51.098Z
  */
 
 import { http, HttpResponse, delay } from 'msw';

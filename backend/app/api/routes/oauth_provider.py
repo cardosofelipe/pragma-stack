@@ -27,7 +27,11 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies.auth import get_current_active_user, get_current_superuser
+from app.api.dependencies.auth import (
+    get_current_active_user,
+    get_current_superuser,
+    get_optional_current_user,
+)
 from app.core.config import settings
 from app.core.database import get_db
 from app.crud import oauth_client as oauth_client_crud
@@ -42,6 +46,8 @@ from app.schemas.oauth import (
 from app.services import oauth_provider_service as provider_service
 
 router = APIRouter()
+# Separate router for RFC 8414 well-known endpoint (registered at root level)
+wellknown_router = APIRouter()
 logger = logging.getLogger(__name__)
 limiter = Limiter(key_func=get_remote_address)
 
@@ -60,7 +66,7 @@ def require_provider_enabled():
 # ============================================================================
 
 
-@router.get(
+@wellknown_router.get(
     "/.well-known/oauth-authorization-server",
     response_model=OAuthServerMetadata,
     summary="OAuth Server Metadata",
@@ -69,6 +75,8 @@ def require_provider_enabled():
 
     Returns server metadata including supported endpoints, scopes,
     and capabilities. MCP clients use this to discover the server.
+
+    Note: This endpoint is at the root level per RFC 8414.
     """,
     operation_id="get_oauth_server_metadata",
     tags=["OAuth Provider"],
@@ -153,7 +161,7 @@ async def authorize(
     nonce: str | None = Query(default=None, description="OpenID Connect nonce"),
     db: AsyncSession = Depends(get_db),
     _: None = Depends(require_provider_enabled),
-    current_user: User | None = Depends(get_current_active_user),
+    current_user: User | None = Depends(get_optional_current_user),
 ) -> Any:
     """
     Authorization endpoint - initiates OAuth flow.

@@ -291,9 +291,8 @@ class TestOAuthProviderEndpoints:
         with patch("app.api.routes.oauth_provider.settings") as mock_settings:
             mock_settings.OAUTH_PROVIDER_ENABLED = False
 
-            response = await client.get(
-                "/api/v1/oauth/.well-known/oauth-authorization-server"
-            )
+            # RFC 8414: well-known endpoint is at root level
+            response = await client.get("/.well-known/oauth-authorization-server")
             assert response.status_code == 404
 
     @pytest.mark.asyncio
@@ -303,9 +302,8 @@ class TestOAuthProviderEndpoints:
             mock_settings.OAUTH_PROVIDER_ENABLED = True
             mock_settings.OAUTH_ISSUER = "https://api.example.com"
 
-            response = await client.get(
-                "/api/v1/oauth/.well-known/oauth-authorization-server"
-            )
+            # RFC 8414: well-known endpoint is at root level
+            response = await client.get("/.well-known/oauth-authorization-server")
             assert response.status_code == 200
             data = response.json()
             assert data["issuer"] == "https://api.example.com"
@@ -344,8 +342,10 @@ class TestOAuthProviderEndpoints:
             assert response.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_provider_authorize_requires_auth(self, client, async_test_db):
-        """Test provider authorize requires authentication."""
+    async def test_provider_authorize_public_client_requires_pkce(
+        self, client, async_test_db
+    ):
+        """Test provider authorize requires PKCE for public clients."""
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create a test client
@@ -373,9 +373,54 @@ class TestOAuthProviderEndpoints:
                     "client_id": test_client_id,
                     "redirect_uri": "http://localhost:3000/callback",
                 },
+                follow_redirects=False,
             )
-            # Authorize endpoint requires authentication
-            assert response.status_code == 401
+            # Public client without PKCE gets redirect with error
+            assert response.status_code == 302
+            assert "error=invalid_request" in response.headers.get("location", "")
+            assert "PKCE" in response.headers.get("location", "")
+
+    @pytest.mark.asyncio
+    async def test_provider_authorize_redirects_to_login(self, client, async_test_db):
+        """Test provider authorize redirects unauthenticated users to login."""
+        _test_engine, AsyncTestingSessionLocal = async_test_db
+
+        # Create a test client
+        from app.crud.oauth import oauth_client
+        from app.schemas.oauth import OAuthClientCreate
+
+        async with AsyncTestingSessionLocal() as session:
+            client_data = OAuthClientCreate(
+                client_name="Test App",
+                redirect_uris=["http://localhost:3000/callback"],
+                allowed_scopes=["read:users"],
+            )
+            test_client, _ = await oauth_client.create_client(
+                session, obj_in=client_data
+            )
+            test_client_id = test_client.client_id
+
+        with patch("app.api.routes.oauth_provider.settings") as mock_settings:
+            mock_settings.OAUTH_PROVIDER_ENABLED = True
+            mock_settings.FRONTEND_URL = "http://localhost:3000"
+
+            # Include PKCE parameters for public client
+            response = await client.get(
+                "/api/v1/oauth/provider/authorize",
+                params={
+                    "response_type": "code",
+                    "client_id": test_client_id,
+                    "redirect_uri": "http://localhost:3000/callback",
+                    "code_challenge": "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+                    "code_challenge_method": "S256",
+                },
+                follow_redirects=False,
+            )
+            # Unauthenticated users get redirected to login
+            assert response.status_code == 302
+            location = response.headers.get("location", "")
+            assert "/login" in location
+            assert "return_to" in location
 
     @pytest.mark.asyncio
     async def test_provider_token_requires_client_id(self, client):

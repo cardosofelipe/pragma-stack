@@ -95,7 +95,7 @@ export default function OAuthConsentPage() {
   // Note: t is available for future i18n use
   const _t = useTranslations('auth.oauth');
   void _t; // Suppress unused warning - ready for i18n
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, accessToken } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -181,9 +181,14 @@ export default function OAuthConsentPage() {
 
       // Submit consent to backend
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const headers: HeadersInit = {};
+      if (accessToken) {
+        headers['Authorization'] = `Bearer ${accessToken}`;
+      }
       const response = await fetch(`${apiUrl}/api/v1/oauth/provider/authorize/consent`, {
         method: 'POST',
         body: formData,
+        headers,
         credentials: 'include',
       });
 

@@ -146,6 +146,84 @@ export type BodyLoginOauth = {
 };
 
 /**
+ * Body_oauth_provider_consent
+ */
+export type BodyOauthProviderConsent = {
+    /**
+     * Approved
+     *
+     * Whether user approved
+     */
+    approved: boolean;
+    /**
+     * Client Id
+     *
+     * OAuth client ID
+     */
+    client_id: string;
+    /**
+     * Redirect Uri
+     *
+     * Redirect URI
+     */
+    redirect_uri: string;
+    /**
+     * Scope
+     *
+     * Granted scopes
+     */
+    scope?: string;
+    /**
+     * State
+     *
+     * CSRF state parameter
+     */
+    state?: string;
+    /**
+     * Code Challenge
+     */
+    code_challenge?: string | null;
+    /**
+     * Code Challenge Method
+     */
+    code_challenge_method?: string | null;
+    /**
+     * Nonce
+     */
+    nonce?: string | null;
+};
+
+/**
+ * Body_oauth_provider_introspect
+ */
+export type BodyOauthProviderIntrospect = {
+    /**
+     * Token
+     *
+     * Token to introspect
+     */
+    token: string;
+    /**
+     * Token Type Hint
+     *
+     * Token type hint (access_token, refresh_token)
+     */
+    token_type_hint?: string | null;
+    /**
+     * Client Id
+     *
+     * Client ID
+     */
+    client_id?: string | null;
+    /**
+     * Client Secret
+     *
+     * Client secret
+     */
+    client_secret?: string | null;
+};
+
+/**
  * Body_oauth_provider_revoke
  */
 export type BodyOauthProviderRevoke = {
@@ -182,7 +260,7 @@ export type BodyOauthProviderToken = {
     /**
      * Grant Type
      *
-     * Grant type (authorization_code)
+     * Grant type
      */
     grant_type: string;
     /**
@@ -221,6 +299,12 @@ export type BodyOauthProviderToken = {
      * Refresh token
      */
     refresh_token?: string | null;
+    /**
+     * Scope
+     *
+     * Scope (for refresh)
+     */
+    scope?: string | null;
 };
 
 /**
@@ -236,7 +320,7 @@ export type BodyRegisterOauthClient = {
     /**
      * Redirect Uris
      *
-     * Comma-separated list of redirect URIs
+     * Comma-separated redirect URIs
      */
     redirect_uris: string;
     /**
@@ -245,6 +329,18 @@ export type BodyRegisterOauthClient = {
      * public or confidential
      */
     client_type?: string;
+    /**
+     * Scopes
+     *
+     * Allowed scopes (space-separated)
+     */
+    scopes?: string;
+    /**
+     * Mcp Server Url
+     *
+     * MCP server URL
+     */
+    mcp_server_url?: string | null;
 };
 
 /**
@@ -455,6 +551,60 @@ export type OAuthCallbackResponse = {
 };
 
 /**
+ * OAuthClientResponse
+ *
+ * Schema for OAuth client response.
+ */
+export type OAuthClientResponse = {
+    /**
+     * Client Name
+     *
+     * Client application name
+     */
+    client_name: string;
+    /**
+     * Client Description
+     *
+     * Client description
+     */
+    client_description?: string | null;
+    /**
+     * Redirect Uris
+     *
+     * Allowed redirect URIs
+     */
+    redirect_uris?: Array<string>;
+    /**
+     * Allowed Scopes
+     *
+     * Allowed OAuth scopes
+     */
+    allowed_scopes?: Array<string>;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Client Id
+     *
+     * OAuth client ID
+     */
+    client_id: string;
+    /**
+     * Client Type
+     */
+    client_type: string;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
  * OAuthProviderInfo
  *
  * Information about an available OAuth provider.
@@ -537,6 +687,12 @@ export type OAuthServerMetadata = {
      */
     revocation_endpoint?: string | null;
     /**
+     * Introspection Endpoint
+     *
+     * Token introspection endpoint (RFC 7662)
+     */
+    introspection_endpoint?: string | null;
+    /**
      * Scopes Supported
      *
      * Supported scopes
@@ -560,6 +716,124 @@ export type OAuthServerMetadata = {
      * Supported PKCE methods
      */
     code_challenge_methods_supported?: Array<string>;
+    /**
+     * Token Endpoint Auth Methods Supported
+     *
+     * Supported client authentication methods
+     */
+    token_endpoint_auth_methods_supported?: Array<string>;
+};
+
+/**
+ * OAuthTokenIntrospectionResponse
+ *
+ * OAuth 2.0 Token Introspection Response (RFC 7662).
+ */
+export type OAuthTokenIntrospectionResponse = {
+    /**
+     * Active
+     *
+     * Whether the token is currently active
+     */
+    active: boolean;
+    /**
+     * Scope
+     *
+     * Space-separated list of scopes
+     */
+    scope?: string | null;
+    /**
+     * Client Id
+     *
+     * Client identifier for the token
+     */
+    client_id?: string | null;
+    /**
+     * Username
+     *
+     * Human-readable identifier for the resource owner
+     */
+    username?: string | null;
+    /**
+     * Token Type
+     *
+     * Type of the token (e.g., 'Bearer')
+     */
+    token_type?: string | null;
+    /**
+     * Exp
+     *
+     * Token expiration time (Unix timestamp)
+     */
+    exp?: number | null;
+    /**
+     * Iat
+     *
+     * Token issue time (Unix timestamp)
+     */
+    iat?: number | null;
+    /**
+     * Nbf
+     *
+     * Token not-before time (Unix timestamp)
+     */
+    nbf?: number | null;
+    /**
+     * Sub
+     *
+     * Subject of the token (user ID)
+     */
+    sub?: string | null;
+    /**
+     * Aud
+     *
+     * Intended audience of the token
+     */
+    aud?: string | null;
+    /**
+     * Iss
+     *
+     * Issuer of the token
+     */
+    iss?: string | null;
+};
+
+/**
+ * OAuthTokenResponse
+ *
+ * OAuth 2.0 Token Response (RFC 6749 Section 5.1).
+ */
+export type OAuthTokenResponse = {
+    /**
+     * Access Token
+     *
+     * The access token issued by the server
+     */
+    access_token: string;
+    /**
+     * Token Type
+     *
+     * The type of token (typically 'Bearer')
+     */
+    token_type?: string;
+    /**
+     * Expires In
+     *
+     * Token lifetime in seconds
+     */
+    expires_in?: number | null;
+    /**
+     * Refresh Token
+     *
+     * Refresh token for obtaining new access tokens
+     */
+    refresh_token?: string | null;
+    /**
+     * Scope
+     *
+     * Space-separated list of granted scopes
+     */
+    scope?: string | null;
 };
 
 /**
@@ -1610,24 +1884,14 @@ export type StartOauthLinkResponses = {
 
 export type StartOauthLinkResponse = StartOauthLinkResponses[keyof StartOauthLinkResponses];
 
-export type GetOauthServerMetadataData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/oauth/.well-known/oauth-authorization-server';
-};
-
-export type GetOauthServerMetadataResponses = {
-    /**
-     * Successful Response
-     */
-    200: OAuthServerMetadata;
-};
-
-export type GetOauthServerMetadataResponse = GetOauthServerMetadataResponses[keyof GetOauthServerMetadataResponses];
-
 export type OauthProviderAuthorizeData = {
     body?: never;
+    headers?: {
+        /**
+         * Authorization
+         */
+        authorization?: string;
+    };
     path?: never;
     query: {
         /**
@@ -1651,7 +1915,7 @@ export type OauthProviderAuthorizeData = {
         /**
          * Scope
          *
-         * Requested scopes
+         * Requested scopes (space-separated)
          */
         scope?: string;
         /**
@@ -1672,6 +1936,12 @@ export type OauthProviderAuthorizeData = {
          * PKCE method (S256)
          */
         code_challenge_method?: string | null;
+        /**
+         * Nonce
+         *
+         * OpenID Connect nonce
+         */
+        nonce?: string | null;
     };
     url: '/api/v1/oauth/provider/authorize';
 };
@@ -1688,6 +1958,31 @@ export type OauthProviderAuthorizeError = OauthProviderAuthorizeErrors[keyof Oau
 export type OauthProviderAuthorizeResponses = {
     /**
      * Response Oauth Provider Authorize
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type OauthProviderConsentData = {
+    body: BodyOauthProviderConsent;
+    path?: never;
+    query?: never;
+    url: '/api/v1/oauth/provider/authorize/consent';
+};
+
+export type OauthProviderConsentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OauthProviderConsentError = OauthProviderConsentErrors[keyof OauthProviderConsentErrors];
+
+export type OauthProviderConsentResponses = {
+    /**
+     * Response Oauth Provider Consent
      *
      * Successful Response
      */
@@ -1712,12 +2007,12 @@ export type OauthProviderTokenError = OauthProviderTokenErrors[keyof OauthProvid
 
 export type OauthProviderTokenResponses = {
     /**
-     * Response Oauth Provider Token
-     *
      * Successful Response
      */
-    200: unknown;
+    200: OAuthTokenResponse;
 };
+
+export type OauthProviderTokenResponse = OauthProviderTokenResponses[keyof OauthProviderTokenResponses];
 
 export type OauthProviderRevokeData = {
     body: BodyOauthProviderRevoke;
@@ -1741,8 +2036,55 @@ export type OauthProviderRevokeResponses = {
      *
      * Successful Response
      */
-    200: unknown;
+    200: {
+        [key: string]: string;
+    };
 };
+
+export type OauthProviderRevokeResponse = OauthProviderRevokeResponses[keyof OauthProviderRevokeResponses];
+
+export type OauthProviderIntrospectData = {
+    body: BodyOauthProviderIntrospect;
+    path?: never;
+    query?: never;
+    url: '/api/v1/oauth/provider/introspect';
+};
+
+export type OauthProviderIntrospectErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type OauthProviderIntrospectError = OauthProviderIntrospectErrors[keyof OauthProviderIntrospectErrors];
+
+export type OauthProviderIntrospectResponses = {
+    /**
+     * Successful Response
+     */
+    200: OAuthTokenIntrospectionResponse;
+};
+
+export type OauthProviderIntrospectResponse = OauthProviderIntrospectResponses[keyof OauthProviderIntrospectResponses];
+
+export type ListOauthClientsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/oauth/provider/clients';
+};
+
+export type ListOauthClientsResponses = {
+    /**
+     * Response List Oauth Clients
+     *
+     * Successful Response
+     */
+    200: Array<OAuthClientResponse>;
+};
+
+export type ListOauthClientsResponse = ListOauthClientsResponses[keyof ListOauthClientsResponses];
 
 export type RegisterOauthClientData = {
     body: BodyRegisterOauthClient;
@@ -1766,8 +2108,92 @@ export type RegisterOauthClientResponses = {
      *
      * Successful Response
      */
-    200: unknown;
+    200: {
+        [key: string]: unknown;
+    };
 };
+
+export type RegisterOauthClientResponse = RegisterOauthClientResponses[keyof RegisterOauthClientResponses];
+
+export type DeleteOauthClientData = {
+    body?: never;
+    path: {
+        /**
+         * Client Id
+         */
+        client_id: string;
+    };
+    query?: never;
+    url: '/api/v1/oauth/provider/clients/{client_id}';
+};
+
+export type DeleteOauthClientErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteOauthClientError = DeleteOauthClientErrors[keyof DeleteOauthClientErrors];
+
+export type DeleteOauthClientResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type DeleteOauthClientResponse = DeleteOauthClientResponses[keyof DeleteOauthClientResponses];
+
+export type ListMyOauthConsentsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/oauth/provider/consents';
+};
+
+export type ListMyOauthConsentsResponses = {
+    /**
+     * Response List My Oauth Consents
+     *
+     * Successful Response
+     */
+    200: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+export type ListMyOauthConsentsResponse = ListMyOauthConsentsResponses[keyof ListMyOauthConsentsResponses];
+
+export type RevokeMyOauthConsentData = {
+    body?: never;
+    path: {
+        /**
+         * Client Id
+         */
+        client_id: string;
+    };
+    query?: never;
+    url: '/api/v1/oauth/provider/consents/{client_id}';
+};
+
+export type RevokeMyOauthConsentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RevokeMyOauthConsentError = RevokeMyOauthConsentErrors[keyof RevokeMyOauthConsentErrors];
+
+export type RevokeMyOauthConsentResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type RevokeMyOauthConsentResponse = RevokeMyOauthConsentResponses[keyof RevokeMyOauthConsentResponses];
 
 export type ListUsersData = {
     body?: never;
@@ -2759,3 +3185,19 @@ export type GetOrganizationMembersResponses = {
 };
 
 export type GetOrganizationMembersResponse = GetOrganizationMembersResponses[keyof GetOrganizationMembersResponses];
+
+export type GetOauthServerMetadataData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/.well-known/oauth-authorization-server';
+};
+
+export type GetOauthServerMetadataResponses = {
+    /**
+     * Successful Response
+     */
+    200: OAuthServerMetadata;
+};
+
+export type GetOauthServerMetadataResponse = GetOauthServerMetadataResponses[keyof GetOauthServerMetadataResponses];

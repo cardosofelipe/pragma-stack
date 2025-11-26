@@ -3,7 +3,7 @@
 
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AdminActivateUserData, AdminActivateUserErrors, AdminActivateUserResponses, AdminAddOrganizationMemberData, AdminAddOrganizationMemberErrors, AdminAddOrganizationMemberResponses, AdminBulkUserActionData, AdminBulkUserActionErrors, AdminBulkUserActionResponses, AdminCreateOrganizationData, AdminCreateOrganizationErrors, AdminCreateOrganizationResponses, AdminCreateUserData, AdminCreateUserErrors, AdminCreateUserResponses, AdminDeactivateUserData, AdminDeactivateUserErrors, AdminDeactivateUserResponses, AdminDeleteOrganizationData, AdminDeleteOrganizationErrors, AdminDeleteOrganizationResponses, AdminDeleteUserData, AdminDeleteUserErrors, AdminDeleteUserResponses, AdminGetOrganizationData, AdminGetOrganizationErrors, AdminGetOrganizationResponses, AdminGetStatsData, AdminGetStatsResponses, AdminGetUserData, AdminGetUserErrors, AdminGetUserResponses, AdminListOrganizationMembersData, AdminListOrganizationMembersErrors, AdminListOrganizationMembersResponses, AdminListOrganizationsData, AdminListOrganizationsErrors, AdminListOrganizationsResponses, AdminListSessionsData, AdminListSessionsErrors, AdminListSessionsResponses, AdminListUsersData, AdminListUsersErrors, AdminListUsersResponses, AdminRemoveOrganizationMemberData, AdminRemoveOrganizationMemberErrors, AdminRemoveOrganizationMemberResponses, AdminUpdateOrganizationData, AdminUpdateOrganizationErrors, AdminUpdateOrganizationResponses, AdminUpdateUserData, AdminUpdateUserErrors, AdminUpdateUserResponses, ChangeCurrentUserPasswordData, ChangeCurrentUserPasswordErrors, ChangeCurrentUserPasswordResponses, CleanupExpiredSessionsData, CleanupExpiredSessionsResponses, ConfirmPasswordResetData, ConfirmPasswordResetErrors, ConfirmPasswordResetResponses, DeleteUserData, DeleteUserErrors, DeleteUserResponses, GetCurrentUserProfileData, GetCurrentUserProfileResponses, GetMyOrganizationsData, GetMyOrganizationsErrors, GetMyOrganizationsResponses, GetOauthAuthorizationUrlData, GetOauthAuthorizationUrlErrors, GetOauthAuthorizationUrlResponses, GetOauthServerMetadataData, GetOauthServerMetadataResponses, GetOrganizationData, GetOrganizationErrors, GetOrganizationMembersData, GetOrganizationMembersErrors, GetOrganizationMembersResponses, GetOrganizationResponses, GetUserByIdData, GetUserByIdErrors, GetUserByIdResponses, HandleOauthCallbackData, HandleOauthCallbackErrors, HandleOauthCallbackResponses, HealthCheckData, HealthCheckResponses, ListMySessionsData, ListMySessionsResponses, ListOauthAccountsData, ListOauthAccountsResponses, ListOauthProvidersData, ListOauthProvidersResponses, ListUsersData, ListUsersErrors, ListUsersResponses, LoginData, LoginErrors, LoginOauthData, LoginOauthErrors, LoginOauthResponses, LoginResponses, LogoutAllData, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, OauthProviderAuthorizeData, OauthProviderAuthorizeErrors, OauthProviderAuthorizeResponses, OauthProviderRevokeData, OauthProviderRevokeErrors, OauthProviderRevokeResponses, OauthProviderTokenData, OauthProviderTokenErrors, OauthProviderTokenResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterOauthClientData, RegisterOauthClientErrors, RegisterOauthClientResponses, RegisterResponses, RequestPasswordResetData, RequestPasswordResetErrors, RequestPasswordResetResponses, RevokeSessionData, RevokeSessionErrors, RevokeSessionResponses, RootGetData, RootGetResponses, StartOauthLinkData, StartOauthLinkErrors, StartOauthLinkResponses, UnlinkOauthAccountData, UnlinkOauthAccountErrors, UnlinkOauthAccountResponses, UpdateCurrentUserData, UpdateCurrentUserErrors, UpdateCurrentUserResponses, UpdateOrganizationData, UpdateOrganizationErrors, UpdateOrganizationResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses } from './types.gen';
+import type { AdminActivateUserData, AdminActivateUserErrors, AdminActivateUserResponses, AdminAddOrganizationMemberData, AdminAddOrganizationMemberErrors, AdminAddOrganizationMemberResponses, AdminBulkUserActionData, AdminBulkUserActionErrors, AdminBulkUserActionResponses, AdminCreateOrganizationData, AdminCreateOrganizationErrors, AdminCreateOrganizationResponses, AdminCreateUserData, AdminCreateUserErrors, AdminCreateUserResponses, AdminDeactivateUserData, AdminDeactivateUserErrors, AdminDeactivateUserResponses, AdminDeleteOrganizationData, AdminDeleteOrganizationErrors, AdminDeleteOrganizationResponses, AdminDeleteUserData, AdminDeleteUserErrors, AdminDeleteUserResponses, AdminGetOrganizationData, AdminGetOrganizationErrors, AdminGetOrganizationResponses, AdminGetStatsData, AdminGetStatsResponses, AdminGetUserData, AdminGetUserErrors, AdminGetUserResponses, AdminListOrganizationMembersData, AdminListOrganizationMembersErrors, AdminListOrganizationMembersResponses, AdminListOrganizationsData, AdminListOrganizationsErrors, AdminListOrganizationsResponses, AdminListSessionsData, AdminListSessionsErrors, AdminListSessionsResponses, AdminListUsersData, AdminListUsersErrors, AdminListUsersResponses, AdminRemoveOrganizationMemberData, AdminRemoveOrganizationMemberErrors, AdminRemoveOrganizationMemberResponses, AdminUpdateOrganizationData, AdminUpdateOrganizationErrors, AdminUpdateOrganizationResponses, AdminUpdateUserData, AdminUpdateUserErrors, AdminUpdateUserResponses, ChangeCurrentUserPasswordData, ChangeCurrentUserPasswordErrors, ChangeCurrentUserPasswordResponses, CleanupExpiredSessionsData, CleanupExpiredSessionsResponses, ConfirmPasswordResetData, ConfirmPasswordResetErrors, ConfirmPasswordResetResponses, DeleteOauthClientData, DeleteOauthClientErrors, DeleteOauthClientResponses, DeleteUserData, DeleteUserErrors, DeleteUserResponses, GetCurrentUserProfileData, GetCurrentUserProfileResponses, GetMyOrganizationsData, GetMyOrganizationsErrors, GetMyOrganizationsResponses, GetOauthAuthorizationUrlData, GetOauthAuthorizationUrlErrors, GetOauthAuthorizationUrlResponses, GetOauthServerMetadataData, GetOauthServerMetadataResponses, GetOrganizationData, GetOrganizationErrors, GetOrganizationMembersData, GetOrganizationMembersErrors, GetOrganizationMembersResponses, GetOrganizationResponses, GetUserByIdData, GetUserByIdErrors, GetUserByIdResponses, HandleOauthCallbackData, HandleOauthCallbackErrors, HandleOauthCallbackResponses, HealthCheckData, HealthCheckResponses, ListMyOauthConsentsData, ListMyOauthConsentsResponses, ListMySessionsData, ListMySessionsResponses, ListOauthAccountsData, ListOauthAccountsResponses, ListOauthClientsData, ListOauthClientsResponses, ListOauthProvidersData, ListOauthProvidersResponses, ListUsersData, ListUsersErrors, ListUsersResponses, LoginData, LoginErrors, LoginOauthData, LoginOauthErrors, LoginOauthResponses, LoginResponses, LogoutAllData, LogoutAllResponses, LogoutData, LogoutErrors, LogoutResponses, OauthProviderAuthorizeData, OauthProviderAuthorizeErrors, OauthProviderAuthorizeResponses, OauthProviderConsentData, OauthProviderConsentErrors, OauthProviderConsentResponses, OauthProviderIntrospectData, OauthProviderIntrospectErrors, OauthProviderIntrospectResponses, OauthProviderRevokeData, OauthProviderRevokeErrors, OauthProviderRevokeResponses, OauthProviderTokenData, OauthProviderTokenErrors, OauthProviderTokenResponses, RefreshTokenData, RefreshTokenErrors, RefreshTokenResponses, RegisterData, RegisterErrors, RegisterOauthClientData, RegisterOauthClientErrors, RegisterOauthClientResponses, RegisterResponses, RequestPasswordResetData, RequestPasswordResetErrors, RequestPasswordResetResponses, RevokeMyOauthConsentData, RevokeMyOauthConsentErrors, RevokeMyOauthConsentResponses, RevokeSessionData, RevokeSessionErrors, RevokeSessionResponses, RootGetData, RootGetResponses, StartOauthLinkData, StartOauthLinkErrors, StartOauthLinkResponses, UnlinkOauthAccountData, UnlinkOauthAccountErrors, UnlinkOauthAccountResponses, UpdateCurrentUserData, UpdateCurrentUserErrors, UpdateCurrentUserResponses, UpdateOrganizationData, UpdateOrganizationErrors, UpdateOrganizationResponses, UpdateUserData, UpdateUserErrors, UpdateUserResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -353,34 +353,26 @@ export const startOauthLink = <ThrowOnError extends boolean = false>(options: Op
 };
 
 /**
- * OAuth Server Metadata
- *
- * OAuth 2.0 Authorization Server Metadata (RFC 8414).
- *
- * Returns server metadata including supported endpoints, scopes,
- * and capabilities for MCP clients.
- */
-export const getOauthServerMetadata = <ThrowOnError extends boolean = false>(options?: Options<GetOauthServerMetadataData, ThrowOnError>) => {
-    return (options?.client ?? client).get<GetOauthServerMetadataResponses, unknown, ThrowOnError>({
-        responseType: 'json',
-        url: '/api/v1/oauth/.well-known/oauth-authorization-server',
-        ...options
-    });
-};
-
-/**
- * Authorization Endpoint (Skeleton)
+ * Authorization Endpoint
  *
  * OAuth 2.0 Authorization Endpoint.
  *
- * **NOTE**: This is a skeleton implementation. In a full implementation,
- * this would:
- * 1. Validate client_id and redirect_uri
- * 2. Display consent screen to user
- * 3. Generate authorization code
- * 4. Redirect back to client with code
+ * Initiates the authorization code flow:
+ * 1. Validates client and parameters
+ * 2. Checks if user is authenticated (redirects to login if not)
+ * 3. Checks existing consent
+ * 4. Redirects to consent page if needed
+ * 5. Issues authorization code and redirects back to client
  *
- * Currently returns a 501 Not Implemented response.
+ * Required parameters:
+ * - response_type: Must be "code"
+ * - client_id: Registered client ID
+ * - redirect_uri: Must match registered URI
+ *
+ * Recommended parameters:
+ * - state: CSRF protection
+ * - code_challenge + code_challenge_method: PKCE (required for public clients)
+ * - scope: Requested permissions
  */
 export const oauthProviderAuthorize = <ThrowOnError extends boolean = false>(options: Options<OauthProviderAuthorizeData, ThrowOnError>) => {
     return (options.client ?? client).get<OauthProviderAuthorizeResponses, OauthProviderAuthorizeErrors, ThrowOnError>({
@@ -391,14 +383,43 @@ export const oauthProviderAuthorize = <ThrowOnError extends boolean = false>(opt
 };
 
 /**
- * Token Endpoint (Skeleton)
+ * Submit Authorization Consent
+ *
+ * Submit user consent for OAuth authorization.
+ *
+ * Called by the consent page after user approves or denies.
+ */
+export const oauthProviderConsent = <ThrowOnError extends boolean = false>(options: Options<OauthProviderConsentData, ThrowOnError>) => {
+    return (options.client ?? client).post<OauthProviderConsentResponses, OauthProviderConsentErrors, ThrowOnError>({
+        ...urlSearchParamsBodySerializer,
+        responseType: 'json',
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/oauth/provider/authorize/consent',
+        ...options,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Token Endpoint
  *
  * OAuth 2.0 Token Endpoint.
  *
- * **NOTE**: This is a skeleton implementation. In a full implementation,
- * this would exchange authorization codes for access tokens.
+ * Supports:
+ * - authorization_code: Exchange code for tokens
+ * - refresh_token: Refresh access token
  *
- * Currently returns a 501 Not Implemented response.
+ * Client authentication:
+ * - Confidential clients: client_secret (Basic auth or POST body)
+ * - Public clients: No secret, but PKCE code_verifier required
  */
 export const oauthProviderToken = <ThrowOnError extends boolean = false>(options: Options<OauthProviderTokenData, ThrowOnError>) => {
     return (options.client ?? client).post<OauthProviderTokenResponses, OauthProviderTokenErrors, ThrowOnError>({
@@ -414,13 +435,12 @@ export const oauthProviderToken = <ThrowOnError extends boolean = false>(options
 };
 
 /**
- * Token Revocation Endpoint (Skeleton)
+ * Token Revocation Endpoint
  *
  * OAuth 2.0 Token Revocation Endpoint (RFC 7009).
  *
- * **NOTE**: This is a skeleton implementation.
- *
- * Currently returns a 501 Not Implemented response.
+ * Revokes an access token or refresh token.
+ * Always returns 200 OK (even if token is invalid) per spec.
  */
 export const oauthProviderRevoke = <ThrowOnError extends boolean = false>(options: Options<OauthProviderRevokeData, ThrowOnError>) => {
     return (options.client ?? client).post<OauthProviderRevokeResponses, OauthProviderRevokeErrors, ThrowOnError>({
@@ -436,25 +456,126 @@ export const oauthProviderRevoke = <ThrowOnError extends boolean = false>(option
 };
 
 /**
- * Register OAuth Client (Admin)
+ * Token Introspection Endpoint
+ *
+ * OAuth 2.0 Token Introspection Endpoint (RFC 7662).
+ *
+ * Allows resource servers to query the authorization server
+ * to determine the active state and metadata of a token.
+ */
+export const oauthProviderIntrospect = <ThrowOnError extends boolean = false>(options: Options<OauthProviderIntrospectData, ThrowOnError>) => {
+    return (options.client ?? client).post<OauthProviderIntrospectResponses, OauthProviderIntrospectErrors, ThrowOnError>({
+        ...urlSearchParamsBodySerializer,
+        responseType: 'json',
+        url: '/api/v1/oauth/provider/introspect',
+        ...options,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * List OAuth Clients
+ *
+ * List all registered OAuth clients (admin only).
+ */
+export const listOauthClients = <ThrowOnError extends boolean = false>(options?: Options<ListOauthClientsData, ThrowOnError>) => {
+    return (options?.client ?? client).get<ListOauthClientsResponses, unknown, ThrowOnError>({
+        responseType: 'json',
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/oauth/provider/clients',
+        ...options
+    });
+};
+
+/**
+ * Register OAuth Client
  *
  * Register a new OAuth client (admin only).
  *
- * This endpoint allows creating MCP clients that can authenticate
- * against this API.
+ * Creates an MCP client that can authenticate against this API.
+ * Returns client_id and client_secret (for confidential clients).
  *
- * **NOTE**: This is a minimal implementation.
+ * **Important:** Store the client_secret securely - it won't be shown again!
  */
 export const registerOauthClient = <ThrowOnError extends boolean = false>(options: Options<RegisterOauthClientData, ThrowOnError>) => {
     return (options.client ?? client).post<RegisterOauthClientResponses, RegisterOauthClientErrors, ThrowOnError>({
         ...urlSearchParamsBodySerializer,
         responseType: 'json',
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
         url: '/api/v1/oauth/provider/clients',
         ...options,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
             ...options.headers
         }
+    });
+};
+
+/**
+ * Delete OAuth Client
+ *
+ * Delete an OAuth client (admin only). Revokes all tokens.
+ */
+export const deleteOauthClient = <ThrowOnError extends boolean = false>(options: Options<DeleteOauthClientData, ThrowOnError>) => {
+    return (options.client ?? client).delete<DeleteOauthClientResponses, DeleteOauthClientErrors, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/oauth/provider/clients/{client_id}',
+        ...options
+    });
+};
+
+/**
+ * List My Consents
+ *
+ * List OAuth applications the current user has authorized.
+ */
+export const listMyOauthConsents = <ThrowOnError extends boolean = false>(options?: Options<ListMyOauthConsentsData, ThrowOnError>) => {
+    return (options?.client ?? client).get<ListMyOauthConsentsResponses, unknown, ThrowOnError>({
+        responseType: 'json',
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/oauth/provider/consents',
+        ...options
+    });
+};
+
+/**
+ * Revoke My Consent
+ *
+ * Revoke authorization for an OAuth application. Also revokes all tokens.
+ */
+export const revokeMyOauthConsent = <ThrowOnError extends boolean = false>(options: Options<RevokeMyOauthConsentData, ThrowOnError>) => {
+    return (options.client ?? client).delete<RevokeMyOauthConsentResponses, RevokeMyOauthConsentErrors, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/oauth/provider/consents/{client_id}',
+        ...options
     });
 };
 
@@ -1163,6 +1284,24 @@ export const getOrganizationMembers = <ThrowOnError extends boolean = false>(opt
             }
         ],
         url: '/api/v1/organizations/{organization_id}/members',
+        ...options
+    });
+};
+
+/**
+ * OAuth Server Metadata
+ *
+ * OAuth 2.0 Authorization Server Metadata (RFC 8414).
+ *
+ * Returns server metadata including supported endpoints, scopes,
+ * and capabilities. MCP clients use this to discover the server.
+ *
+ * Note: This endpoint is at the root level per RFC 8414.
+ */
+export const getOauthServerMetadata = <ThrowOnError extends boolean = false>(options?: Options<GetOauthServerMetadataData, ThrowOnError>) => {
+    return (options?.client ?? client).get<GetOauthServerMetadataResponses, unknown, ThrowOnError>({
+        responseType: 'json',
+        url: '/.well-known/oauth-authorization-server',
         ...options
     });
 };
