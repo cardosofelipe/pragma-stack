@@ -77,9 +77,7 @@ class TestOAuthProviderServerMetadata:
     async def test_server_metadata_disabled(self, e2e_client):
         """Test server metadata returns 404 when provider mode is disabled."""
         with patch.object(settings, "OAUTH_PROVIDER_ENABLED", False):
-            response = await e2e_client.get(
-                "/.well-known/oauth-authorization-server"
-            )
+            response = await e2e_client.get("/.well-known/oauth-authorization-server")
             assert response.status_code == 404
 
 
@@ -262,7 +260,7 @@ class TestOAuthProviderAuthorizationFlow:
         self, e2e_client, oauth_client
     ):
         """Test that unauthenticated users are redirected to login."""
-        code_verifier, code_challenge = generate_pkce_pair()
+        _code_verifier, code_challenge = generate_pkce_pair()
 
         with patch.object(settings, "OAUTH_PROVIDER_ENABLED", True):
             with patch.object(settings, "FRONTEND_URL", "http://localhost:3000"):
@@ -291,7 +289,7 @@ class TestOAuthProviderAuthorizationFlow:
         self, e2e_client, oauth_client, e2e_superuser
     ):
         """Test that authenticated users without consent are redirected to consent page."""
-        code_verifier, code_challenge = generate_pkce_pair()
+        _code_verifier, code_challenge = generate_pkce_pair()
 
         with patch.object(settings, "OAUTH_PROVIDER_ENABLED", True):
             with patch.object(settings, "FRONTEND_URL", "http://localhost:3000"):
@@ -670,7 +668,7 @@ class TestOAuthProviderConsentManagement:
                 client_data = client_response.json()
 
                 # Generate PKCE and grant consent
-                code_verifier, code_challenge = generate_pkce_pair()
+                _code_verifier, code_challenge = generate_pkce_pair()
 
                 await e2e_client.post(
                     "/api/v1/oauth/provider/authorize/consent",
@@ -711,7 +709,11 @@ class TestOAuthProviderConsentManagement:
 
             # Find our consent
             consent = next(
-                (c for c in data if c["client_id"] == consent_setup["client"]["client_id"]),
+                (
+                    c
+                    for c in data
+                    if c["client_id"] == consent_setup["client"]["client_id"]
+                ),
                 None,
             )
             assert consent is not None
@@ -776,7 +778,7 @@ class TestOAuthProviderSecurityChecks:
     @pytest.mark.asyncio
     async def test_invalid_redirect_uri_rejected(self, e2e_client, security_setup):
         """Test that unregistered redirect_uri is rejected."""
-        code_verifier, code_challenge = generate_pkce_pair()
+        _code_verifier, code_challenge = generate_pkce_pair()
 
         with patch.object(settings, "OAUTH_PROVIDER_ENABLED", True):
             response = await e2e_client.get(
@@ -882,7 +884,7 @@ class TestOAuthProviderSecurityChecks:
     @pytest.mark.asyncio
     async def test_invalid_pkce_verifier_rejected(self, e2e_client, security_setup):
         """Test that wrong code_verifier is rejected."""
-        code_verifier, code_challenge = generate_pkce_pair()
+        _code_verifier, code_challenge = generate_pkce_pair()
 
         with patch.object(settings, "OAUTH_PROVIDER_ENABLED", True):
             with patch.object(settings, "OAUTH_ISSUER", "http://e2e-test"):
