@@ -818,6 +818,84 @@ def add_member(
     pass
 ```
 
+### OAuth Integration
+
+The system supports two OAuth modes:
+
+#### OAuth Consumer Mode (Social Login)
+
+Users can authenticate via Google or GitHub OAuth providers:
+
+```python
+# Get authorization URL with PKCE support
+GET /oauth/authorize/{provider}?redirect_uri=https://yourapp.com/callback
+
+# Handle callback and exchange code for tokens
+POST /oauth/callback/{provider}
+{
+    "code": "authorization_code_from_provider",
+    "state": "csrf_state_token"
+}
+```
+
+**Security Features:**
+- PKCE (S256) for Google
+- State parameter for CSRF protection
+- Nonce for Google OIDC replay attack prevention
+- Google ID token signature verification via JWKS
+- Email normalization to prevent account duplication
+- Auto-linking by email (configurable)
+
+#### OAuth Provider Mode (MCP Integration)
+
+Full OAuth 2.0 Authorization Server for third-party clients (RFC compliant):
+
+```
+┌─────────────┐                              ┌─────────────┐
+│ MCP Client  │                              │   Backend   │
+└──────┬──────┘                              └──────┬──────┘
+       │                                             │
+       │  GET /.well-known/oauth-authorization-server│
+       │─────────────────────────────────────────────>│
+       │                 {metadata}                  │
+       │<─────────────────────────────────────────────│
+       │                                             │
+       │  GET /oauth/provider/authorize              │
+       │  ?response_type=code&client_id=...          │
+       │  &redirect_uri=...&code_challenge=...       │
+       │─────────────────────────────────────────────>│
+       │                                             │
+       │              (User consents)                │
+       │                                             │
+       │  302 redirect_uri?code=AUTH_CODE&state=...  │
+       │<─────────────────────────────────────────────│
+       │                                             │
+       │  POST /oauth/provider/token                 │
+       │  {grant_type=authorization_code,            │
+       │   code=AUTH_CODE, code_verifier=...}        │
+       │─────────────────────────────────────────────>│
+       │                                             │
+       │  {access_token, refresh_token, expires_in}  │
+       │<─────────────────────────────────────────────│
+       │                                             │
+```
+
+**Endpoints:**
+- `GET /.well-known/oauth-authorization-server` - RFC 8414 metadata
+- `GET /oauth/provider/authorize` - Authorization endpoint
+- `POST /oauth/provider/token` - Token endpoint (authorization_code, refresh_token)
+- `POST /oauth/provider/revoke` - RFC 7009 token revocation
+- `POST /oauth/provider/introspect` - RFC 7662 token introspection
+
+**Security Features:**
+- PKCE S256 required for public clients (plain method rejected)
+- Authorization codes are single-use with 10-minute expiry
+- Code reuse detection triggers security incident (all tokens revoked)
+- Refresh token rotation on use
+- Opaque refresh tokens (hashed in database)
+- JWT access tokens with standard claims
+- Consent management per client
+
 ## Error Handling
 
 ### Exception Hierarchy

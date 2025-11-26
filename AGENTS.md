@@ -90,6 +90,26 @@ Full OAuth 2.0 Authorization Server for MCP (Model Context Protocol) clients:
 
 **Scopes supported:** `openid`, `profile`, `email`, `read:users`, `write:users`, `admin`
 
+**OAuth Configuration (backend `.env`):**
+```bash
+# OAuth Social Login (as OAuth Consumer)
+OAUTH_ENABLED=true                           # Enable OAuth social login
+OAUTH_AUTO_LINK_BY_EMAIL=true                # Auto-link accounts by email
+OAUTH_STATE_EXPIRE_MINUTES=10                # CSRF state expiration
+
+# Google OAuth
+OAUTH_GOOGLE_CLIENT_ID=your-google-client-id
+OAUTH_GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# GitHub OAuth
+OAUTH_GITHUB_CLIENT_ID=your-github-client-id
+OAUTH_GITHUB_CLIENT_SECRET=your-github-client-secret
+
+# OAuth Provider Mode (as Authorization Server for MCP)
+OAUTH_PROVIDER_ENABLED=true                  # Enable OAuth provider mode
+OAUTH_ISSUER=https://api.yourdomain.com      # JWT issuer URL (must be HTTPS in production)
+```
+
 ### Database Pattern
 - **Async SQLAlchemy 2.0** with PostgreSQL
 - **Connection pooling**: 20 base connections, 50 max overflow

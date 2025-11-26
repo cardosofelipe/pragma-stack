@@ -53,11 +53,24 @@ Whether you're building a SaaS, an internal tool, or a side project, PragmaStack
 ### 🔐 **Authentication & Security**
 - JWT-based authentication with access + refresh tokens
 - **OAuth/Social Login** (Google, GitHub) with PKCE support
+- **OAuth 2.0 Authorization Server** (MCP-ready) for third-party integrations
 - Session management with device tracking and revocation
 - Password reset flow (email integration ready)
 - Secure password hashing (bcrypt)
 - CSRF protection, rate limiting, and security headers
 - Comprehensive security tests (JWT algorithm attacks, session hijacking, privilege escalation)
+
+### 🔌 **OAuth Provider Mode (MCP Integration)**
+Full OAuth 2.0 Authorization Server for Model Context Protocol (MCP) and third-party clients:
+- **RFC 7636**: Authorization Code Flow with PKCE (S256 only)
+- **RFC 8414**: Server metadata discovery at `/.well-known/oauth-authorization-server`
+- **RFC 7662**: Token introspection endpoint
+- **RFC 7009**: Token revocation endpoint
+- **JWT access tokens**: Self-contained, configurable lifetime
+- **Opaque refresh tokens**: Secure rotation, database-backed revocation
+- **Consent management**: Users can review and revoke app permissions
+- **Client management**: Admin endpoints for registering OAuth clients
+- **Scopes**: `openid`, `profile`, `email`, `read:users`, `write:users`, `admin`
 
 ### 👥 **Multi-Tenancy & Organizations**
 - Full organization system with role-based access control (Owner, Admin, Member)
