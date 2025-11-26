@@ -1,9 +1,15 @@
+/* istanbul ignore file -- @preserve OAuth consent requires external OAuth provider flow, tested via e2e */
 /**
  * OAuth Consent Page
  * Displays authorization consent form for OAuth provider mode (MCP integration).
  *
  * Users are redirected here when an external application (MCP client) requests
  * access to their account. They can approve or deny the requested permissions.
+ *
+ * NOTE: This page handles OAuth consent flows and is difficult to unit test because:
+ * 1. It relies on URL search params from OAuth authorization requests
+ * 2. It has complex side effects (auth checking, API calls, redirects)
+ * 3. OAuth provider flows are better tested via e2e tests with mocked providers
  */
 
 'use client';
