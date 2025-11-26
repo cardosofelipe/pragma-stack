@@ -144,9 +144,8 @@ export function UserFormDialog({ open, onOpenChange, user, mode }: UserFormDialo
           }
         }
 
-        // Prepare update data (exclude password if empty)
+        // Prepare update data (exclude password if empty, email is not updatable)
         const updateData: Record<string, unknown> = {
-          email: data.email,
           first_name: data.first_name,
           last_name: data.last_name || null,
           is_active: data.is_active,
