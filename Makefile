@@ -1,7 +1,7 @@
 .PHONY: help dev dev-full prod down logs logs-dev clean clean-slate drop-db reset-db push-images deploy
 
 VERSION ?= latest
-REGISTRY := gitea.pragmazest.com/cardosofelipe/app
+REGISTRY ?= ghcr.io/cardosofelipe/pragma-stack
 
 # Default target
 help:

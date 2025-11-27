@@ -20,7 +20,7 @@ const technologies: Tech[] = [
     color: 'from-teal-500 to-green-600',
   },
   {
-    name: 'Next.js 15',
+    name: 'Next.js 16',
     description: 'React 19, App Router, Server Components',
     color: 'from-slate-900 to-slate-700',
   },

@@ -30,7 +30,7 @@
 
 ### 1.1 Purpose
 
-This frontend template provides a production-ready foundation for building modern web applications with Next.js 15 and FastAPI backend integration. It implements comprehensive authentication, admin dashboards, user management, and organization management out of the box.
+This frontend template provides a production-ready foundation for building modern web applications with Next.js 16 and FastAPI backend integration. It implements comprehensive authentication, admin dashboards, user management, and organization management out of the box.
 
 ### 1.2 High-Level Architecture
 
@@ -87,7 +87,7 @@ This frontend template provides a production-ready foundation for building moder
 
 ### 2.1 Core Framework
 
-**Next.js 15.x (App Router)**
+**Next.js 16.x (App Router)**
 
 - **Why**: Modern React framework with RSC, excellent DX, optimized performance
 - **App Router**: Preferred over Pages Router for better data fetching, layouts, and streaming

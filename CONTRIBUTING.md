@@ -90,22 +90,18 @@ Ready to write some code? Awesome!
 ```bash
 cd backend
 
-# Setup virtual environment
-python -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies (uv manages virtual environment automatically)
+uv sync
 
 # Setup environment
 cp .env.example .env
 # Edit .env with your settings
 
 # Run migrations
-alembic upgrade head
+python migrate.py apply
 
 # Run tests
-IS_TEST=True pytest
+IS_TEST=True uv run pytest
 
 # Start dev server
 uvicorn app.main:app --reload

@@ -533,7 +533,6 @@ A: Not built-in, but you can add a "Download Sample Data" button that exports mo
 
 - [API Integration](./API_INTEGRATION.md) - How API client works
 - [Testing Guide](./TESTING.md) - Unit and E2E testing
-- [Architecture](./ARCHITECTURE_FIX_REPORT.md) - Dependency injection patterns
 - [Design System](./design-system/) - UI component guidelines
 
 ---

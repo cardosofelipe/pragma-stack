@@ -219,7 +219,7 @@ Our design system is built on these core principles:
 
 ## 🏗️ Technology Stack
 
-- **Framework**: Next.js 15 + React 19
+- **Framework**: Next.js 16 + React 19
 - **Styling**: Tailwind CSS 4 (CSS-first configuration)
 - **Components**: shadcn/ui (New York style)
 - **Color Space**: OKLCH (perceptually uniform)

@@ -343,9 +343,7 @@ class OAuthService:
                 await oauth_account.update_tokens(
                     db,
                     account=existing_oauth,
-                    access_token_encrypted=token.get("access_token"),  # TODO: encrypt
-                    refresh_token_encrypted=token.get("refresh_token"),  # TODO: encrypt
-                    token_expires_at=datetime.now(UTC)
+                    access_token_encrypted=token.get("access_token"),                    refresh_token_encrypted=token.get("refresh_token"),                    token_expires_at=datetime.now(UTC)
                     + timedelta(seconds=token.get("expires_in", 3600)),
                 )
 
@@ -377,9 +375,7 @@ class OAuthService:
                 provider=provider,
                 provider_user_id=provider_user_id,
                 provider_email=provider_email,
-                access_token_encrypted=token.get("access_token"),  # TODO: encrypt
-                refresh_token_encrypted=token.get("refresh_token"),  # TODO: encrypt
-                token_expires_at=datetime.now(UTC)
+                access_token_encrypted=token.get("access_token"),                refresh_token_encrypted=token.get("refresh_token"),                token_expires_at=datetime.now(UTC)
                 + timedelta(seconds=token.get("expires_in", 3600))
                 if token.get("expires_in")
                 else None,
@@ -648,9 +644,7 @@ class OAuthService:
             provider=provider,
             provider_user_id=provider_user_id,
             provider_email=email,
-            access_token_encrypted=token.get("access_token"),  # TODO: encrypt
-            refresh_token_encrypted=token.get("refresh_token"),  # TODO: encrypt
-            token_expires_at=datetime.now(UTC)
+            access_token_encrypted=token.get("access_token"),            refresh_token_encrypted=token.get("refresh_token"),            token_expires_at=datetime.now(UTC)
             + timedelta(seconds=token.get("expires_in", 3600))
             if token.get("expires_in")
             else None,

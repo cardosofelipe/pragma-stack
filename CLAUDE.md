@@ -88,8 +88,6 @@ const { user, isAuthenticated } = useAuth();
 1. `AuthContext.tsx` - DI boundary, legitimately needs real store
 2. `client.ts` - Non-React context, uses dynamic import + `__TEST_AUTH_STORE__` check
 
-**See**: `frontend/docs/ARCHITECTURE_FIX_REPORT.md` for full details.
-
 ### E2E Test Best Practices
 
 When writing or fixing Playwright tests:
@@ -229,7 +227,6 @@ No Claude Code Skills installed yet. To create one, invoke the built-in "skill-c
 - [README.md](./README.md) - User-facing project overview
 - `backend/docs/` - Backend architecture, coding standards, common pitfalls
 - `frontend/docs/design-system/` - Complete design system guide
-- `frontend/docs/ARCHITECTURE_FIX_REPORT.md` - Critical DI pattern fixes
 
 **API Documentation (when running):**
 - Swagger UI: http://localhost:8000/docs

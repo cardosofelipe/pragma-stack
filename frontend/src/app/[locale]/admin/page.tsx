@@ -19,7 +19,9 @@ import { useQuery } from '@tanstack/react-query';
 import { getAdminStats } from '@/lib/api/admin';
 
 export default function AdminPage() {
-  console.log('[AdminPage] Component rendering');
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[AdminPage] Component rendering');
+  }
 
   const {
     data: stats,
@@ -30,14 +32,20 @@ export default function AdminPage() {
   } = useQuery({
     queryKey: ['admin', 'analytics'], // Changed from 'stats' to avoid collision with useAdminStats hook
     queryFn: async () => {
-      console.log('[AdminPage] QueryFn executing - fetching stats...');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[AdminPage] QueryFn executing - fetching stats...');
+      }
       try {
         const response = await getAdminStats();
-        console.log('[AdminPage] Stats response received:', response);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[AdminPage] Stats response received:', response);
+        }
         return response.data;
       } catch (err) {
         // istanbul ignore next - Error path tested via E2E
-        console.error('[AdminPage] Error fetching stats:', err);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('[AdminPage] Error fetching stats:', err);
+        }
         throw err;
       }
     },
@@ -46,15 +54,17 @@ export default function AdminPage() {
     staleTime: 60000, // Cache for 1 minute
   });
 
-  console.log('[AdminPage] Current state:', {
-    isLoading,
-    hasError: Boolean(error),
-    error: error?.message,
-    hasData: Boolean(stats),
-    dataKeys: stats ? Object.keys(stats) : null,
-    status,
-    fetchStatus,
-  });
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[AdminPage] Current state:', {
+      isLoading,
+      hasError: Boolean(error),
+      error: error?.message,
+      hasData: Boolean(stats),
+      dataKeys: stats ? Object.keys(stats) : null,
+      status,
+      fetchStatus,
+    });
+  }
 
   return (
     <div className="container mx-auto px-6 py-8">

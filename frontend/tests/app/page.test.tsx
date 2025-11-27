@@ -197,7 +197,7 @@ describe('HomePage', () => {
     it('renders all technologies', () => {
       render(<Home />);
       expect(screen.getAllByText('FastAPI')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Next.js 15')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Next.js 16')[0]).toBeInTheDocument();
       expect(screen.getAllByText('PostgreSQL')[0]).toBeInTheDocument();
       expect(screen.getAllByText('TypeScript')[0]).toBeInTheDocument();
       expect(screen.getAllByText('OAuth 2.0')[0]).toBeInTheDocument();

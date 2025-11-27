@@ -45,9 +45,9 @@ Default superuser (change in production):
 │   ├── tests/              # 96% coverage, 987 tests
 │   └── alembic/            # Database migrations
 │
-└── frontend/               # Next.js 15 frontend
+└── frontend/               # Next.js 16 frontend
     ├── src/
-    │   ├── app/           # App Router pages (Next.js 15)
+    │   ├── app/           # App Router pages (Next.js 16)
     │   ├── components/    # React components
     │   ├── lib/
     │   │   ├── api/       # Auto-generated API client
@@ -183,7 +183,7 @@ Permission dependencies in `api/dependencies/permissions.py`:
 - **Makefile**: `make help` for all commands
 
 **Frontend:**
-- **Next.js 15**: App Router with React 19
+- **Next.js 16**: App Router with React 19
 - **TypeScript**: Full type safety
 - **TailwindCSS + shadcn/ui**: Design system
 - **ESLint + Prettier**: Code quality

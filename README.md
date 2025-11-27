@@ -22,17 +22,6 @@
 
 ---
 
-## 🤖 AI-Friendly Documentation
-
-This project includes comprehensive documentation designed for AI coding assistants:
-
-- **[AGENTS.md](./AGENTS.md)** - Framework-agnostic AI assistant context for PragmaStack
-- **[CLAUDE.md](./CLAUDE.md)** - Claude Code-specific guidance
-
-These files provide AI assistants with the **PragmaStack** architecture, patterns, and best practices.
-
----
-
 ## Why PragmaStack?
 
 Building a modern full-stack application often leads to "analysis paralysis" or "boilerplate fatigue". You spend weeks setting up authentication, testing, and linting before writing a single line of business logic.
@@ -86,7 +75,7 @@ Full OAuth 2.0 Authorization Server for Model Context Protocol (MCP) and third-p
 - Admin-only routes with proper authorization
 
 ### 🎨 **Modern Frontend**
-- Next.js 15 with App Router and React 19
+- Next.js 16 with App Router and React 19
 - **PragmaStack Design System** built on shadcn/ui + TailwindCSS
 - Pre-configured theme with dark mode support (coming soon)
 - Responsive, accessible components (WCAG AA compliant)
@@ -148,6 +137,30 @@ Full OAuth 2.0 Authorization Server for Model Context Protocol (MCP) and third-p
 
 ---
 
+## 📸 Screenshots
+
+<details>
+<summary>Click to view screenshots</summary>
+
+### Landing Page
+![Landing Page](docs/images/landing.png)
+
+### Authentication
+![Login Page](docs/images/login.png)
+
+### Admin Dashboard
+![Admin Dashboard](docs/images/admin-dashboard.png)
+
+### User Settings
+![Settings](docs/images/settings.png)
+
+### Design System
+![Components](docs/images/design-system.png)
+
+</details>
+
+---
+
 ## 🎭 Demo Mode
 
 **Try the frontend without a backend!** Perfect for:
@@ -191,7 +204,7 @@ Demo mode uses [Mock Service Worker (MSW)](https://mswjs.io/) to intercept API c
 - **[pytest](https://pytest.org/)** - Testing framework with async support
 
 ### Frontend
-- **[Next.js 15](https://nextjs.org/)** - React framework with App Router
+- **[Next.js 16](https://nextjs.org/)** - React framework with App Router
 - **[React 19](https://react.dev/)** - UI library
 - **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript
 - **[TailwindCSS](https://tailwindcss.com/)** - Utility-first CSS framework
@@ -228,7 +241,7 @@ The fastest way to get started is with Docker:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/fast-next-template.git
+git clone https://github.com/cardosofelipe/pragma-stack.git
 cd fast-next-template
 
 # Copy environment file
@@ -430,6 +443,17 @@ npx playwright show-report
 
 ---
 
+## 🤖 AI-Friendly Documentation
+
+This project includes comprehensive documentation designed for AI coding assistants:
+
+- **[AGENTS.md](./AGENTS.md)** - Framework-agnostic AI assistant context for PragmaStack
+- **[CLAUDE.md](./CLAUDE.md)** - Claude Code-specific guidance
+
+These files provide AI assistants with the **PragmaStack** architecture, patterns, and best practices.
+
+---
+
 ## 🗄️ Database Migrations
 
 The template uses Alembic for database migrations:
@@ -476,7 +500,6 @@ python migrate.py current
   - Component library guide
   - Layout patterns, spacing philosophy
   - Forms, accessibility, AI guidelines
-- **[ARCHITECTURE_FIX_REPORT.md](./frontend/docs/ARCHITECTURE_FIX_REPORT.md)** - Critical dependency injection patterns
 - **[E2E Testing Guide](./frontend/e2e/README.md)** - E2E testing setup and best practices
 
 ### API Documentation
@@ -552,6 +575,7 @@ docker-compose down
 - [ ] GitHub Actions CI/CD pipelines
 - [ ] Dynamic test coverage badges from CI
 - [ ] E2E test coverage reporting
+- [ ] OAuth token encryption at rest (security hardening)
 - [ ] Additional languages (Spanish, French, German, etc.)
 - [ ] SSO/SAML authentication
 - [ ] Real-time notifications with WebSockets
@@ -590,7 +614,7 @@ Contributions are welcome! Whether you're fixing bugs, improving documentation, 
 
 ### Reporting Issues
 
-Found a bug? Have a suggestion? [Open an issue](https://github.com/yourusername/fast-next-template/issues)!
+Found a bug? Have a suggestion? [Open an issue](https://github.com/cardosofelipe/pragma-stack/issues)!
 
 Please include:
 - Clear description of the issue/suggestion
@@ -624,8 +648,8 @@ This template is built on the shoulders of giants:
 ## 💬 Questions?
 
 - **Documentation**: Check the `/docs` folders in backend and frontend
-- **Issues**: [GitHub Issues](https://github.com/yourusername/fast-next-template/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/fast-next-template/discussions)
+- **Issues**: [GitHub Issues](https://github.com/cardosofelipe/pragma-stack/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/cardosofelipe/pragma-stack/discussions)
 
 ---
 

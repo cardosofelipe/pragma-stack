@@ -394,7 +394,6 @@ npm run generate:api  # Done! All 31+ endpoints handled automatically
 
 - [DEMO_MODE.md](./DEMO_MODE.md) - Complete demo mode guide
 - [API_INTEGRATION.md](./API_INTEGRATION.md) - API client docs
-- [ARCHITECTURE_FIX_REPORT.md](./ARCHITECTURE_FIX_REPORT.md) - DI patterns
 
 ## Summary
 
