@@ -1,24 +1,14 @@
-# PragmaStack
-
-<div style="text-align: center">
-  <img src="frontend/public/logo.svg" alt="PragmaStack Logo" width="200" />
-  <br />
-</div>
+# <img src="frontend/public/logo.svg" alt="PragmaStack" width="32" height="32" style="vertical-align: middle" /> PragmaStack
 
 > **The Pragmatic Full-Stack Template. Production-ready, security-first, and opinionated.**
 
-<!--
-  TODO: Replace these static badges with dynamic CI/CD badges when GitHub Actions is set up
-  Example: https://github.com/YOUR_ORG/YOUR_REPO/actions/workflows/backend-tests.yml/badge.svg
--->
-
-[![Backend Unit Tests](https://img.shields.io/badge/backend_unit_tests-passing-success)](./backend/tests)
 [![Backend Coverage](https://img.shields.io/badge/backend_coverage-97%25-brightgreen)](./backend/tests)
-[![Frontend Unit Tests](https://img.shields.io/badge/frontend_unit_tests-passing-success)](./frontend/tests)
 [![Frontend Coverage](https://img.shields.io/badge/frontend_coverage-97%25-brightgreen)](./frontend/tests)
 [![E2E Tests](https://img.shields.io/badge/e2e_tests-passing-success)](./frontend/e2e)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
+
+![Landing Page](docs/images/landing.png)
 
 ---
 
