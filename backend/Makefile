@@ -1,4 +1,4 @@
-.PHONY: help lint lint-fix format format-check type-check test test-cov validate clean install-dev sync check-docker install-e2e test-e2e test-e2e-schema test-all drop-db reset-db
+.PHONY: help lint lint-fix format format-check type-check test test-cov validate clean install-dev sync check-docker install-e2e test-e2e test-e2e-schema test-all
 
 # Default target
 help:
@@ -24,10 +24,6 @@ help:
 	@echo "  make test-e2e-schema - Run Schemathesis API schema tests"
 	@echo "  make test-all      - Run all tests (unit + E2E)"
 	@echo "  make check-docker  - Check if Docker is available"
-	@echo ""
-	@echo "Database:"
-	@echo "  make drop-db       - Drop local database entirely (requires Docker)"
-	@echo "  make reset-db      - Drop and recreate database with migrations"
 	@echo ""
 	@echo "Cleanup:"
 	@echo "  make clean         - Remove cache and build artifacts"
@@ -122,22 +118,6 @@ test-all:
 	@echo "🧪 Running ALL tests (unit + E2E)..."
 	@$(MAKE) test
 	@$(MAKE) test-e2e
-
-# ============================================================================
-# Database Management
-# ============================================================================
-
-drop-db: check-docker
-	@echo "🗑️  Dropping local database..."
-	@cd .. && docker compose -f docker-compose.dev.yml exec -T db psql -U postgres -c "DROP DATABASE IF EXISTS app WITH (FORCE);" 2>/dev/null || \
-		cd .. && docker compose -f docker-compose.dev.yml exec -T db psql -U postgres -c "DROP DATABASE IF EXISTS app;"
-	@cd .. && docker compose -f docker-compose.dev.yml exec -T db psql -U postgres -c "CREATE DATABASE app;"
-	@echo "✅ Database dropped and recreated (empty)"
-
-reset-db: drop-db
-	@echo "🔄 Applying migrations..."
-	@uv run python migrate.py --local apply
-	@echo "✅ Database reset complete!"
 
 # ============================================================================
 # Cleanup
