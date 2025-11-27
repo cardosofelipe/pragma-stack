@@ -102,7 +102,7 @@ test.describe('Homepage - Hero Section', () => {
 
   test('should display badge with key highlights', async ({ page }) => {
     await expect(page.getByText('MIT Licensed').first()).toBeVisible();
-    await expect(page.getByText('Comprehensive Tests').first()).toBeVisible();
+    await expect(page.getByText('OAuth 2.0 + i18n').first()).toBeVisible();
     await expect(page.getByText('Pragmatic by Design').first()).toBeVisible();
   });
 

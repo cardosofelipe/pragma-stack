@@ -111,7 +111,8 @@ describe('HomePage', () => {
 
     it('renders badges', () => {
       render(<Home />);
-      expect(screen.getByText('Comprehensive Tests')).toBeInTheDocument();
+      expect(screen.getByText('MIT Licensed')).toBeInTheDocument();
+      expect(screen.getByText('OAuth 2.0 + i18n')).toBeInTheDocument();
       expect(screen.getByText('Pragmatic by Design')).toBeInTheDocument();
     });
   });
@@ -125,8 +126,8 @@ describe('HomePage', () => {
     it('renders key features', () => {
       render(<Home />);
       expect(screen.getAllByText(/Clone & Deploy in < 5 minutes/i)[0]).toBeInTheDocument();
-      expect(screen.getAllByText(/Comprehensive Test Suite/i)[0]).toBeInTheDocument();
-      expect(screen.getAllByText(/12\+ Documentation Guides/i)[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/OAuth 2\.0 \+ Social Login/i)[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/i18n Ready \(EN, IT\)/i)[0]).toBeInTheDocument();
       expect(screen.getAllByText(/Zero Commercial Dependencies/i)[0]).toBeInTheDocument();
     });
   });
@@ -199,10 +200,10 @@ describe('HomePage', () => {
       expect(screen.getAllByText('Next.js 15')[0]).toBeInTheDocument();
       expect(screen.getAllByText('PostgreSQL')[0]).toBeInTheDocument();
       expect(screen.getAllByText('TypeScript')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Docker')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('TailwindCSS')[0]).toBeInTheDocument();
-      expect(screen.getAllByText(/shadcn\/ui/i)[0]).toBeInTheDocument();
+      expect(screen.getAllByText('OAuth 2.0')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('next-intl')[0]).toBeInTheDocument();
       expect(screen.getAllByText('Playwright')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('pytest')[0]).toBeInTheDocument();
     });
   });
 

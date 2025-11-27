@@ -47,7 +47,7 @@ describe('HeroSection', () => {
     );
 
     expect(screen.getByText('MIT Licensed')).toBeInTheDocument();
-    expect(screen.getByText('Comprehensive Tests')).toBeInTheDocument();
+    expect(screen.getByText('OAuth 2.0 + i18n')).toBeInTheDocument();
     expect(screen.getByText('Pragmatic by Design')).toBeInTheDocument();
   });
 
