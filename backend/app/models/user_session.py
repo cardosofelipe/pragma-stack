@@ -22,6 +22,9 @@ class UserSession(Base, UUIDMixin, TimestampMixin):
 
     Each time a user logs in from a device, a new session is created.
     Sessions are identified by the refresh token JTI (JWT ID).
+
+    Performance indexes (defined in migration 0002_add_performance_indexes.py):
+    - ix_perf_user_sessions_expires: expires_at WHERE is_active = true
     """
 
     __tablename__ = "user_sessions"

@@ -22,6 +22,24 @@ from app.models import *
 # access to the values within the .ini file in use.
 config = context.config
 
+
+def include_object(object, name, type_, reflected, compare_to):
+    """
+    Filter objects for autogenerate.
+
+    Skip comparing functional indexes (like LOWER(column)) and partial indexes
+    (with WHERE clauses) as Alembic cannot reliably detect these from models.
+    These should be managed manually via dedicated performance migrations.
+
+    Convention: Any index starting with "ix_perf_" is automatically excluded.
+    This allows adding new performance indexes without updating this file.
+    """
+    if type_ == "index" and name:
+        # Convention-based: any index prefixed with ix_perf_ is manual
+        if name.startswith("ix_perf_"):
+            return False
+    return True
+
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
@@ -100,6 +118,8 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_type=True,
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -123,7 +143,12 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True,
+            include_object=include_object,
+        )
 
         with context.begin_transaction():
             context.run_migrations()

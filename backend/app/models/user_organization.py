@@ -44,7 +44,7 @@ class UserOrganization(Base, TimestampMixin):
         Enum(OrganizationRole),
         default=OrganizationRole.MEMBER,
         nullable=False,
-        index=True,
+        # Note: index defined in __table_args__ as ix_user_org_role
     )
     is_active = Column(Boolean, default=True, nullable=False, index=True)
 

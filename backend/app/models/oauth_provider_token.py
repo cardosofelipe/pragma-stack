@@ -27,6 +27,9 @@ class OAuthProviderRefreshToken(Base, UUIDMixin, TimestampMixin):
     - Support token rotation (new refresh token on use)
     - Track last used time for security auditing
     - Support revocation by user, client, or admin
+
+    Performance indexes (defined in migration 0002_add_performance_indexes.py):
+    - ix_perf_oauth_refresh_tokens_expires: expires_at WHERE revoked = false
     """
 
     __tablename__ = "oauth_provider_refresh_tokens"

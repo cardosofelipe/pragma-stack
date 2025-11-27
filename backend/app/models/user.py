@@ -6,6 +6,14 @@ from .base import Base, TimestampMixin, UUIDMixin
 
 
 class User(Base, UUIDMixin, TimestampMixin):
+    """
+    User model for authentication and profile data.
+
+    Performance indexes (defined in migration 0002_add_performance_indexes.py):
+    - ix_perf_users_email_lower: LOWER(email) WHERE deleted_at IS NULL
+    - ix_perf_users_active: is_active WHERE deleted_at IS NULL
+    """
+
     __tablename__ = "users"
 
     email = Column(String(255), unique=True, nullable=False, index=True)

@@ -10,6 +10,9 @@ class Organization(Base, UUIDMixin, TimestampMixin):
     """
     Organization model for multi-tenant support.
     Users can belong to multiple organizations with different roles.
+
+    Performance indexes (defined in migration 0002_add_performance_indexes.py):
+    - ix_perf_organizations_slug_lower: LOWER(slug) WHERE is_active = true
     """
 
     __tablename__ = "organizations"

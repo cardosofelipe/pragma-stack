@@ -24,6 +24,9 @@ class OAuthAuthorizationCode(Base, UUIDMixin, TimestampMixin):
     - Must validate redirect_uri matches exactly
     - Must verify PKCE code_verifier for public clients
     - Must be consumed within expiration time
+
+    Performance indexes (defined in migration 0002_add_performance_indexes.py):
+    - ix_perf_oauth_auth_codes_expires: expires_at WHERE used = false
     """
 
     __tablename__ = "oauth_authorization_codes"

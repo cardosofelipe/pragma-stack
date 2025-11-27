@@ -1,9 +1,6 @@
 # Development stage
 FROM python:3.12-slim AS development
 
-# Create non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -31,11 +28,8 @@ COPY . .
 COPY entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Set ownership to non-root user
-RUN chown -R appuser:appuser /app
-
-# Switch to non-root user
-USER appuser
+# Note: Running as root in development for bind mount compatibility
+# Production stage uses non-root user for security
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 

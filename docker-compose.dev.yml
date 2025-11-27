@@ -25,7 +25,8 @@ services:
     volumes:
       - ./backend:/app
       - ./uploads:/app/uploads
-      - backend_dev_modules:/app/.venv
+      # Exclude local .venv from bind mount to use container's .venv
+      - /app/.venv
     ports:
       - "8000:8000"
     env_file:
@@ -67,7 +68,6 @@ services:
 
 volumes:
   postgres_data_dev:
-  backend_dev_modules:
   frontend_dev_modules:
   frontend_dev_next:
 

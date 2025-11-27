@@ -8,6 +8,7 @@ This document outlines the coding standards and best practices for the FastAPI b
 - [Code Organization](#code-organization)
 - [Naming Conventions](#naming-conventions)
 - [Error Handling](#error-handling)
+- [Data Models and Migrations](#data-models-and-migrations)
 - [Database Operations](#database-operations)
 - [API Endpoints](#api-endpoints)
 - [Authentication & Security](#authentication--security)
@@ -281,6 +282,151 @@ All error responses follow this structure:
     ]
 }
 ```
+
+## Data Models and Migrations
+
+### Model Definition Best Practices
+
+To ensure Alembic autogenerate works reliably without drift, follow these rules:
+
+#### 1. Simple Indexes: Use Column-Level or `__table_args__`, Not Both
+
+```python
+# ❌ BAD - Creates DUPLICATE indexes with different names
+class User(Base):
+    role = Column(String(50), index=True)  # Creates ix_users_role
+
+    __table_args__ = (
+        Index("ix_user_role", "role"),  # Creates ANOTHER index!
+    )
+
+# ✅ GOOD - Choose ONE approach
+class User(Base):
+    role = Column(String(50))  # No index=True
+
+    __table_args__ = (
+        Index("ix_user_role", "role"),  # Single index with explicit name
+    )
+
+# ✅ ALSO GOOD - For simple single-column indexes
+class User(Base):
+    role = Column(String(50), index=True)  # Auto-named ix_users_role
+```
+
+#### 2. Composite Indexes: Always Use `__table_args__`
+
+```python
+class UserOrganization(Base):
+    __tablename__ = "user_organizations"
+
+    user_id = Column(UUID, nullable=False)
+    organization_id = Column(UUID, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False, index=True)
+
+    __table_args__ = (
+        Index("ix_user_org_user_active", "user_id", "is_active"),
+        Index("ix_user_org_org_active", "organization_id", "is_active"),
+    )
+```
+
+#### 3. Functional/Partial Indexes: Use `ix_perf_` Prefix
+
+Alembic **cannot** auto-detect:
+- **Functional indexes**: `LOWER(column)`, `UPPER(column)`, expressions
+- **Partial indexes**: Indexes with `WHERE` clauses
+
+**Solution**: Use the `ix_perf_` naming prefix. Any index with this prefix is automatically excluded from autogenerate by `env.py`.
+
+```python
+# In migration file (NOT in model) - use ix_perf_ prefix:
+op.create_index(
+    "ix_perf_users_email_lower",  # <-- ix_perf_ prefix!
+    "users",
+    [sa.text("LOWER(email)")],  # Functional
+    postgresql_where=sa.text("deleted_at IS NULL"),  # Partial
+)
+```
+
+**No need to update `env.py`** - the prefix convention handles it automatically:
+
+```python
+# env.py - already configured:
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "index" and name:
+        if name.startswith("ix_perf_"):  # Auto-excluded!
+            return False
+    return True
+```
+
+**To add new performance indexes:**
+1. Create a new migration file
+2. Name your indexes with `ix_perf_` prefix
+3. Done - Alembic will ignore them automatically
+
+#### 4. Use Correct Types
+
+```python
+# ✅ GOOD - PostgreSQL-native types
+from sqlalchemy.dialects.postgresql import JSONB, UUID
+
+class User(Base):
+    id = Column(UUID(as_uuid=True), primary_key=True)
+    preferences = Column(JSONB)  # Not JSON!
+
+# ❌ BAD - Generic types may cause migration drift
+from sqlalchemy import JSON
+preferences = Column(JSON)  # May detect as different from JSONB
+```
+
+### Migration Workflow
+
+#### Creating Migrations
+
+```bash
+# Generate autogenerate migration:
+python migrate.py generate "Add new field"
+
+# Or inside Docker:
+docker exec -w /app backend uv run alembic revision --autogenerate -m "Add new field"
+
+# Apply migration:
+python migrate.py apply
+# Or: docker exec -w /app backend uv run alembic upgrade head
+```
+
+#### Testing for Drift
+
+After any model changes, verify no unintended drift:
+
+```bash
+# Generate test migration
+docker exec -w /app backend uv run alembic revision --autogenerate -m "test_drift"
+
+# Check the generated file - should be empty (just 'pass')
+# If it has operations, investigate why
+
+# Delete test file
+rm backend/app/alembic/versions/*_test_drift.py
+```
+
+#### Migration File Structure
+
+```
+backend/app/alembic/versions/
+├── cbddc8aa6eda_initial_models.py    # Auto-generated, tracks all models
+├── 0002_performance_indexes.py        # Manual, functional/partial indexes
+└── __init__.py
+```
+
+### Summary: What Goes Where
+
+| Index Type | In Model? | Alembic Detects? | Where to Define |
+|------------|-----------|------------------|-----------------|
+| Simple column (`index=True`) | Yes | Yes | Column definition |
+| Composite (`col1, col2`) | Yes | Yes | `__table_args__` |
+| Unique composite | Yes | Yes | `__table_args__` with `unique=True` |
+| Functional (`LOWER(col)`) | No | No | Migration with `ix_perf_` prefix |
+| Partial (`WHERE ...`) | No | No | Migration with `ix_perf_` prefix |
 
 ## Database Operations
 
