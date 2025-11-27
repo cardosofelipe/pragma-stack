@@ -145,14 +145,17 @@ Full OAuth 2.0 Authorization Server for Model Context Protocol (MCP) and third-p
 ### Landing Page
 ![Landing Page](docs/images/landing.png)
 
+
+
 ### Authentication
 ![Login Page](docs/images/login.png)
+
+
 
 ### Admin Dashboard
 ![Admin Dashboard](docs/images/admin-dashboard.png)
 
-### User Settings
-![Settings](docs/images/settings.png)
+
 
 ### Design System
 ![Components](docs/images/design-system.png)
