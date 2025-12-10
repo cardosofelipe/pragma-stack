@@ -113,6 +113,7 @@ export default defineConfig({
         /auth-flows\.spec\.ts/,
         /auth-oauth\.spec\.ts/,
         /theme-toggle\.spec\.ts/,
+        /security-headers\.spec\.ts/,
       ],
       use: { ...devices['Desktop Chrome'] },
     },
