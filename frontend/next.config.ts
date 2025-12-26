@@ -45,15 +45,17 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'", // Required for theme init script
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // unsafe-eval needed for MSW in dev
       "style-src 'self' 'unsafe-inline'", // Required for Tailwind and styled components
       "img-src 'self' blob: data: https:", // Allow images from HTTPS sources
       "font-src 'self'",
+      "connect-src 'self' http://localhost:* ws://localhost:*", // API + HMR websocket
+      "worker-src 'self' blob:", // Required for MSW service worker in demo mode
+      "child-src 'self' blob:", // For service worker registration
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
-      'upgrade-insecure-requests',
     ].join('; '),
   },
 ];
