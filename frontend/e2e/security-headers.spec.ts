@@ -34,6 +34,7 @@ test.describe('Security Headers', () => {
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("worker-src 'self' blob:"); // Required for MSW
   });
 
   test('should NOT include deprecated security headers', async ({ request }) => {
