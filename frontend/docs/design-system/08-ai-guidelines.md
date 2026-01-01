@@ -244,8 +244,7 @@ const componentVariants = cva(
 );
 
 interface ComponentProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof componentVariants> {}
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof componentVariants> {}
 
 export function Component({ variant, size, className, ...props }: ComponentProps) {
   return <div className={cn(componentVariants({ variant, size, className }))} {...props} />;

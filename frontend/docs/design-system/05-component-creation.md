@@ -231,8 +231,7 @@ const componentVariants = cva(
 );
 
 interface MyComponentProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof componentVariants> {
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof componentVariants> {
   // Additional props here
 }
 
