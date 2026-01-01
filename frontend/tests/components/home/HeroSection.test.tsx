@@ -100,7 +100,7 @@ describe('HeroSection', () => {
     );
 
     const githubLink = screen.getByRole('link', { name: /view on github/i });
-    expect(githubLink).toHaveAttribute('href', 'https://github.com/your-org/fast-next-template');
+    expect(githubLink).toHaveAttribute('href', 'https://github.com/cardosofelipe/pragma-stack.git');
     expect(githubLink).toHaveAttribute('target', '_blank');
     expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
   });

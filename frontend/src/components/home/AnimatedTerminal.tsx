@@ -14,7 +14,7 @@ import { Link } from '@/lib/i18n/routing';
 
 const commands = [
   { text: '# Clone the repository', delay: 0 },
-  { text: '$ git clone https://github.com/your-org/fast-next-template.git', delay: 800 },
+  { text: '$ git clone https://github.com/cardosofelipe/pragma-stack.git.git', delay: 800 },
   { text: '$ cd fast-next-template', delay: 1600 },
   { text: '', delay: 2200 },
   { text: '# Start with Docker (one command)', delay: 2400 },

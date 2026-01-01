@@ -71,7 +71,7 @@ describe('CTASection', () => {
     );
 
     const githubLink = screen.getByRole('link', { name: /get started on github/i });
-    expect(githubLink).toHaveAttribute('href', 'https://github.com/your-org/fast-next-template');
+    expect(githubLink).toHaveAttribute('href', 'https://github.com/cardosofelipe/pragma-stack.git');
     expect(githubLink).toHaveAttribute('target', '_blank');
     expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
@@ -101,7 +101,7 @@ describe('CTASection', () => {
     const docsLink = screen.getByRole('link', { name: /read documentation/i });
     expect(docsLink).toHaveAttribute(
       'href',
-      'https://github.com/your-org/fast-next-template#documentation'
+      'https://github.com/cardosofelipe/pragma-stack.git#documentation'
     );
     expect(docsLink).toHaveAttribute('target', '_blank');
     expect(docsLink).toHaveAttribute('rel', 'noopener noreferrer');

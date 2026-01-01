@@ -49,7 +49,7 @@ export function CTASection({ onOpenDemoModal }: CTASectionProps) {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Button asChild size="lg" className="gap-2 text-base group">
               <a
-                href="https://github.com/your-org/fast-next-template"
+                href="https://github.com/cardosofelipe/pragma-stack.git"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -75,7 +75,7 @@ export function CTASection({ onOpenDemoModal }: CTASectionProps) {
             </Button>
             <Button asChild size="lg" variant="ghost" className="gap-2 text-base group">
               <a
-                href="https://github.com/your-org/fast-next-template#documentation"
+                href="https://github.com/cardosofelipe/pragma-stack.git#documentation"
                 target="_blank"
                 rel="noopener noreferrer"
               >

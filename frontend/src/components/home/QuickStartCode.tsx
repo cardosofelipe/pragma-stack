@@ -13,7 +13,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Button } from '@/components/ui/button';
 
 const codeString = `# Clone and start with Docker
-git clone https://github.com/your-org/fast-next-template.git
+git clone https://github.com/cardosofelipe/pragma-stack.git.git
 cd fast-next-template
 docker-compose up
 

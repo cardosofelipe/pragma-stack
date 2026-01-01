@@ -102,7 +102,7 @@ describe('Header', () => {
 
       expect(desktopGithubLink).toHaveAttribute(
         'href',
-        'https://github.com/your-org/fast-next-template'
+        'https://github.com/cardosofelipe/pragma-stack.git'
       );
       expect(desktopGithubLink).toHaveAttribute('target', '_blank');
       expect(desktopGithubLink).toHaveAttribute('rel', 'noopener noreferrer');

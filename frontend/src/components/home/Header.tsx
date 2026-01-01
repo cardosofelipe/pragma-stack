@@ -72,7 +72,7 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
 
             {/* GitHub Link with Star */}
             <a
-              href="https://github.com/your-org/fast-next-template"
+              href="https://github.com/cardosofelipe/pragma-stack.git"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -135,7 +135,7 @@ export function Header({ onOpenDemoModal }: HeaderProps) {
 
                 {/* GitHub Link */}
                 <a
-                  href="https://github.com/your-org/fast-next-template"
+                  href="https://github.com/cardosofelipe/pragma-stack.git"
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setMobileMenuOpen(false)}

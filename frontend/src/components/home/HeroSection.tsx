@@ -93,7 +93,7 @@ export function HeroSection({ onOpenDemoModal }: HeroSectionProps) {
             </Button>
             <Button asChild size="lg" variant="outline" className="gap-2 text-base group">
               <a
-                href="https://github.com/your-org/fast-next-template"
+                href="https://github.com/cardosofelipe/pragma-stack.git"
                 target="_blank"
                 rel="noopener noreferrer"
               >

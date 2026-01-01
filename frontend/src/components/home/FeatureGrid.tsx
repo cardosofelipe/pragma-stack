@@ -44,7 +44,7 @@ const features = [
       '12+ documentation guides covering architecture, design system, testing patterns, deployment, and AI code generation guidelines. Interactive API docs with Swagger and ReDoc',
     highlight: 'Developer-first docs',
     ctaText: 'Browse Docs',
-    ctaHref: 'https://github.com/your-org/fast-next-template#documentation',
+    ctaHref: 'https://github.com/cardosofelipe/pragma-stack.git#documentation',
   },
   {
     icon: Server,
@@ -53,7 +53,7 @@ const features = [
       'Docker deployment configs, database migrations with Alembic helpers, connection pooling, health checks, monitoring setup, and production security headers',
     highlight: 'Deploy with confidence',
     ctaText: 'Deployment Guide',
-    ctaHref: 'https://github.com/your-org/fast-next-template#deployment',
+    ctaHref: 'https://github.com/cardosofelipe/pragma-stack.git#deployment',
   },
   {
     icon: Code,
