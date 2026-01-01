@@ -97,5 +97,9 @@
     "workerDirectory": [
       "public"
     ]
+  },
+  "overrides": {
+    "glob": "^10.4.1",
+    "inflight": "npm:lru-cache@^10.0.0"
   }
 }
