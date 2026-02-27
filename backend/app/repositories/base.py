@@ -1,6 +1,6 @@
-# app/crud/base_async.py
+# app/repositories/base.py
 """
-Async CRUD operations base class using SQLAlchemy 2.0 async patterns.
+Base repository class for async CRUD operations using SQLAlchemy 2.0 async patterns.
 
 Provides reusable create, read, update, and delete operations for all models.
 """
@@ -18,6 +18,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Load
 
 from app.core.database import Base
+from app.core.repository_exceptions import (
+    DuplicateEntryError,
+    IntegrityConstraintError,
+    InvalidInputError,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -26,16 +31,16 @@ CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
 UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 
 
-class CRUDBase[
+class BaseRepository[
     ModelType: Base,
     CreateSchemaType: BaseModel,
     UpdateSchemaType: BaseModel,
 ]:
-    """Async CRUD operations for a model."""
+    """Async repository operations for a model."""
 
     def __init__(self, model: type[ModelType]):
         """
-        CRUD object with default async methods to Create, Read, Update, Delete.
+        Repository object with default async methods to Create, Read, Update, Delete.
 
         Parameters:
             model: A SQLAlchemy model class
@@ -56,13 +61,7 @@ class CRUDBase[
 
         Returns:
             Model instance or None if not found
-
-        Example:
-            # Eager load user relationship
-            from sqlalchemy.orm import joinedload
-            session = await session_crud.get(db, id=session_id, options=[joinedload(UserSession.user)])
         """
-        # Validate UUID format and convert to UUID object if string
         try:
             if isinstance(id, uuid.UUID):
                 uuid_obj = id
@@ -75,7 +74,6 @@ class CRUDBase[
         try:
             query = select(self.model).where(self.model.id == uuid_obj)
 
-            # Apply eager loading options if provided
             if options:
                 for option in options:
                     query = query.options(option)
@@ -96,28 +94,17 @@ class CRUDBase[
     ) -> list[ModelType]:
         """
         Get multiple records with pagination validation and optional eager loading.
-
-        Args:
-            db: Database session
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-            options: Optional list of SQLAlchemy load options for eager loading
-
-        Returns:
-            List of model instances
         """
-        # Validate pagination parameters
         if skip < 0:
-            raise ValueError("skip must be non-negative")
+            raise InvalidInputError("skip must be non-negative")
         if limit < 0:
-            raise ValueError("limit must be non-negative")
+            raise InvalidInputError("limit must be non-negative")
         if limit > 1000:
-            raise ValueError("Maximum limit is 1000")
+            raise InvalidInputError("Maximum limit is 1000")
 
         try:
-            query = select(self.model).offset(skip).limit(limit)
+            query = select(self.model).order_by(self.model.id).offset(skip).limit(limit)
 
-            # Apply eager loading options if provided
             if options:
                 for option in options:
                     query = query.options(option)
@@ -136,9 +123,8 @@ class CRUDBase[
         """Create a new record with error handling.
 
         NOTE: This method is defensive code that's never called in practice.
-        All CRUD subclasses (CRUDUser, CRUDOrganization, CRUDSession) override this method
-        with their own implementations, so the base implementation and its exception handlers
-        are never executed. Marked as pragma: no cover to avoid false coverage gaps.
+        All repository subclasses override this method with their own implementations.
+        Marked as pragma: no cover to avoid false coverage gaps.
         """
         try:  # pragma: no cover
             obj_in_data = jsonable_encoder(obj_in)
@@ -154,15 +140,15 @@ class CRUDBase[
                 logger.warning(
                     f"Duplicate entry attempted for {self.model.__name__}: {error_msg}"
                 )
-                raise ValueError(
+                raise DuplicateEntryError(
                     f"A {self.model.__name__} with this data already exists"
                 )
             logger.error(f"Integrity error creating {self.model.__name__}: {error_msg}")
-            raise ValueError(f"Database integrity error: {error_msg}")
+            raise IntegrityConstraintError(f"Database integrity error: {error_msg}")
         except (OperationalError, DataError) as e:  # pragma: no cover
             await db.rollback()
             logger.error(f"Database error creating {self.model.__name__}: {e!s}")
-            raise ValueError(f"Database operation failed: {e!s}")
+            raise IntegrityConstraintError(f"Database operation failed: {e!s}")
         except Exception as e:  # pragma: no cover
             await db.rollback()
             logger.error(
@@ -200,15 +186,15 @@ class CRUDBase[
                 logger.warning(
                     f"Duplicate entry attempted for {self.model.__name__}: {error_msg}"
                 )
-                raise ValueError(
+                raise DuplicateEntryError(
                     f"A {self.model.__name__} with this data already exists"
                 )
             logger.error(f"Integrity error updating {self.model.__name__}: {error_msg}")
-            raise ValueError(f"Database integrity error: {error_msg}")
+            raise IntegrityConstraintError(f"Database integrity error: {error_msg}")
         except (OperationalError, DataError) as e:
             await db.rollback()
             logger.error(f"Database error updating {self.model.__name__}: {e!s}")
-            raise ValueError(f"Database operation failed: {e!s}")
+            raise IntegrityConstraintError(f"Database operation failed: {e!s}")
         except Exception as e:
             await db.rollback()
             logger.error(
@@ -218,7 +204,6 @@ class CRUDBase[
 
     async def remove(self, db: AsyncSession, *, id: str) -> ModelType | None:
         """Delete a record with error handling and null check."""
-        # Validate UUID format and convert to UUID object if string
         try:
             if isinstance(id, uuid.UUID):
                 uuid_obj = id
@@ -247,7 +232,7 @@ class CRUDBase[
             await db.rollback()
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
             logger.error(f"Integrity error deleting {self.model.__name__}: {error_msg}")
-            raise ValueError(
+            raise IntegrityConstraintError(
                 f"Cannot delete {self.model.__name__}: referenced by other records"
             )
         except Exception as e:
@@ -272,57 +257,40 @@ class CRUDBase[
         Get multiple records with total count, filtering, and sorting.
 
         NOTE: This method is defensive code that's never called in practice.
-        All CRUD subclasses (CRUDUser, CRUDOrganization, CRUDSession) override this method
-        with their own implementations that include additional parameters like search.
+        All repository subclasses override this method with their own implementations.
         Marked as pragma: no cover to avoid false coverage gaps.
-
-        Args:
-            db: Database session
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-            sort_by: Field name to sort by (must be a valid model attribute)
-            sort_order: Sort order ("asc" or "desc")
-            filters: Dictionary of filters (field_name: value)
-
-        Returns:
-            Tuple of (items, total_count)
         """
-        # Validate pagination parameters
         if skip < 0:
-            raise ValueError("skip must be non-negative")
+            raise InvalidInputError("skip must be non-negative")
         if limit < 0:
-            raise ValueError("limit must be non-negative")
+            raise InvalidInputError("limit must be non-negative")
         if limit > 1000:
-            raise ValueError("Maximum limit is 1000")
+            raise InvalidInputError("Maximum limit is 1000")
 
         try:
-            # Build base query
             query = select(self.model)
 
-            # Exclude soft-deleted records by default
             if hasattr(self.model, "deleted_at"):
                 query = query.where(self.model.deleted_at.is_(None))
 
-            # Apply filters
             if filters:
                 for field, value in filters.items():
                     if hasattr(self.model, field) and value is not None:
                         query = query.where(getattr(self.model, field) == value)
 
-            # Get total count (before pagination)
             count_query = select(func.count()).select_from(query.alias())
             count_result = await db.execute(count_query)
             total = count_result.scalar_one()
 
-            # Apply sorting
             if sort_by and hasattr(self.model, sort_by):
                 sort_column = getattr(self.model, sort_by)
                 if sort_order.lower() == "desc":
                     query = query.order_by(sort_column.desc())
                 else:
                     query = query.order_by(sort_column.asc())
+            else:
+                query = query.order_by(self.model.id)
 
-            # Apply pagination
             query = query.offset(skip).limit(limit)
             items_result = await db.execute(query)
             items = list(items_result.scalars().all())
@@ -356,7 +324,6 @@ class CRUDBase[
         """
         from datetime import datetime
 
-        # Validate UUID format and convert to UUID object if string
         try:
             if isinstance(id, uuid.UUID):
                 uuid_obj = id
@@ -378,14 +345,12 @@ class CRUDBase[
                 )
                 return None
 
-            # Check if model supports soft deletes
             if not hasattr(self.model, "deleted_at"):
                 logger.error(f"{self.model.__name__} does not support soft deletes")
-                raise ValueError(
+                raise InvalidInputError(
                     f"{self.model.__name__} does not have a deleted_at column"
                 )
 
-            # Set deleted_at timestamp
             obj.deleted_at = datetime.now(UTC)
             db.add(obj)
             await db.commit()
@@ -405,7 +370,6 @@ class CRUDBase[
 
         Only works if the model has a 'deleted_at' column.
         """
-        # Validate UUID format
         try:
             if isinstance(id, uuid.UUID):
                 uuid_obj = id
@@ -416,7 +380,6 @@ class CRUDBase[
             return None
 
         try:
-            # Find the soft-deleted record
             if hasattr(self.model, "deleted_at"):
                 result = await db.execute(
                     select(self.model).where(
@@ -426,7 +389,7 @@ class CRUDBase[
                 obj = result.scalar_one_or_none()
             else:
                 logger.error(f"{self.model.__name__} does not support soft deletes")
-                raise ValueError(
+                raise InvalidInputError(
                     f"{self.model.__name__} does not have a deleted_at column"
                 )
 
@@ -436,7 +399,6 @@ class CRUDBase[
                 )
                 return None
 
-            # Clear deleted_at timestamp
             obj.deleted_at = None
             db.add(obj)
             await db.commit()
@@ -449,3 +411,4 @@ class CRUDBase[
                 exc_info=True,
             )
             raise
+

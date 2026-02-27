@@ -10,6 +10,7 @@ from app.core.auth import (
     get_password_hash,
     verify_password,
 )
+from app.core.exceptions import DuplicateError
 from app.models.user import User
 from app.schemas.users import Token, UserCreate
 from app.services.auth_service import AuthenticationError, AuthService
@@ -152,9 +153,9 @@ class TestAuthServiceUserCreation:
             last_name="User",
         )
 
-        # Should raise AuthenticationError
+        # Should raise DuplicateError for duplicate email
         async with AsyncTestingSessionLocal() as session:
-            with pytest.raises(AuthenticationError):
+            with pytest.raises(DuplicateError):
                 await AuthService.create_user(db=session, user_data=user_data)
 
 

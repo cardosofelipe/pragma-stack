@@ -14,7 +14,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies.auth import get_current_superuser, get_current_user
 from app.core.database import get_db
 from app.core.exceptions import AuthorizationError, ErrorCode, NotFoundError
-from app.crud.user import user as user_crud
 from app.models.user import User
 from app.schemas.common import (
     MessageResponse,
@@ -25,6 +24,7 @@ from app.schemas.common import (
 )
 from app.schemas.users import PasswordChange, UserResponse, UserUpdate
 from app.services.auth_service import AuthenticationError, AuthService
+from app.services.user_service import user_service
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ async def list_users(
             filters["is_superuser"] = is_superuser
 
         # Get paginated users with total count
-        users, total = await user_crud.get_multi_with_total(
+        users, total = await user_service.list_users(
             db,
             skip=pagination.offset,
             limit=pagination.limit,
@@ -107,7 +107,7 @@ async def list_users(
     """,
     operation_id="get_current_user_profile",
 )
-def get_current_user_profile(current_user: User = Depends(get_current_user)) -> Any:
+async def get_current_user_profile(current_user: User = Depends(get_current_user)) -> Any:
     """Get current user's profile."""
     return current_user
 
@@ -138,8 +138,8 @@ async def update_current_user(
     Users cannot elevate their own permissions (protected by UserUpdate schema validator).
     """
     try:
-        updated_user = await user_crud.update(
-            db, db_obj=current_user, obj_in=user_update
+        updated_user = await user_service.update_user(
+            db, user=current_user, obj_in=user_update
         )
         logger.info(f"User {current_user.id} updated their profile")
         return updated_user
@@ -190,13 +190,7 @@ async def get_user_by_id(
         )
 
     # Get user
-    user = await user_crud.get(db, id=str(user_id))
-    if not user:
-        raise NotFoundError(
-            message=f"User with id {user_id} not found",
-            error_code=ErrorCode.USER_NOT_FOUND,
-        )
-
+    user = await user_service.get_user(db, str(user_id))
     return user
 
 
@@ -241,15 +235,10 @@ async def update_user(
         )
 
     # Get user
-    user = await user_crud.get(db, id=str(user_id))
-    if not user:
-        raise NotFoundError(
-            message=f"User with id {user_id} not found",
-            error_code=ErrorCode.USER_NOT_FOUND,
-        )
+    user = await user_service.get_user(db, str(user_id))
 
     try:
-        updated_user = await user_crud.update(db, db_obj=user, obj_in=user_update)
+        updated_user = await user_service.update_user(db, user=user, obj_in=user_update)
         logger.info(f"User {user_id} updated by {current_user.id}")
         return updated_user
     except ValueError as e:
@@ -346,17 +335,12 @@ async def delete_user(
             error_code=ErrorCode.INSUFFICIENT_PERMISSIONS,
         )
 
-    # Get user
-    user = await user_crud.get(db, id=str(user_id))
-    if not user:
-        raise NotFoundError(
-            message=f"User with id {user_id} not found",
-            error_code=ErrorCode.USER_NOT_FOUND,
-        )
+    # Get user (raises NotFoundError if not found)
+    await user_service.get_user(db, str(user_id))
 
     try:
         # Use soft delete instead of hard delete
-        await user_crud.soft_delete(db, id=str(user_id))
+        await user_service.soft_delete_user(db, str(user_id))
         logger.info(f"User {user_id} soft-deleted by {current_user.id}")
         return MessageResponse(
             success=True, message=f"User {user_id} deleted successfully"

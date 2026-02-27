@@ -39,7 +39,7 @@ async def async_test_user2(async_test_db):
     _test_engine, SessionLocal = async_test_db
 
     async with SessionLocal() as session:
-        from app.crud.user import user as user_crud
+        from app.repositories.user import user_repo as user_crud
         from app.schemas.users import UserCreate
 
         user_data = UserCreate(
@@ -191,7 +191,7 @@ class TestRevokeSession:
 
         # Verify session is deactivated
         async with SessionLocal() as session:
-            from app.crud.session import session as session_crud
+            from app.repositories.session import session_repo as session_crud
 
             revoked_session = await session_crud.get(session, id=str(session_id))
             assert revoked_session.is_active is False
@@ -268,7 +268,7 @@ class TestCleanupExpiredSessions:
         _test_engine, SessionLocal = async_test_db
 
         # Create expired and active sessions using CRUD to avoid greenlet issues
-        from app.crud.session import session as session_crud
+        from app.repositories.session import session_repo as session_crud
         from app.schemas.sessions import SessionCreate
 
         async with SessionLocal() as db:
@@ -334,7 +334,7 @@ class TestCleanupExpiredSessions:
         _test_engine, SessionLocal = async_test_db
 
         # Create only active sessions using CRUD
-        from app.crud.session import session as session_crud
+        from app.repositories.session import session_repo as session_crud
         from app.schemas.sessions import SessionCreate
 
         async with SessionLocal() as db:
@@ -384,7 +384,7 @@ class TestSessionsAdditionalCases:
 
         # Create multiple sessions
         async with SessionLocal() as session:
-            from app.crud.session import session as session_crud
+            from app.repositories.session import session_repo as session_crud
             from app.schemas.sessions import SessionCreate
 
             for i in range(5):
@@ -431,7 +431,7 @@ class TestSessionsAdditionalCases:
         """Test cleanup with mix of active/inactive and expired/not-expired sessions."""
         _test_engine, SessionLocal = async_test_db
 
-        from app.crud.session import session as session_crud
+        from app.repositories.session import session_repo as session_crud
         from app.schemas.sessions import SessionCreate
 
         async with SessionLocal() as db:
@@ -502,10 +502,10 @@ class TestSessionExceptionHandlers:
         """Test list_sessions handles database errors (covers lines 104-106)."""
         from unittest.mock import patch
 
-        from app.crud import session as session_module
+        from app.repositories import session as session_module
 
         with patch.object(
-            session_module.session,
+            session_module.session_repo,
             "get_user_sessions",
             side_effect=Exception("Database error"),
         ):
@@ -527,10 +527,10 @@ class TestSessionExceptionHandlers:
         from unittest.mock import patch
         from uuid import uuid4
 
-        from app.crud import session as session_module
+        from app.repositories import session as session_module
 
         # First create a session to revoke
-        from app.crud.session import session as session_crud
+        from app.repositories.session import session_repo as session_crud
         from app.schemas.sessions import SessionCreate
 
         _test_engine, AsyncTestingSessionLocal = async_test_db
@@ -550,7 +550,7 @@ class TestSessionExceptionHandlers:
 
         # Mock the deactivate method to raise an exception
         with patch.object(
-            session_module.session,
+            session_module.session_repo,
             "deactivate",
             side_effect=Exception("Database connection lost"),
         ):
@@ -568,10 +568,10 @@ class TestSessionExceptionHandlers:
         """Test cleanup_expired_sessions handles database errors (covers lines 233-236)."""
         from unittest.mock import patch
 
-        from app.crud import session as session_module
+        from app.repositories import session as session_module
 
         with patch.object(
-            session_module.session,
+            session_module.session_repo,
             "cleanup_expired_for_user",
             side_effect=Exception("Cleanup failed"),
         ):

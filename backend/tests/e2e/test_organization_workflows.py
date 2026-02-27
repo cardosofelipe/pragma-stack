@@ -46,7 +46,7 @@ async def register_and_login(client, email: str, password: str = "SecurePassword
 
 async def create_superuser_and_login(client, db_session):
     """Helper to create a superuser directly in DB and login."""
-    from app.crud.user import user as user_crud
+    from app.repositories.user import user_repo as user_crud
     from app.schemas.users import UserCreate
 
     email = f"admin-{uuid4().hex[:8]}@example.com"

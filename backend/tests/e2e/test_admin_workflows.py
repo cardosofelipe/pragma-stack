@@ -46,7 +46,7 @@ async def login_user(client, email: str, password: str = "SecurePassword123!"): 
 
 async def create_superuser(e2e_db_session, email: str, password: str):
     """Create a superuser directly in the database."""
-    from app.crud.user import user as user_crud
+    from app.repositories.user import user_repo as user_crud
     from app.schemas.users import UserCreate
 
     user_in = UserCreate(

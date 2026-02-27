@@ -15,16 +15,14 @@ from app.core.auth import (
     TokenExpiredError,
     TokenInvalidError,
     decode_token,
-    get_password_hash,
 )
 from app.core.database import get_db
 from app.core.exceptions import (
     AuthenticationError as AuthError,
     DatabaseError,
+    DuplicateError,
     ErrorCode,
 )
-from app.crud.session import session as session_crud
-from app.crud.user import user as user_crud
 from app.models.user import User
 from app.schemas.common import MessageResponse
 from app.schemas.sessions import LogoutRequest, SessionCreate
@@ -39,6 +37,8 @@ from app.schemas.users import (
 )
 from app.services.auth_service import AuthenticationError, AuthService
 from app.services.email_service import email_service
+from app.services.session_service import session_service
+from app.services.user_service import user_service
 from app.utils.device import extract_device_info
 from app.utils.security import create_password_reset_token, verify_password_reset_token
 
@@ -91,7 +91,7 @@ async def _create_login_session(
             location_country=device_info.location_country,
         )
 
-        await session_crud.create_session(db, obj_in=session_data)
+        await session_service.create_session(db, obj_in=session_data)
 
         logger.info(
             f"{login_type.capitalize()} successful: {user.email} from {device_info.device_name} "
@@ -123,8 +123,14 @@ async def register_user(
     try:
         user = await AuthService.create_user(db, user_data)
         return user
-    except AuthenticationError as e:
+    except DuplicateError:
         # SECURITY: Don't reveal if email exists - generic error message
+        logger.warning(f"Registration failed: duplicate email {user_data.email}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Registration failed. Please check your information and try again.",
+        )
+    except AuthError as e:
         logger.warning(f"Registration failed: {e!s}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -259,7 +265,7 @@ async def refresh_token(
         )
 
         # Check if session exists and is active
-        session = await session_crud.get_active_by_jti(db, jti=refresh_payload.jti)
+        session = await session_service.get_active_by_jti(db, jti=refresh_payload.jti)
 
         if not session:
             logger.warning(
@@ -279,7 +285,7 @@ async def refresh_token(
 
         # Update session with new refresh token JTI and expiration
         try:
-            await session_crud.update_refresh_token(
+            await session_service.update_refresh_token(
                 db,
                 session=session,
                 new_jti=new_refresh_payload.jti,
@@ -347,7 +353,7 @@ async def request_password_reset(
     """
     try:
         # Look up user by email
-        user = await user_crud.get_by_email(db, email=reset_request.email)
+        user = await user_service.get_by_email(db, email=reset_request.email)
 
         # Only send email if user exists and is active
         if user and user.is_active:
@@ -412,31 +418,25 @@ async def confirm_password_reset(
                 detail="Invalid or expired password reset token",
             )
 
-        # Look up user
-        user = await user_crud.get_by_email(db, email=email)
-
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        # Reset password via service (validates user exists and is active)
+        try:
+            user = await AuthService.reset_password(
+                db, email=email, new_password=reset_confirm.new_password
             )
-
-        if not user.is_active:
+        except AuthenticationError as e:
+            err_msg = str(e)
+            if "inactive" in err_msg.lower():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, detail=err_msg
+                )
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User account is inactive",
+                status_code=status.HTTP_404_NOT_FOUND, detail=err_msg
             )
-
-        # Update password
-        user.password_hash = get_password_hash(reset_confirm.new_password)
-        db.add(user)
-        await db.commit()
 
         # SECURITY: Invalidate all existing sessions after password reset
         # This prevents stolen sessions from being used after password change
-        from app.crud.session import session as session_crud
-
         try:
-            deactivated_count = await session_crud.deactivate_all_user_sessions(
+            deactivated_count = await session_service.deactivate_all_user_sessions(
                 db, user_id=str(user.id)
             )
             logger.info(
@@ -511,7 +511,7 @@ async def logout(
             return MessageResponse(success=True, message="Logged out successfully")
 
         # Find the session by JTI
-        session = await session_crud.get_by_jti(db, jti=refresh_payload.jti)
+        session = await session_service.get_by_jti(db, jti=refresh_payload.jti)
 
         if session:
             # Verify session belongs to current user (security check)
@@ -526,7 +526,7 @@ async def logout(
                 )
 
             # Deactivate the session
-            await session_crud.deactivate(db, session_id=str(session.id))
+            await session_service.deactivate(db, session_id=str(session.id))
 
             logger.info(
                 f"User {current_user.id} logged out from {session.device_name} "
@@ -584,7 +584,7 @@ async def logout_all(
     """
     try:
         # Deactivate all sessions for this user
-        count = await session_crud.deactivate_all_user_sessions(
+        count = await session_service.deactivate_all_user_sessions(
             db, user_id=str(current_user.id)
         )
 

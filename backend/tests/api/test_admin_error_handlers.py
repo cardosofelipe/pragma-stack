@@ -45,7 +45,7 @@ class TestAdminListUsersFilters:
     async def test_list_users_database_error_propagates(self, client, superuser_token):
         """Test that database errors propagate correctly (covers line 118-120)."""
         with patch(
-            "app.api.routes.admin.user_crud.get_multi_with_total",
+            "app.api.routes.admin.user_service.list_users",
             side_effect=Exception("DB error"),
         ):
             with pytest.raises(Exception):
@@ -74,8 +74,8 @@ class TestAdminCreateUserErrors:
             },
         )
 
-        # Should get error for duplicate email
-        assert response.status_code == status.HTTP_404_NOT_FOUND
+        # Should get conflict for duplicate email
+        assert response.status_code == status.HTTP_409_CONFLICT
 
     @pytest.mark.asyncio
     async def test_create_user_unexpected_error_propagates(
@@ -83,7 +83,7 @@ class TestAdminCreateUserErrors:
     ):
         """Test unexpected errors during user creation (covers line 151-153)."""
         with patch(
-            "app.api.routes.admin.user_crud.create",
+            "app.api.routes.admin.user_service.create_user",
             side_effect=RuntimeError("Unexpected error"),
         ):
             with pytest.raises(RuntimeError):
@@ -135,7 +135,7 @@ class TestAdminUpdateUserErrors:
     ):
         """Test unexpected errors during user update (covers line 206-208)."""
         with patch(
-            "app.api.routes.admin.user_crud.update",
+            "app.api.routes.admin.user_service.update_user",
             side_effect=RuntimeError("Update failed"),
         ):
             with pytest.raises(RuntimeError):
@@ -166,7 +166,7 @@ class TestAdminDeleteUserErrors:
     ):
         """Test unexpected errors during user deletion (covers line 238-240)."""
         with patch(
-            "app.api.routes.admin.user_crud.soft_delete",
+            "app.api.routes.admin.user_service.soft_delete_user",
             side_effect=Exception("Delete failed"),
         ):
             with pytest.raises(Exception):
@@ -196,7 +196,7 @@ class TestAdminActivateUserErrors:
     ):
         """Test unexpected errors during user activation (covers line 282-284)."""
         with patch(
-            "app.api.routes.admin.user_crud.update",
+            "app.api.routes.admin.user_service.update_user",
             side_effect=Exception("Activation failed"),
         ):
             with pytest.raises(Exception):
@@ -238,7 +238,7 @@ class TestAdminDeactivateUserErrors:
     ):
         """Test unexpected errors during user deactivation (covers line 326-328)."""
         with patch(
-            "app.api.routes.admin.user_crud.update",
+            "app.api.routes.admin.user_service.update_user",
             side_effect=Exception("Deactivation failed"),
         ):
             with pytest.raises(Exception):
@@ -258,7 +258,7 @@ class TestAdminListOrganizationsErrors:
     async def test_list_organizations_database_error(self, client, superuser_token):
         """Test list organizations with database error (covers line 427-456)."""
         with patch(
-            "app.api.routes.admin.organization_crud.get_multi_with_member_counts",
+            "app.api.routes.admin.organization_service.get_multi_with_member_counts",
             side_effect=Exception("DB error"),
         ):
             with pytest.raises(Exception):
@@ -299,14 +299,14 @@ class TestAdminCreateOrganizationErrors:
             },
         )
 
-        # Should get error for duplicate slug
-        assert response.status_code == status.HTTP_404_NOT_FOUND
+        # Should get conflict for duplicate slug
+        assert response.status_code == status.HTTP_409_CONFLICT
 
     @pytest.mark.asyncio
     async def test_create_organization_unexpected_error(self, client, superuser_token):
         """Test unexpected errors during organization creation (covers line 484-485)."""
         with patch(
-            "app.api.routes.admin.organization_crud.create",
+            "app.api.routes.admin.organization_service.create_organization",
             side_effect=RuntimeError("Creation failed"),
         ):
             with pytest.raises(RuntimeError):
@@ -367,7 +367,7 @@ class TestAdminUpdateOrganizationErrors:
             org_id = org.id
 
         with patch(
-            "app.api.routes.admin.organization_crud.update",
+            "app.api.routes.admin.organization_service.update_organization",
             side_effect=Exception("Update failed"),
         ):
             with pytest.raises(Exception):
@@ -412,7 +412,7 @@ class TestAdminDeleteOrganizationErrors:
             org_id = org.id
 
         with patch(
-            "app.api.routes.admin.organization_crud.remove",
+            "app.api.routes.admin.organization_service.remove_organization",
             side_effect=Exception("Delete failed"),
         ):
             with pytest.raises(Exception):
@@ -456,7 +456,7 @@ class TestAdminListOrganizationMembersErrors:
             org_id = org.id
 
         with patch(
-            "app.api.routes.admin.organization_crud.get_organization_members",
+            "app.api.routes.admin.organization_service.get_organization_members",
             side_effect=Exception("DB error"),
         ):
             with pytest.raises(Exception):
@@ -531,7 +531,7 @@ class TestAdminAddOrganizationMemberErrors:
             org_id = org.id
 
         with patch(
-            "app.api.routes.admin.organization_crud.add_user",
+            "app.api.routes.admin.organization_service.add_member",
             side_effect=Exception("Add failed"),
         ):
             with pytest.raises(Exception):
@@ -587,7 +587,7 @@ class TestAdminRemoveOrganizationMemberErrors:
             org_id = org.id
 
         with patch(
-            "app.api.routes.admin.organization_crud.remove_user",
+            "app.api.routes.admin.organization_service.remove_member",
             side_effect=Exception("Remove failed"),
         ):
             with pytest.raises(Exception):

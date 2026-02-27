@@ -5,7 +5,8 @@ Comprehensive tests for async user CRUD operations.
 
 import pytest
 
-from app.crud.user import user as user_crud
+from app.core.repository_exceptions import DuplicateEntryError, InvalidInputError
+from app.repositories.user import user_repo as user_crud
 from app.schemas.users import UserCreate, UserUpdate
 
 
@@ -93,7 +94,7 @@ class TestCreate:
                 last_name="User",
             )
 
-            with pytest.raises(ValueError) as exc_info:
+            with pytest.raises(DuplicateEntryError) as exc_info:
                 await user_crud.create(session, obj_in=user_data)
 
             assert "already exists" in str(exc_info.value).lower()
@@ -330,7 +331,7 @@ class TestGetMultiWithTotal:
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            with pytest.raises(ValueError) as exc_info:
+            with pytest.raises(InvalidInputError) as exc_info:
                 await user_crud.get_multi_with_total(session, skip=-1, limit=10)
 
             assert "skip must be non-negative" in str(exc_info.value)
@@ -341,7 +342,7 @@ class TestGetMultiWithTotal:
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            with pytest.raises(ValueError) as exc_info:
+            with pytest.raises(InvalidInputError) as exc_info:
                 await user_crud.get_multi_with_total(session, skip=0, limit=-1)
 
             assert "limit must be non-negative" in str(exc_info.value)
@@ -352,7 +353,7 @@ class TestGetMultiWithTotal:
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            with pytest.raises(ValueError) as exc_info:
+            with pytest.raises(InvalidInputError) as exc_info:
                 await user_crud.get_multi_with_total(session, skip=0, limit=1001)
 
             assert "Maximum limit is 1000" in str(exc_info.value)

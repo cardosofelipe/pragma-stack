@@ -334,7 +334,7 @@ class TestPasswordResetConfirm:
         token = create_password_reset_token(async_test_user.email)
 
         # Mock the database commit to raise an exception
-        with patch("app.api.routes.auth.user_crud.get_by_email") as mock_get:
+        with patch("app.services.auth_service.user_repo.get_by_email") as mock_get:
             mock_get.side_effect = Exception("Database error")
 
             response = await client.post(

@@ -10,7 +10,8 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.exc import OperationalError
 
-from app.crud.session import session as session_crud
+from app.core.repository_exceptions import IntegrityConstraintError
+from app.repositories.session import session_repo as session_crud
 from app.models.user_session import UserSession
 from app.schemas.sessions import SessionCreate
 
@@ -102,7 +103,7 @@ class TestSessionCRUDCreateSessionFailures:
                         last_used_at=datetime.now(UTC),
                     )
 
-                    with pytest.raises(ValueError, match="Failed to create session"):
+                    with pytest.raises(IntegrityConstraintError, match="Failed to create session"):
                         await session_crud.create_session(session, obj_in=session_data)
 
                     mock_rollback.assert_called_once()
@@ -133,7 +134,7 @@ class TestSessionCRUDCreateSessionFailures:
                         last_used_at=datetime.now(UTC),
                     )
 
-                    with pytest.raises(ValueError, match="Failed to create session"):
+                    with pytest.raises(IntegrityConstraintError, match="Failed to create session"):
                         await session_crud.create_session(session, obj_in=session_data)
 
                     mock_rollback.assert_called_once()

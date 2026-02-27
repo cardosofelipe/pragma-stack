@@ -7,7 +7,10 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from app.crud.oauth import oauth_account, oauth_client, oauth_state
+from app.core.repository_exceptions import DuplicateEntryError
+from app.repositories.oauth_account import oauth_account_repo as oauth_account
+from app.repositories.oauth_client import oauth_client_repo as oauth_client
+from app.repositories.oauth_state import oauth_state_repo as oauth_state
 from app.schemas.oauth import OAuthAccountCreate, OAuthClientCreate, OAuthStateCreate
 
 
@@ -60,7 +63,7 @@ class TestOAuthAccountCRUD:
 
             # SQLite returns different error message than PostgreSQL
             with pytest.raises(
-                ValueError, match="(already linked|UNIQUE constraint failed)"
+                DuplicateEntryError, match="(already linked|UNIQUE constraint failed|Failed to create)"
             ):
                 await oauth_account.create_account(session, obj_in=account_data2)
 
@@ -256,13 +259,13 @@ class TestOAuthAccountCRUD:
             updated = await oauth_account.update_tokens(
                 session,
                 account=account,
-                access_token_encrypted="new_access_token",
-                refresh_token_encrypted="new_refresh_token",
+                access_token="new_access_token",
+                refresh_token="new_refresh_token",
                 token_expires_at=new_expires,
             )
 
-            assert updated.access_token_encrypted == "new_access_token"
-            assert updated.refresh_token_encrypted == "new_refresh_token"
+            assert updated.access_token == "new_access_token"
+            assert updated.refresh_token == "new_refresh_token"
 
 
 class TestOAuthStateCRUD:

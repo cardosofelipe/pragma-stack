@@ -12,7 +12,7 @@ These tests prevent real-world attack scenarios.
 import pytest
 from httpx import AsyncClient
 
-from app.crud.session import session as session_crud
+from app.repositories.session import session_repo as session_crud
 from app.models.user import User
 
 

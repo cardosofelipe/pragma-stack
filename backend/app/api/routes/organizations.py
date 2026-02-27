@@ -15,9 +15,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies.auth import get_current_user
 from app.api.dependencies.permissions import require_org_admin, require_org_membership
 from app.core.database import get_db
-from app.core.exceptions import ErrorCode, NotFoundError
-from app.crud.organization import organization as organization_crud
 from app.models.user import User
+from app.services.organization_service import organization_service
 from app.schemas.common import (
     PaginatedResponse,
     PaginationParams,
@@ -54,7 +53,7 @@ async def get_my_organizations(
     """
     try:
         # Get all org data in single query with JOIN and subquery
-        orgs_data = await organization_crud.get_user_organizations_with_details(
+        orgs_data = await organization_service.get_user_organizations_with_details(
             db, user_id=current_user.id, is_active=is_active
         )
 
@@ -100,13 +99,7 @@ async def get_organization(
     User must be a member of the organization.
     """
     try:
-        org = await organization_crud.get(db, id=organization_id)
-        if not org:  # pragma: no cover - Permission check prevents this (see docs/UNREACHABLE_DEFENSIVE_CODE_ANALYSIS.md)
-            raise NotFoundError(
-                detail=f"Organization {organization_id} not found",
-                error_code=ErrorCode.NOT_FOUND,
-            )
-
+        org = await organization_service.get_organization(db, str(organization_id))
         org_dict = {
             "id": org.id,
             "name": org.name,
@@ -116,14 +109,12 @@ async def get_organization(
             "settings": org.settings,
             "created_at": org.created_at,
             "updated_at": org.updated_at,
-            "member_count": await organization_crud.get_member_count(
+            "member_count": await organization_service.get_member_count(
                 db, organization_id=org.id
             ),
         }
         return OrganizationResponse(**org_dict)
 
-    except NotFoundError:  # pragma: no cover - See above
-        raise
     except Exception as e:
         logger.error(f"Error getting organization: {e!s}", exc_info=True)
         raise
@@ -149,7 +140,7 @@ async def get_organization_members(
     User must be a member of the organization to view members.
     """
     try:
-        members, total = await organization_crud.get_organization_members(
+        members, total = await organization_service.get_organization_members(
             db,
             organization_id=organization_id,
             skip=pagination.offset,
@@ -192,14 +183,10 @@ async def update_organization(
     Requires owner or admin role in the organization.
     """
     try:
-        org = await organization_crud.get(db, id=organization_id)
-        if not org:  # pragma: no cover - Permission check prevents this (see docs/UNREACHABLE_DEFENSIVE_CODE_ANALYSIS.md)
-            raise NotFoundError(
-                detail=f"Organization {organization_id} not found",
-                error_code=ErrorCode.NOT_FOUND,
-            )
-
-        updated_org = await organization_crud.update(db, db_obj=org, obj_in=org_in)
+        org = await organization_service.get_organization(db, str(organization_id))
+        updated_org = await organization_service.update_organization(
+            db, org=org, obj_in=org_in
+        )
         logger.info(
             f"User {current_user.email} updated organization {updated_org.name}"
         )
@@ -213,14 +200,12 @@ async def update_organization(
             "settings": updated_org.settings,
             "created_at": updated_org.created_at,
             "updated_at": updated_org.updated_at,
-            "member_count": await organization_crud.get_member_count(
+            "member_count": await organization_service.get_member_count(
                 db, organization_id=updated_org.id
             ),
         }
         return OrganizationResponse(**org_dict)
 
-    except NotFoundError:  # pragma: no cover - See above
-        raise
     except Exception as e:
         logger.error(f"Error updating organization: {e!s}", exc_info=True)
         raise

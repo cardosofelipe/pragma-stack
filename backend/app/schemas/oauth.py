@@ -60,8 +60,8 @@ class OAuthAccountCreate(OAuthAccountBase):
 
     user_id: UUID
     provider_user_id: str = Field(..., max_length=255)
-    access_token_encrypted: str | None = None
-    refresh_token_encrypted: str | None = None
+    access_token: str | None = None
+    refresh_token: str | None = None
     token_expires_at: datetime | None = None
 
 

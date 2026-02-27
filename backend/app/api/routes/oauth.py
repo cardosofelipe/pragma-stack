@@ -25,8 +25,7 @@ from app.core.auth import decode_token
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.exceptions import AuthenticationError as AuthError
-from app.crud import oauth_account
-from app.crud.session import session as session_crud
+from app.services.session_service import session_service
 from app.models.user import User
 from app.schemas.oauth import (
     OAuthAccountsListResponse,
@@ -82,7 +81,7 @@ async def _create_oauth_login_session(
             location_country=device_info.location_country,
         )
 
-        await session_crud.create_session(db, obj_in=session_data)
+        await session_service.create_session(db, obj_in=session_data)
 
         logger.info(
             f"OAuth login successful: {user.email} via {provider} "
@@ -289,7 +288,7 @@ async def list_accounts(
     Returns:
         List of linked OAuth accounts
     """
-    accounts = await oauth_account.get_user_accounts(db, user_id=current_user.id)
+    accounts = await OAuthService.get_user_accounts(db, user_id=current_user.id)
     return OAuthAccountsListResponse(accounts=accounts)
 
 
@@ -397,7 +396,7 @@ async def start_link(
         )
 
     # Check if user already has this provider linked
-    existing = await oauth_account.get_user_account_by_provider(
+    existing = await OAuthService.get_user_account_by_provider(
         db, user_id=current_user.id, provider=provider
     )
     if existing:

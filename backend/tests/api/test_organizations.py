@@ -537,7 +537,7 @@ class TestOrganizationExceptionHandlers:
     ):
         """Test generic exception handler in get_my_organizations (covers lines 81-83)."""
         with patch(
-            "app.crud.organization.organization.get_user_organizations_with_details",
+            "app.api.routes.organizations.organization_service.get_user_organizations_with_details",
             side_effect=Exception("Database connection lost"),
         ):
             # The exception handler logs and re-raises, so we expect the exception
@@ -554,7 +554,7 @@ class TestOrganizationExceptionHandlers:
     ):
         """Test generic exception handler in get_organization (covers lines 124-128)."""
         with patch(
-            "app.crud.organization.organization.get",
+            "app.api.routes.organizations.organization_service.get_organization",
             side_effect=Exception("Database timeout"),
         ):
             with pytest.raises(Exception, match="Database timeout"):
@@ -569,7 +569,7 @@ class TestOrganizationExceptionHandlers:
     ):
         """Test generic exception handler in get_organization_members (covers lines 170-172)."""
         with patch(
-            "app.crud.organization.organization.get_organization_members",
+            "app.api.routes.organizations.organization_service.get_organization_members",
             side_effect=Exception("Connection pool exhausted"),
         ):
             with pytest.raises(Exception, match="Connection pool exhausted"):
@@ -591,11 +591,11 @@ class TestOrganizationExceptionHandlers:
         admin_token = login_response.json()["access_token"]
 
         with patch(
-            "app.crud.organization.organization.get",
+            "app.api.routes.organizations.organization_service.get_organization",
             return_value=test_org_with_user_admin,
         ):
             with patch(
-                "app.crud.organization.organization.update",
+                "app.api.routes.organizations.organization_service.update_organization",
                 side_effect=Exception("Write lock timeout"),
             ):
                 with pytest.raises(Exception, match="Write lock timeout"):

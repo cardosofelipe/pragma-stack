@@ -1,12 +1,12 @@
 from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.security.utils import get_authorization_scheme_param
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import TokenExpiredError, TokenInvalidError, get_token_data
 from app.core.database import get_db
 from app.models.user import User
+from app.repositories.user import user_repo
 
 # OAuth2 configuration
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -32,9 +32,8 @@ async def get_current_user(
         # Decode token and get user ID
         token_data = get_token_data(token)
 
-        # Get user from database
-        result = await db.execute(select(User).where(User.id == token_data.user_id))
-        user = result.scalar_one_or_none()
+        # Get user from database via repository
+        user = await user_repo.get(db, id=str(token_data.user_id))
 
         if not user:
             raise HTTPException(
@@ -144,8 +143,7 @@ async def get_optional_current_user(
 
     try:
         token_data = get_token_data(token)
-        result = await db.execute(select(User).where(User.id == token_data.user_id))
-        user = result.scalar_one_or_none()
+        user = await user_repo.get(db, id=str(token_data.user_id))
         if not user or not user.is_active:
             return None
         return user

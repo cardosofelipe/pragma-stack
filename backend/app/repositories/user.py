@@ -1,5 +1,5 @@
-# app/crud/user_async.py
-"""Async CRUD operations for User model using SQLAlchemy 2.0 patterns."""
+# app/repositories/user.py
+"""Repository for User model async CRUD operations using SQLAlchemy 2.0 patterns."""
 
 import logging
 from datetime import UTC, datetime
@@ -11,15 +11,16 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import get_password_hash_async
-from app.crud.base import CRUDBase
+from app.core.repository_exceptions import DuplicateEntryError, InvalidInputError
 from app.models.user import User
+from app.repositories.base import BaseRepository
 from app.schemas.users import UserCreate, UserUpdate
 
 logger = logging.getLogger(__name__)
 
 
-class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
-    """Async CRUD operations for User model."""
+class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
+    """Repository for User model."""
 
     async def get_by_email(self, db: AsyncSession, *, email: str) -> User | None:
         """Get user by email address."""
@@ -33,7 +34,6 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     async def create(self, db: AsyncSession, *, obj_in: UserCreate) -> User:
         """Create a new user with async password hashing and error handling."""
         try:
-            # Hash password asynchronously to avoid blocking event loop
             password_hash = await get_password_hash_async(obj_in.password)
 
             db_obj = User(
@@ -58,12 +58,46 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
             if "email" in error_msg.lower():
                 logger.warning(f"Duplicate email attempted: {obj_in.email}")
-                raise ValueError(f"User with email {obj_in.email} already exists")
+                raise DuplicateEntryError(f"User with email {obj_in.email} already exists")
             logger.error(f"Integrity error creating user: {error_msg}")
-            raise ValueError(f"Database integrity error: {error_msg}")
+            raise DuplicateEntryError(f"Database integrity error: {error_msg}")
         except Exception as e:
             await db.rollback()
             logger.error(f"Unexpected error creating user: {e!s}", exc_info=True)
+            raise
+
+    async def create_oauth_user(
+        self,
+        db: AsyncSession,
+        *,
+        email: str,
+        first_name: str = "User",
+        last_name: str | None = None,
+    ) -> User:
+        """Create a new passwordless user for OAuth sign-in."""
+        try:
+            db_obj = User(
+                email=email,
+                password_hash=None,  # OAuth-only user
+                first_name=first_name,
+                last_name=last_name,
+                is_active=True,
+                is_superuser=False,
+            )
+            db.add(db_obj)
+            await db.flush()  # Get user.id without committing
+            return db_obj
+        except IntegrityError as e:
+            await db.rollback()
+            error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
+            if "email" in error_msg.lower():
+                logger.warning(f"Duplicate email attempted: {email}")
+                raise DuplicateEntryError(f"User with email {email} already exists")
+            logger.error(f"Integrity error creating OAuth user: {error_msg}")
+            raise DuplicateEntryError(f"Database integrity error: {error_msg}")
+        except Exception as e:
+            await db.rollback()
+            logger.error(f"Unexpected error creating OAuth user: {e!s}", exc_info=True)
             raise
 
     async def update(
@@ -75,8 +109,6 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         else:
             update_data = obj_in.model_dump(exclude_unset=True)
 
-        # Handle password separately if it exists in update data
-        # Hash password asynchronously to avoid blocking event loop
         if "password" in update_data:
             update_data["password_hash"] = await get_password_hash_async(
                 update_data["password"]
@@ -84,6 +116,15 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             del update_data["password"]
 
         return await super().update(db, db_obj=db_obj, obj_in=update_data)
+
+    async def update_password(
+        self, db: AsyncSession, *, user: User, password_hash: str
+    ) -> User:
+        """Set a new password hash on a user and commit."""
+        user.password_hash = password_hash
+        await db.commit()
+        await db.refresh(user)
+        return user
 
     async def get_multi_with_total(
         self,
@@ -96,43 +137,23 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         filters: dict[str, Any] | None = None,
         search: str | None = None,
     ) -> tuple[list[User], int]:
-        """
-        Get multiple users with total count, filtering, sorting, and search.
-
-        Args:
-            db: Database session
-            skip: Number of records to skip
-            limit: Maximum number of records to return
-            sort_by: Field name to sort by
-            sort_order: Sort order ("asc" or "desc")
-            filters: Dictionary of filters (field_name: value)
-            search: Search term to match against email, first_name, last_name
-
-        Returns:
-            Tuple of (users list, total count)
-        """
-        # Validate pagination
+        """Get multiple users with total count, filtering, sorting, and search."""
         if skip < 0:
-            raise ValueError("skip must be non-negative")
+            raise InvalidInputError("skip must be non-negative")
         if limit < 0:
-            raise ValueError("limit must be non-negative")
+            raise InvalidInputError("limit must be non-negative")
         if limit > 1000:
-            raise ValueError("Maximum limit is 1000")
+            raise InvalidInputError("Maximum limit is 1000")
 
         try:
-            # Build base query
             query = select(User)
-
-            # Exclude soft-deleted users
             query = query.where(User.deleted_at.is_(None))
 
-            # Apply filters
             if filters:
                 for field, value in filters.items():
                     if hasattr(User, field) and value is not None:
                         query = query.where(getattr(User, field) == value)
 
-            # Apply search
             if search:
                 search_filter = or_(
                     User.email.ilike(f"%{search}%"),
@@ -141,14 +162,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 )
                 query = query.where(search_filter)
 
-            # Get total count
             from sqlalchemy import func
 
             count_query = select(func.count()).select_from(query.alias())
             count_result = await db.execute(count_query)
             total = count_result.scalar_one()
 
-            # Apply sorting
             if sort_by and hasattr(User, sort_by):
                 sort_column = getattr(User, sort_by)
                 if sort_order.lower() == "desc":
@@ -156,7 +175,6 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
                 else:
                     query = query.order_by(sort_column.asc())
 
-            # Apply pagination
             query = query.offset(skip).limit(limit)
             result = await db.execute(query)
             users = list(result.scalars().all())
@@ -170,26 +188,15 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     async def bulk_update_status(
         self, db: AsyncSession, *, user_ids: list[UUID], is_active: bool
     ) -> int:
-        """
-        Bulk update is_active status for multiple users.
-
-        Args:
-            db: Database session
-            user_ids: List of user IDs to update
-            is_active: New active status
-
-        Returns:
-            Number of users updated
-        """
+        """Bulk update is_active status for multiple users."""
         try:
             if not user_ids:
                 return 0
 
-            # Use UPDATE with WHERE IN for efficiency
             stmt = (
                 update(User)
                 .where(User.id.in_(user_ids))
-                .where(User.deleted_at.is_(None))  # Don't update deleted users
+                .where(User.deleted_at.is_(None))
                 .values(is_active=is_active, updated_at=datetime.now(UTC))
             )
 
@@ -212,34 +219,20 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         user_ids: list[UUID],
         exclude_user_id: UUID | None = None,
     ) -> int:
-        """
-        Bulk soft delete multiple users.
-
-        Args:
-            db: Database session
-            user_ids: List of user IDs to delete
-            exclude_user_id: Optional user ID to exclude (e.g., the admin performing the action)
-
-        Returns:
-            Number of users deleted
-        """
+        """Bulk soft delete multiple users."""
         try:
             if not user_ids:
                 return 0
 
-            # Remove excluded user from list
             filtered_ids = [uid for uid in user_ids if uid != exclude_user_id]
 
             if not filtered_ids:
                 return 0
 
-            # Use UPDATE with WHERE IN for efficiency
             stmt = (
                 update(User)
                 .where(User.id.in_(filtered_ids))
-                .where(
-                    User.deleted_at.is_(None)
-                )  # Don't re-delete already deleted users
+                .where(User.deleted_at.is_(None))
                 .values(
                     deleted_at=datetime.now(UTC),
                     is_active=False,
@@ -268,5 +261,5 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return user.is_superuser
 
 
-# Create a singleton instance for use across the application
-user = CRUDUser(User)
+# Singleton instance
+user_repo = UserRepository(User)

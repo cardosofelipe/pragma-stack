@@ -99,7 +99,7 @@ class TestUpdateCurrentUser:
         from unittest.mock import patch
 
         with patch(
-            "app.api.routes.users.user_crud.update", side_effect=Exception("DB error")
+            "app.api.routes.users.user_service.update_user", side_effect=Exception("DB error")
         ):
             with pytest.raises(Exception):
                 await client.patch(
@@ -134,7 +134,7 @@ class TestUpdateCurrentUser:
         from unittest.mock import patch
 
         with patch(
-            "app.api.routes.users.user_crud.update",
+            "app.api.routes.users.user_service.update_user",
             side_effect=ValueError("Invalid value"),
         ):
             with pytest.raises(ValueError):
@@ -224,7 +224,7 @@ class TestUpdateUserById:
         from unittest.mock import patch
 
         with patch(
-            "app.api.routes.users.user_crud.update", side_effect=ValueError("Invalid")
+            "app.api.routes.users.user_service.update_user", side_effect=ValueError("Invalid")
         ):
             with pytest.raises(ValueError):
                 await client.patch(
@@ -241,7 +241,7 @@ class TestUpdateUserById:
         from unittest.mock import patch
 
         with patch(
-            "app.api.routes.users.user_crud.update", side_effect=Exception("Unexpected")
+            "app.api.routes.users.user_service.update_user", side_effect=Exception("Unexpected")
         ):
             with pytest.raises(Exception):
                 await client.patch(
@@ -354,7 +354,7 @@ class TestDeleteUserById:
         from unittest.mock import patch
 
         with patch(
-            "app.api.routes.users.user_crud.soft_delete",
+            "app.api.routes.users.user_service.soft_delete_user",
             side_effect=ValueError("Cannot delete"),
         ):
             with pytest.raises(ValueError):
@@ -371,7 +371,7 @@ class TestDeleteUserById:
         from unittest.mock import patch
 
         with patch(
-            "app.api.routes.users.user_crud.soft_delete",
+            "app.api.routes.users.user_service.soft_delete_user",
             side_effect=Exception("Unexpected"),
         ):
             with pytest.raises(Exception):

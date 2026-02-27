@@ -1,5 +1,5 @@
-# app/crud/organization_async.py
-"""Async CRUD operations for Organization model using SQLAlchemy 2.0 patterns."""
+# app/repositories/organization.py
+"""Repository for Organization model async CRUD operations using SQLAlchemy 2.0 patterns."""
 
 import logging
 from typing import Any
@@ -9,10 +9,11 @@ from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.base import CRUDBase
+from app.core.repository_exceptions import DuplicateEntryError, IntegrityConstraintError
 from app.models.organization import Organization
 from app.models.user import User
 from app.models.user_organization import OrganizationRole, UserOrganization
+from app.repositories.base import BaseRepository
 from app.schemas.organizations import (
     OrganizationCreate,
     OrganizationUpdate,
@@ -21,8 +22,8 @@ from app.schemas.organizations import (
 logger = logging.getLogger(__name__)
 
 
-class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUpdate]):
-    """Async CRUD operations for Organization model."""
+class OrganizationRepository(BaseRepository[Organization, OrganizationCreate, OrganizationUpdate]):
+    """Repository for Organization model."""
 
     async def get_by_slug(self, db: AsyncSession, *, slug: str) -> Organization | None:
         """Get organization by slug."""
@@ -54,13 +55,13 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
         except IntegrityError as e:
             await db.rollback()
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
-            if "slug" in error_msg.lower():
+            if "slug" in error_msg.lower() or "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
                 logger.warning(f"Duplicate slug attempted: {obj_in.slug}")
-                raise ValueError(
+                raise DuplicateEntryError(
                     f"Organization with slug '{obj_in.slug}' already exists"
                 )
             logger.error(f"Integrity error creating organization: {error_msg}")
-            raise ValueError(f"Database integrity error: {error_msg}")
+            raise IntegrityConstraintError(f"Database integrity error: {error_msg}")
         except Exception as e:
             await db.rollback()
             logger.error(
@@ -79,16 +80,10 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
         sort_by: str = "created_at",
         sort_order: str = "desc",
     ) -> tuple[list[Organization], int]:
-        """
-        Get multiple organizations with filtering, searching, and sorting.
-
-        Returns:
-            Tuple of (organizations list, total count)
-        """
+        """Get multiple organizations with filtering, searching, and sorting."""
         try:
             query = select(Organization)
 
-            # Apply filters
             if is_active is not None:
                 query = query.where(Organization.is_active == is_active)
 
@@ -100,19 +95,16 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
                 )
                 query = query.where(search_filter)
 
-            # Get total count before pagination
             count_query = select(func.count()).select_from(query.alias())
             count_result = await db.execute(count_query)
             total = count_result.scalar_one()
 
-            # Apply sorting
             sort_column = getattr(Organization, sort_by, Organization.created_at)
             if sort_order == "desc":
                 query = query.order_by(sort_column.desc())
             else:
                 query = query.order_by(sort_column.asc())
 
-            # Apply pagination
             query = query.offset(skip).limit(limit)
             result = await db.execute(query)
             organizations = list(result.scalars().all())
@@ -149,16 +141,8 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
         is_active: bool | None = None,
         search: str | None = None,
     ) -> tuple[list[dict[str, Any]], int]:
-        """
-        Get organizations with member counts in a SINGLE QUERY using JOIN and GROUP BY.
-        This eliminates the N+1 query problem.
-
-        Returns:
-            Tuple of (list of dicts with org and member_count, total count)
-        """
+        """Get organizations with member counts in a SINGLE QUERY using JOIN and GROUP BY."""
         try:
-            # Build base query with LEFT JOIN and GROUP BY
-            # Use CASE statement to count only active members
             query = (
                 select(
                     Organization,
@@ -181,7 +165,6 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
                 .group_by(Organization.id)
             )
 
-            # Apply filters
             if is_active is not None:
                 query = query.where(Organization.is_active == is_active)
 
@@ -193,7 +176,6 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
                 )
                 query = query.where(search_filter)
 
-            # Get total count
             count_query = select(func.count(Organization.id))
             if is_active is not None:
                 count_query = count_query.where(Organization.is_active == is_active)
@@ -203,7 +185,6 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
             count_result = await db.execute(count_query)
             total = count_result.scalar_one()
 
-            # Apply pagination and ordering
             query = (
                 query.order_by(Organization.created_at.desc()).offset(skip).limit(limit)
             )
@@ -211,7 +192,6 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
             result = await db.execute(query)
             rows = result.all()
 
-            # Convert to list of dicts
             orgs_with_counts = [
                 {"organization": org, "member_count": member_count}
                 for org, member_count in rows
@@ -236,7 +216,6 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
     ) -> UserOrganization:
         """Add a user to an organization with a specific role."""
         try:
-            # Check if relationship already exists
             result = await db.execute(
                 select(UserOrganization).where(
                     and_(
@@ -248,7 +227,6 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
             existing = result.scalar_one_or_none()
 
             if existing:
-                # Reactivate if inactive, or raise error if already active
                 if not existing.is_active:
                     existing.is_active = True
                     existing.role = role
@@ -257,9 +235,8 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
                     await db.refresh(existing)
                     return existing
                 else:
-                    raise ValueError("User is already a member of this organization")
+                    raise DuplicateEntryError("User is already a member of this organization")
 
-            # Create new relationship
             user_org = UserOrganization(
                 user_id=user_id,
                 organization_id=organization_id,
@@ -274,7 +251,7 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
         except IntegrityError as e:
             await db.rollback()
             logger.error(f"Integrity error adding user to organization: {e!s}")
-            raise ValueError("Failed to add user to organization")
+            raise IntegrityConstraintError("Failed to add user to organization")
         except Exception as e:
             await db.rollback()
             logger.error(f"Error adding user to organization: {e!s}", exc_info=True)
@@ -350,14 +327,8 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
         limit: int = 100,
         is_active: bool = True,
     ) -> tuple[list[dict[str, Any]], int]:
-        """
-        Get members of an organization with user details.
-
-        Returns:
-            Tuple of (members list with user details, total count)
-        """
+        """Get members of an organization with user details."""
         try:
-            # Build query with join
             query = (
                 select(UserOrganization, User)
                 .join(User, UserOrganization.user_id == User.id)
@@ -367,7 +338,6 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
             if is_active is not None:
                 query = query.where(UserOrganization.is_active == is_active)
 
-            # Get total count
             count_query = select(func.count()).select_from(
                 select(UserOrganization)
                 .where(UserOrganization.organization_id == organization_id)
@@ -381,7 +351,6 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
             count_result = await db.execute(count_query)
             total = count_result.scalar_one()
 
-            # Apply ordering and pagination
             query = (
                 query.order_by(UserOrganization.created_at.desc())
                 .offset(skip)
@@ -435,15 +404,8 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
     async def get_user_organizations_with_details(
         self, db: AsyncSession, *, user_id: UUID, is_active: bool = True
     ) -> list[dict[str, Any]]:
-        """
-        Get user's organizations with role and member count in SINGLE QUERY.
-        Eliminates N+1 problem by using subquery for member counts.
-
-        Returns:
-            List of dicts with organization, role, and member_count
-        """
+        """Get user's organizations with role and member count in SINGLE QUERY."""
         try:
-            # Subquery to get member counts for each organization
             member_count_subq = (
                 select(
                     UserOrganization.organization_id,
@@ -454,7 +416,6 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
                 .subquery()
             )
 
-            # Main query with JOIN to get org, role, and member count
             query = (
                 select(
                     Organization,
@@ -531,5 +492,5 @@ class CRUDOrganization(CRUDBase[Organization, OrganizationCreate, OrganizationUp
         return role in [OrganizationRole.OWNER, OrganizationRole.ADMIN]
 
 
-# Create a singleton instance for use across the application
-organization = CRUDOrganization(Organization)
+# Singleton instance
+organization_repo = OrganizationRepository(Organization)

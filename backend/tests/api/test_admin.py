@@ -147,7 +147,7 @@ class TestAdminCreateUser:
             headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
-        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.status_code == status.HTTP_409_CONFLICT
 
 
 class TestAdminGetUser:
@@ -565,7 +565,7 @@ class TestAdminCreateOrganization:
             headers={"Authorization": f"Bearer {superuser_token}"},
         )
 
-        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.status_code == status.HTTP_409_CONFLICT
 
 
 class TestAdminGetOrganization:

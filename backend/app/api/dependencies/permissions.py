@@ -15,9 +15,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_user
 from app.core.database import get_db
-from app.crud.organization import organization as organization_crud
 from app.models.user import User
 from app.models.user_organization import OrganizationRole
+from app.services.organization_service import organization_service
 
 
 def require_superuser(current_user: User = Depends(get_current_user)) -> User:
@@ -81,7 +81,7 @@ class OrganizationPermission:
             return current_user
 
         # Get user's role in organization
-        user_role = await organization_crud.get_user_role_in_org(
+        user_role = await organization_service.get_user_role_in_org(
             db, user_id=current_user.id, organization_id=organization_id
         )
 
@@ -123,7 +123,7 @@ async def require_org_membership(
     if current_user.is_superuser:
         return current_user
 
-    user_role = await organization_crud.get_user_role_in_org(
+    user_role = await organization_service.get_user_role_in_org(
         db, user_id=current_user.id, organization_id=organization_id
     )
 

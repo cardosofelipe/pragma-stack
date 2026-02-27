@@ -34,7 +34,6 @@ from app.api.dependencies.auth import (
 )
 from app.core.config import settings
 from app.core.database import get_db
-from app.crud import oauth_client as oauth_client_crud
 from app.models.user import User
 from app.schemas.oauth import (
     OAuthClientCreate,
@@ -712,7 +711,7 @@ async def register_client(
         client_type=client_type,
     )
 
-    client, secret = await oauth_client_crud.create_client(db, obj_in=client_data)
+    client, secret = await provider_service.register_client(db, client_data)
 
     # Update MCP server URL if provided
     if mcp_server_url:
@@ -750,7 +749,7 @@ async def list_clients(
     current_user: User = Depends(get_current_superuser),
 ) -> list[OAuthClientResponse]:
     """List all OAuth clients."""
-    clients = await oauth_client_crud.get_all_clients(db)
+    clients = await provider_service.list_clients(db)
     return [OAuthClientResponse.model_validate(c) for c in clients]
 
 
@@ -776,7 +775,7 @@ async def delete_client(
             detail="Client not found",
         )
 
-    await oauth_client_crud.delete_client(db, client_id=client_id)
+    await provider_service.delete_client_by_id(db, client_id=client_id)
 
 
 # ============================================================================
@@ -797,30 +796,7 @@ async def list_my_consents(
     current_user: User = Depends(get_current_active_user),
 ) -> list[dict]:
     """List applications the user has authorized."""
-    from sqlalchemy import select
-
-    from app.models.oauth_client import OAuthClient
-    from app.models.oauth_provider_token import OAuthConsent
-
-    result = await db.execute(
-        select(OAuthConsent, OAuthClient)
-        .join(OAuthClient, OAuthConsent.client_id == OAuthClient.client_id)
-        .where(OAuthConsent.user_id == current_user.id)
-    )
-    rows = result.all()
-
-    return [
-        {
-            "client_id": consent.client_id,
-            "client_name": client.client_name,
-            "client_description": client.client_description,
-            "granted_scopes": consent.granted_scopes.split()
-            if consent.granted_scopes
-            else [],
-            "granted_at": consent.created_at.isoformat(),
-        }
-        for consent, client in rows
-    ]
+    return await provider_service.list_user_consents(db, user_id=current_user.id)
 
 
 @router.delete(

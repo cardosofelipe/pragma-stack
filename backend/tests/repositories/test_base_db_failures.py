@@ -10,7 +10,8 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.exc import DataError, OperationalError
 
-from app.crud.user import user as user_crud
+from app.core.repository_exceptions import IntegrityConstraintError
+from app.repositories.user import user_repo as user_crud
 from app.schemas.users import UserCreate
 
 
@@ -119,7 +120,7 @@ class TestBaseCRUDUpdateFailures:
                 with patch.object(
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
-                    with pytest.raises(ValueError, match="Database operation failed"):
+                    with pytest.raises(IntegrityConstraintError, match="Database operation failed"):
                         await user_crud.update(
                             session, db_obj=user, obj_in={"first_name": "Updated"}
                         )
@@ -141,7 +142,7 @@ class TestBaseCRUDUpdateFailures:
                 with patch.object(
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
-                    with pytest.raises(ValueError, match="Database operation failed"):
+                    with pytest.raises(IntegrityConstraintError, match="Database operation failed"):
                         await user_crud.update(
                             session, db_obj=user, obj_in={"first_name": "Updated"}
                         )

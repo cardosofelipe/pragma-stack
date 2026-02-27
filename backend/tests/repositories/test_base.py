@@ -11,7 +11,12 @@ import pytest
 from sqlalchemy.exc import DataError, IntegrityError, OperationalError
 from sqlalchemy.orm import joinedload
 
-from app.crud.user import user as user_crud
+from app.core.repository_exceptions import (
+    DuplicateEntryError,
+    IntegrityConstraintError,
+    InvalidInputError,
+)
+from app.repositories.user import user_repo as user_crud
 from app.schemas.users import UserCreate, UserUpdate
 
 
@@ -81,7 +86,7 @@ class TestCRUDBaseGetMulti:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            with pytest.raises(ValueError, match="skip must be non-negative"):
+            with pytest.raises(InvalidInputError, match="skip must be non-negative"):
                 await user_crud.get_multi(session, skip=-1)
 
     @pytest.mark.asyncio
@@ -90,7 +95,7 @@ class TestCRUDBaseGetMulti:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            with pytest.raises(ValueError, match="limit must be non-negative"):
+            with pytest.raises(InvalidInputError, match="limit must be non-negative"):
                 await user_crud.get_multi(session, limit=-1)
 
     @pytest.mark.asyncio
@@ -99,7 +104,7 @@ class TestCRUDBaseGetMulti:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            with pytest.raises(ValueError, match="Maximum limit is 1000"):
+            with pytest.raises(InvalidInputError, match="Maximum limit is 1000"):
                 await user_crud.get_multi(session, limit=1001)
 
     @pytest.mark.asyncio
@@ -140,7 +145,7 @@ class TestCRUDBaseCreate:
                 last_name="Duplicate",
             )
 
-            with pytest.raises(ValueError, match="already exists"):
+            with pytest.raises(DuplicateEntryError, match="already exists"):
                 await user_crud.create(session, obj_in=user_data)
 
     @pytest.mark.asyncio
@@ -165,7 +170,7 @@ class TestCRUDBaseCreate:
                     last_name="User",
                 )
 
-                with pytest.raises(ValueError, match="Database integrity error"):
+                with pytest.raises(DuplicateEntryError, match="Database integrity error"):
                     await user_crud.create(session, obj_in=user_data)
 
     @pytest.mark.asyncio
@@ -244,7 +249,7 @@ class TestCRUDBaseUpdate:
 
         # Create another user
         async with SessionLocal() as session:
-            from app.crud.user import user as user_crud
+            from app.repositories.user import user_repo as user_crud
 
             user2_data = UserCreate(
                 email="user2@example.com",
@@ -268,7 +273,7 @@ class TestCRUDBaseUpdate:
             ):
                 update_data = UserUpdate(email=async_test_user.email)
 
-                with pytest.raises(ValueError, match="already exists"):
+                with pytest.raises(DuplicateEntryError, match="already exists"):
                     await user_crud.update(
                         session, db_obj=user2_obj, obj_in=update_data
                     )
@@ -302,7 +307,7 @@ class TestCRUDBaseUpdate:
                     "statement", {}, Exception("constraint failed")
                 ),
             ):
-                with pytest.raises(ValueError, match="Database integrity error"):
+                with pytest.raises(IntegrityConstraintError, match="Database integrity error"):
                     await user_crud.update(
                         session, db_obj=user, obj_in={"first_name": "Test"}
                     )
@@ -322,7 +327,7 @@ class TestCRUDBaseUpdate:
                     "statement", {}, Exception("connection error")
                 ),
             ):
-                with pytest.raises(ValueError, match="Database operation failed"):
+                with pytest.raises(IntegrityConstraintError, match="Database operation failed"):
                     await user_crud.update(
                         session, db_obj=user, obj_in={"first_name": "Test"}
                     )
@@ -403,7 +408,7 @@ class TestCRUDBaseRemove:
                 ),
             ):
                 with pytest.raises(
-                    ValueError, match="Cannot delete.*referenced by other records"
+                    IntegrityConstraintError, match="Cannot delete.*referenced by other records"
                 ):
                     await user_crud.remove(session, id=str(async_test_user.id))
 
@@ -442,7 +447,7 @@ class TestCRUDBaseGetMultiWithTotal:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            with pytest.raises(ValueError, match="skip must be non-negative"):
+            with pytest.raises(InvalidInputError, match="skip must be non-negative"):
                 await user_crud.get_multi_with_total(session, skip=-1)
 
     @pytest.mark.asyncio
@@ -451,7 +456,7 @@ class TestCRUDBaseGetMultiWithTotal:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            with pytest.raises(ValueError, match="limit must be non-negative"):
+            with pytest.raises(InvalidInputError, match="limit must be non-negative"):
                 await user_crud.get_multi_with_total(session, limit=-1)
 
     @pytest.mark.asyncio
@@ -460,7 +465,7 @@ class TestCRUDBaseGetMultiWithTotal:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            with pytest.raises(ValueError, match="Maximum limit is 1000"):
+            with pytest.raises(InvalidInputError, match="Maximum limit is 1000"):
                 await user_crud.get_multi_with_total(session, limit=1001)
 
     @pytest.mark.asyncio
@@ -827,7 +832,7 @@ class TestCRUDBasePaginationValidation:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            with pytest.raises(ValueError, match="skip must be non-negative"):
+            with pytest.raises(InvalidInputError, match="skip must be non-negative"):
                 await user_crud.get_multi_with_total(session, skip=-1, limit=10)
 
     @pytest.mark.asyncio
@@ -836,7 +841,7 @@ class TestCRUDBasePaginationValidation:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            with pytest.raises(ValueError, match="limit must be non-negative"):
+            with pytest.raises(InvalidInputError, match="limit must be non-negative"):
                 await user_crud.get_multi_with_total(session, skip=0, limit=-1)
 
     @pytest.mark.asyncio
@@ -845,7 +850,7 @@ class TestCRUDBasePaginationValidation:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            with pytest.raises(ValueError, match="Maximum limit is 1000"):
+            with pytest.raises(InvalidInputError, match="Maximum limit is 1000"):
                 await user_crud.get_multi_with_total(session, skip=0, limit=1001)
 
     @pytest.mark.asyncio
@@ -899,7 +904,7 @@ class TestCRUDBaseModelsWithoutSoftDelete:
         _test_engine, SessionLocal = async_test_db
 
         # Create an organization (which doesn't have deleted_at)
-        from app.crud.organization import organization as org_crud
+        from app.repositories.organization import organization_repo as org_crud
         from app.models.organization import Organization
 
         async with SessionLocal() as session:
@@ -910,7 +915,7 @@ class TestCRUDBaseModelsWithoutSoftDelete:
 
         # Try to soft delete organization (should fail)
         async with SessionLocal() as session:
-            with pytest.raises(ValueError, match="does not have a deleted_at column"):
+            with pytest.raises(InvalidInputError, match="does not have a deleted_at column"):
                 await org_crud.soft_delete(session, id=str(org_id))
 
     @pytest.mark.asyncio
@@ -919,7 +924,7 @@ class TestCRUDBaseModelsWithoutSoftDelete:
         _test_engine, SessionLocal = async_test_db
 
         # Create an organization (which doesn't have deleted_at)
-        from app.crud.organization import organization as org_crud
+        from app.repositories.organization import organization_repo as org_crud
         from app.models.organization import Organization
 
         async with SessionLocal() as session:
@@ -930,7 +935,7 @@ class TestCRUDBaseModelsWithoutSoftDelete:
 
         # Try to restore organization (should fail)
         async with SessionLocal() as session:
-            with pytest.raises(ValueError, match="does not have a deleted_at column"):
+            with pytest.raises(InvalidInputError, match="does not have a deleted_at column"):
                 await org_crud.restore(session, id=str(org_id))
 
 
@@ -950,7 +955,7 @@ class TestCRUDBaseEagerLoadingWithRealOptions:
         _test_engine, SessionLocal = async_test_db
 
         # Create a session for the user
-        from app.crud.session import session as session_crud
+        from app.repositories.session import session_repo as session_crud
         from app.models.user_session import UserSession
 
         async with SessionLocal() as session:
@@ -989,7 +994,7 @@ class TestCRUDBaseEagerLoadingWithRealOptions:
         _test_engine, SessionLocal = async_test_db
 
         # Create multiple sessions for the user
-        from app.crud.session import session as session_crud
+        from app.repositories.session import session_repo as session_crud
         from app.models.user_session import UserSession
 
         async with SessionLocal() as session:

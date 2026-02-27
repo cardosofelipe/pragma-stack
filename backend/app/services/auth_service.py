@@ -2,7 +2,6 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import (
@@ -14,11 +13,17 @@ from app.core.auth import (
     verify_password_async,
 )
 from app.core.config import settings
-from app.core.exceptions import AuthenticationError
+from app.core.exceptions import AuthenticationError, DuplicateError
+from app.core.repository_exceptions import DuplicateEntryError
 from app.models.user import User
+from app.repositories.user import user_repo
 from app.schemas.users import Token, UserCreate, UserResponse
 
 logger = logging.getLogger(__name__)
+
+# Pre-computed bcrypt hash used for constant-time comparison when user is not found,
+# preventing timing attacks that could enumerate valid email addresses.
+_DUMMY_HASH = "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36zLFbnJHfxPSEFBzXKiHia"
 
 
 class AuthService:
@@ -39,10 +44,12 @@ class AuthService:
         Returns:
             User if authenticated, None otherwise
         """
-        result = await db.execute(select(User).where(User.email == email))
-        user = result.scalar_one_or_none()
+        user = await user_repo.get_by_email(db, email=email)
 
         if not user:
+            # Perform a dummy verification to match timing of a real bcrypt check,
+            # preventing email enumeration via response-time differences.
+            await verify_password_async(password, _DUMMY_HASH)
             return None
 
         # Verify password asynchronously to avoid blocking event loop
@@ -71,39 +78,22 @@ class AuthService:
         """
         try:
             # Check if user already exists
-            result = await db.execute(select(User).where(User.email == user_data.email))
-            existing_user = result.scalar_one_or_none()
+            existing_user = await user_repo.get_by_email(db, email=user_data.email)
             if existing_user:
-                raise AuthenticationError("User with this email already exists")
+                raise DuplicateError("User with this email already exists")
 
-            # Create new user with async password hashing
-            # Hash password asynchronously to avoid blocking event loop
-            hashed_password = await get_password_hash_async(user_data.password)
-
-            # Create user object from model
-            user = User(
-                email=user_data.email,
-                password_hash=hashed_password,
-                first_name=user_data.first_name,
-                last_name=user_data.last_name,
-                phone_number=user_data.phone_number,
-                is_active=True,
-                is_superuser=False,
-            )
-
-            db.add(user)
-            await db.commit()
-            await db.refresh(user)
+            # Delegate creation (hashing + commit) to the repository
+            user = await user_repo.create(db, obj_in=user_data)
 
             logger.info(f"User created successfully: {user.email}")
             return user
 
-        except AuthenticationError:
-            # Re-raise authentication errors without rollback
+        except (AuthenticationError, DuplicateError):
+            # Re-raise API exceptions without rollback
             raise
+        except DuplicateEntryError as e:
+            raise DuplicateError(str(e))
         except Exception as e:
-            # Rollback on any database errors
-            await db.rollback()
             logger.error(f"Error creating user: {e!s}", exc_info=True)
             raise AuthenticationError(f"Failed to create user: {e!s}")
 
@@ -168,8 +158,7 @@ class AuthService:
             user_id = token_data.user_id
 
             # Get user from database
-            result = await db.execute(select(User).where(User.id == user_id))
-            user = result.scalar_one_or_none()
+            user = await user_repo.get(db, id=str(user_id))
             if not user or not user.is_active:
                 raise TokenInvalidError("Invalid user or inactive account")
 
@@ -200,8 +189,7 @@ class AuthService:
             AuthenticationError: If current password is incorrect or update fails
         """
         try:
-            result = await db.execute(select(User).where(User.id == user_id))
-            user = result.scalar_one_or_none()
+            user = await user_repo.get(db, id=str(user_id))
             if not user:
                 raise AuthenticationError("User not found")
 
@@ -210,8 +198,8 @@ class AuthService:
                 raise AuthenticationError("Current password is incorrect")
 
             # Hash new password asynchronously to avoid blocking event loop
-            user.password_hash = await get_password_hash_async(new_password)
-            await db.commit()
+            new_hash = await get_password_hash_async(new_password)
+            await user_repo.update_password(db, user=user, password_hash=new_hash)
 
             logger.info(f"Password changed successfully for user {user_id}")
             return True
@@ -226,3 +214,32 @@ class AuthService:
                 f"Error changing password for user {user_id}: {e!s}", exc_info=True
             )
             raise AuthenticationError(f"Failed to change password: {e!s}")
+
+    @staticmethod
+    async def reset_password(
+        db: AsyncSession, *, email: str, new_password: str
+    ) -> User:
+        """
+        Reset a user's password without requiring the current password.
+
+        Args:
+            db: Database session
+            email: User email address
+            new_password: New password to set
+
+        Returns:
+            Updated user
+
+        Raises:
+            AuthenticationError: If user not found or inactive
+        """
+        user = await user_repo.get_by_email(db, email=email)
+        if not user:
+            raise AuthenticationError("User not found")
+        if not user.is_active:
+            raise AuthenticationError("User account is inactive")
+
+        new_hash = await get_password_hash_async(new_password)
+        user = await user_repo.update_password(db, user=user, password_hash=new_hash)
+        logger.info(f"Password reset successfully for {email}")
+        return user

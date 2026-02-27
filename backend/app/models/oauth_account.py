@@ -36,9 +36,9 @@ class OAuthAccount(Base, UUIDMixin, TimestampMixin):
     )  # Email from provider (for reference)
 
     # Optional: store provider tokens for API access
-    # These should be encrypted at rest in production
-    access_token_encrypted = Column(String(2048), nullable=True)
-    refresh_token_encrypted = Column(String(2048), nullable=True)
+    # TODO: Encrypt these at rest in production (requires key management infrastructure)
+    access_token = Column(String(2048), nullable=True)
+    refresh_token = Column(String(2048), nullable=True)
     token_expires_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationship

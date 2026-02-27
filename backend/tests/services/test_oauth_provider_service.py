@@ -269,18 +269,18 @@ class TestClientValidation:
     async def test_validate_client_legacy_sha256_hash(
         self, db, confidential_client_legacy_hash
     ):
-        """Test validating a client with legacy SHA-256 hash (backward compatibility)."""
+        """Test that legacy SHA-256 hash is rejected with clear error message."""
         client, secret = confidential_client_legacy_hash
-        validated = await service.validate_client(db, client.client_id, secret)
-        assert validated.client_id == client.client_id
+        with pytest.raises(service.InvalidClientError, match="deprecated hash format"):
+            await service.validate_client(db, client.client_id, secret)
 
     @pytest.mark.asyncio
     async def test_validate_client_legacy_sha256_wrong_secret(
         self, db, confidential_client_legacy_hash
     ):
-        """Test legacy SHA-256 client rejects wrong secret."""
+        """Test that legacy SHA-256 client with wrong secret is rejected."""
         client, _ = confidential_client_legacy_hash
-        with pytest.raises(service.InvalidClientError, match="Invalid client secret"):
+        with pytest.raises(service.InvalidClientError, match="deprecated hash format"):
             await service.validate_client(db, client.client_id, "wrong_secret")
 
     def test_validate_redirect_uri_success(self, public_client):

@@ -9,7 +9,8 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import select
 
-from app.crud.organization import organization as organization_crud
+from app.core.repository_exceptions import DuplicateEntryError, IntegrityConstraintError
+from app.repositories.organization import organization_repo as organization_crud
 from app.models.organization import Organization
 from app.models.user_organization import OrganizationRole, UserOrganization
 from app.schemas.organizations import OrganizationCreate
@@ -87,7 +88,7 @@ class TestCreate:
         # Try to create second with same slug
         async with AsyncTestingSessionLocal() as session:
             org_in = OrganizationCreate(name="Org 2", slug="duplicate-slug")
-            with pytest.raises(ValueError, match="already exists"):
+            with pytest.raises(DuplicateEntryError, match="already exists"):
                 await organization_crud.create(session, obj_in=org_in)
 
     @pytest.mark.asyncio
@@ -295,7 +296,7 @@ class TestAddUser:
             org_id = org.id
 
         async with AsyncTestingSessionLocal() as session:
-            with pytest.raises(ValueError, match="already a member"):
+            with pytest.raises(DuplicateEntryError, match="already a member"):
                 await organization_crud.add_user(
                     session, organization_id=org_id, user_id=async_test_user.id
                 )
@@ -972,7 +973,7 @@ class TestOrganizationExceptionHandlers:
             with patch.object(session, "commit", side_effect=mock_commit):
                 with patch.object(session, "rollback", new_callable=AsyncMock):
                     org_in = OrganizationCreate(name="Test", slug="test")
-                    with pytest.raises(ValueError, match="Database integrity error"):
+                    with pytest.raises(IntegrityConstraintError, match="Database integrity error"):
                         await organization_crud.create(session, obj_in=org_in)
 
     @pytest.mark.asyncio
@@ -1058,7 +1059,7 @@ class TestOrganizationExceptionHandlers:
                 with patch.object(session, "commit", side_effect=mock_commit):
                     with patch.object(session, "rollback", new_callable=AsyncMock):
                         with pytest.raises(
-                            ValueError, match="Failed to add user to organization"
+                            IntegrityConstraintError, match="Failed to add user to organization"
                         ):
                             await organization_crud.add_user(
                                 session,

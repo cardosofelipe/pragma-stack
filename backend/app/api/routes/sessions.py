@@ -17,8 +17,8 @@ from app.api.dependencies.auth import get_current_user
 from app.core.auth import decode_token
 from app.core.database import get_db
 from app.core.exceptions import AuthorizationError, ErrorCode, NotFoundError
-from app.crud.session import session as session_crud
 from app.models.user import User
+from app.services.session_service import session_service
 from app.schemas.common import MessageResponse
 from app.schemas.sessions import SessionListResponse, SessionResponse
 
@@ -60,7 +60,7 @@ async def list_my_sessions(
     """
     try:
         # Get all active sessions for user
-        sessions = await session_crud.get_user_sessions(
+        sessions = await session_service.get_user_sessions(
             db, user_id=str(current_user.id), active_only=True
         )
 
@@ -150,7 +150,7 @@ async def revoke_session(
     """
     try:
         # Get the session
-        session = await session_crud.get(db, id=str(session_id))
+        session = await session_service.get_session(db, str(session_id))
 
         if not session:
             raise NotFoundError(
@@ -170,7 +170,7 @@ async def revoke_session(
             )
 
         # Deactivate the session
-        await session_crud.deactivate(db, session_id=str(session_id))
+        await session_service.deactivate(db, session_id=str(session_id))
 
         logger.info(
             f"User {current_user.id} revoked session {session_id} "
@@ -224,7 +224,7 @@ async def cleanup_expired_sessions(
     """
     try:
         # Use optimized bulk DELETE instead of N individual deletes
-        deleted_count = await session_crud.cleanup_expired_for_user(
+        deleted_count = await session_service.cleanup_expired_for_user(
             db, user_id=str(current_user.id)
         )
 

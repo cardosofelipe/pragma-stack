@@ -8,7 +8,8 @@ from uuid import uuid4
 
 import pytest
 
-from app.crud.session import session as session_crud
+from app.core.repository_exceptions import InvalidInputError
+from app.repositories.session import session_repo as session_crud
 from app.models.user_session import UserSession
 from app.schemas.sessions import SessionCreate
 
@@ -503,7 +504,7 @@ class TestCleanupExpiredForUser:
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            with pytest.raises(ValueError, match="Invalid user ID format"):
+            with pytest.raises(InvalidInputError, match="Invalid user ID format"):
                 await session_crud.cleanup_expired_for_user(
                     session, user_id="not-a-valid-uuid"
                 )

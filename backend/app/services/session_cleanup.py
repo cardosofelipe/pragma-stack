@@ -8,7 +8,7 @@ import logging
 from datetime import UTC, datetime
 
 from app.core.database import SessionLocal
-from app.crud.session import session as session_crud
+from app.repositories.session import session_repo as session_crud
 
 logger = logging.getLogger(__name__)
 

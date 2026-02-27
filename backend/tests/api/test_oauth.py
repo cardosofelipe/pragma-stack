@@ -8,7 +8,7 @@ from uuid import uuid4
 
 import pytest
 
-from app.crud.oauth import oauth_account
+from app.repositories.oauth_account import oauth_account_repo as oauth_account
 from app.schemas.oauth import OAuthAccountCreate
 
 
@@ -349,7 +349,7 @@ class TestOAuthProviderEndpoints:
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create a test client
-        from app.crud.oauth import oauth_client
+        from app.repositories.oauth_client import oauth_client_repo as oauth_client
         from app.schemas.oauth import OAuthClientCreate
 
         async with AsyncTestingSessionLocal() as session:
@@ -386,7 +386,7 @@ class TestOAuthProviderEndpoints:
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         # Create a test client
-        from app.crud.oauth import oauth_client
+        from app.repositories.oauth_client import oauth_client_repo as oauth_client
         from app.schemas.oauth import OAuthClientCreate
 
         async with AsyncTestingSessionLocal() as session:

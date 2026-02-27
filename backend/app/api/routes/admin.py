@@ -14,7 +14,6 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 from pydantic import BaseModel, Field
-from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.permissions import require_superuser
@@ -25,12 +24,12 @@ from app.core.exceptions import (
     ErrorCode,
     NotFoundError,
 )
-from app.crud.organization import organization as organization_crud
-from app.crud.session import session as session_crud
-from app.crud.user import user as user_crud
-from app.models.organization import Organization
+from app.core.repository_exceptions import DuplicateEntryError
 from app.models.user import User
-from app.models.user_organization import OrganizationRole, UserOrganization
+from app.models.user_organization import OrganizationRole
+from app.services.organization_service import organization_service
+from app.services.session_service import session_service
+from app.services.user_service import user_service
 from app.schemas.common import (
     MessageResponse,
     PaginatedResponse,
@@ -178,38 +177,29 @@ async def admin_get_stats(
     """Get admin dashboard statistics with real data from database."""
     from app.core.config import settings
 
-    # Check if we have any data
-    total_users_query = select(func.count()).select_from(User)
-    total_users = (await db.execute(total_users_query)).scalar() or 0
+    stats = await user_service.get_stats(db)
+    total_users = stats["total_users"]
+    active_count = stats["active_count"]
+    inactive_count = stats["inactive_count"]
+    all_users = stats["all_users"]
 
     # If database is essentially empty (only admin user), return demo data
     if total_users <= 1 and settings.DEMO_MODE:  # pragma: no cover
         logger.info("Returning demo stats data (empty database in demo mode)")
         return _generate_demo_stats()
 
-    # 1. User Growth (Last 30 days) - Improved calculation
-    datetime.now(UTC) - timedelta(days=30)
-
-    # Get all users with their creation dates
-    all_users_query = select(User).order_by(User.created_at)
-    result = await db.execute(all_users_query)
-    all_users = result.scalars().all()
-
-    # Build cumulative counts per day
+    # 1. User Growth (Last 30 days)
     user_growth = []
     for i in range(29, -1, -1):
         date = datetime.now(UTC) - timedelta(days=i)
         date_start = date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=UTC)
         date_end = date_start + timedelta(days=1)
 
-        # Count all users created before end of this day
-        # Make comparison timezone-aware
         total_users_on_date = sum(
             1
             for u in all_users
             if u.created_at and u.created_at.replace(tzinfo=UTC) < date_end
         )
-        # Count active users created before end of this day
         active_users_on_date = sum(
             1
             for u in all_users
@@ -227,27 +217,16 @@ async def admin_get_stats(
         )
 
     # 2. Organization Distribution - Top 6 organizations by member count
-    org_query = (
-        select(Organization.name, func.count(UserOrganization.user_id).label("count"))
-        .join(UserOrganization, Organization.id == UserOrganization.organization_id)
-        .group_by(Organization.name)
-        .order_by(func.count(UserOrganization.user_id).desc())
-        .limit(6)
-    )
-    result = await db.execute(org_query)
-    org_dist = [
-        OrgDistributionData(name=row.name, value=row.count) for row in result.all()
-    ]
+    org_rows = await organization_service.get_org_distribution(db, limit=6)
+    org_dist = [OrgDistributionData(name=r["name"], value=r["value"]) for r in org_rows]
 
-    # 3. User Registration Activity (Last 14 days) - NEW
+    # 3. User Registration Activity (Last 14 days)
     registration_activity = []
     for i in range(13, -1, -1):
         date = datetime.now(UTC) - timedelta(days=i)
         date_start = date.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=UTC)
         date_end = date_start + timedelta(days=1)
 
-        # Count users created on this specific day
-        # Make comparison timezone-aware
         day_registrations = sum(
             1
             for u in all_users
@@ -263,14 +242,6 @@ async def admin_get_stats(
         )
 
     # 4. User Status - Active vs Inactive
-    active_query = select(func.count()).select_from(User).where(User.is_active)
-    inactive_query = (
-        select(func.count()).select_from(User).where(User.is_active.is_(False))
-    )
-
-    active_count = (await db.execute(active_query)).scalar() or 0
-    inactive_count = (await db.execute(inactive_query)).scalar() or 0
-
     logger.info(
         f"User status counts - Active: {active_count}, Inactive: {inactive_count}"
     )
@@ -321,7 +292,7 @@ async def admin_list_users(
             filters["is_superuser"] = is_superuser
 
         # Get users with search
-        users, total = await user_crud.get_multi_with_total(
+        users, total = await user_service.list_users(
             db,
             skip=pagination.offset,
             limit=pagination.limit,
@@ -364,12 +335,12 @@ async def admin_create_user(
     Allows setting is_superuser and other fields.
     """
     try:
-        user = await user_crud.create(db, obj_in=user_in)
+        user = await user_service.create_user(db, user_in)
         logger.info(f"Admin {admin.email} created user {user.email}")
         return user
-    except ValueError as e:
+    except DuplicateEntryError as e:
         logger.warning(f"Failed to create user: {e!s}")
-        raise NotFoundError(message=str(e), error_code=ErrorCode.USER_ALREADY_EXISTS)
+        raise DuplicateError(message=str(e), error_code=ErrorCode.USER_ALREADY_EXISTS)
     except Exception as e:
         logger.error(f"Error creating user (admin): {e!s}", exc_info=True)
         raise
@@ -388,11 +359,7 @@ async def admin_get_user(
     db: AsyncSession = Depends(get_db),
 ) -> Any:
     """Get detailed information about a specific user."""
-    user = await user_crud.get(db, id=user_id)
-    if not user:
-        raise NotFoundError(
-            message=f"User {user_id} not found", error_code=ErrorCode.USER_NOT_FOUND
-        )
+    user = await user_service.get_user(db, str(user_id))
     return user
 
 
@@ -411,18 +378,11 @@ async def admin_update_user(
 ) -> Any:
     """Update user information with admin privileges."""
     try:
-        user = await user_crud.get(db, id=user_id)
-        if not user:
-            raise NotFoundError(
-                message=f"User {user_id} not found", error_code=ErrorCode.USER_NOT_FOUND
-            )
-
-        updated_user = await user_crud.update(db, db_obj=user, obj_in=user_in)
+        user = await user_service.get_user(db, str(user_id))
+        updated_user = await user_service.update_user(db, user=user, obj_in=user_in)
         logger.info(f"Admin {admin.email} updated user {updated_user.email}")
         return updated_user
 
-    except NotFoundError:
-        raise
     except Exception as e:
         logger.error(f"Error updating user (admin): {e!s}", exc_info=True)
         raise
@@ -442,11 +402,7 @@ async def admin_delete_user(
 ) -> Any:
     """Soft delete a user (sets deleted_at timestamp)."""
     try:
-        user = await user_crud.get(db, id=user_id)
-        if not user:
-            raise NotFoundError(
-                message=f"User {user_id} not found", error_code=ErrorCode.USER_NOT_FOUND
-            )
+        user = await user_service.get_user(db, str(user_id))
 
         # Prevent deleting yourself
         if user.id == admin.id:
@@ -456,15 +412,13 @@ async def admin_delete_user(
                 error_code=ErrorCode.OPERATION_FORBIDDEN,
             )
 
-        await user_crud.soft_delete(db, id=user_id)
+        await user_service.soft_delete_user(db, str(user_id))
         logger.info(f"Admin {admin.email} deleted user {user.email}")
 
         return MessageResponse(
             success=True, message=f"User {user.email} has been deleted"
         )
 
-    except NotFoundError:
-        raise
     except Exception as e:
         logger.error(f"Error deleting user (admin): {e!s}", exc_info=True)
         raise
@@ -484,21 +438,14 @@ async def admin_activate_user(
 ) -> Any:
     """Activate a user account."""
     try:
-        user = await user_crud.get(db, id=user_id)
-        if not user:
-            raise NotFoundError(
-                message=f"User {user_id} not found", error_code=ErrorCode.USER_NOT_FOUND
-            )
-
-        await user_crud.update(db, db_obj=user, obj_in={"is_active": True})
+        user = await user_service.get_user(db, str(user_id))
+        await user_service.update_user(db, user=user, obj_in={"is_active": True})
         logger.info(f"Admin {admin.email} activated user {user.email}")
 
         return MessageResponse(
             success=True, message=f"User {user.email} has been activated"
         )
 
-    except NotFoundError:
-        raise
     except Exception as e:
         logger.error(f"Error activating user (admin): {e!s}", exc_info=True)
         raise
@@ -518,11 +465,7 @@ async def admin_deactivate_user(
 ) -> Any:
     """Deactivate a user account."""
     try:
-        user = await user_crud.get(db, id=user_id)
-        if not user:
-            raise NotFoundError(
-                message=f"User {user_id} not found", error_code=ErrorCode.USER_NOT_FOUND
-            )
+        user = await user_service.get_user(db, str(user_id))
 
         # Prevent deactivating yourself
         if user.id == admin.id:
@@ -532,15 +475,13 @@ async def admin_deactivate_user(
                 error_code=ErrorCode.OPERATION_FORBIDDEN,
             )
 
-        await user_crud.update(db, db_obj=user, obj_in={"is_active": False})
+        await user_service.update_user(db, user=user, obj_in={"is_active": False})
         logger.info(f"Admin {admin.email} deactivated user {user.email}")
 
         return MessageResponse(
             success=True, message=f"User {user.email} has been deactivated"
         )
 
-    except NotFoundError:
-        raise
     except Exception as e:
         logger.error(f"Error deactivating user (admin): {e!s}", exc_info=True)
         raise
@@ -567,16 +508,16 @@ async def admin_bulk_user_action(
     try:
         # Use efficient bulk operations instead of loop
         if bulk_action.action == BulkAction.ACTIVATE:
-            affected_count = await user_crud.bulk_update_status(
+            affected_count = await user_service.bulk_update_status(
                 db, user_ids=bulk_action.user_ids, is_active=True
             )
         elif bulk_action.action == BulkAction.DEACTIVATE:
-            affected_count = await user_crud.bulk_update_status(
+            affected_count = await user_service.bulk_update_status(
                 db, user_ids=bulk_action.user_ids, is_active=False
             )
         elif bulk_action.action == BulkAction.DELETE:
             # bulk_soft_delete automatically excludes the admin user
-            affected_count = await user_crud.bulk_soft_delete(
+            affected_count = await user_service.bulk_soft_delete(
                 db, user_ids=bulk_action.user_ids, exclude_user_id=admin.id
             )
         else:  # pragma: no cover
@@ -624,7 +565,7 @@ async def admin_list_organizations(
     """List all organizations with filtering and search."""
     try:
         # Use optimized method that gets member counts in single query (no N+1)
-        orgs_with_data, total = await organization_crud.get_multi_with_member_counts(
+        orgs_with_data, total = await organization_service.get_multi_with_member_counts(
             db,
             skip=pagination.offset,
             limit=pagination.limit,
@@ -680,7 +621,7 @@ async def admin_create_organization(
 ) -> Any:
     """Create a new organization."""
     try:
-        org = await organization_crud.create(db, obj_in=org_in)
+        org = await organization_service.create_organization(db, obj_in=org_in)
         logger.info(f"Admin {admin.email} created organization {org.name}")
 
         # Add member count
@@ -697,9 +638,9 @@ async def admin_create_organization(
         }
         return OrganizationResponse(**org_dict)
 
-    except ValueError as e:
+    except DuplicateEntryError as e:
         logger.warning(f"Failed to create organization: {e!s}")
-        raise NotFoundError(message=str(e), error_code=ErrorCode.ALREADY_EXISTS)
+        raise DuplicateError(message=str(e), error_code=ErrorCode.ALREADY_EXISTS)
     except Exception as e:
         logger.error(f"Error creating organization (admin): {e!s}", exc_info=True)
         raise
@@ -718,12 +659,7 @@ async def admin_get_organization(
     db: AsyncSession = Depends(get_db),
 ) -> Any:
     """Get detailed information about a specific organization."""
-    org = await organization_crud.get(db, id=org_id)
-    if not org:
-        raise NotFoundError(
-            message=f"Organization {org_id} not found", error_code=ErrorCode.NOT_FOUND
-        )
-
+    org = await organization_service.get_organization(db, str(org_id))
     org_dict = {
         "id": org.id,
         "name": org.name,
@@ -733,7 +669,7 @@ async def admin_get_organization(
         "settings": org.settings,
         "created_at": org.created_at,
         "updated_at": org.updated_at,
-        "member_count": await organization_crud.get_member_count(
+        "member_count": await organization_service.get_member_count(
             db, organization_id=org.id
         ),
     }
@@ -755,14 +691,10 @@ async def admin_update_organization(
 ) -> Any:
     """Update organization information."""
     try:
-        org = await organization_crud.get(db, id=org_id)
-        if not org:
-            raise NotFoundError(
-                message=f"Organization {org_id} not found",
-                error_code=ErrorCode.NOT_FOUND,
-            )
-
-        updated_org = await organization_crud.update(db, db_obj=org, obj_in=org_in)
+        org = await organization_service.get_organization(db, str(org_id))
+        updated_org = await organization_service.update_organization(
+            db, org=org, obj_in=org_in
+        )
         logger.info(f"Admin {admin.email} updated organization {updated_org.name}")
 
         org_dict = {
@@ -774,14 +706,12 @@ async def admin_update_organization(
             "settings": updated_org.settings,
             "created_at": updated_org.created_at,
             "updated_at": updated_org.updated_at,
-            "member_count": await organization_crud.get_member_count(
+            "member_count": await organization_service.get_member_count(
                 db, organization_id=updated_org.id
             ),
         }
         return OrganizationResponse(**org_dict)
 
-    except NotFoundError:
-        raise
     except Exception as e:
         logger.error(f"Error updating organization (admin): {e!s}", exc_info=True)
         raise
@@ -801,22 +731,14 @@ async def admin_delete_organization(
 ) -> Any:
     """Delete an organization and all its relationships."""
     try:
-        org = await organization_crud.get(db, id=org_id)
-        if not org:
-            raise NotFoundError(
-                message=f"Organization {org_id} not found",
-                error_code=ErrorCode.NOT_FOUND,
-            )
-
-        await organization_crud.remove(db, id=org_id)
+        org = await organization_service.get_organization(db, str(org_id))
+        await organization_service.remove_organization(db, str(org_id))
         logger.info(f"Admin {admin.email} deleted organization {org.name}")
 
         return MessageResponse(
             success=True, message=f"Organization {org.name} has been deleted"
         )
 
-    except NotFoundError:
-        raise
     except Exception as e:
         logger.error(f"Error deleting organization (admin): {e!s}", exc_info=True)
         raise
@@ -838,14 +760,8 @@ async def admin_list_organization_members(
 ) -> Any:
     """List all members of an organization."""
     try:
-        org = await organization_crud.get(db, id=org_id)
-        if not org:
-            raise NotFoundError(
-                message=f"Organization {org_id} not found",
-                error_code=ErrorCode.NOT_FOUND,
-            )
-
-        members, total = await organization_crud.get_organization_members(
+        await organization_service.get_organization(db, str(org_id))  # validates exists
+        members, total = await organization_service.get_organization_members(
             db,
             organization_id=org_id,
             skip=pagination.offset,
@@ -898,21 +814,10 @@ async def admin_add_organization_member(
 ) -> Any:
     """Add a user to an organization."""
     try:
-        org = await organization_crud.get(db, id=org_id)
-        if not org:
-            raise NotFoundError(
-                message=f"Organization {org_id} not found",
-                error_code=ErrorCode.NOT_FOUND,
-            )
+        org = await organization_service.get_organization(db, str(org_id))
+        user = await user_service.get_user(db, str(request.user_id))
 
-        user = await user_crud.get(db, id=request.user_id)
-        if not user:
-            raise NotFoundError(
-                message=f"User {request.user_id} not found",
-                error_code=ErrorCode.USER_NOT_FOUND,
-            )
-
-        await organization_crud.add_user(
+        await organization_service.add_member(
             db, organization_id=org_id, user_id=request.user_id, role=request.role
         )
 
@@ -925,14 +830,11 @@ async def admin_add_organization_member(
             success=True, message=f"User {user.email} added to organization {org.name}"
         )
 
-    except ValueError as e:
+    except DuplicateEntryError as e:
         logger.warning(f"Failed to add user to organization: {e!s}")
-        # Use DuplicateError for "already exists" scenarios
         raise DuplicateError(
             message=str(e), error_code=ErrorCode.USER_ALREADY_EXISTS, field="user_id"
         )
-    except NotFoundError:
-        raise
     except Exception as e:
         logger.error(
             f"Error adding member to organization (admin): {e!s}", exc_info=True
@@ -955,20 +857,10 @@ async def admin_remove_organization_member(
 ) -> Any:
     """Remove a user from an organization."""
     try:
-        org = await organization_crud.get(db, id=org_id)
-        if not org:
-            raise NotFoundError(
-                message=f"Organization {org_id} not found",
-                error_code=ErrorCode.NOT_FOUND,
-            )
+        org = await organization_service.get_organization(db, str(org_id))
+        user = await user_service.get_user(db, str(user_id))
 
-        user = await user_crud.get(db, id=user_id)
-        if not user:
-            raise NotFoundError(
-                message=f"User {user_id} not found", error_code=ErrorCode.USER_NOT_FOUND
-            )
-
-        success = await organization_crud.remove_user(
+        success = await organization_service.remove_member(
             db, organization_id=org_id, user_id=user_id
         )
 
@@ -1022,7 +914,7 @@ async def admin_list_sessions(
     """List all sessions across all users with filtering and pagination."""
     try:
         # Get sessions with user info (eager loaded to prevent N+1)
-        sessions, total = await session_crud.get_all_sessions(
+        sessions, total = await session_service.get_all_sessions(
             db,
             skip=pagination.offset,
             limit=pagination.limit,

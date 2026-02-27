@@ -11,7 +11,8 @@ from uuid import uuid4
 import pytest
 
 from app.core.exceptions import AuthenticationError
-from app.crud.oauth import oauth_account, oauth_state
+from app.repositories.oauth_account import oauth_account_repo as oauth_account
+from app.repositories.oauth_state import oauth_state_repo as oauth_state
 from app.schemas.oauth import OAuthAccountCreate, OAuthStateCreate
 from app.services.oauth_service import OAUTH_PROVIDERS, OAuthService
 

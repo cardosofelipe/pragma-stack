@@ -19,7 +19,7 @@ class TestLoginSessionCreationFailure:
         """Test that login succeeds even if session creation fails."""
         # Mock session creation to fail
         with patch(
-            "app.api.routes.auth.session_crud.create_session",
+            "app.api.routes.auth.session_service.create_session",
             side_effect=Exception("Session creation failed"),
         ):
             response = await client.post(
@@ -43,7 +43,7 @@ class TestOAuthLoginSessionCreationFailure:
     ):
         """Test OAuth login succeeds even if session creation fails."""
         with patch(
-            "app.api.routes.auth.session_crud.create_session",
+            "app.api.routes.auth.session_service.create_session",
             side_effect=Exception("Session failed"),
         ):
             response = await client.post(
@@ -76,7 +76,7 @@ class TestRefreshTokenSessionUpdateFailure:
 
         # Mock session update to fail
         with patch(
-            "app.api.routes.auth.session_crud.update_refresh_token",
+            "app.api.routes.auth.session_service.update_refresh_token",
             side_effect=Exception("Update failed"),
         ):
             response = await client.post(
@@ -130,7 +130,7 @@ class TestLogoutWithNonExistentSession:
         tokens = response.json()
 
         # Mock session lookup to return None
-        with patch("app.api.routes.auth.session_crud.get_by_jti", return_value=None):
+        with patch("app.api.routes.auth.session_service.get_by_jti", return_value=None):
             response = await client.post(
                 "/api/v1/auth/logout",
                 headers={"Authorization": f"Bearer {tokens['access_token']}"},
@@ -157,7 +157,7 @@ class TestLogoutUnexpectedError:
 
         # Mock to raise unexpected error
         with patch(
-            "app.api.routes.auth.session_crud.get_by_jti",
+            "app.api.routes.auth.session_service.get_by_jti",
             side_effect=Exception("Unexpected error"),
         ):
             response = await client.post(
@@ -186,7 +186,7 @@ class TestLogoutAllUnexpectedError:
 
         # Mock to raise database error
         with patch(
-            "app.api.routes.auth.session_crud.deactivate_all_user_sessions",
+            "app.api.routes.auth.session_service.deactivate_all_user_sessions",
             side_effect=Exception("DB error"),
         ):
             response = await client.post(
@@ -212,7 +212,7 @@ class TestPasswordResetConfirmSessionInvalidation:
 
         # Mock session invalidation to fail
         with patch(
-            "app.api.routes.auth.session_crud.deactivate_all_user_sessions",
+            "app.api.routes.auth.session_service.deactivate_all_user_sessions",
             side_effect=Exception("Invalidation failed"),
         ):
             response = await client.post(
