@@ -65,7 +65,7 @@ class BulkUserAction(BaseModel):
 
     action: BulkAction = Field(..., description="Action to perform on selected users")
     user_ids: list[UUID] = Field(
-        ..., min_items=1, max_items=100, description="List of user IDs (max 100)"
+        ..., min_length=1, max_length=100, description="List of user IDs (max 100)"
     )
 
 

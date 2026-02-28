@@ -99,7 +99,7 @@ class OAuthProviderRefreshToken(Base, UUIDMixin, TimestampMixin):
         # Handle both timezone-aware and naive datetimes from DB
         if expires_at.tzinfo is None:
             expires_at = expires_at.replace(tzinfo=UTC)
-        return now > expires_at
+        return bool(now > expires_at)
 
     @property
     def is_valid(self) -> bool:

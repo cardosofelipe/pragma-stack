@@ -183,9 +183,6 @@ async def login(
         # Handle specific authentication errors like inactive accounts
         logger.warning(f"Authentication failed: {e!s}")
         raise AuthError(message=str(e), error_code=ErrorCode.INVALID_CREDENTIALS)
-    except AuthError:
-        # Re-raise custom auth exceptions without modification
-        raise
     except Exception as e:
         # Handle unexpected errors
         logger.error(f"Unexpected error during login: {e!s}", exc_info=True)
@@ -232,9 +229,6 @@ async def login_oauth(
     except AuthenticationError as e:
         logger.warning(f"OAuth authentication failed: {e!s}")
         raise AuthError(message=str(e), error_code=ErrorCode.INVALID_CREDENTIALS)
-    except AuthError:
-        # Re-raise custom auth exceptions without modification
-        raise
     except Exception as e:
         logger.error(f"Unexpected error during OAuth login: {e!s}", exc_info=True)
         raise DatabaseError(

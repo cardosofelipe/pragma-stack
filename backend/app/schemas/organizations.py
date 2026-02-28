@@ -48,7 +48,7 @@ class OrganizationCreate(OrganizationBase):
     """Schema for creating a new organization."""
 
     name: str = Field(..., min_length=1, max_length=255)
-    slug: str = Field(..., min_length=1, max_length=255)
+    slug: str = Field(..., min_length=1, max_length=255)  # pyright: ignore[reportIncompatibleVariableOverride]
 
 
 class OrganizationUpdate(BaseModel):

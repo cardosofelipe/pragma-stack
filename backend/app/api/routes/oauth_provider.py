@@ -655,7 +655,7 @@ async def introspect(
         )
     except Exception as e:
         logger.warning(f"Token introspection error: {e}")
-        return OAuthTokenIntrospectionResponse(active=False)
+        return OAuthTokenIntrospectionResponse(active=False)  # pyright: ignore[reportCallIssue]
 
 
 # ============================================================================

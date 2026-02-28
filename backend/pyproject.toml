@@ -72,7 +72,7 @@ dev = [
 
     # Development tools
     "ruff>=0.8.0",  # All-in-one: linting, formatting, import sorting
-    "mypy>=1.8.0",  # Type checking
+    "pyright>=1.1.390",  # Type checking
 ]
 
 # E2E testing with real PostgreSQL (requires Docker)
@@ -184,120 +184,6 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "lf"
-
-# ============================================================================
-# mypy Configuration - Type Checking
-# ============================================================================
-[tool.mypy]
-python_version = "3.12"
-warn_return_any = false  # SQLAlchemy queries return Any - overly strict
-warn_unused_configs = true
-disallow_untyped_defs = false  # Gradual typing - enable later
-disallow_incomplete_defs = false
-check_untyped_defs = true
-no_implicit_optional = true
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_no_return = true
-strict_equality = true
-ignore_missing_imports = false
-explicit_package_bases = true
-namespace_packages = true
-
-# Pydantic plugin for better validation
-plugins = ["pydantic.mypy"]
-
-# Per-module options
-[[tool.mypy.overrides]]
-module = "alembic.*"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = "app.alembic.*"
-ignore_errors = true
-
-[[tool.mypy.overrides]]
-module = "sqlalchemy.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "fastapi_utils.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "slowapi.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "jose.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "passlib.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "pydantic_settings.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "fastapi.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "apscheduler.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "starlette.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "authlib.*"
-ignore_missing_imports = true
-
-# SQLAlchemy ORM models - Column descriptors cause type confusion
-[[tool.mypy.overrides]]
-module = "app.models.*"
-disable_error_code = ["assignment", "arg-type", "return-value"]
-
-# CRUD operations - Generic ModelType and SQLAlchemy Result issues
-[[tool.mypy.overrides]]
-module = "app.crud.*"
-disable_error_code = ["attr-defined", "assignment", "arg-type", "return-value"]
-
-# API routes - SQLAlchemy Column to Pydantic schema conversions
-[[tool.mypy.overrides]]
-module = "app.api.routes.*"
-disable_error_code = ["arg-type", "call-arg", "call-overload", "assignment"]
-
-# API dependencies - Similar SQLAlchemy Column issues
-[[tool.mypy.overrides]]
-module = "app.api.dependencies.*"
-disable_error_code = ["arg-type"]
-
-# FastAPI exception handlers have correct signatures despite mypy warnings
-[[tool.mypy.overrides]]
-module = "app.main"
-disable_error_code = ["arg-type"]
-
-# Auth service - SQLAlchemy Column issues
-[[tool.mypy.overrides]]
-module = "app.services.auth_service"
-disable_error_code = ["assignment", "arg-type"]
-
-# Test utils - Testing patterns
-[[tool.mypy.overrides]]
-module = "app.utils.auth_test_utils"
-disable_error_code = ["assignment", "arg-type"]
-
-# ============================================================================
-# Pydantic mypy plugin configuration
-# ============================================================================
-[tool.pydantic-mypy]
-init_forbid_extra = true
-init_typed = true
-warn_required_dynamic_aliases = true
 
 # ============================================================================
 # Pytest Configuration

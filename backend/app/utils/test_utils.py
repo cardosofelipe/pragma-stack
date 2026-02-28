@@ -65,10 +65,10 @@ async def setup_async_test_db():
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    AsyncTestingSessionLocal = sessionmaker(
+    AsyncTestingSessionLocal = sessionmaker(  # pyright: ignore[reportCallIssue]
         autocommit=False,
         autoflush=False,
-        bind=test_engine,
+        bind=test_engine,  # pyright: ignore[reportArgumentType]
         expire_on_commit=False,
         class_=AsyncSession,
     )

@@ -39,17 +39,20 @@ from app.schemas.oauth import (
 logger = logging.getLogger(__name__)
 
 
-class OAuthProviderConfig(TypedDict, total=False):
-    """Type definition for OAuth provider configuration."""
-
+class _OAuthProviderConfigRequired(TypedDict):
     name: str
     icon: str
     authorize_url: str
     token_url: str
     userinfo_url: str
-    email_url: str  # Optional, GitHub-only
     scopes: list[str]
     supports_pkce: bool
+
+
+class OAuthProviderConfig(_OAuthProviderConfigRequired, total=False):
+    """Type definition for OAuth provider configuration."""
+
+    email_url: str  # Optional, GitHub-only
 
 
 # Provider configurations
@@ -485,7 +488,7 @@ class OAuthService:
         # GitHub requires separate request for email
         if provider == "github" and not user_info.get("email"):
             email_resp = await client.get(
-                config["email_url"],
+                config["email_url"],  # pyright: ignore[reportTypedDictNotRequiredAccess]
                 headers=headers,
             )
             email_resp.raise_for_status()

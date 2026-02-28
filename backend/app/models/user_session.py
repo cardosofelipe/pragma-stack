@@ -76,7 +76,11 @@ class UserSession(Base, UUIDMixin, TimestampMixin):
         """Check if session has expired."""
         from datetime import datetime
 
-        return self.expires_at < datetime.now(UTC)
+        now = datetime.now(UTC)
+        expires_at = self.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=UTC)
+        return bool(expires_at < now)
 
     def to_dict(self):
         """Convert session to dictionary for serialization."""

@@ -14,7 +14,7 @@ help:
 	@echo "  make lint-fix      - Run Ruff linter with auto-fix"
 	@echo "  make format        - Format code with Ruff"
 	@echo "  make format-check  - Check if code is formatted"
-	@echo "  make type-check    - Run mypy type checking"
+	@echo "  make type-check    - Run pyright type checking"
 	@echo "  make validate      - Run all checks (lint + format + types)"
 	@echo ""
 	@echo "Testing:"
@@ -63,8 +63,8 @@ format-check:
 	@uv run ruff format --check app/ tests/
 
 type-check:
-	@echo "🔎 Running mypy type checking..."
-	@uv run mypy app/
+	@echo "🔎 Running pyright type checking..."
+	@uv run pyright app/
 
 validate: lint format-check type-check
 	@echo "✅ All quality checks passed!"
@@ -127,7 +127,7 @@ clean:
 	@echo "🧹 Cleaning up..."
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type d -name ".pyright" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name "htmlcov" -exec rm -rf {} + 2>/dev/null || true

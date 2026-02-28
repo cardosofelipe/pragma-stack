@@ -222,7 +222,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     )
 
     error_response = ErrorResponse(
-        errors=[ErrorDetail(code=error_code, message=str(exc.detail))]
+        errors=[ErrorDetail(code=error_code, message=str(exc.detail), field=None)]
     )
 
     return JSONResponse(
@@ -254,7 +254,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
         message = f"{type(exc).__name__}: {exc!s}"
 
     error_response = ErrorResponse(
-        errors=[ErrorDetail(code=ErrorCode.INTERNAL_ERROR, message=message)]
+        errors=[ErrorDetail(code=ErrorCode.INTERNAL_ERROR, message=message, field=None)]
     )
 
     return JSONResponse(

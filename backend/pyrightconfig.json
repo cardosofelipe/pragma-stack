@@ -1,0 +1,23 @@
+{
+  "include": ["app"],
+  "exclude": ["app/alembic"],
+  "pythonVersion": "3.12",
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "standard",
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownArgumentType": false,
+  "reportUnknownParameterType": false,
+  "reportUnknownLambdaType": false,
+  "reportReturnType": true,
+  "reportUnusedImport": false,
+  "reportGeneralTypeIssues": false,
+  "reportAttributeAccessIssue": false,
+  "reportArgumentType": false,
+  "strictListInference": false,
+  "strictDictionaryInference": false,
+  "strictSetInference": false
+}

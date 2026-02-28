@@ -174,6 +174,7 @@ class OrganizationRepository(
             if is_active is not None:
                 query = query.where(Organization.is_active == is_active)
 
+            search_filter = None
             if search:
                 search_filter = or_(
                     Organization.name.ilike(f"%{search}%"),
@@ -185,7 +186,7 @@ class OrganizationRepository(
             count_query = select(func.count(Organization.id))
             if is_active is not None:
                 count_query = count_query.where(Organization.is_active == is_active)
-            if search:
+            if search_filter is not None:
                 count_query = count_query.where(search_filter)
 
             count_result = await db.execute(count_query)
@@ -333,7 +334,7 @@ class OrganizationRepository(
         organization_id: UUID,
         skip: int = 0,
         limit: int = 100,
-        is_active: bool = True,
+        is_active: bool | None = True,
     ) -> tuple[list[dict[str, Any]], int]:
         """Get members of an organization with user details."""
         try:
@@ -387,7 +388,7 @@ class OrganizationRepository(
             raise
 
     async def get_user_organizations(
-        self, db: AsyncSession, *, user_id: UUID, is_active: bool = True
+        self, db: AsyncSession, *, user_id: UUID, is_active: bool | None = True
     ) -> list[Organization]:
         """Get all organizations a user belongs to."""
         try:
@@ -410,7 +411,7 @@ class OrganizationRepository(
             raise
 
     async def get_user_organizations_with_details(
-        self, db: AsyncSession, *, user_id: UUID, is_active: bool = True
+        self, db: AsyncSession, *, user_id: UUID, is_active: bool | None = True
     ) -> list[dict[str, Any]]:
         """Get user's organizations with role and member count in SINGLE QUERY."""
         try:
@@ -476,7 +477,7 @@ class OrganizationRepository(
             )
             user_org = result.scalar_one_or_none()
 
-            return user_org.role if user_org else None
+            return user_org.role if user_org else None  # pyright: ignore[reportReturnType]
         except Exception as e:
             logger.error(f"Error getting user role in org: {e!s}")
             raise
