@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies.auth import get_current_superuser, get_current_user
 from app.core.database import get_db
-from app.core.exceptions import AuthorizationError, ErrorCode, NotFoundError
+from app.core.exceptions import AuthorizationError, ErrorCode
 from app.models.user import User
 from app.schemas.common import (
     MessageResponse,
@@ -107,7 +107,9 @@ async def list_users(
     """,
     operation_id="get_current_user_profile",
 )
-async def get_current_user_profile(current_user: User = Depends(get_current_user)) -> Any:
+async def get_current_user_profile(
+    current_user: User = Depends(get_current_user),
+) -> Any:
     """Get current user's profile."""
     return current_user
 

@@ -99,9 +99,7 @@ class OAuthProviderTokenRepository:
             await db.commit()
         return count
 
-    async def revoke_all_for_user(
-        self, db: AsyncSession, *, user_id: UUID
-    ) -> int:
+    async def revoke_all_for_user(self, db: AsyncSession, *, user_id: UUID) -> int:
         """
         Revoke all active tokens for a user across all clients.
 
@@ -123,9 +121,7 @@ class OAuthProviderTokenRepository:
             await db.commit()
         return count
 
-    async def cleanup_expired(
-        self, db: AsyncSession, *, cutoff_days: int = 7
-    ) -> int:
+    async def cleanup_expired(self, db: AsyncSession, *, cutoff_days: int = 7) -> int:
         """
         Delete expired refresh tokens older than cutoff_days.
 

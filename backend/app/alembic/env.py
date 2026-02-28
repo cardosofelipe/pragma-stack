@@ -40,6 +40,7 @@ def include_object(object, name, type_, reflected, compare_to):
             return False
     return True
 
+
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:

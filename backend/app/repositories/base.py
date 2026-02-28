@@ -411,4 +411,3 @@ class BaseRepository[
                 exc_info=True,
             )
             raise
-

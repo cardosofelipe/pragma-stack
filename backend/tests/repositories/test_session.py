@@ -9,8 +9,8 @@ from uuid import uuid4
 import pytest
 
 from app.core.repository_exceptions import InvalidInputError
-from app.repositories.session import session_repo as session_crud
 from app.models.user_session import UserSession
+from app.repositories.session import session_repo as session_crud
 from app.schemas.sessions import SessionCreate
 
 

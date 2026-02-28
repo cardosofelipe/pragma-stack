@@ -96,7 +96,9 @@ class UserService:
             await db.execute(select(func.count()).select_from(User))
         ).scalar() or 0
         active_count = (
-            await db.execute(select(func.count()).select_from(User).where(User.is_active))
+            await db.execute(
+                select(func.count()).select_from(User).where(User.is_active)
+            )
         ).scalar() or 0
         inactive_count = (
             await db.execute(
@@ -104,9 +106,7 @@ class UserService:
             )
         ).scalar() or 0
         all_users = list(
-            (
-                await db.execute(select(User).order_by(User.created_at))
-            ).scalars().all()
+            (await db.execute(select(User).order_by(User.created_at))).scalars().all()
         )
         return {
             "total_users": total_users,

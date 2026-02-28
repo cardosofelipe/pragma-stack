@@ -9,11 +9,11 @@ from .user_service import UserService, user_service
 __all__ = [
     "AuthService",
     "OAuthService",
-    "UserService",
     "OrganizationService",
     "SessionService",
+    "UserService",
     "oauth_provider_service",
-    "user_service",
     "organization_service",
     "session_service",
+    "user_service",
 ]

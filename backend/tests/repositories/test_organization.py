@@ -10,9 +10,9 @@ import pytest
 from sqlalchemy import select
 
 from app.core.repository_exceptions import DuplicateEntryError, IntegrityConstraintError
-from app.repositories.organization import organization_repo as organization_crud
 from app.models.organization import Organization
 from app.models.user_organization import OrganizationRole, UserOrganization
+from app.repositories.organization import organization_repo as organization_crud
 from app.schemas.organizations import OrganizationCreate
 
 
@@ -973,7 +973,9 @@ class TestOrganizationExceptionHandlers:
             with patch.object(session, "commit", side_effect=mock_commit):
                 with patch.object(session, "rollback", new_callable=AsyncMock):
                     org_in = OrganizationCreate(name="Test", slug="test")
-                    with pytest.raises(IntegrityConstraintError, match="Database integrity error"):
+                    with pytest.raises(
+                        IntegrityConstraintError, match="Database integrity error"
+                    ):
                         await organization_crud.create(session, obj_in=org_in)
 
     @pytest.mark.asyncio
@@ -1059,7 +1061,8 @@ class TestOrganizationExceptionHandlers:
                 with patch.object(session, "commit", side_effect=mock_commit):
                     with patch.object(session, "rollback", new_callable=AsyncMock):
                         with pytest.raises(
-                            IntegrityConstraintError, match="Failed to add user to organization"
+                            IntegrityConstraintError,
+                            match="Failed to add user to organization",
                         ):
                             await organization_crud.add_user(
                                 session,

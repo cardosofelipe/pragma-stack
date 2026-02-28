@@ -24,9 +24,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import create_access_token, create_refresh_token
 from app.core.config import settings
 from app.core.exceptions import AuthenticationError
+from app.models.user import User
 from app.repositories.oauth_account import oauth_account_repo as oauth_account
 from app.repositories.oauth_state import oauth_state_repo as oauth_state
-from app.models.user import User
 from app.repositories.user import user_repo
 from app.schemas.oauth import (
     OAuthAccountCreate,
@@ -344,7 +344,9 @@ class OAuthService:
                 await oauth_account.update_tokens(
                     db,
                     account=existing_oauth,
-                    access_token=token.get("access_token"),                    refresh_token=token.get("refresh_token"),                    token_expires_at=datetime.now(UTC)
+                    access_token=token.get("access_token"),
+                    refresh_token=token.get("refresh_token"),
+                    token_expires_at=datetime.now(UTC)
                     + timedelta(seconds=token.get("expires_in", 3600)),
                 )
 
@@ -373,7 +375,9 @@ class OAuthService:
                 provider=provider,
                 provider_user_id=provider_user_id,
                 provider_email=provider_email,
-                access_token=token.get("access_token"),                refresh_token=token.get("refresh_token"),                token_expires_at=datetime.now(UTC)
+                access_token=token.get("access_token"),
+                refresh_token=token.get("refresh_token"),
+                token_expires_at=datetime.now(UTC)
                 + timedelta(seconds=token.get("expires_in", 3600))
                 if token.get("expires_in")
                 else None,
@@ -639,7 +643,9 @@ class OAuthService:
             provider=provider,
             provider_user_id=provider_user_id,
             provider_email=email,
-            access_token=token.get("access_token"),            refresh_token=token.get("refresh_token"),            token_expires_at=datetime.now(UTC)
+            access_token=token.get("access_token"),
+            refresh_token=token.get("refresh_token"),
+            token_expires_at=datetime.now(UTC)
             + timedelta(seconds=token.get("expires_in", 3600))
             if token.get("expires_in")
             else None,

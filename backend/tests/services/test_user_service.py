@@ -4,13 +4,12 @@
 import uuid
 
 import pytest
-import pytest_asyncio
 from sqlalchemy import select
 
 from app.core.exceptions import NotFoundError
 from app.models.user import User
 from app.schemas.users import UserCreate, UserUpdate
-from app.services.user_service import UserService, user_service
+from app.services.user_service import user_service
 
 
 class TestGetUser:

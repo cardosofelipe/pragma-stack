@@ -12,8 +12,8 @@ These tests prevent real-world attack scenarios.
 import pytest
 from httpx import AsyncClient
 
-from app.repositories.session import session_repo as session_crud
 from app.models.user import User
+from app.repositories.session import session_repo as session_crud
 
 
 class TestRevokedSessionSecurity:

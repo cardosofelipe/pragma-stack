@@ -8,7 +8,6 @@ Create Date: 2026-02-27 01:03:18.869178
 
 from collections.abc import Sequence
 
-import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
@@ -19,10 +18,18 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.alter_column("oauth_accounts", "access_token_encrypted", new_column_name="access_token")
-    op.alter_column("oauth_accounts", "refresh_token_encrypted", new_column_name="refresh_token")
+    op.alter_column(
+        "oauth_accounts", "access_token_encrypted", new_column_name="access_token"
+    )
+    op.alter_column(
+        "oauth_accounts", "refresh_token_encrypted", new_column_name="refresh_token"
+    )
 
 
 def downgrade() -> None:
-    op.alter_column("oauth_accounts", "access_token", new_column_name="access_token_encrypted")
-    op.alter_column("oauth_accounts", "refresh_token", new_column_name="refresh_token_encrypted")
+    op.alter_column(
+        "oauth_accounts", "access_token", new_column_name="access_token_encrypted"
+    )
+    op.alter_column(
+        "oauth_accounts", "refresh_token", new_column_name="refresh_token_encrypted"
+    )

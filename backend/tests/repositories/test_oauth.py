@@ -63,7 +63,8 @@ class TestOAuthAccountCRUD:
 
             # SQLite returns different error message than PostgreSQL
             with pytest.raises(
-                DuplicateEntryError, match="(already linked|UNIQUE constraint failed|Failed to create)"
+                DuplicateEntryError,
+                match="(already linked|UNIQUE constraint failed|Failed to create)",
             ):
                 await oauth_account.create_account(session, obj_in=account_data2)
 

@@ -170,7 +170,9 @@ class TestCRUDBaseCreate:
                     last_name="User",
                 )
 
-                with pytest.raises(DuplicateEntryError, match="Database integrity error"):
+                with pytest.raises(
+                    DuplicateEntryError, match="Database integrity error"
+                ):
                     await user_crud.create(session, obj_in=user_data)
 
     @pytest.mark.asyncio
@@ -307,7 +309,9 @@ class TestCRUDBaseUpdate:
                     "statement", {}, Exception("constraint failed")
                 ),
             ):
-                with pytest.raises(IntegrityConstraintError, match="Database integrity error"):
+                with pytest.raises(
+                    IntegrityConstraintError, match="Database integrity error"
+                ):
                     await user_crud.update(
                         session, db_obj=user, obj_in={"first_name": "Test"}
                     )
@@ -327,7 +331,9 @@ class TestCRUDBaseUpdate:
                     "statement", {}, Exception("connection error")
                 ),
             ):
-                with pytest.raises(IntegrityConstraintError, match="Database operation failed"):
+                with pytest.raises(
+                    IntegrityConstraintError, match="Database operation failed"
+                ):
                     await user_crud.update(
                         session, db_obj=user, obj_in={"first_name": "Test"}
                     )
@@ -408,7 +414,8 @@ class TestCRUDBaseRemove:
                 ),
             ):
                 with pytest.raises(
-                    IntegrityConstraintError, match="Cannot delete.*referenced by other records"
+                    IntegrityConstraintError,
+                    match="Cannot delete.*referenced by other records",
                 ):
                     await user_crud.remove(session, id=str(async_test_user.id))
 
@@ -904,8 +911,8 @@ class TestCRUDBaseModelsWithoutSoftDelete:
         _test_engine, SessionLocal = async_test_db
 
         # Create an organization (which doesn't have deleted_at)
-        from app.repositories.organization import organization_repo as org_crud
         from app.models.organization import Organization
+        from app.repositories.organization import organization_repo as org_crud
 
         async with SessionLocal() as session:
             org = Organization(name="Test Org", slug="test-org")
@@ -915,7 +922,9 @@ class TestCRUDBaseModelsWithoutSoftDelete:
 
         # Try to soft delete organization (should fail)
         async with SessionLocal() as session:
-            with pytest.raises(InvalidInputError, match="does not have a deleted_at column"):
+            with pytest.raises(
+                InvalidInputError, match="does not have a deleted_at column"
+            ):
                 await org_crud.soft_delete(session, id=str(org_id))
 
     @pytest.mark.asyncio
@@ -924,8 +933,8 @@ class TestCRUDBaseModelsWithoutSoftDelete:
         _test_engine, SessionLocal = async_test_db
 
         # Create an organization (which doesn't have deleted_at)
-        from app.repositories.organization import organization_repo as org_crud
         from app.models.organization import Organization
+        from app.repositories.organization import organization_repo as org_crud
 
         async with SessionLocal() as session:
             org = Organization(name="Restore Test", slug="restore-test")
@@ -935,7 +944,9 @@ class TestCRUDBaseModelsWithoutSoftDelete:
 
         # Try to restore organization (should fail)
         async with SessionLocal() as session:
-            with pytest.raises(InvalidInputError, match="does not have a deleted_at column"):
+            with pytest.raises(
+                InvalidInputError, match="does not have a deleted_at column"
+            ):
                 await org_crud.restore(session, id=str(org_id))
 
 
@@ -955,8 +966,8 @@ class TestCRUDBaseEagerLoadingWithRealOptions:
         _test_engine, SessionLocal = async_test_db
 
         # Create a session for the user
-        from app.repositories.session import session_repo as session_crud
         from app.models.user_session import UserSession
+        from app.repositories.session import session_repo as session_crud
 
         async with SessionLocal() as session:
             user_session = UserSession(
@@ -994,8 +1005,8 @@ class TestCRUDBaseEagerLoadingWithRealOptions:
         _test_engine, SessionLocal = async_test_db
 
         # Create multiple sessions for the user
-        from app.repositories.session import session_repo as session_crud
         from app.models.user_session import UserSession
+        from app.repositories.session import session_repo as session_crud
 
         async with SessionLocal() as session:
             for i in range(3):

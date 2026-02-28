@@ -22,7 +22,9 @@ class EmptySchema(BaseModel):
     """Placeholder schema for repository operations that don't need update schemas."""
 
 
-class OAuthClientRepository(BaseRepository[OAuthClient, OAuthClientCreate, EmptySchema]):
+class OAuthClientRepository(
+    BaseRepository[OAuthClient, OAuthClientCreate, EmptySchema]
+):
     """Repository for OAuth clients (provider mode)."""
 
     async def get_by_client_id(

@@ -16,7 +16,6 @@ from app.api.dependencies.auth import get_current_user
 from app.api.dependencies.permissions import require_org_admin, require_org_membership
 from app.core.database import get_db
 from app.models.user import User
-from app.services.organization_service import organization_service
 from app.schemas.common import (
     PaginatedResponse,
     PaginationParams,
@@ -27,6 +26,7 @@ from app.schemas.organizations import (
     OrganizationResponse,
     OrganizationUpdate,
 )
+from app.services.organization_service import organization_service
 
 logger = logging.getLogger(__name__)
 

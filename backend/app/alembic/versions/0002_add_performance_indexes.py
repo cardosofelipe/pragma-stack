@@ -114,8 +114,13 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     # Drop indexes in reverse order
-    op.drop_index("ix_perf_oauth_auth_codes_expires", table_name="oauth_authorization_codes")
-    op.drop_index("ix_perf_oauth_refresh_tokens_expires", table_name="oauth_provider_refresh_tokens")
+    op.drop_index(
+        "ix_perf_oauth_auth_codes_expires", table_name="oauth_authorization_codes"
+    )
+    op.drop_index(
+        "ix_perf_oauth_refresh_tokens_expires",
+        table_name="oauth_provider_refresh_tokens",
+    )
     op.drop_index("ix_perf_user_sessions_expires", table_name="user_sessions")
     op.drop_index("ix_perf_organizations_slug_lower", table_name="organizations")
     op.drop_index("ix_perf_users_active", table_name="users")

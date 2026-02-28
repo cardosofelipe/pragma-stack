@@ -429,9 +429,7 @@ async def confirm_password_reset(
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST, detail=err_msg
                 )
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=err_msg
-            )
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=err_msg)
 
         # SECURITY: Invalidate all existing sessions after password reset
         # This prevents stolen sessions from being used after password change

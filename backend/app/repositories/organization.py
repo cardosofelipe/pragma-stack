@@ -22,7 +22,9 @@ from app.schemas.organizations import (
 logger = logging.getLogger(__name__)
 
 
-class OrganizationRepository(BaseRepository[Organization, OrganizationCreate, OrganizationUpdate]):
+class OrganizationRepository(
+    BaseRepository[Organization, OrganizationCreate, OrganizationUpdate]
+):
     """Repository for Organization model."""
 
     async def get_by_slug(self, db: AsyncSession, *, slug: str) -> Organization | None:
@@ -55,7 +57,11 @@ class OrganizationRepository(BaseRepository[Organization, OrganizationCreate, Or
         except IntegrityError as e:
             await db.rollback()
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
-            if "slug" in error_msg.lower() or "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
+            if (
+                "slug" in error_msg.lower()
+                or "unique" in error_msg.lower()
+                or "duplicate" in error_msg.lower()
+            ):
                 logger.warning(f"Duplicate slug attempted: {obj_in.slug}")
                 raise DuplicateEntryError(
                     f"Organization with slug '{obj_in.slug}' already exists"
@@ -235,7 +241,9 @@ class OrganizationRepository(BaseRepository[Organization, OrganizationCreate, Or
                     await db.refresh(existing)
                     return existing
                 else:
-                    raise DuplicateEntryError("User is already a member of this organization")
+                    raise DuplicateEntryError(
+                        "User is already a member of this organization"
+                    )
 
             user_org = UserOrganization(
                 user_id=user_id,

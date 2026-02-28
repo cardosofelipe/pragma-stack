@@ -99,7 +99,8 @@ class TestUpdateCurrentUser:
         from unittest.mock import patch
 
         with patch(
-            "app.api.routes.users.user_service.update_user", side_effect=Exception("DB error")
+            "app.api.routes.users.user_service.update_user",
+            side_effect=Exception("DB error"),
         ):
             with pytest.raises(Exception):
                 await client.patch(
@@ -224,7 +225,8 @@ class TestUpdateUserById:
         from unittest.mock import patch
 
         with patch(
-            "app.api.routes.users.user_service.update_user", side_effect=ValueError("Invalid")
+            "app.api.routes.users.user_service.update_user",
+            side_effect=ValueError("Invalid"),
         ):
             with pytest.raises(ValueError):
                 await client.patch(
@@ -241,7 +243,8 @@ class TestUpdateUserById:
         from unittest.mock import patch
 
         with patch(
-            "app.api.routes.users.user_service.update_user", side_effect=Exception("Unexpected")
+            "app.api.routes.users.user_service.update_user",
+            side_effect=Exception("Unexpected"),
         ):
             with pytest.raises(Exception):
                 await client.patch(

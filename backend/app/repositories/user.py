@@ -58,7 +58,9 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
             if "email" in error_msg.lower():
                 logger.warning(f"Duplicate email attempted: {obj_in.email}")
-                raise DuplicateEntryError(f"User with email {obj_in.email} already exists")
+                raise DuplicateEntryError(
+                    f"User with email {obj_in.email} already exists"
+                )
             logger.error(f"Integrity error creating user: {error_msg}")
             raise DuplicateEntryError(f"Database integrity error: {error_msg}")
         except Exception as e:

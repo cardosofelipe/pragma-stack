@@ -10,7 +10,7 @@ from sqlalchemy import and_, delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 
-from app.core.repository_exceptions import InvalidInputError, IntegrityConstraintError
+from app.core.repository_exceptions import IntegrityConstraintError, InvalidInputError
 from app.models.user_session import UserSession
 from app.repositories.base import BaseRepository
 from app.schemas.sessions import SessionCreate, SessionUpdate

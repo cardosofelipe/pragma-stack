@@ -27,9 +27,6 @@ from app.core.exceptions import (
 from app.core.repository_exceptions import DuplicateEntryError
 from app.models.user import User
 from app.models.user_organization import OrganizationRole
-from app.services.organization_service import organization_service
-from app.services.session_service import session_service
-from app.services.user_service import user_service
 from app.schemas.common import (
     MessageResponse,
     PaginatedResponse,
@@ -45,6 +42,9 @@ from app.schemas.organizations import (
 )
 from app.schemas.sessions import AdminSessionResponse
 from app.schemas.users import UserCreate, UserResponse, UserUpdate
+from app.services.organization_service import organization_service
+from app.services.session_service import session_service
+from app.services.user_service import user_service
 
 logger = logging.getLogger(__name__)
 

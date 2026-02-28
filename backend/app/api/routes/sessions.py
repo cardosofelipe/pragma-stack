@@ -18,9 +18,9 @@ from app.core.auth import decode_token
 from app.core.database import get_db
 from app.core.exceptions import AuthorizationError, ErrorCode, NotFoundError
 from app.models.user import User
-from app.services.session_service import session_service
 from app.schemas.common import MessageResponse
 from app.schemas.sessions import SessionListResponse, SessionResponse
+from app.services.session_service import session_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

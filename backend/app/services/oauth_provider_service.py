@@ -30,13 +30,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.models.oauth_client import OAuthClient
-from app.schemas.oauth import OAuthClientCreate
 from app.models.user import User
 from app.repositories.oauth_authorization_code import oauth_authorization_code_repo
 from app.repositories.oauth_client import oauth_client_repo
 from app.repositories.oauth_consent import oauth_consent_repo
 from app.repositories.oauth_provider_token import oauth_provider_token_repo
 from app.repositories.user import user_repo
+from app.schemas.oauth import OAuthClientCreate
 
 logger = logging.getLogger(__name__)
 
@@ -691,9 +691,7 @@ async def revoke_token(
             jti = payload.get("jti")
             if jti:
                 # Find and revoke the associated refresh token
-                refresh_record = await oauth_provider_token_repo.get_by_jti(
-                    db, jti=jti
-                )
+                refresh_record = await oauth_provider_token_repo.get_by_jti(db, jti=jti)
                 if refresh_record:
                     if client_id and refresh_record.client_id != client_id:
                         raise InvalidClientError("Token was not issued to this client")
@@ -807,9 +805,7 @@ async def introspect_token(
             # Check if associated refresh token is revoked
             jti = payload.get("jti")
             if jti:
-                refresh_record = await oauth_provider_token_repo.get_by_jti(
-                    db, jti=jti
-                )
+                refresh_record = await oauth_provider_token_repo.get_by_jti(db, jti=jti)
                 if refresh_record and refresh_record.revoked:
                     return {"active": False}
 
@@ -862,7 +858,9 @@ async def get_consent(
     client_id: str,
 ):
     """Get existing consent record for user-client pair."""
-    return await oauth_consent_repo.get_consent(db, user_id=user_id, client_id=client_id)
+    return await oauth_consent_repo.get_consent(
+        db, user_id=user_id, client_id=client_id
+    )
 
 
 async def check_consent(

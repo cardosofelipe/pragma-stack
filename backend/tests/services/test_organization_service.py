@@ -4,12 +4,11 @@
 import uuid
 
 import pytest
-import pytest_asyncio
 
 from app.core.exceptions import NotFoundError
 from app.models.user_organization import OrganizationRole
 from app.schemas.organizations import OrganizationCreate, OrganizationUpdate
-from app.services.organization_service import OrganizationService, organization_service
+from app.services.organization_service import organization_service
 
 
 def _make_org_create(name=None, slug=None) -> OrganizationCreate:
@@ -50,9 +49,7 @@ class TestGetOrganization:
         _test_engine, AsyncTestingSessionLocal = async_test_db
         async with AsyncTestingSessionLocal() as session:
             with pytest.raises(NotFoundError):
-                await organization_service.get_organization(
-                    session, str(uuid.uuid4())
-                )
+                await organization_service.get_organization(session, str(uuid.uuid4()))
 
 
 class TestCreateOrganization:

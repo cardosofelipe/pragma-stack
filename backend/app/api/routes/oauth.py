@@ -25,7 +25,6 @@ from app.core.auth import decode_token
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.exceptions import AuthenticationError as AuthError
-from app.services.session_service import session_service
 from app.models.user import User
 from app.schemas.oauth import (
     OAuthAccountsListResponse,
@@ -37,6 +36,7 @@ from app.schemas.oauth import (
 from app.schemas.sessions import SessionCreate
 from app.schemas.users import Token
 from app.services.oauth_service import OAuthService
+from app.services.session_service import session_service
 from app.utils.device import extract_device_info
 
 router = APIRouter()

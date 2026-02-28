@@ -16,10 +16,10 @@ from sqlalchemy import select, text
 
 from app.core.config import settings
 from app.core.database import SessionLocal, engine
-from app.repositories.user import user_repo as user_crud
 from app.models.organization import Organization
 from app.models.user import User
 from app.models.user_organization import UserOrganization
+from app.repositories.user import user_repo as user_crud
 from app.schemas.users import UserCreate
 
 logger = logging.getLogger(__name__)

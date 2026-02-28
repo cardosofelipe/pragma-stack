@@ -120,7 +120,9 @@ class TestBaseCRUDUpdateFailures:
                 with patch.object(
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
-                    with pytest.raises(IntegrityConstraintError, match="Database operation failed"):
+                    with pytest.raises(
+                        IntegrityConstraintError, match="Database operation failed"
+                    ):
                         await user_crud.update(
                             session, db_obj=user, obj_in={"first_name": "Updated"}
                         )
@@ -142,7 +144,9 @@ class TestBaseCRUDUpdateFailures:
                 with patch.object(
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
-                    with pytest.raises(IntegrityConstraintError, match="Database operation failed"):
+                    with pytest.raises(
+                        IntegrityConstraintError, match="Database operation failed"
+                    ):
                         await user_crud.update(
                             session, db_obj=user, obj_in={"first_name": "Updated"}
                         )

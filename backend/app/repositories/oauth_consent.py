@@ -2,9 +2,8 @@
 """Repository for OAuthConsent model."""
 
 import logging
-from uuid import UUID
-
 from typing import Any
+from uuid import UUID
 
 from sqlalchemy import and_, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -49,7 +48,9 @@ class OAuthConsentRepository:
         consent = await self.get_consent(db, user_id=user_id, client_id=client_id)
 
         if consent:
-            existing = set(consent.granted_scopes.split()) if consent.granted_scopes else set()
+            existing = (
+                set(consent.granted_scopes.split()) if consent.granted_scopes else set()
+            )
             merged = existing | set(scopes)
             consent.granted_scopes = " ".join(sorted(merged))  # type: ignore[assignment]
         else:

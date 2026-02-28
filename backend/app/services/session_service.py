@@ -25,7 +25,9 @@ class SessionService:
         """Create a new session record."""
         return await self._repo.create_session(db, obj_in=obj_in)
 
-    async def get_session(self, db: AsyncSession, session_id: str) -> UserSession | None:
+    async def get_session(
+        self, db: AsyncSession, session_id: str
+    ) -> UserSession | None:
         """Get session by ID."""
         return await self._repo.get(db, id=session_id)
 
@@ -72,9 +74,7 @@ class SessionService:
             db, session=session, new_jti=new_jti, new_expires_at=new_expires_at
         )
 
-    async def cleanup_expired_for_user(
-        self, db: AsyncSession, *, user_id: str
-    ) -> int:
+    async def cleanup_expired_for_user(self, db: AsyncSession, *, user_id: str) -> int:
         """Remove expired sessions for a user. Returns count removed."""
         return await self._repo.cleanup_expired_for_user(db, user_id=user_id)
 

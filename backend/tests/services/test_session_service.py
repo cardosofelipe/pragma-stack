@@ -5,10 +5,9 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import pytest
-import pytest_asyncio
 
 from app.schemas.sessions import SessionCreate
-from app.services.session_service import SessionService, session_service
+from app.services.session_service import session_service
 
 
 def _make_session_create(user_id, jti=None) -> SessionCreate:

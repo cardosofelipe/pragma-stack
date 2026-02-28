@@ -51,9 +51,7 @@ class OrganizationService:
         """Permanently delete an organization by ID."""
         await self._repo.remove(db, id=org_id)
 
-    async def get_member_count(
-        self, db: AsyncSession, *, organization_id: UUID
-    ) -> int:
+    async def get_member_count(self, db: AsyncSession, *, organization_id: UUID) -> int:
         """Get number of active members in an organization."""
         return await self._repo.get_member_count(db, organization_id=organization_id)
 

@@ -11,9 +11,9 @@ These tests prevent unauthorized access and privilege escalation.
 import pytest
 from httpx import AsyncClient
 
-from app.repositories.user import user_repo as user_crud
 from app.models.organization import Organization
 from app.models.user import User
+from app.repositories.user import user_repo as user_crud
 
 
 class TestInactiveUserBlocking:
