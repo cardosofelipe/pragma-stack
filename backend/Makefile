@@ -1,5 +1,8 @@
 .PHONY: help lint lint-fix format format-check type-check test test-cov validate clean install-dev sync check-docker install-e2e test-e2e test-e2e-schema test-all
 
+# Prevent a stale VIRTUAL_ENV in the caller's shell from confusing uv
+unexport VIRTUAL_ENV
+
 # Default target
 help:
 	@echo "🚀 FastAPI Backend - Development Commands"
