@@ -117,7 +117,8 @@ backend/
 │   ├── api/                        # API layer
 │   │   ├── dependencies/           # Dependency injection
 │   │   │   ├── auth.py            # Authentication dependencies
-│   │   │   └── permissions.py     # Authorization dependencies
+│   │   │   ├── permissions.py     # Authorization dependencies
+│   │   │   └── services.py        # Service singleton injection
 │   │   ├── routes/                # API endpoints
 │   │   │   ├── auth.py            # Authentication routes
 │   │   │   ├── users.py           # User management routes
@@ -131,13 +132,14 @@ backend/
 │   │   ├── config.py              # Application configuration
 │   │   ├── database.py            # Database connection
 │   │   ├── exceptions.py          # Custom exception classes
+│   │   ├── repository_exceptions.py # Repository-level exception hierarchy
 │   │   └── middleware.py          # Custom middleware
 │   │
-│   ├── crud/                       # Database operations
-│   │   ├── base.py                # Generic CRUD base class
-│   │   ├── user.py                # User CRUD operations
-│   │   ├── session.py             # Session CRUD operations
-│   │   └── organization.py        # Organization CRUD
+│   ├── repositories/               # Data access layer
+│   │   ├── base.py                # Generic repository base class
+│   │   ├── user.py                # User repository
+│   │   ├── session.py             # Session repository
+│   │   └── organization.py        # Organization repository
 │   │
 │   ├── models/                     # SQLAlchemy models
 │   │   ├── base.py                # Base model with mixins
@@ -153,8 +155,11 @@ backend/
 │   │   ├── sessions.py            # Session schemas
 │   │   └── organizations.py       # Organization schemas
 │   │
-│   ├── services/                   # Business logic
+│   ├── services/                   # Business logic layer
 │   │   ├── auth_service.py        # Authentication service
+│   │   ├── user_service.py        # User management service
+│   │   ├── session_service.py     # Session management service
+│   │   ├── organization_service.py # Organization service
 │   │   ├── email_service.py       # Email service
 │   │   └── session_cleanup.py     # Background cleanup
 │   │
@@ -168,9 +173,9 @@ backend/
 │
 ├── tests/                          # Test suite
 │   ├── api/                        # Integration tests
-│   ├── crud/                       # CRUD tests
+│   ├── repositories/               # Repository unit tests
+│   ├── services/                   # Service unit tests
 │   ├── models/                     # Model tests
-│   ├── services/                   # Service tests
 │   └── conftest.py                 # Test configuration
 │
 ├── docs/                           # Documentation
@@ -214,11 +219,11 @@ The application follows a strict 5-layer architecture:
 └──────────────────────────┬──────────────────────────────────┘
                            │ calls
 ┌──────────────────────────▼──────────────────────────────────┐
-│                    CRUD Layer (crud/)                        │
+│              Repository Layer (repositories/)                │
 │  - Database operations                                       │
 │  - Query building                                            │
-│  - Transaction management                                    │
-│  - Error handling                                            │
+│  - Custom repository exceptions                              │
+│  - No business logic                                         │
 └──────────────────────────┬──────────────────────────────────┘
                            │ uses
 ┌──────────────────────────▼──────────────────────────────────┐
@@ -262,7 +267,7 @@ async def get_current_user_info(
 
 **Rules**:
 - Should NOT contain business logic
-- Should NOT directly perform database operations (use CRUD or services)
+- Should NOT directly call repositories (use services injected via `dependencies/services.py`)
 - Must validate all input via Pydantic schemas
 - Must specify response models
 - Should apply appropriate rate limits
@@ -279,9 +284,9 @@ async def get_current_user_info(
 
 **Example**:
 ```python
-def get_current_user(
+async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ) -> User:
     """
     Extract and validate user from JWT token.
@@ -295,7 +300,7 @@ def get_current_user(
     except Exception:
         raise AuthenticationError("Invalid authentication credentials")
 
-    user = user_crud.get(db, id=user_id)
+    user = await user_repo.get(db, id=user_id)
     if not user:
         raise AuthenticationError("User not found")
 
@@ -313,7 +318,7 @@ def get_current_user(
 **Responsibility**: Implement complex business logic
 
 **Key Functions**:
-- Orchestrate multiple CRUD operations
+- Orchestrate multiple repository operations
 - Implement business rules
 - Handle external service integration
 - Coordinate transactions
@@ -323,9 +328,9 @@ def get_current_user(
 class AuthService:
     """Authentication service with business logic."""
 
-    def login(
+    async def login(
         self,
-        db: Session,
+        db: AsyncSession,
         email: str,
         password: str,
         request: Request
@@ -339,8 +344,8 @@ class AuthService:
         3. Generate tokens
         4. Return tokens and user info
         """
-        # Validate credentials
-        user = user_crud.get_by_email(db, email=email)
+        # Validate credentials via repository
+        user = await user_repo.get_by_email(db, email=email)
         if not user or not verify_password(password, user.hashed_password):
             raise AuthenticationError("Invalid credentials")
 
@@ -350,11 +355,10 @@ class AuthService:
         # Extract device info
         device_info = extract_device_info(request)
 
-        # Create session
-        session = session_crud.create_session(
+        # Create session via repository
+        session = await session_repo.create(
             db,
-            user_id=user.id,
-            device_info=device_info
+            obj_in=SessionCreate(user_id=user.id, **device_info)
         )
 
         # Generate tokens
@@ -373,75 +377,60 @@ class AuthService:
 
 **Rules**:
 - Contains business logic, not just data operations
-- Can call multiple CRUD operations
+- Can call multiple repository operations
 - Should handle complex workflows
 - Must maintain data consistency
 - Should use transactions when needed
 
-#### 4. CRUD Layer (`app/crud/`)
+#### 4. Repository Layer (`app/repositories/`)
 
-**Responsibility**: Database operations and queries
+**Responsibility**: Database operations and queries — no business logic
 
 **Key Functions**:
 - Create, read, update, delete operations
 - Build database queries
-- Handle database errors
+- Raise custom repository exceptions (`DuplicateEntryError`, `IntegrityConstraintError`)
 - Manage soft deletes
 - Implement pagination and filtering
 
 **Example**:
 ```python
-class CRUDSession(CRUDBase[UserSession, SessionCreate, SessionUpdate]):
-    """CRUD operations for user sessions."""
+class SessionRepository(RepositoryBase[UserSession, SessionCreate, SessionUpdate]):
+    """Repository for user sessions — database operations only."""
 
-    def get_by_jti(self, db: Session, jti: UUID) -> Optional[UserSession]:
+    async def get_by_jti(self, db: AsyncSession, *, jti: str) -> UserSession | None:
         """Get session by refresh token JTI."""
-        try:
-            return (
-                db.query(UserSession)
-                .filter(UserSession.refresh_token_jti == jti)
-                .first()
-            )
-        except Exception as e:
-            logger.error(f"Error getting session by JTI: {str(e)}")
-            return None
+        result = await db.execute(
+            select(UserSession).where(UserSession.refresh_token_jti == jti)
+        )
+        return result.scalar_one_or_none()
 
-    def get_active_by_jti(
-        self,
-        db: Session,
-        jti: UUID
-    ) -> Optional[UserSession]:
-        """Get active session by refresh token JTI."""
-        session = self.get_by_jti(db, jti=jti)
-        if session and session.is_active and not session.is_expired:
-            return session
-        return None
-
-    def deactivate(self, db: Session, session_id: UUID) -> bool:
+    async def deactivate(self, db: AsyncSession, *, session_id: UUID) -> bool:
         """Deactivate a session (logout)."""
         try:
-            session = self.get(db, id=session_id)
+            session = await self.get(db, id=session_id)
             if not session:
                 return False
 
             session.is_active = False
-            db.commit()
+            await db.commit()
             logger.info(f"Session {session_id} deactivated")
             return True
 
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             logger.error(f"Error deactivating session: {str(e)}")
             return False
 ```
 
 **Rules**:
 - Should NOT contain business logic
-- Must handle database exceptions
-- Must use parameterized queries (SQLAlchemy does this)
+- Must raise custom repository exceptions (not raw `ValueError`/`IntegrityError`)
+- Must use async SQLAlchemy 2.0 `select()` API (never `db.query()`)
 - Should log all database errors
 - Must rollback on errors
 - Should use soft deletes when possible
+- **Never imported directly by routes** — always called through services
 
 #### 5. Data Layer (`app/models/` + `app/schemas/`)
 
@@ -546,51 +535,23 @@ SessionLocal = sessionmaker(
 #### Dependency Injection Pattern
 
 ```python
-def get_db() -> Generator[Session, None, None]:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
-    Database session dependency for FastAPI routes.
+    Async database session dependency for FastAPI routes.
 
-    Automatically commits on success, rolls back on error.
+    The session is passed to service methods; commit/rollback is
+    managed inside service or repository methods.
     """
-    db = SessionLocal()
-    try:
+    async with AsyncSessionLocal() as db:
         yield db
-    finally:
-        db.close()
 
-# Usage in routes
+# Usage in routes — always through a service, never direct repository
 @router.get("/users")
-def list_users(db: Session = Depends(get_db)):
-    return user_crud.get_multi(db)
-```
-
-#### Context Manager Pattern
-
-```python
-@contextmanager
-def transaction_scope() -> Generator[Session, None, None]:
-    """
-    Context manager for database transactions.
-
-    Use for complex operations requiring multiple steps.
-    Automatically commits on success, rolls back on error.
-    """
-    db = SessionLocal()
-    try:
-        yield db
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-    finally:
-        db.close()
-
-# Usage in services
-def complex_operation():
-    with transaction_scope() as db:
-        user = user_crud.create(db, obj_in=user_data)
-        session = session_crud.create(db, session_data)
-        return user, session
+async def list_users(
+    user_service: UserService = Depends(get_user_service),
+    db: AsyncSession = Depends(get_db),
+):
+    return await user_service.get_users(db)
 ```
 
 ### Model Mixins
@@ -782,22 +743,15 @@ def get_profile(
 
 ```python
 @router.delete("/sessions/{session_id}")
-def revoke_session(
+async def revoke_session(
     session_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    session_service: SessionService = Depends(get_session_service),
+    db: AsyncSession = Depends(get_db),
 ):
     """Users can only revoke their own sessions."""
-    session = session_crud.get(db, id=session_id)
-
-    if not session:
-        raise NotFoundError("Session not found")
-
-    # Check ownership
-    if session.user_id != current_user.id:
-        raise AuthorizationError("You can only revoke your own sessions")
-
-    session_crud.deactivate(db, session_id=session_id)
+    # SessionService verifies ownership and raises NotFoundError / AuthorizationError
+    await session_service.revoke_session(db, session_id=session_id, user_id=current_user.id)
     return MessageResponse(success=True, message="Session revoked")
 ```
 
@@ -1092,8 +1046,8 @@ async def cleanup_expired_sessions():
     Runs daily at 2 AM. Removes sessions expired for more than 30 days.
     """
     try:
-        with transaction_scope() as db:
-            count = session_crud.cleanup_expired(db, keep_days=30)
+        async with AsyncSessionLocal() as db:
+            count = await session_repo.cleanup_expired(db, keep_days=30)
             logger.info(f"Cleaned up {count} expired sessions")
     except Exception as e:
         logger.error(f"Error cleaning up sessions: {str(e)}", exc_info=True)
@@ -1110,7 +1064,7 @@ async def cleanup_expired_sessions():
         │Integration  │  ← API endpoint tests
         │   Tests     │
         ├─────────────┤
-        │   Unit      │  ← CRUD, services, utilities
+        │   Unit      │  ← repositories, services, utilities
         │   Tests     │
         └─────────────┘
 ```

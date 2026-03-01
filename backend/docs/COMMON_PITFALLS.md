@@ -616,7 +616,43 @@ def create_user(
     return user
 ```
 
-**Rule**: Add type hints to ALL functions. Use `mypy` to enforce type checking.
+**Rule**: Add type hints to ALL functions. Use `pyright` to enforce type checking (`make type-check`).
+
+---
+
+---
+
+### ❌ PITFALL #19: Importing Repositories Directly in Routes
+
+**Issue**: Routes should never call repositories directly. The layered architecture requires all business operations to go through the service layer.
+
+```python
+# ❌ WRONG - Route bypasses service layer
+from app.repositories.session import session_repo
+
+@router.get("/sessions/me")
+async def list_sessions(
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db),
+):
+    return await session_repo.get_user_sessions(db, user_id=current_user.id)
+```
+
+```python
+# ✅ CORRECT - Route calls service injected via dependency
+from app.api.dependencies.services import get_session_service
+from app.services.session_service import SessionService
+
+@router.get("/sessions/me")
+async def list_sessions(
+    current_user: User = Depends(get_current_active_user),
+    session_service: SessionService = Depends(get_session_service),
+    db: AsyncSession = Depends(get_db),
+):
+    return await session_service.get_user_sessions(db, user_id=current_user.id)
+```
+
+**Rule**: Routes import from `app.api.dependencies.services`, never from `app.repositories.*`. Services are the only callers of repositories.
 
 ---
 
@@ -649,6 +685,11 @@ Use this checklist to catch issues before code review:
 - [ ] Resource ownership verification
 - [ ] CORS configured (no wildcards in production)
 
+### Architecture
+- [ ] Routes never import repositories directly (only services)
+- [ ] Services call repositories; repositories call database only
+- [ ] New service registered in `app/api/dependencies/services.py`
+
 ### Python
 - [ ] Use `==` not `is` for value comparison
 - [ ] No mutable default arguments
@@ -661,21 +702,18 @@ Use this checklist to catch issues before code review:
 
 ### Pre-commit Checks
 
-Add these to your development workflow:
+Add these to your development workflow (or use `make validate`):
 
 ```bash
-# Format code
-black app tests
-isort app tests
+# Format + lint (Ruff replaces Black, isort, flake8)
+uv run ruff format app tests
+uv run ruff check app tests
 
 # Type checking
-mypy app --strict
-
-# Linting
-flake8 app tests
+uv run pyright app
 
 # Run tests
-pytest --cov=app --cov-report=term-missing
+IS_TEST=True uv run pytest --cov=app --cov-report=term-missing
 
 # Check coverage (should be 80%+)
 coverage report --fail-under=80
@@ -693,6 +731,6 @@ Add new entries when:
 
 ---
 
-**Last Updated**: 2025-10-31
-**Issues Cataloged**: 18 common pitfalls
+**Last Updated**: 2026-02-28
+**Issues Cataloged**: 19 common pitfalls
 **Remember**: This document exists because these issues HAVE occurred. Don't skip it.

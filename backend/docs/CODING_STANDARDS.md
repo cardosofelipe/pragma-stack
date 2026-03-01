@@ -75,15 +75,14 @@ def create_user(db: Session, user_in: UserCreate) -> User:
 ### 4. Code Formatting
 
 Use automated formatters:
-- **Black**: Code formatting
-- **isort**: Import sorting
-- **flake8**: Linting
+- **Ruff**: Code formatting and linting (replaces Black, isort, flake8)
+- **pyright**: Static type checking
 
-Run before committing:
+Run before committing (or use `make validate`):
 ```bash
-black app tests
-isort app tests
-flake8 app tests
+uv run ruff format app tests
+uv run ruff check app tests
+uv run pyright app
 ```
 
 ## Code Organization
@@ -94,19 +93,17 @@ Follow the 5-layer architecture strictly:
 
 ```
 API Layer (routes/)
-    ↓ calls
-Dependencies (dependencies/)
-    ↓ injects
+    ↓ calls (via service injected from dependencies/services.py)
 Service Layer (services/)
     ↓ calls
-CRUD Layer (crud/)
+Repository Layer (repositories/)
     ↓ uses
 Models & Schemas (models/, schemas/)
 ```
 
 **Rules:**
-- Routes should NOT directly call CRUD operations (use services when business logic is needed)
-- CRUD operations should NOT contain business logic
+- Routes must NEVER import repositories directly — always use a service
+- Services call repositories; repositories contain only database operations
 - Models should NOT import from higher layers
 - Each layer should only depend on the layer directly below it
 
@@ -125,7 +122,7 @@ from sqlalchemy.orm import Session
 
 # 3. Local application imports
 from app.api.dependencies.auth import get_current_user
-from app.crud import user_crud
+from app.api.dependencies.services import get_user_service
 from app.models.user import User
 from app.schemas.users import UserResponse, UserCreate
 ```
@@ -442,19 +439,19 @@ backend/app/alembic/versions/
 4. **Testability**: Easy to mock and test
 5. **Consistent Ordering**: Always order queries for pagination
 
-### Use the Async CRUD Base Class
+### Use the Async Repository Base Class
 
-Always inherit from `CRUDBase` for database operations:
+Always inherit from `RepositoryBase` for database operations:
 
 ```python
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.crud.base import CRUDBase
+from app.repositories.base import RepositoryBase
 from app.models.user import User
 from app.schemas.users import UserCreate, UserUpdate
 
-class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
-    """CRUD operations for User model."""
+class UserRepository(RepositoryBase[User, UserCreate, UserUpdate]):
+    """Repository for User model — database operations only."""
 
     async def get_by_email(
         self,
@@ -467,7 +464,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         )
         return result.scalar_one_or_none()
 
-user_crud = CRUDUser(User)
+user_repo = UserRepository(User)
 ```
 
 **Key Points:**
@@ -476,6 +473,7 @@ user_crud = CRUDUser(User)
 - Use `await db.execute()` for queries
 - Use `.scalar_one_or_none()` instead of `.first()`
 - Use `T | None` instead of `Optional[T]`
+- Repository instances are used internally by services — never import them in routes
 
 ### Modern SQLAlchemy Patterns
 
@@ -563,7 +561,7 @@ async def create_user(
     The database session is automatically managed by FastAPI.
     Commit on success, rollback on error.
     """
-    return await user_crud.create(db, obj_in=user_in)
+    return await user_service.create_user(db, obj_in=user_in)
 ```
 
 **Key Points:**
@@ -582,12 +580,11 @@ async def complex_operation(
     """
     Perform multiple database operations atomically.
 
-    The session automatically commits on success or rolls back on error.
+    Services call repositories; commit/rollback is handled inside
+    each repository method.
     """
-    user = await user_crud.create(db, obj_in=user_data)
-    session = await session_crud.create(db, obj_in=session_data)
-
-    # Commit is handled by the route's dependency
+    user = await user_repo.create(db, obj_in=user_data)
+    session = await session_repo.create(db, obj_in=session_data)
     return user, session
 ```
 
@@ -597,10 +594,10 @@ Prefer soft deletes over hard deletes for audit trails:
 
 ```python
 # Good - Soft delete (sets deleted_at)
-await user_crud.soft_delete(db, id=user_id)
+await user_repo.soft_delete(db, id=user_id)
 
 # Acceptable only when required - Hard delete
-user_crud.remove(db, id=user_id)
+await user_repo.remove(db, id=user_id)
 ```
 
 ### Query Patterns
@@ -740,9 +737,10 @@ Always implement pagination for list endpoints:
 from app.schemas.common import PaginationParams, PaginatedResponse
 
 @router.get("/users", response_model=PaginatedResponse[UserResponse])
-def list_users(
+async def list_users(
     pagination: PaginationParams = Depends(),
-    db: Session = Depends(get_db)
+    user_service: UserService = Depends(get_user_service),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     List all users with pagination.
@@ -750,10 +748,8 @@ def list_users(
     Default page size: 20
     Maximum page size: 100
     """
-    users, total = user_crud.get_multi_with_total(
-        db,
-        skip=pagination.offset,
-        limit=pagination.limit
+    users, total = await user_service.get_users(
+        db, skip=pagination.offset, limit=pagination.limit
     )
     return PaginatedResponse(data=users, pagination=pagination.create_meta(total))
 ```
@@ -816,19 +812,17 @@ def admin_route(
     pass
 
 # Check ownership
-def delete_resource(
+async def delete_resource(
     resource_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    resource_service: ResourceService = Depends(get_resource_service),
+    db: AsyncSession = Depends(get_db),
 ):
-    resource = resource_crud.get(db, id=resource_id)
-    if not resource:
-        raise NotFoundError("Resource not found")
-
-    if resource.user_id != current_user.id and not current_user.is_superuser:
-        raise AuthorizationError("You can only delete your own resources")
-
-    resource_crud.remove(db, id=resource_id)
+    # Service handles ownership check and raises appropriate errors
+    await resource_service.delete_resource(
+        db, resource_id=resource_id, user_id=current_user.id,
+        is_superuser=current_user.is_superuser,
+    )
 ```
 
 ### Input Validation
@@ -862,9 +856,9 @@ tests/
 ├── api/                     # Integration tests
 │   ├── test_users.py
 │   └── test_auth.py
-├── crud/                    # Unit tests for CRUD
-├── models/                  # Model tests
-└── services/                # Service tests
+├── repositories/            # Unit tests for repositories
+├── services/                # Unit tests for services
+└── models/                  # Model tests
 ```
 
 ### Async Testing with pytest-asyncio
@@ -927,7 +921,7 @@ async def test_user(db_session: AsyncSession) -> User:
 @pytest.mark.asyncio
 async def test_get_user(db_session: AsyncSession, test_user: User):
     """Test retrieving a user by ID."""
-    user = await user_crud.get(db_session, id=test_user.id)
+    user = await user_repo.get(db_session, id=test_user.id)
     assert user is not None
     assert user.email == test_user.email
 ```
