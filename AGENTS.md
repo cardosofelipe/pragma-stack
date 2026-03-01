@@ -165,7 +165,7 @@ Permission dependencies in `api/dependencies/permissions.py`:
 **Frontend Unit Tests (Jest):**
 - 97% coverage
 - Component, hook, and utility testing
-- Run: `bun test`
+- Run: `bun run test`
 - Coverage: `bun run test:coverage`
 
 **Frontend E2E Tests (Playwright):**

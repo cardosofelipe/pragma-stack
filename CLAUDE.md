@@ -51,7 +51,7 @@ EOF
 **Testing Commands:**
 - Backend unit/integration: `IS_TEST=True uv run pytest` (always prefix with `IS_TEST=True`)
 - Backend E2E (requires Docker): `make test-e2e`
-- Frontend unit: `bun test`
+- Frontend unit: `bun run test`
 - Frontend E2E: `bun run test:e2e`
 - Use `make test` or `make test-cov` in backend for convenience
 

@@ -914,7 +914,7 @@ bun run type-check
 bun run lint
 
 # Tests
-bun test
+bun run test
 
 # Build check
 bun run build

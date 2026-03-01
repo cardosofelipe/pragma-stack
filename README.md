@@ -390,7 +390,7 @@ open htmlcov/index.html
 cd frontend
 
 # Run unit tests
-bun test
+bun run test
 
 # Run with coverage
 bun run test:coverage

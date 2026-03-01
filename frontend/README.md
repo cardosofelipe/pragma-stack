@@ -86,7 +86,7 @@ bun run type-check   # TypeScript type checking
 bun run validate     # Run all checks (lint + format + type-check)
 
 # Testing
-bun test             # Run unit tests
+bun run test             # Run unit tests
 bun run test:watch   # Watch mode
 bun run test:coverage # Coverage report
 bun run test:e2e     # Run E2E tests
@@ -184,7 +184,7 @@ See [docs/I18N.md](./docs/I18N.md) for complete guide.
 
 ```bash
 # Run all tests
-bun test
+bun run test
 
 # Watch mode
 bun run test:watch

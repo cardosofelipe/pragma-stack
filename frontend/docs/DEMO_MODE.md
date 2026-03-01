@@ -233,7 +233,7 @@ MSW never initializes during Jest tests:
 - 97%+ coverage maintained
 
 ```bash
-bun test  # MSW will NOT interfere
+bun run test  # MSW will NOT interfere
 ```
 
 ### E2E Tests (Playwright)

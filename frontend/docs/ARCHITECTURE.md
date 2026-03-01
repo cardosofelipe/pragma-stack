@@ -1538,7 +1538,7 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: Run tests
-        run: bun test
+        run: bun run test
       - name: Run linter
         run: bun run lint
       - name: Type check

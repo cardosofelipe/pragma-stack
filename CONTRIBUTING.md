@@ -131,7 +131,7 @@ cp .env.local.example .env.local
 bun run generate:api
 
 # Run tests
-bun test
+bun run test
 bun run test:e2e:ui
 
 # Start dev server
