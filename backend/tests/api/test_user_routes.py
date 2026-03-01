@@ -157,7 +157,7 @@ class TestListUsers:
         response = await client.get("/api/v1/users")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    # Note: Removed test_list_users_unexpected_error because mocking at CRUD level
+    # Note: Removed test_list_users_unexpected_error because mocking at repository level
     # causes the exception to be raised before FastAPI can handle it properly
 
 

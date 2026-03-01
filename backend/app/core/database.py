@@ -128,8 +128,8 @@ async def async_transaction_scope() -> AsyncGenerator[AsyncSession, None]:
 
     Usage:
         async with async_transaction_scope() as db:
-            user = await user_crud.create(db, obj_in=user_create)
-            profile = await profile_crud.create(db, obj_in=profile_create)
+            user = await user_repo.create(db, obj_in=user_create)
+            profile = await profile_repo.create(db, obj_in=profile_create)
             # Both operations committed together
     """
     async with SessionLocal() as session:

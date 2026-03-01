@@ -206,13 +206,13 @@ class TestCleanupExpiredSessions:
         """Test cleanup returns 0 on database errors (doesn't crash)."""
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
-        # Mock session_crud.cleanup_expired to raise error
+        # Mock session_repo.cleanup_expired to raise error
         with patch(
             "app.services.session_cleanup.SessionLocal",
             return_value=AsyncTestingSessionLocal(),
         ):
             with patch(
-                "app.services.session_cleanup.session_crud.cleanup_expired"
+                "app.services.session_cleanup.session_repo.cleanup_expired"
             ) as mock_cleanup:
                 mock_cleanup.side_effect = Exception("Database connection lost")
 

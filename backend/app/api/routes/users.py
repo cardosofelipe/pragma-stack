@@ -1,5 +1,5 @@
 """
-User management endpoints for CRUD operations.
+User management endpoints for database operations.
 """
 
 import logging

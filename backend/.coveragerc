@@ -11,7 +11,7 @@ omit =
     app/utils/auth_test_utils.py
 
     # Async implementations not yet in use
-    app/crud/base_async.py
+    app/repositories/base_async.py
     app/core/database_async.py
 
     # CLI scripts - run manually, not tested
@@ -23,7 +23,7 @@ omit =
     app/api/routes/__init__.py
     app/api/dependencies/__init__.py
     app/core/__init__.py
-    app/crud/__init__.py
+    app/repositories/__init__.py
     app/models/__init__.py
     app/schemas/__init__.py
     app/services/__init__.py

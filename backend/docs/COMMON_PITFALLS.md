@@ -334,14 +334,14 @@ def login(request: Request, credentials: OAuth2PasswordRequestForm):
 # ❌ WRONG - Returns password hash!
 @router.get("/users/{user_id}")
 def get_user(user_id: UUID, db: Session = Depends(get_db)) -> User:
-    return user_crud.get(db, id=user_id)  # Returns ORM model with ALL fields!
+    return user_repo.get(db, id=user_id)  # Returns ORM model with ALL fields!
 ```
 
 ```python
 # ✅ CORRECT - Use response schema
 @router.get("/users/{user_id}", response_model=UserResponse)
 def get_user(user_id: UUID, db: Session = Depends(get_db)):
-    user = user_crud.get(db, id=user_id)
+    user = user_repo.get(db, id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user  # Pydantic filters to only UserResponse fields
@@ -506,8 +506,8 @@ def revoke_session(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    session = session_crud.get(db, id=session_id)
-    session_crud.deactivate(db, session_id=session_id)
+    session = session_repo.get(db, id=session_id)
+    session_repo.deactivate(db, session_id=session_id)
     # BUG: User can revoke ANYONE'S session!
     return {"message": "Session revoked"}
 ```
@@ -520,7 +520,7 @@ def revoke_session(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    session = session_crud.get(db, id=session_id)
+    session = session_repo.get(db, id=session_id)
 
     if not session:
         raise NotFoundError("Session not found")
@@ -529,7 +529,7 @@ def revoke_session(
     if session.user_id != current_user.id:
         raise AuthorizationError("You can only revoke your own sessions")
 
-    session_crud.deactivate(db, session_id=session_id)
+    session_repo.deactivate(db, session_id=session_id)
     return {"message": "Session revoked"}
 ```
 

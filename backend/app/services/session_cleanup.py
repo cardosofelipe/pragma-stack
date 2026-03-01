@@ -8,7 +8,7 @@ import logging
 from datetime import UTC, datetime
 
 from app.core.database import SessionLocal
-from app.repositories.session import session_repo as session_crud
+from app.repositories.session import session_repo as session_repo
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,8 @@ async def cleanup_expired_sessions(keep_days: int = 30) -> int:
 
     async with SessionLocal() as db:
         try:
-            # Use CRUD method to cleanup
-            count = await session_crud.cleanup_expired(db, keep_days=keep_days)
+            # Use repository method to cleanup
+            count = await session_repo.cleanup_expired(db, keep_days=keep_days)
 
             logger.info("Session cleanup complete: %s sessions deleted", count)
 

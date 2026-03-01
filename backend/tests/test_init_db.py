@@ -91,9 +91,9 @@ class TestInitDb:
         """Test that init_db handles database errors gracefully."""
         _test_engine, SessionLocal = async_test_db
 
-        # Mock user_crud.get_by_email to raise an exception
+        # Mock user_repo.get_by_email to raise an exception
         with patch(
-            "app.init_db.user_crud.get_by_email",
+            "app.init_db.user_repo.get_by_email",
             side_effect=Exception("Database error"),
         ):
             with patch("app.init_db.SessionLocal", SessionLocal):

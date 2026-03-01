@@ -1780,7 +1780,7 @@ The frontend template will be considered complete when:
 1. **Functionality:**
    - All specified pages are implemented and functional
    - Authentication flow works end-to-end
-   - User and organization CRUD operations work
+   - User and organization management operations work
    - API integration is complete and reliable
 
 2. **Code Quality:**

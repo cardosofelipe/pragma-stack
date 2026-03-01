@@ -1,6 +1,6 @@
-# tests/crud/test_session_db_failures.py
+# tests/repositories/test_session_db_failures.py
 """
-Comprehensive tests for session CRUD database failure scenarios.
+Comprehensive tests for session repository database failure scenarios.
 """
 
 from datetime import UTC, datetime, timedelta
@@ -12,11 +12,11 @@ from sqlalchemy.exc import OperationalError
 
 from app.core.repository_exceptions import IntegrityConstraintError
 from app.models.user_session import UserSession
-from app.repositories.session import session_repo as session_crud
+from app.repositories.session import session_repo as session_repo
 from app.schemas.sessions import SessionCreate
 
 
-class TestSessionCRUDGetByJtiFailures:
+class TestSessionRepositoryGetByJtiFailures:
     """Test get_by_jti exception handling."""
 
     @pytest.mark.asyncio
@@ -31,10 +31,10 @@ class TestSessionCRUDGetByJtiFailures:
 
             with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
-                    await session_crud.get_by_jti(session, jti="test_jti")
+                    await session_repo.get_by_jti(session, jti="test_jti")
 
 
-class TestSessionCRUDGetActiveByJtiFailures:
+class TestSessionRepositoryGetActiveByJtiFailures:
     """Test get_active_by_jti exception handling."""
 
     @pytest.mark.asyncio
@@ -49,10 +49,10 @@ class TestSessionCRUDGetActiveByJtiFailures:
 
             with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
-                    await session_crud.get_active_by_jti(session, jti="test_jti")
+                    await session_repo.get_active_by_jti(session, jti="test_jti")
 
 
-class TestSessionCRUDGetUserSessionsFailures:
+class TestSessionRepositoryGetUserSessionsFailures:
     """Test get_user_sessions exception handling."""
 
     @pytest.mark.asyncio
@@ -69,12 +69,12 @@ class TestSessionCRUDGetUserSessionsFailures:
 
             with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
-                    await session_crud.get_user_sessions(
+                    await session_repo.get_user_sessions(
                         session, user_id=str(async_test_user.id)
                     )
 
 
-class TestSessionCRUDCreateSessionFailures:
+class TestSessionRepositoryCreateSessionFailures:
     """Test create_session exception handling."""
 
     @pytest.mark.asyncio
@@ -106,7 +106,7 @@ class TestSessionCRUDCreateSessionFailures:
                     with pytest.raises(
                         IntegrityConstraintError, match="Failed to create session"
                     ):
-                        await session_crud.create_session(session, obj_in=session_data)
+                        await session_repo.create_session(session, obj_in=session_data)
 
                     mock_rollback.assert_called_once()
 
@@ -139,12 +139,12 @@ class TestSessionCRUDCreateSessionFailures:
                     with pytest.raises(
                         IntegrityConstraintError, match="Failed to create session"
                     ):
-                        await session_crud.create_session(session, obj_in=session_data)
+                        await session_repo.create_session(session, obj_in=session_data)
 
                     mock_rollback.assert_called_once()
 
 
-class TestSessionCRUDDeactivateFailures:
+class TestSessionRepositoryDeactivateFailures:
     """Test deactivate exception handling."""
 
     @pytest.mark.asyncio
@@ -182,14 +182,14 @@ class TestSessionCRUDDeactivateFailures:
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
                     with pytest.raises(OperationalError):
-                        await session_crud.deactivate(
+                        await session_repo.deactivate(
                             session, session_id=str(session_id)
                         )
 
                     mock_rollback.assert_called_once()
 
 
-class TestSessionCRUDDeactivateAllFailures:
+class TestSessionRepositoryDeactivateAllFailures:
     """Test deactivate_all_user_sessions exception handling."""
 
     @pytest.mark.asyncio
@@ -209,14 +209,14 @@ class TestSessionCRUDDeactivateAllFailures:
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
                     with pytest.raises(OperationalError):
-                        await session_crud.deactivate_all_user_sessions(
+                        await session_repo.deactivate_all_user_sessions(
                             session, user_id=str(async_test_user.id)
                         )
 
                     mock_rollback.assert_called_once()
 
 
-class TestSessionCRUDUpdateLastUsedFailures:
+class TestSessionRepositoryUpdateLastUsedFailures:
     """Test update_last_used exception handling."""
 
     @pytest.mark.asyncio
@@ -259,12 +259,12 @@ class TestSessionCRUDUpdateLastUsedFailures:
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
                     with pytest.raises(OperationalError):
-                        await session_crud.update_last_used(session, session=sess)
+                        await session_repo.update_last_used(session, session=sess)
 
                     mock_rollback.assert_called_once()
 
 
-class TestSessionCRUDUpdateRefreshTokenFailures:
+class TestSessionRepositoryUpdateRefreshTokenFailures:
     """Test update_refresh_token exception handling."""
 
     @pytest.mark.asyncio
@@ -307,7 +307,7 @@ class TestSessionCRUDUpdateRefreshTokenFailures:
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
                     with pytest.raises(OperationalError):
-                        await session_crud.update_refresh_token(
+                        await session_repo.update_refresh_token(
                             session,
                             session=sess,
                             new_jti=str(uuid4()),
@@ -317,7 +317,7 @@ class TestSessionCRUDUpdateRefreshTokenFailures:
                     mock_rollback.assert_called_once()
 
 
-class TestSessionCRUDCleanupExpiredFailures:
+class TestSessionRepositoryCleanupExpiredFailures:
     """Test cleanup_expired exception handling."""
 
     @pytest.mark.asyncio
@@ -337,12 +337,12 @@ class TestSessionCRUDCleanupExpiredFailures:
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
                     with pytest.raises(OperationalError):
-                        await session_crud.cleanup_expired(session, keep_days=30)
+                        await session_repo.cleanup_expired(session, keep_days=30)
 
                     mock_rollback.assert_called_once()
 
 
-class TestSessionCRUDCleanupExpiredForUserFailures:
+class TestSessionRepositoryCleanupExpiredForUserFailures:
     """Test cleanup_expired_for_user exception handling."""
 
     @pytest.mark.asyncio
@@ -362,14 +362,14 @@ class TestSessionCRUDCleanupExpiredForUserFailures:
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
                     with pytest.raises(OperationalError):
-                        await session_crud.cleanup_expired_for_user(
+                        await session_repo.cleanup_expired_for_user(
                             session, user_id=str(async_test_user.id)
                         )
 
                     mock_rollback.assert_called_once()
 
 
-class TestSessionCRUDGetUserSessionCountFailures:
+class TestSessionRepositoryGetUserSessionCountFailures:
     """Test get_user_session_count exception handling."""
 
     @pytest.mark.asyncio
@@ -386,6 +386,6 @@ class TestSessionCRUDGetUserSessionCountFailures:
 
             with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
-                    await session_crud.get_user_session_count(
+                    await session_repo.get_user_session_count(
                         session, user_id=str(async_test_user.id)
                     )

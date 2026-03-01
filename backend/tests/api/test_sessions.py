@@ -39,7 +39,7 @@ async def async_test_user2(async_test_db):
     _test_engine, SessionLocal = async_test_db
 
     async with SessionLocal() as session:
-        from app.repositories.user import user_repo as user_crud
+        from app.repositories.user import user_repo as user_repo
         from app.schemas.users import UserCreate
 
         user_data = UserCreate(
@@ -48,7 +48,7 @@ async def async_test_user2(async_test_db):
             first_name="Test",
             last_name="User2",
         )
-        user = await user_crud.create(session, obj_in=user_data)
+        user = await user_repo.create(session, obj_in=user_data)
         await session.commit()
         await session.refresh(user)
         return user
@@ -191,9 +191,9 @@ class TestRevokeSession:
 
         # Verify session is deactivated
         async with SessionLocal() as session:
-            from app.repositories.session import session_repo as session_crud
+            from app.repositories.session import session_repo as session_repo
 
-            revoked_session = await session_crud.get(session, id=str(session_id))
+            revoked_session = await session_repo.get(session, id=str(session_id))
             assert revoked_session.is_active is False
 
     @pytest.mark.asyncio
@@ -267,8 +267,8 @@ class TestCleanupExpiredSessions:
         """Test successfully cleaning up expired sessions."""
         _test_engine, SessionLocal = async_test_db
 
-        # Create expired and active sessions using CRUD to avoid greenlet issues
-        from app.repositories.session import session_repo as session_crud
+        # Create expired and active sessions using repository to avoid greenlet issues
+        from app.repositories.session import session_repo as session_repo
         from app.schemas.sessions import SessionCreate
 
         async with SessionLocal() as db:
@@ -282,7 +282,7 @@ class TestCleanupExpiredSessions:
                 expires_at=datetime.now(UTC) - timedelta(days=1),
                 last_used_at=datetime.now(UTC) - timedelta(days=2),
             )
-            e1 = await session_crud.create_session(db, obj_in=e1_data)
+            e1 = await session_repo.create_session(db, obj_in=e1_data)
             e1.is_active = False
             db.add(e1)
 
@@ -296,7 +296,7 @@ class TestCleanupExpiredSessions:
                 expires_at=datetime.now(UTC) - timedelta(hours=1),
                 last_used_at=datetime.now(UTC) - timedelta(hours=2),
             )
-            e2 = await session_crud.create_session(db, obj_in=e2_data)
+            e2 = await session_repo.create_session(db, obj_in=e2_data)
             e2.is_active = False
             db.add(e2)
 
@@ -310,7 +310,7 @@ class TestCleanupExpiredSessions:
                 expires_at=datetime.now(UTC) + timedelta(days=7),
                 last_used_at=datetime.now(UTC),
             )
-            await session_crud.create_session(db, obj_in=a1_data)
+            await session_repo.create_session(db, obj_in=a1_data)
             await db.commit()
 
         # Cleanup expired sessions
@@ -333,8 +333,8 @@ class TestCleanupExpiredSessions:
         """Test cleanup when no sessions are expired."""
         _test_engine, SessionLocal = async_test_db
 
-        # Create only active sessions using CRUD
-        from app.repositories.session import session_repo as session_crud
+        # Create only active sessions using repository
+        from app.repositories.session import session_repo as session_repo
         from app.schemas.sessions import SessionCreate
 
         async with SessionLocal() as db:
@@ -347,7 +347,7 @@ class TestCleanupExpiredSessions:
                 expires_at=datetime.now(UTC) + timedelta(days=7),
                 last_used_at=datetime.now(UTC),
             )
-            await session_crud.create_session(db, obj_in=a1_data)
+            await session_repo.create_session(db, obj_in=a1_data)
             await db.commit()
 
         response = await client.delete(
@@ -384,7 +384,7 @@ class TestSessionsAdditionalCases:
 
         # Create multiple sessions
         async with SessionLocal() as session:
-            from app.repositories.session import session_repo as session_crud
+            from app.repositories.session import session_repo as session_repo
             from app.schemas.sessions import SessionCreate
 
             for i in range(5):
@@ -397,7 +397,7 @@ class TestSessionsAdditionalCases:
                     expires_at=datetime.now(UTC) + timedelta(days=7),
                     last_used_at=datetime.now(UTC),
                 )
-                await session_crud.create_session(session, obj_in=session_data)
+                await session_repo.create_session(session, obj_in=session_data)
             await session.commit()
 
         response = await client.get(
@@ -431,7 +431,7 @@ class TestSessionsAdditionalCases:
         """Test cleanup with mix of active/inactive and expired/not-expired sessions."""
         _test_engine, SessionLocal = async_test_db
 
-        from app.repositories.session import session_repo as session_crud
+        from app.repositories.session import session_repo as session_repo
         from app.schemas.sessions import SessionCreate
 
         async with SessionLocal() as db:
@@ -445,7 +445,7 @@ class TestSessionsAdditionalCases:
                 expires_at=datetime.now(UTC) - timedelta(days=1),
                 last_used_at=datetime.now(UTC) - timedelta(days=2),
             )
-            e1 = await session_crud.create_session(db, obj_in=e1_data)
+            e1 = await session_repo.create_session(db, obj_in=e1_data)
             e1.is_active = False
             db.add(e1)
 
@@ -459,7 +459,7 @@ class TestSessionsAdditionalCases:
                 expires_at=datetime.now(UTC) - timedelta(hours=1),
                 last_used_at=datetime.now(UTC) - timedelta(hours=2),
             )
-            await session_crud.create_session(db, obj_in=e2_data)
+            await session_repo.create_session(db, obj_in=e2_data)
 
             await db.commit()
 
@@ -530,7 +530,7 @@ class TestSessionExceptionHandlers:
         from app.repositories import session as session_module
 
         # First create a session to revoke
-        from app.repositories.session import session_repo as session_crud
+        from app.repositories.session import session_repo as session_repo
         from app.schemas.sessions import SessionCreate
 
         _test_engine, AsyncTestingSessionLocal = async_test_db
@@ -545,7 +545,7 @@ class TestSessionExceptionHandlers:
                 last_used_at=datetime.now(UTC),
                 expires_at=datetime.now(UTC) + timedelta(days=60),
             )
-            user_session = await session_crud.create_session(db, obj_in=session_in)
+            user_session = await session_repo.create_session(db, obj_in=session_in)
             session_id = user_session.id
 
         # Mock the deactivate method to raise an exception

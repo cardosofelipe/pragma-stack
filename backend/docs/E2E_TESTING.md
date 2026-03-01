@@ -99,7 +99,7 @@ backend/tests/
 │   └── test_database_workflows.py # PostgreSQL workflow tests
 │
 ├── api/                          # Integration tests (SQLite, fast)
-├── crud/                         # Unit tests
+├── repositories/                 # Repository unit tests
 └── conftest.py                   # Standard fixtures
 ```
 

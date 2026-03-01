@@ -1,6 +1,6 @@
 # app/repositories/base.py
 """
-Base repository class for async CRUD operations using SQLAlchemy 2.0 async patterns.
+Base repository class for async database operations using SQLAlchemy 2.0 async patterns.
 
 Provides reusable create, read, update, and delete operations for all models.
 """

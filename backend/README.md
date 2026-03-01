@@ -264,7 +264,7 @@ app/
 │   ├── database.py   # Database engine setup
 │   ├── auth.py       # JWT token handling
 │   └── exceptions.py # Custom exceptions
-├── crud/             # Database operations
+├── repositories/     # Repository pattern (database operations)
 ├── models/           # SQLAlchemy ORM models
 ├── schemas/          # Pydantic request/response schemas
 ├── services/         # Business logic layer
@@ -462,7 +462,7 @@ See [docs/FEATURE_EXAMPLE.md](docs/FEATURE_EXAMPLE.md) for step-by-step guide.
 
 Quick overview:
 1. Create Pydantic schemas in `app/schemas/`
-2. Create CRUD operations in `app/crud/`
+2. Create repository in `app/repositories/`
 3. Create route in `app/api/routes/`
 4. Register router in `app/api/main.py`
 5. Write tests in `tests/api/`

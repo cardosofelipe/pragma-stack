@@ -1040,7 +1040,7 @@ export default function AdminDashboardPage() {
 
 These examples demonstrate:
 
-1. **Complete CRUD operations** (User Management)
+1. **Complete management operations** (User Management)
 2. **Real-time data with polling** (Session Management)
 3. **Data visualization** (Admin Dashboard Charts)
 

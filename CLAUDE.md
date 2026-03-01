@@ -148,7 +148,7 @@ async def mock_commit():
 with patch.object(session, 'commit', side_effect=mock_commit):
     with patch.object(session, 'rollback', new_callable=AsyncMock) as mock_rollback:
         with pytest.raises(OperationalError):
-            await crud_method(session, obj_in=data)
+            await repo_method(session, obj_in=data)
         mock_rollback.assert_called_once()
 ```
 
@@ -171,7 +171,7 @@ with patch.object(session, 'commit', side_effect=mock_commit):
 ### Common Workflows Guidance
 
 **When Adding a New Feature:**
-1. Start with backend schema and CRUD
+1. Start with backend schema and repository
 2. Implement API route with proper authorization
 3. Write backend tests (aim for >90% coverage)
 4. Generate frontend API client: `bun run generate:api`
@@ -224,7 +224,7 @@ with patch.object(session, 'commit', side_effect=mock_commit):
 No Claude Code Skills installed yet. To create one, invoke the built-in "skill-creator" skill.
 
 **Potential skill ideas for this project:**
-- API endpoint generator workflow (schema → CRUD → route → tests → frontend client)
+- API endpoint generator workflow (schema → repository → route → tests → frontend client)
 - Component generator with design system compliance
 - Database migration troubleshooting helper
 - Test coverage analyzer and improvement suggester

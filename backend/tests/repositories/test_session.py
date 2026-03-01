@@ -1,6 +1,6 @@
-# tests/crud/test_session_async.py
+# tests/repositories/test_session_async.py
 """
-Comprehensive tests for async session CRUD operations.
+Comprehensive tests for async session repository operations.
 """
 
 from datetime import UTC, datetime, timedelta
@@ -10,7 +10,7 @@ import pytest
 
 from app.core.repository_exceptions import InvalidInputError
 from app.models.user_session import UserSession
-from app.repositories.session import session_repo as session_crud
+from app.repositories.session import session_repo as session_repo
 from app.schemas.sessions import SessionCreate
 
 
@@ -37,7 +37,7 @@ class TestGetByJti:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            result = await session_crud.get_by_jti(session, jti="test_jti_123")
+            result = await session_repo.get_by_jti(session, jti="test_jti_123")
             assert result is not None
             assert result.refresh_token_jti == "test_jti_123"
 
@@ -47,7 +47,7 @@ class TestGetByJti:
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            result = await session_crud.get_by_jti(session, jti="nonexistent")
+            result = await session_repo.get_by_jti(session, jti="nonexistent")
             assert result is None
 
 
@@ -74,7 +74,7 @@ class TestGetActiveByJti:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            result = await session_crud.get_active_by_jti(session, jti="active_jti")
+            result = await session_repo.get_active_by_jti(session, jti="active_jti")
             assert result is not None
             assert result.is_active is True
 
@@ -98,7 +98,7 @@ class TestGetActiveByJti:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            result = await session_crud.get_active_by_jti(session, jti="inactive_jti")
+            result = await session_repo.get_active_by_jti(session, jti="inactive_jti")
             assert result is None
 
 
@@ -135,7 +135,7 @@ class TestGetUserSessions:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            results = await session_crud.get_user_sessions(
+            results = await session_repo.get_user_sessions(
                 session, user_id=str(async_test_user.id), active_only=True
             )
             assert len(results) == 1
@@ -162,7 +162,7 @@ class TestGetUserSessions:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            results = await session_crud.get_user_sessions(
+            results = await session_repo.get_user_sessions(
                 session, user_id=str(async_test_user.id), active_only=False
             )
             assert len(results) == 3
@@ -173,7 +173,7 @@ class TestCreateSession:
 
     @pytest.mark.asyncio
     async def test_create_session_success(self, async_test_db, async_test_user):
-        """Test successfully creating a session_crud."""
+        """Test successfully creating a session_repo."""
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
@@ -189,7 +189,7 @@ class TestCreateSession:
                 location_city="San Francisco",
                 location_country="USA",
             )
-            result = await session_crud.create_session(session, obj_in=session_data)
+            result = await session_repo.create_session(session, obj_in=session_data)
 
             assert result.user_id == async_test_user.id
             assert result.refresh_token_jti == "new_jti"
@@ -202,7 +202,7 @@ class TestDeactivate:
 
     @pytest.mark.asyncio
     async def test_deactivate_success(self, async_test_db, async_test_user):
-        """Test successfully deactivating a session_crud."""
+        """Test successfully deactivating a session_repo."""
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
@@ -221,7 +221,7 @@ class TestDeactivate:
             session_id = user_session.id
 
         async with AsyncTestingSessionLocal() as session:
-            result = await session_crud.deactivate(session, session_id=str(session_id))
+            result = await session_repo.deactivate(session, session_id=str(session_id))
             assert result is not None
             assert result.is_active is False
 
@@ -231,7 +231,7 @@ class TestDeactivate:
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            result = await session_crud.deactivate(session, session_id=str(uuid4()))
+            result = await session_repo.deactivate(session, session_id=str(uuid4()))
             assert result is None
 
 
@@ -262,7 +262,7 @@ class TestDeactivateAllUserSessions:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            count = await session_crud.deactivate_all_user_sessions(
+            count = await session_repo.deactivate_all_user_sessions(
                 session, user_id=str(async_test_user.id)
             )
             assert count == 2
@@ -292,7 +292,7 @@ class TestUpdateLastUsed:
             await session.refresh(user_session)
 
             old_time = user_session.last_used_at
-            result = await session_crud.update_last_used(session, session=user_session)
+            result = await session_repo.update_last_used(session, session=user_session)
 
             assert result.last_used_at > old_time
 
@@ -321,7 +321,7 @@ class TestGetUserSessionCount:
             await session.commit()
 
         async with AsyncTestingSessionLocal() as session:
-            count = await session_crud.get_user_session_count(
+            count = await session_repo.get_user_session_count(
                 session, user_id=str(async_test_user.id)
             )
             assert count == 3
@@ -332,7 +332,7 @@ class TestGetUserSessionCount:
         _test_engine, AsyncTestingSessionLocal = async_test_db
 
         async with AsyncTestingSessionLocal() as session:
-            count = await session_crud.get_user_session_count(
+            count = await session_repo.get_user_session_count(
                 session, user_id=str(uuid4())
             )
             assert count == 0
@@ -364,7 +364,7 @@ class TestUpdateRefreshToken:
             new_jti = "new_jti_123"
             new_expires = datetime.now(UTC) + timedelta(days=14)
 
-            result = await session_crud.update_refresh_token(
+            result = await session_repo.update_refresh_token(
                 session,
                 session=user_session,
                 new_jti=new_jti,
@@ -410,7 +410,7 @@ class TestCleanupExpired:
 
         # Cleanup
         async with AsyncTestingSessionLocal() as session:
-            count = await session_crud.cleanup_expired(session, keep_days=30)
+            count = await session_repo.cleanup_expired(session, keep_days=30)
             assert count == 1
 
     @pytest.mark.asyncio
@@ -436,7 +436,7 @@ class TestCleanupExpired:
 
         # Cleanup
         async with AsyncTestingSessionLocal() as session:
-            count = await session_crud.cleanup_expired(session, keep_days=30)
+            count = await session_repo.cleanup_expired(session, keep_days=30)
             assert count == 0  # Should not delete recent sessions
 
     @pytest.mark.asyncio
@@ -462,7 +462,7 @@ class TestCleanupExpired:
 
         # Cleanup
         async with AsyncTestingSessionLocal() as session:
-            count = await session_crud.cleanup_expired(session, keep_days=30)
+            count = await session_repo.cleanup_expired(session, keep_days=30)
             assert count == 0  # Should not delete active sessions
 
 
@@ -493,7 +493,7 @@ class TestCleanupExpiredForUser:
 
         # Cleanup for user
         async with AsyncTestingSessionLocal() as session:
-            count = await session_crud.cleanup_expired_for_user(
+            count = await session_repo.cleanup_expired_for_user(
                 session, user_id=str(async_test_user.id)
             )
             assert count == 1
@@ -505,7 +505,7 @@ class TestCleanupExpiredForUser:
 
         async with AsyncTestingSessionLocal() as session:
             with pytest.raises(InvalidInputError, match="Invalid user ID format"):
-                await session_crud.cleanup_expired_for_user(
+                await session_repo.cleanup_expired_for_user(
                     session, user_id="not-a-valid-uuid"
                 )
 
@@ -533,7 +533,7 @@ class TestCleanupExpiredForUser:
 
         # Cleanup
         async with AsyncTestingSessionLocal() as session:
-            count = await session_crud.cleanup_expired_for_user(
+            count = await session_repo.cleanup_expired_for_user(
                 session, user_id=str(async_test_user.id)
             )
             assert count == 0  # Should not delete active sessions
@@ -565,7 +565,7 @@ class TestGetUserSessionsWithUser:
 
         # Get with user relationship
         async with AsyncTestingSessionLocal() as session:
-            results = await session_crud.get_user_sessions(
+            results = await session_repo.get_user_sessions(
                 session, user_id=str(async_test_user.id), with_user=True
             )
             assert len(results) >= 1

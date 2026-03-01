@@ -1,5 +1,5 @@
 # app/repositories/user.py
-"""Repository for User model async CRUD operations using SQLAlchemy 2.0 patterns."""
+"""Repository for User model async database operations using SQLAlchemy 2.0 patterns."""
 
 import logging
 from datetime import UTC, datetime

@@ -1,5 +1,5 @@
 # app/repositories/oauth_state.py
-"""Repository for OAuthState model async CRUD operations."""
+"""Repository for OAuthState model async database operations."""
 
 import logging
 from datetime import UTC, datetime

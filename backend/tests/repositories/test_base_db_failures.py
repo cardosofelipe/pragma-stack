@@ -1,6 +1,6 @@
-# tests/crud/test_base_db_failures.py
+# tests/repositories/test_base_db_failures.py
 """
-Comprehensive tests for base CRUD database failure scenarios.
+Comprehensive tests for base repository database failure scenarios.
 Tests exception handling, rollbacks, and error messages.
 """
 
@@ -11,16 +11,16 @@ import pytest
 from sqlalchemy.exc import DataError, OperationalError
 
 from app.core.repository_exceptions import IntegrityConstraintError
-from app.repositories.user import user_repo as user_crud
+from app.repositories.user import user_repo as user_repo
 from app.schemas.users import UserCreate
 
 
-class TestBaseCRUDCreateFailures:
-    """Test base CRUD create method exception handling."""
+class TestBaseRepositoryCreateFailures:
+    """Test base repository create method exception handling."""
 
     @pytest.mark.asyncio
     async def test_create_operational_error_triggers_rollback(self, async_test_db):
-        """Test that OperationalError triggers rollback (User CRUD catches as Exception)."""
+        """Test that OperationalError triggers rollback (User repository catches as Exception)."""
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
@@ -41,16 +41,16 @@ class TestBaseCRUDCreateFailures:
                         last_name="User",
                     )
 
-                    # User CRUD catches this as generic Exception and re-raises
+                    # User repository catches this as generic Exception and re-raises
                     with pytest.raises(OperationalError):
-                        await user_crud.create(session, obj_in=user_data)
+                        await user_repo.create(session, obj_in=user_data)
 
                     # Verify rollback was called
                     mock_rollback.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_create_data_error_triggers_rollback(self, async_test_db):
-        """Test that DataError triggers rollback (User CRUD catches as Exception)."""
+        """Test that DataError triggers rollback (User repository catches as Exception)."""
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
@@ -69,9 +69,9 @@ class TestBaseCRUDCreateFailures:
                         last_name="User",
                     )
 
-                    # User CRUD catches this as generic Exception and re-raises
+                    # User repository catches this as generic Exception and re-raises
                     with pytest.raises(DataError):
-                        await user_crud.create(session, obj_in=user_data)
+                        await user_repo.create(session, obj_in=user_data)
 
                     mock_rollback.assert_called_once()
 
@@ -97,13 +97,13 @@ class TestBaseCRUDCreateFailures:
                     )
 
                     with pytest.raises(RuntimeError, match="Unexpected database error"):
-                        await user_crud.create(session, obj_in=user_data)
+                        await user_repo.create(session, obj_in=user_data)
 
                     mock_rollback.assert_called_once()
 
 
-class TestBaseCRUDUpdateFailures:
-    """Test base CRUD update method exception handling."""
+class TestBaseRepositoryUpdateFailures:
+    """Test base repository update method exception handling."""
 
     @pytest.mark.asyncio
     async def test_update_operational_error(self, async_test_db, async_test_user):
@@ -111,7 +111,7 @@ class TestBaseCRUDUpdateFailures:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            user = await user_crud.get(session, id=str(async_test_user.id))
+            user = await user_repo.get(session, id=str(async_test_user.id))
 
             async def mock_commit():
                 raise OperationalError("Connection timeout", {}, Exception("Timeout"))
@@ -123,7 +123,7 @@ class TestBaseCRUDUpdateFailures:
                     with pytest.raises(
                         IntegrityConstraintError, match="Database operation failed"
                     ):
-                        await user_crud.update(
+                        await user_repo.update(
                             session, db_obj=user, obj_in={"first_name": "Updated"}
                         )
 
@@ -135,7 +135,7 @@ class TestBaseCRUDUpdateFailures:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            user = await user_crud.get(session, id=str(async_test_user.id))
+            user = await user_repo.get(session, id=str(async_test_user.id))
 
             async def mock_commit():
                 raise DataError("Invalid data", {}, Exception("Data type mismatch"))
@@ -147,7 +147,7 @@ class TestBaseCRUDUpdateFailures:
                     with pytest.raises(
                         IntegrityConstraintError, match="Database operation failed"
                     ):
-                        await user_crud.update(
+                        await user_repo.update(
                             session, db_obj=user, obj_in={"first_name": "Updated"}
                         )
 
@@ -159,7 +159,7 @@ class TestBaseCRUDUpdateFailures:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            user = await user_crud.get(session, id=str(async_test_user.id))
+            user = await user_repo.get(session, id=str(async_test_user.id))
 
             async def mock_commit():
                 raise KeyError("Unexpected error")
@@ -169,15 +169,15 @@ class TestBaseCRUDUpdateFailures:
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
                     with pytest.raises(KeyError):
-                        await user_crud.update(
+                        await user_repo.update(
                             session, db_obj=user, obj_in={"first_name": "Updated"}
                         )
 
                     mock_rollback.assert_called_once()
 
 
-class TestBaseCRUDRemoveFailures:
-    """Test base CRUD remove method exception handling."""
+class TestBaseRepositoryRemoveFailures:
+    """Test base repository remove method exception handling."""
 
     @pytest.mark.asyncio
     async def test_remove_unexpected_error_triggers_rollback(
@@ -196,12 +196,12 @@ class TestBaseCRUDRemoveFailures:
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
                     with pytest.raises(RuntimeError, match="Database write failed"):
-                        await user_crud.remove(session, id=str(async_test_user.id))
+                        await user_repo.remove(session, id=str(async_test_user.id))
 
                     mock_rollback.assert_called_once()
 
 
-class TestBaseCRUDGetMultiWithTotalFailures:
+class TestBaseRepositoryGetMultiWithTotalFailures:
     """Test get_multi_with_total exception handling."""
 
     @pytest.mark.asyncio
@@ -217,10 +217,10 @@ class TestBaseCRUDGetMultiWithTotalFailures:
 
             with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
-                    await user_crud.get_multi_with_total(session, skip=0, limit=10)
+                    await user_repo.get_multi_with_total(session, skip=0, limit=10)
 
 
-class TestBaseCRUDCountFailures:
+class TestBaseRepositoryCountFailures:
     """Test count method exception handling."""
 
     @pytest.mark.asyncio
@@ -235,10 +235,10 @@ class TestBaseCRUDCountFailures:
 
             with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
-                    await user_crud.count(session)
+                    await user_repo.count(session)
 
 
-class TestBaseCRUDSoftDeleteFailures:
+class TestBaseRepositorySoftDeleteFailures:
     """Test soft_delete method exception handling."""
 
     @pytest.mark.asyncio
@@ -258,12 +258,12 @@ class TestBaseCRUDSoftDeleteFailures:
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
                     with pytest.raises(RuntimeError, match="Soft delete failed"):
-                        await user_crud.soft_delete(session, id=str(async_test_user.id))
+                        await user_repo.soft_delete(session, id=str(async_test_user.id))
 
                     mock_rollback.assert_called_once()
 
 
-class TestBaseCRUDRestoreFailures:
+class TestBaseRepositoryRestoreFailures:
     """Test restore method exception handling."""
 
     @pytest.mark.asyncio
@@ -279,12 +279,12 @@ class TestBaseCRUDRestoreFailures:
                 first_name="Restore",
                 last_name="Test",
             )
-            user = await user_crud.create(session, obj_in=user_data)
+            user = await user_repo.create(session, obj_in=user_data)
             user_id = user.id
             await session.commit()
 
         async with SessionLocal() as session:
-            await user_crud.soft_delete(session, id=str(user_id))
+            await user_repo.soft_delete(session, id=str(user_id))
 
         # Now test restore failure
         async with SessionLocal() as session:
@@ -297,12 +297,12 @@ class TestBaseCRUDRestoreFailures:
                     session, "rollback", new_callable=AsyncMock
                 ) as mock_rollback:
                     with pytest.raises(RuntimeError, match="Restore failed"):
-                        await user_crud.restore(session, id=str(user_id))
+                        await user_repo.restore(session, id=str(user_id))
 
                     mock_rollback.assert_called_once()
 
 
-class TestBaseCRUDGetFailures:
+class TestBaseRepositoryGetFailures:
     """Test get method exception handling."""
 
     @pytest.mark.asyncio
@@ -317,10 +317,10 @@ class TestBaseCRUDGetFailures:
 
             with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
-                    await user_crud.get(session, id=str(uuid4()))
+                    await user_repo.get(session, id=str(uuid4()))
 
 
-class TestBaseCRUDGetMultiFailures:
+class TestBaseRepositoryGetMultiFailures:
     """Test get_multi method exception handling."""
 
     @pytest.mark.asyncio
@@ -335,4 +335,4 @@ class TestBaseCRUDGetMultiFailures:
 
             with patch.object(session, "execute", side_effect=mock_execute):
                 with pytest.raises(OperationalError):
-                    await user_crud.get_multi(session, skip=0, limit=10)
+                    await user_repo.get_multi(session, skip=0, limit=10)

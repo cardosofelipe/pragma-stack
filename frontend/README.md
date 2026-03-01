@@ -29,7 +29,7 @@ Production-ready Next.js 16 frontend with TypeScript, authentication, admin pane
 
 ### Admin Panel
 
-- 👥 **User Administration** - CRUD operations, search, filters
+- 👥 **User Administration** - Full lifecycle operations, search, filters
 - 🏢 **Organization Management** - Multi-tenant support with roles
 - 📊 **Dashboard** - Statistics and quick actions
 - 🔍 **Advanced Filtering** - Status, search, pagination

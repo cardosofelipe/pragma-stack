@@ -1,5 +1,5 @@
 # app/repositories/organization.py
-"""Repository for Organization model async CRUD operations using SQLAlchemy 2.0 patterns."""
+"""Repository for Organization model async database operations using SQLAlchemy 2.0 patterns."""
 
 import logging
 from typing import Any

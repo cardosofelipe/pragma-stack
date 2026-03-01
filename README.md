@@ -58,7 +58,7 @@ Full OAuth 2.0 Authorization Server for Model Context Protocol (MCP) and third-p
 - User can belong to multiple organizations
 
 ### 🛠️ **Admin Panel**
-- Complete user management (CRUD, activate/deactivate, bulk operations)
+- Complete user management (full lifecycle, activate/deactivate, bulk operations)
 - Organization management (create, edit, delete, member management)
 - Session monitoring across all users
 - Real-time statistics dashboard
@@ -322,7 +322,7 @@ Visit http://localhost:3000 to see your app!
 │   ├── app/
 │   │   ├── api/            # API routes and dependencies
 │   │   ├── core/           # Core functionality (auth, config, database)
-│   │   ├── crud/           # Database operations
+│   │   ├── repositories/   # Repository pattern (database operations)
 │   │   ├── models/         # SQLAlchemy models
 │   │   ├── schemas/        # Pydantic schemas
 │   │   ├── services/       # Business logic
@@ -377,7 +377,7 @@ open htmlcov/index.html
 ```
 
 **Test types:**
-- **Unit tests**: CRUD operations, utilities, business logic
+- **Unit tests**: Repository operations, utilities, business logic
 - **Integration tests**: API endpoints with database
 - **Security tests**: JWT algorithm attacks, session hijacking, privilege escalation
 - **Error handling tests**: Database failures, validation errors
@@ -542,7 +542,7 @@ docker-compose down
 
 ### ✅ Completed
 - [x] Authentication system (JWT, refresh tokens, session management, OAuth)
-- [x] User management (CRUD, profile, password change)
+- [x] User management (full lifecycle, profile, password change)
 - [x] Organization system with RBAC (Owner, Admin, Member)
 - [x] Admin panel (users, organizations, sessions, statistics)
 - [x] **Internationalization (i18n)** with next-intl (English + Italian)

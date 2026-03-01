@@ -1,6 +1,6 @@
-# tests/crud/test_oauth.py
+# tests/repositories/test_oauth.py
 """
-Comprehensive tests for OAuth CRUD operations.
+Comprehensive tests for OAuth repository operations.
 """
 
 from datetime import UTC, datetime, timedelta
@@ -14,8 +14,8 @@ from app.repositories.oauth_state import oauth_state_repo as oauth_state
 from app.schemas.oauth import OAuthAccountCreate, OAuthClientCreate, OAuthStateCreate
 
 
-class TestOAuthAccountCRUD:
-    """Tests for OAuth account CRUD operations."""
+class TestOAuthAccountRepository:
+    """Tests for OAuth account repository operations."""
 
     @pytest.mark.asyncio
     async def test_create_account(self, async_test_db, async_test_user):
@@ -269,8 +269,8 @@ class TestOAuthAccountCRUD:
             assert updated.refresh_token == "new_refresh_token"
 
 
-class TestOAuthStateCRUD:
-    """Tests for OAuth state CRUD operations."""
+class TestOAuthStateRepository:
+    """Tests for OAuth state repository operations."""
 
     @pytest.mark.asyncio
     async def test_create_state(self, async_test_db):
@@ -376,8 +376,8 @@ class TestOAuthStateCRUD:
             assert result is not None
 
 
-class TestOAuthClientCRUD:
-    """Tests for OAuth client CRUD operations (provider mode)."""
+class TestOAuthClientRepository:
+    """Tests for OAuth client repository operations (provider mode)."""
 
     @pytest.mark.asyncio
     async def test_create_public_client(self, async_test_db):

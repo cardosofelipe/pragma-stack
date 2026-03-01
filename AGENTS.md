@@ -37,7 +37,7 @@ Default superuser (change in production):
 │   ├── app/
 │   │   ├── api/            # API routes (auth, users, organizations, admin)
 │   │   ├── core/           # Core functionality (auth, config, database)
-│   │   ├── crud/           # Database CRUD operations
+│   │   ├── repositories/   # Repository pattern (database operations)
 │   │   ├── models/         # SQLAlchemy ORM models
 │   │   ├── schemas/        # Pydantic request/response schemas
 │   │   ├── services/       # Business logic layer
@@ -113,7 +113,7 @@ OAUTH_ISSUER=https://api.yourdomain.com      # JWT issuer URL (must be HTTPS in 
 ### Database Pattern
 - **Async SQLAlchemy 2.0** with PostgreSQL
 - **Connection pooling**: 20 base connections, 50 max overflow
-- **CRUD base class**: `crud/base.py` with common operations
+- **Repository base class**: `repositories/base.py` with common operations
 - **Migrations**: Alembic with helper script `migrate.py`
   - `python migrate.py auto "message"` - Generate and apply
   - `python migrate.py list` - View history
@@ -222,7 +222,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
 ### Adding a New API Endpoint
 
 1. **Define schema** in `backend/app/schemas/`
-2. **Create CRUD operations** in `backend/app/crud/`
+2. **Create repository** in `backend/app/repositories/`
 3. **Implement route** in `backend/app/api/routes/`
 4. **Register router** in `backend/app/api/main.py`
 5. **Write tests** in `backend/tests/api/`
@@ -289,7 +289,7 @@ docker-compose exec backend python -c "from app.init_db import init_db; import a
 - Authentication system (JWT with refresh tokens, OAuth/social login)
 - **OAuth Provider Mode (MCP-ready)**: Full OAuth 2.0 Authorization Server
 - Session management (device tracking, revocation)
-- User management (CRUD, password change)
+- User management (full lifecycle, password change)
 - Organization system (multi-tenant with RBAC)
 - Admin panel (user/org management, bulk operations)
 - **Internationalization (i18n)** with English and Italian

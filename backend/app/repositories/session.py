@@ -1,5 +1,5 @@
 # app/repositories/session.py
-"""Repository for UserSession model async CRUD operations using SQLAlchemy 2.0 patterns."""
+"""Repository for UserSession model async database operations using SQLAlchemy 2.0 patterns."""
 
 import logging
 import uuid

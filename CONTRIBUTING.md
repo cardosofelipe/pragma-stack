@@ -204,7 +204,7 @@ export function UserProfile({ userId }: UserProfileProps) {
 
 ### Key Patterns
 
-- **Backend**: Use CRUD pattern, keep routes thin, business logic in services
+- **Backend**: Use repository pattern, keep routes thin, business logic in services
 - **Frontend**: Use React Query for server state, Zustand for client state
 - **Both**: Handle errors gracefully, log appropriately, write tests
 

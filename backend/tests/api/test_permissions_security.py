@@ -13,7 +13,7 @@ from httpx import AsyncClient
 
 from app.models.organization import Organization
 from app.models.user import User
-from app.repositories.user import user_repo as user_crud
+from app.repositories.user import user_repo as user_repo
 
 
 class TestInactiveUserBlocking:
@@ -50,7 +50,7 @@ class TestInactiveUserBlocking:
 
         # Step 2: Admin deactivates the user
         async with SessionLocal() as session:
-            user = await user_crud.get(session, id=async_test_user.id)
+            user = await user_repo.get(session, id=async_test_user.id)
             user.is_active = False
             await session.commit()
 
@@ -80,7 +80,7 @@ class TestInactiveUserBlocking:
 
         # Deactivate user
         async with SessionLocal() as session:
-            user = await user_crud.get(session, id=async_test_user.id)
+            user = await user_repo.get(session, id=async_test_user.id)
             user.is_active = False
             await session.commit()
 

@@ -1,6 +1,6 @@
-# tests/crud/test_base.py
+# tests/repositories/test_base.py
 """
-Comprehensive tests for CRUDBase class covering all error paths and edge cases.
+Comprehensive tests for BaseRepository class covering all error paths and edge cases.
 """
 
 from datetime import UTC
@@ -16,11 +16,11 @@ from app.core.repository_exceptions import (
     IntegrityConstraintError,
     InvalidInputError,
 )
-from app.repositories.user import user_repo as user_crud
+from app.repositories.user import user_repo as user_repo
 from app.schemas.users import UserCreate, UserUpdate
 
 
-class TestCRUDBaseGet:
+class TestRepositoryBaseGet:
     """Tests for get method covering UUID validation and options."""
 
     @pytest.mark.asyncio
@@ -29,7 +29,7 @@ class TestCRUDBaseGet:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            result = await user_crud.get(session, id="invalid-uuid")
+            result = await user_repo.get(session, id="invalid-uuid")
             assert result is None
 
     @pytest.mark.asyncio
@@ -38,7 +38,7 @@ class TestCRUDBaseGet:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            result = await user_crud.get(session, id=12345)  # int instead of UUID
+            result = await user_repo.get(session, id=12345)  # int instead of UUID
             assert result is None
 
     @pytest.mark.asyncio
@@ -48,7 +48,7 @@ class TestCRUDBaseGet:
 
         async with SessionLocal() as session:
             # Pass UUID object directly
-            result = await user_crud.get(session, id=async_test_user.id)
+            result = await user_repo.get(session, id=async_test_user.id)
             assert result is not None
             assert result.id == async_test_user.id
 
@@ -60,7 +60,7 @@ class TestCRUDBaseGet:
         async with SessionLocal() as session:
             # Test that options parameter is accepted and doesn't error
             # We pass an empty list which still tests the code path
-            result = await user_crud.get(
+            result = await user_repo.get(
                 session, id=str(async_test_user.id), options=[]
             )
             assert result is not None
@@ -74,10 +74,10 @@ class TestCRUDBaseGet:
             # Mock execute to raise an exception
             with patch.object(session, "execute", side_effect=Exception("DB error")):
                 with pytest.raises(Exception, match="DB error"):
-                    await user_crud.get(session, id=str(uuid4()))
+                    await user_repo.get(session, id=str(uuid4()))
 
 
-class TestCRUDBaseGetMulti:
+class TestRepositoryBaseGetMulti:
     """Tests for get_multi method covering pagination validation and options."""
 
     @pytest.mark.asyncio
@@ -87,7 +87,7 @@ class TestCRUDBaseGetMulti:
 
         async with SessionLocal() as session:
             with pytest.raises(InvalidInputError, match="skip must be non-negative"):
-                await user_crud.get_multi(session, skip=-1)
+                await user_repo.get_multi(session, skip=-1)
 
     @pytest.mark.asyncio
     async def test_get_multi_negative_limit(self, async_test_db):
@@ -96,7 +96,7 @@ class TestCRUDBaseGetMulti:
 
         async with SessionLocal() as session:
             with pytest.raises(InvalidInputError, match="limit must be non-negative"):
-                await user_crud.get_multi(session, limit=-1)
+                await user_repo.get_multi(session, limit=-1)
 
     @pytest.mark.asyncio
     async def test_get_multi_limit_too_large(self, async_test_db):
@@ -105,7 +105,7 @@ class TestCRUDBaseGetMulti:
 
         async with SessionLocal() as session:
             with pytest.raises(InvalidInputError, match="Maximum limit is 1000"):
-                await user_crud.get_multi(session, limit=1001)
+                await user_repo.get_multi(session, limit=1001)
 
     @pytest.mark.asyncio
     async def test_get_multi_with_options(self, async_test_db, async_test_user):
@@ -114,7 +114,7 @@ class TestCRUDBaseGetMulti:
 
         async with SessionLocal() as session:
             # Test that options parameter is accepted
-            results = await user_crud.get_multi(session, skip=0, limit=10, options=[])
+            results = await user_repo.get_multi(session, skip=0, limit=10, options=[])
             assert isinstance(results, list)
 
     @pytest.mark.asyncio
@@ -125,10 +125,10 @@ class TestCRUDBaseGetMulti:
         async with SessionLocal() as session:
             with patch.object(session, "execute", side_effect=Exception("DB error")):
                 with pytest.raises(Exception, match="DB error"):
-                    await user_crud.get_multi(session)
+                    await user_repo.get_multi(session)
 
 
-class TestCRUDBaseCreate:
+class TestRepositoryBaseCreate:
     """Tests for create method covering various error conditions."""
 
     @pytest.mark.asyncio
@@ -146,7 +146,7 @@ class TestCRUDBaseCreate:
             )
 
             with pytest.raises(DuplicateEntryError, match="already exists"):
-                await user_crud.create(session, obj_in=user_data)
+                await user_repo.create(session, obj_in=user_data)
 
     @pytest.mark.asyncio
     async def test_create_integrity_error_non_duplicate(self, async_test_db):
@@ -173,11 +173,11 @@ class TestCRUDBaseCreate:
                 with pytest.raises(
                     DuplicateEntryError, match="Database integrity error"
                 ):
-                    await user_crud.create(session, obj_in=user_data)
+                    await user_repo.create(session, obj_in=user_data)
 
     @pytest.mark.asyncio
     async def test_create_operational_error(self, async_test_db):
-        """Test create with OperationalError (user CRUD catches as generic Exception)."""
+        """Test create with OperationalError (user repository catches as generic Exception)."""
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
@@ -195,13 +195,13 @@ class TestCRUDBaseCreate:
                     last_name="User",
                 )
 
-                # User CRUD catches this as generic Exception and re-raises
+                # User repository catches this as generic Exception and re-raises
                 with pytest.raises(OperationalError):
-                    await user_crud.create(session, obj_in=user_data)
+                    await user_repo.create(session, obj_in=user_data)
 
     @pytest.mark.asyncio
     async def test_create_data_error(self, async_test_db):
-        """Test create with DataError (user CRUD catches as generic Exception)."""
+        """Test create with DataError (user repository catches as generic Exception)."""
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
@@ -217,9 +217,9 @@ class TestCRUDBaseCreate:
                     last_name="User",
                 )
 
-                # User CRUD catches this as generic Exception and re-raises
+                # User repository catches this as generic Exception and re-raises
                 with pytest.raises(DataError):
-                    await user_crud.create(session, obj_in=user_data)
+                    await user_repo.create(session, obj_in=user_data)
 
     @pytest.mark.asyncio
     async def test_create_unexpected_error(self, async_test_db):
@@ -238,10 +238,10 @@ class TestCRUDBaseCreate:
                 )
 
                 with pytest.raises(RuntimeError, match="Unexpected error"):
-                    await user_crud.create(session, obj_in=user_data)
+                    await user_repo.create(session, obj_in=user_data)
 
 
-class TestCRUDBaseUpdate:
+class TestRepositoryBaseUpdate:
     """Tests for update method covering error conditions."""
 
     @pytest.mark.asyncio
@@ -251,7 +251,7 @@ class TestCRUDBaseUpdate:
 
         # Create another user
         async with SessionLocal() as session:
-            from app.repositories.user import user_repo as user_crud
+            from app.repositories.user import user_repo as user_repo
 
             user2_data = UserCreate(
                 email="user2@example.com",
@@ -259,12 +259,12 @@ class TestCRUDBaseUpdate:
                 first_name="User",
                 last_name="Two",
             )
-            user2 = await user_crud.create(session, obj_in=user2_data)
+            user2 = await user_repo.create(session, obj_in=user2_data)
             await session.commit()
 
         # Try to update user2 with user1's email
         async with SessionLocal() as session:
-            user2_obj = await user_crud.get(session, id=str(user2.id))
+            user2_obj = await user_repo.get(session, id=str(user2.id))
 
             with patch.object(
                 session,
@@ -276,7 +276,7 @@ class TestCRUDBaseUpdate:
                 update_data = UserUpdate(email=async_test_user.email)
 
                 with pytest.raises(DuplicateEntryError, match="already exists"):
-                    await user_crud.update(
+                    await user_repo.update(
                         session, db_obj=user2_obj, obj_in=update_data
                     )
 
@@ -286,10 +286,10 @@ class TestCRUDBaseUpdate:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            user = await user_crud.get(session, id=str(async_test_user.id))
+            user = await user_repo.get(session, id=str(async_test_user.id))
 
             # Update with dict (tests lines 164-165)
-            updated = await user_crud.update(
+            updated = await user_repo.update(
                 session, db_obj=user, obj_in={"first_name": "UpdatedName"}
             )
             assert updated.first_name == "UpdatedName"
@@ -300,7 +300,7 @@ class TestCRUDBaseUpdate:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            user = await user_crud.get(session, id=str(async_test_user.id))
+            user = await user_repo.get(session, id=str(async_test_user.id))
 
             with patch.object(
                 session,
@@ -312,7 +312,7 @@ class TestCRUDBaseUpdate:
                 with pytest.raises(
                     IntegrityConstraintError, match="Database integrity error"
                 ):
-                    await user_crud.update(
+                    await user_repo.update(
                         session, db_obj=user, obj_in={"first_name": "Test"}
                     )
 
@@ -322,7 +322,7 @@ class TestCRUDBaseUpdate:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            user = await user_crud.get(session, id=str(async_test_user.id))
+            user = await user_repo.get(session, id=str(async_test_user.id))
 
             with patch.object(
                 session,
@@ -334,7 +334,7 @@ class TestCRUDBaseUpdate:
                 with pytest.raises(
                     IntegrityConstraintError, match="Database operation failed"
                 ):
-                    await user_crud.update(
+                    await user_repo.update(
                         session, db_obj=user, obj_in={"first_name": "Test"}
                     )
 
@@ -344,18 +344,18 @@ class TestCRUDBaseUpdate:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            user = await user_crud.get(session, id=str(async_test_user.id))
+            user = await user_repo.get(session, id=str(async_test_user.id))
 
             with patch.object(
                 session, "commit", side_effect=RuntimeError("Unexpected")
             ):
                 with pytest.raises(RuntimeError):
-                    await user_crud.update(
+                    await user_repo.update(
                         session, db_obj=user, obj_in={"first_name": "Test"}
                     )
 
 
-class TestCRUDBaseRemove:
+class TestRepositoryBaseRemove:
     """Tests for remove method covering UUID validation and error conditions."""
 
     @pytest.mark.asyncio
@@ -364,7 +364,7 @@ class TestCRUDBaseRemove:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            result = await user_crud.remove(session, id="invalid-uuid")
+            result = await user_repo.remove(session, id="invalid-uuid")
             assert result is None
 
     @pytest.mark.asyncio
@@ -380,13 +380,13 @@ class TestCRUDBaseRemove:
                 first_name="To",
                 last_name="Delete",
             )
-            user = await user_crud.create(session, obj_in=user_data)
+            user = await user_repo.create(session, obj_in=user_data)
             user_id = user.id
             await session.commit()
 
         # Delete with UUID object
         async with SessionLocal() as session:
-            result = await user_crud.remove(session, id=user_id)  # UUID object
+            result = await user_repo.remove(session, id=user_id)  # UUID object
             assert result is not None
             assert result.id == user_id
 
@@ -396,7 +396,7 @@ class TestCRUDBaseRemove:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            result = await user_crud.remove(session, id=str(uuid4()))
+            result = await user_repo.remove(session, id=str(uuid4()))
             assert result is None
 
     @pytest.mark.asyncio
@@ -417,7 +417,7 @@ class TestCRUDBaseRemove:
                     IntegrityConstraintError,
                     match="Cannot delete.*referenced by other records",
                 ):
-                    await user_crud.remove(session, id=str(async_test_user.id))
+                    await user_repo.remove(session, id=str(async_test_user.id))
 
     @pytest.mark.asyncio
     async def test_remove_unexpected_error(self, async_test_db, async_test_user):
@@ -429,10 +429,10 @@ class TestCRUDBaseRemove:
                 session, "commit", side_effect=RuntimeError("Unexpected")
             ):
                 with pytest.raises(RuntimeError):
-                    await user_crud.remove(session, id=str(async_test_user.id))
+                    await user_repo.remove(session, id=str(async_test_user.id))
 
 
-class TestCRUDBaseGetMultiWithTotal:
+class TestRepositoryBaseGetMultiWithTotal:
     """Tests for get_multi_with_total method covering pagination, filtering, sorting."""
 
     @pytest.mark.asyncio
@@ -441,7 +441,7 @@ class TestCRUDBaseGetMultiWithTotal:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            items, total = await user_crud.get_multi_with_total(
+            items, total = await user_repo.get_multi_with_total(
                 session, skip=0, limit=10
             )
             assert isinstance(items, list)
@@ -455,7 +455,7 @@ class TestCRUDBaseGetMultiWithTotal:
 
         async with SessionLocal() as session:
             with pytest.raises(InvalidInputError, match="skip must be non-negative"):
-                await user_crud.get_multi_with_total(session, skip=-1)
+                await user_repo.get_multi_with_total(session, skip=-1)
 
     @pytest.mark.asyncio
     async def test_get_multi_with_total_negative_limit(self, async_test_db):
@@ -464,7 +464,7 @@ class TestCRUDBaseGetMultiWithTotal:
 
         async with SessionLocal() as session:
             with pytest.raises(InvalidInputError, match="limit must be non-negative"):
-                await user_crud.get_multi_with_total(session, limit=-1)
+                await user_repo.get_multi_with_total(session, limit=-1)
 
     @pytest.mark.asyncio
     async def test_get_multi_with_total_limit_too_large(self, async_test_db):
@@ -473,7 +473,7 @@ class TestCRUDBaseGetMultiWithTotal:
 
         async with SessionLocal() as session:
             with pytest.raises(InvalidInputError, match="Maximum limit is 1000"):
-                await user_crud.get_multi_with_total(session, limit=1001)
+                await user_repo.get_multi_with_total(session, limit=1001)
 
     @pytest.mark.asyncio
     async def test_get_multi_with_total_with_filters(
@@ -484,7 +484,7 @@ class TestCRUDBaseGetMultiWithTotal:
 
         async with SessionLocal() as session:
             filters = {"email": async_test_user.email}
-            items, total = await user_crud.get_multi_with_total(
+            items, total = await user_repo.get_multi_with_total(
                 session, filters=filters
             )
             assert total == 1
@@ -512,12 +512,12 @@ class TestCRUDBaseGetMultiWithTotal:
                 first_name="ZZZ",
                 last_name="User",
             )
-            await user_crud.create(session, obj_in=user_data1)
-            await user_crud.create(session, obj_in=user_data2)
+            await user_repo.create(session, obj_in=user_data1)
+            await user_repo.create(session, obj_in=user_data2)
             await session.commit()
 
         async with SessionLocal() as session:
-            items, total = await user_crud.get_multi_with_total(
+            items, total = await user_repo.get_multi_with_total(
                 session, sort_by="email", sort_order="asc"
             )
             assert total >= 3
@@ -545,12 +545,12 @@ class TestCRUDBaseGetMultiWithTotal:
                 first_name="CCC",
                 last_name="User",
             )
-            await user_crud.create(session, obj_in=user_data1)
-            await user_crud.create(session, obj_in=user_data2)
+            await user_repo.create(session, obj_in=user_data1)
+            await user_repo.create(session, obj_in=user_data2)
             await session.commit()
 
         async with SessionLocal() as session:
-            items, _total = await user_crud.get_multi_with_total(
+            items, _total = await user_repo.get_multi_with_total(
                 session, sort_by="email", sort_order="desc", limit=1
             )
             assert len(items) == 1
@@ -570,19 +570,19 @@ class TestCRUDBaseGetMultiWithTotal:
                     first_name=f"User{i}",
                     last_name="Test",
                 )
-                await user_crud.create(session, obj_in=user_data)
+                await user_repo.create(session, obj_in=user_data)
             await session.commit()
 
         async with SessionLocal() as session:
             # Get first page
-            items1, total = await user_crud.get_multi_with_total(
+            items1, total = await user_repo.get_multi_with_total(
                 session, skip=0, limit=2
             )
             assert len(items1) == 2
             assert total >= 3
 
             # Get second page
-            items2, total2 = await user_crud.get_multi_with_total(
+            items2, total2 = await user_repo.get_multi_with_total(
                 session, skip=2, limit=2
             )
             assert len(items2) >= 1
@@ -594,7 +594,7 @@ class TestCRUDBaseGetMultiWithTotal:
             assert ids1.isdisjoint(ids2)
 
 
-class TestCRUDBaseCount:
+class TestRepositoryBaseCount:
     """Tests for count method."""
 
     @pytest.mark.asyncio
@@ -603,7 +603,7 @@ class TestCRUDBaseCount:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            count = await user_crud.count(session)
+            count = await user_repo.count(session)
             assert isinstance(count, int)
             assert count >= 1  # At least the test user
 
@@ -614,7 +614,7 @@ class TestCRUDBaseCount:
 
         # Create additional users
         async with SessionLocal() as session:
-            initial_count = await user_crud.count(session)
+            initial_count = await user_repo.count(session)
 
             user_data1 = UserCreate(
                 email="count1@example.com",
@@ -628,12 +628,12 @@ class TestCRUDBaseCount:
                 first_name="Count",
                 last_name="Two",
             )
-            await user_crud.create(session, obj_in=user_data1)
-            await user_crud.create(session, obj_in=user_data2)
+            await user_repo.create(session, obj_in=user_data1)
+            await user_repo.create(session, obj_in=user_data2)
             await session.commit()
 
         async with SessionLocal() as session:
-            new_count = await user_crud.count(session)
+            new_count = await user_repo.count(session)
             assert new_count == initial_count + 2
 
     @pytest.mark.asyncio
@@ -644,10 +644,10 @@ class TestCRUDBaseCount:
         async with SessionLocal() as session:
             with patch.object(session, "execute", side_effect=Exception("DB error")):
                 with pytest.raises(Exception, match="DB error"):
-                    await user_crud.count(session)
+                    await user_repo.count(session)
 
 
-class TestCRUDBaseExists:
+class TestRepositoryBaseExists:
     """Tests for exists method."""
 
     @pytest.mark.asyncio
@@ -656,7 +656,7 @@ class TestCRUDBaseExists:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            result = await user_crud.exists(session, id=str(async_test_user.id))
+            result = await user_repo.exists(session, id=str(async_test_user.id))
             assert result is True
 
     @pytest.mark.asyncio
@@ -665,7 +665,7 @@ class TestCRUDBaseExists:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            result = await user_crud.exists(session, id=str(uuid4()))
+            result = await user_repo.exists(session, id=str(uuid4()))
             assert result is False
 
     @pytest.mark.asyncio
@@ -674,11 +674,11 @@ class TestCRUDBaseExists:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            result = await user_crud.exists(session, id="invalid-uuid")
+            result = await user_repo.exists(session, id="invalid-uuid")
             assert result is False
 
 
-class TestCRUDBaseSoftDelete:
+class TestRepositoryBaseSoftDelete:
     """Tests for soft_delete method."""
 
     @pytest.mark.asyncio
@@ -694,13 +694,13 @@ class TestCRUDBaseSoftDelete:
                 first_name="Soft",
                 last_name="Delete",
             )
-            user = await user_crud.create(session, obj_in=user_data)
+            user = await user_repo.create(session, obj_in=user_data)
             user_id = user.id
             await session.commit()
 
         # Soft delete the user
         async with SessionLocal() as session:
-            deleted = await user_crud.soft_delete(session, id=str(user_id))
+            deleted = await user_repo.soft_delete(session, id=str(user_id))
             assert deleted is not None
             assert deleted.deleted_at is not None
 
@@ -710,7 +710,7 @@ class TestCRUDBaseSoftDelete:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            result = await user_crud.soft_delete(session, id="invalid-uuid")
+            result = await user_repo.soft_delete(session, id="invalid-uuid")
             assert result is None
 
     @pytest.mark.asyncio
@@ -719,7 +719,7 @@ class TestCRUDBaseSoftDelete:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            result = await user_crud.soft_delete(session, id=str(uuid4()))
+            result = await user_repo.soft_delete(session, id=str(uuid4()))
             assert result is None
 
     @pytest.mark.asyncio
@@ -735,18 +735,18 @@ class TestCRUDBaseSoftDelete:
                 first_name="Soft",
                 last_name="Delete2",
             )
-            user = await user_crud.create(session, obj_in=user_data)
+            user = await user_repo.create(session, obj_in=user_data)
             user_id = user.id
             await session.commit()
 
         # Soft delete with UUID object
         async with SessionLocal() as session:
-            deleted = await user_crud.soft_delete(session, id=user_id)  # UUID object
+            deleted = await user_repo.soft_delete(session, id=user_id)  # UUID object
             assert deleted is not None
             assert deleted.deleted_at is not None
 
 
-class TestCRUDBaseRestore:
+class TestRepositoryBaseRestore:
     """Tests for restore method."""
 
     @pytest.mark.asyncio
@@ -762,16 +762,16 @@ class TestCRUDBaseRestore:
                 first_name="Restore",
                 last_name="Test",
             )
-            user = await user_crud.create(session, obj_in=user_data)
+            user = await user_repo.create(session, obj_in=user_data)
             user_id = user.id
             await session.commit()
 
         async with SessionLocal() as session:
-            await user_crud.soft_delete(session, id=str(user_id))
+            await user_repo.soft_delete(session, id=str(user_id))
 
         # Restore the user
         async with SessionLocal() as session:
-            restored = await user_crud.restore(session, id=str(user_id))
+            restored = await user_repo.restore(session, id=str(user_id))
             assert restored is not None
             assert restored.deleted_at is None
 
@@ -781,7 +781,7 @@ class TestCRUDBaseRestore:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            result = await user_crud.restore(session, id="invalid-uuid")
+            result = await user_repo.restore(session, id="invalid-uuid")
             assert result is None
 
     @pytest.mark.asyncio
@@ -790,7 +790,7 @@ class TestCRUDBaseRestore:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            result = await user_crud.restore(session, id=str(uuid4()))
+            result = await user_repo.restore(session, id=str(uuid4()))
             assert result is None
 
     @pytest.mark.asyncio
@@ -800,7 +800,7 @@ class TestCRUDBaseRestore:
 
         async with SessionLocal() as session:
             # Try to restore a user that's not deleted
-            result = await user_crud.restore(session, id=str(async_test_user.id))
+            result = await user_repo.restore(session, id=str(async_test_user.id))
             assert result is None
 
     @pytest.mark.asyncio
@@ -816,21 +816,21 @@ class TestCRUDBaseRestore:
                 first_name="Restore",
                 last_name="Test2",
             )
-            user = await user_crud.create(session, obj_in=user_data)
+            user = await user_repo.create(session, obj_in=user_data)
             user_id = user.id
             await session.commit()
 
         async with SessionLocal() as session:
-            await user_crud.soft_delete(session, id=str(user_id))
+            await user_repo.soft_delete(session, id=str(user_id))
 
         # Restore with UUID object
         async with SessionLocal() as session:
-            restored = await user_crud.restore(session, id=user_id)  # UUID object
+            restored = await user_repo.restore(session, id=user_id)  # UUID object
             assert restored is not None
             assert restored.deleted_at is None
 
 
-class TestCRUDBasePaginationValidation:
+class TestRepositoryBasePaginationValidation:
     """Tests for pagination parameter validation (covers lines 254-260)."""
 
     @pytest.mark.asyncio
@@ -840,7 +840,7 @@ class TestCRUDBasePaginationValidation:
 
         async with SessionLocal() as session:
             with pytest.raises(InvalidInputError, match="skip must be non-negative"):
-                await user_crud.get_multi_with_total(session, skip=-1, limit=10)
+                await user_repo.get_multi_with_total(session, skip=-1, limit=10)
 
     @pytest.mark.asyncio
     async def test_get_multi_with_total_negative_limit(self, async_test_db):
@@ -849,7 +849,7 @@ class TestCRUDBasePaginationValidation:
 
         async with SessionLocal() as session:
             with pytest.raises(InvalidInputError, match="limit must be non-negative"):
-                await user_crud.get_multi_with_total(session, skip=0, limit=-1)
+                await user_repo.get_multi_with_total(session, skip=0, limit=-1)
 
     @pytest.mark.asyncio
     async def test_get_multi_with_total_limit_too_large(self, async_test_db):
@@ -858,7 +858,7 @@ class TestCRUDBasePaginationValidation:
 
         async with SessionLocal() as session:
             with pytest.raises(InvalidInputError, match="Maximum limit is 1000"):
-                await user_crud.get_multi_with_total(session, skip=0, limit=1001)
+                await user_repo.get_multi_with_total(session, skip=0, limit=1001)
 
     @pytest.mark.asyncio
     async def test_get_multi_with_total_with_filters(
@@ -868,7 +868,7 @@ class TestCRUDBasePaginationValidation:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            users, total = await user_crud.get_multi_with_total(
+            users, total = await user_repo.get_multi_with_total(
                 session, skip=0, limit=10, filters={"is_active": True}
             )
             assert isinstance(users, list)
@@ -880,7 +880,7 @@ class TestCRUDBasePaginationValidation:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            users, _total = await user_crud.get_multi_with_total(
+            users, _total = await user_repo.get_multi_with_total(
                 session, skip=0, limit=10, sort_by="created_at", sort_order="desc"
             )
             assert isinstance(users, list)
@@ -891,13 +891,13 @@ class TestCRUDBasePaginationValidation:
         _test_engine, SessionLocal = async_test_db
 
         async with SessionLocal() as session:
-            users, _total = await user_crud.get_multi_with_total(
+            users, _total = await user_repo.get_multi_with_total(
                 session, skip=0, limit=10, sort_by="created_at", sort_order="asc"
             )
             assert isinstance(users, list)
 
 
-class TestCRUDBaseModelsWithoutSoftDelete:
+class TestRepositoryBaseModelsWithoutSoftDelete:
     """
     Test soft_delete and restore on models without deleted_at column.
     Covers lines 342-343, 383-384 - error handling for unsupported models.
@@ -912,7 +912,7 @@ class TestCRUDBaseModelsWithoutSoftDelete:
 
         # Create an organization (which doesn't have deleted_at)
         from app.models.organization import Organization
-        from app.repositories.organization import organization_repo as org_crud
+        from app.repositories.organization import organization_repo as org_repo
 
         async with SessionLocal() as session:
             org = Organization(name="Test Org", slug="test-org")
@@ -925,7 +925,7 @@ class TestCRUDBaseModelsWithoutSoftDelete:
             with pytest.raises(
                 InvalidInputError, match="does not have a deleted_at column"
             ):
-                await org_crud.soft_delete(session, id=str(org_id))
+                await org_repo.soft_delete(session, id=str(org_id))
 
     @pytest.mark.asyncio
     async def test_restore_model_without_deleted_at(self, async_test_db):
@@ -934,7 +934,7 @@ class TestCRUDBaseModelsWithoutSoftDelete:
 
         # Create an organization (which doesn't have deleted_at)
         from app.models.organization import Organization
-        from app.repositories.organization import organization_repo as org_crud
+        from app.repositories.organization import organization_repo as org_repo
 
         async with SessionLocal() as session:
             org = Organization(name="Restore Test", slug="restore-test")
@@ -947,10 +947,10 @@ class TestCRUDBaseModelsWithoutSoftDelete:
             with pytest.raises(
                 InvalidInputError, match="does not have a deleted_at column"
             ):
-                await org_crud.restore(session, id=str(org_id))
+                await org_repo.restore(session, id=str(org_id))
 
 
-class TestCRUDBaseEagerLoadingWithRealOptions:
+class TestRepositoryBaseEagerLoadingWithRealOptions:
     """
     Test eager loading with actual SQLAlchemy load options.
     Covers lines 77-78, 119-120 - options loop execution.
@@ -967,7 +967,7 @@ class TestCRUDBaseEagerLoadingWithRealOptions:
 
         # Create a session for the user
         from app.models.user_session import UserSession
-        from app.repositories.session import session_repo as session_crud
+        from app.repositories.session import session_repo as session_repo
 
         async with SessionLocal() as session:
             user_session = UserSession(
@@ -985,7 +985,7 @@ class TestCRUDBaseEagerLoadingWithRealOptions:
 
         # Get session with eager loading of user relationship
         async with SessionLocal() as session:
-            result = await session_crud.get(
+            result = await session_repo.get(
                 session,
                 id=str(session_id),
                 options=[joinedload(UserSession.user)],  # Real option, not empty list
@@ -1006,7 +1006,7 @@ class TestCRUDBaseEagerLoadingWithRealOptions:
 
         # Create multiple sessions for the user
         from app.models.user_session import UserSession
-        from app.repositories.session import session_repo as session_crud
+        from app.repositories.session import session_repo as session_repo
 
         async with SessionLocal() as session:
             for i in range(3):
@@ -1024,7 +1024,7 @@ class TestCRUDBaseEagerLoadingWithRealOptions:
 
         # Get sessions with eager loading
         async with SessionLocal() as session:
-            results = await session_crud.get_multi(
+            results = await session_repo.get_multi(
                 session,
                 skip=0,
                 limit=10,

@@ -1,5 +1,5 @@
 # app/repositories/oauth_client.py
-"""Repository for OAuthClient model async CRUD operations."""
+"""Repository for OAuthClient model async database operations."""
 
 import logging
 import secrets

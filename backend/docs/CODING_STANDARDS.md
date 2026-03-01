@@ -214,7 +214,7 @@ if not user:
 
 ### Error Handling Pattern
 
-Always follow this pattern in CRUD operations (Async version):
+Always follow this pattern in repository operations (Async version):
 
 ```python
 from sqlalchemy.exc import IntegrityError, OperationalError, DataError
@@ -427,7 +427,7 @@ backend/app/alembic/versions/
 
 ## Database Operations
 
-### Async CRUD Pattern
+### Async Repository Pattern
 
 **IMPORTANT**: This application uses **async SQLAlchemy** with modern patterns for better performance and testability.
 
@@ -567,7 +567,7 @@ async def create_user(
 **Key Points:**
 - Route functions must be `async def`
 - Database parameter is `AsyncSession`
-- Always `await` CRUD operations
+- Always `await` repository operations
 
 #### In Services (Multiple Operations)
 

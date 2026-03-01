@@ -19,7 +19,7 @@ from app.core.database import SessionLocal, engine
 from app.models.organization import Organization
 from app.models.user import User
 from app.models.user_organization import UserOrganization
-from app.repositories.user import user_repo as user_crud
+from app.repositories.user import user_repo as user_repo
 from app.schemas.users import UserCreate
 
 logger = logging.getLogger(__name__)
@@ -51,7 +51,7 @@ async def init_db() -> User | None:
     async with SessionLocal() as session:
         try:
             # Check if superuser already exists
-            existing_user = await user_crud.get_by_email(session, email=superuser_email)
+            existing_user = await user_repo.get_by_email(session, email=superuser_email)
 
             if existing_user:
                 logger.info("Superuser already exists: %s", existing_user.email)
@@ -66,7 +66,7 @@ async def init_db() -> User | None:
                 is_superuser=True,
             )
 
-            user = await user_crud.create(session, obj_in=user_in)
+            user = await user_repo.create(session, obj_in=user_in)
             await session.commit()
             await session.refresh(user)
 
@@ -136,7 +136,7 @@ async def load_demo_data(session):
 
         # Create Users
         for user_data in data.get("users", []):
-            existing_user = await user_crud.get_by_email(
+            existing_user = await user_repo.get_by_email(
                 session, email=user_data["email"]
             )
             if not existing_user:
@@ -149,7 +149,7 @@ async def load_demo_data(session):
                     is_superuser=user_data["is_superuser"],
                     is_active=user_data.get("is_active", True),
                 )
-                user = await user_crud.create(session, obj_in=user_in)
+                user = await user_repo.create(session, obj_in=user_in)
 
                 # Randomize created_at for demo data (last 30 days)
                 # This makes the charts look more realistic

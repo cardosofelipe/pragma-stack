@@ -1,5 +1,5 @@
 # app/repositories/oauth_account.py
-"""Repository for OAuthAccount model async CRUD operations."""
+"""Repository for OAuthAccount model async database operations."""
 
 import logging
 from datetime import datetime

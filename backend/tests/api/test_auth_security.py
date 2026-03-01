@@ -13,7 +13,7 @@ import pytest
 from httpx import AsyncClient
 
 from app.models.user import User
-from app.repositories.session import session_repo as session_crud
+from app.repositories.session import session_repo as session_repo
 
 
 class TestRevokedSessionSecurity:
@@ -117,7 +117,7 @@ class TestRevokedSessionSecurity:
 
         async with SessionLocal() as session:
             # Find and delete the session
-            db_session = await session_crud.get_by_jti(session, jti=jti)
+            db_session = await session_repo.get_by_jti(session, jti=jti)
             if db_session:
                 await session.delete(db_session)
                 await session.commit()
