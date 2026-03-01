@@ -148,17 +148,11 @@ class TestJWTAlgorithmSecurityAttacks:
 
         payload = {"sub": "user123", "exp": now + 3600, "iat": now, "type": "access"}
 
-        # Create token with HS384 instead of HS256
-        try:
-            malicious_token = jwt.encode(
-                payload, settings.SECRET_KEY, algorithm="HS384"
-            )
+        # Create token with HS384 instead of HS256 (HMAC key works with HS384)
+        malicious_token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS384")
 
-            with pytest.raises(TokenInvalidError):
-                decode_token(malicious_token)
-        except Exception:
-            # If encoding fails, that's also fine
-            pass
+        with pytest.raises(TokenInvalidError):
+            decode_token(malicious_token)
 
     def test_valid_token_with_correct_algorithm_accepted(self):
         """
