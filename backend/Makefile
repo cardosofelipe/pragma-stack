@@ -91,7 +91,7 @@ dep-audit:
 
 license-check:
 	@echo "📜 Checking dependency license compliance..."
-	@uv run pip-licenses --fail-on="GPL-3.0-or-later;AGPL-3.0-or-later" --format=plain
+	@uv run pip-licenses --fail-on="GPL-3.0-or-later;AGPL-3.0-or-later" --format=plain > /dev/null
 	@echo "✅ All dependency licenses are compliant!"
 
 audit: dep-audit license-check
