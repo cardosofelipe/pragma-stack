@@ -186,8 +186,15 @@ benchmark-save:
 
 benchmark-check:
 	@echo "⏱️  Running benchmarks and comparing against baseline..."
-	@IS_TEST=True PYTHONPATH=. uv run pytest tests/benchmarks/ -v --benchmark-only --benchmark-compare=0001_baseline --benchmark-sort=mean --benchmark-compare-fail=mean:200% -p no:xdist --override-ini='addopts='
-	@echo "✅ No performance regressions detected!"
+	@if find .benchmarks -name '*_baseline*' -print -quit 2>/dev/null | grep -q .; then \
+		IS_TEST=True PYTHONPATH=. uv run pytest tests/benchmarks/ -v --benchmark-only --benchmark-compare=0001_baseline --benchmark-sort=mean --benchmark-compare-fail=mean:200% -p no:xdist --override-ini='addopts='; \
+		echo "✅ No performance regressions detected!"; \
+	else \
+		echo "⚠️  No benchmark baseline found. Run 'make benchmark-save' first to create one."; \
+		echo "   Running benchmarks without comparison..."; \
+		IS_TEST=True PYTHONPATH=. uv run pytest tests/benchmarks/ -v --benchmark-only --benchmark-save=baseline --benchmark-sort=mean -p no:xdist --override-ini='addopts='; \
+		echo "✅ Benchmark baseline created. Future runs of 'make benchmark-check' will compare against it."; \
+	fi
 
 test-all:
 	@echo "🧪 Running ALL tests (unit + E2E)..."

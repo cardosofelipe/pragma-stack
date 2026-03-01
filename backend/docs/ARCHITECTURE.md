@@ -1169,6 +1169,8 @@ app.add_middleware(
 
 ## Performance Considerations
 
+> 📖 For the full benchmarking guide (how to run, read results, write new benchmarks, and manage baselines), see **[BENCHMARKS.md](BENCHMARKS.md)**.
+
 ### Database Connection Pooling
 
 - Pool size: 20 connections
