@@ -33,11 +33,11 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
-# Production stage
-FROM python:3.12-slim AS production
+# Production stage — Alpine eliminates glibc CVEs (e.g. CVE-2026-0861)
+FROM python:3.12-alpine AS production
 
 # Create non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+RUN addgroup -S appuser && adduser -S -G appuser appuser
 
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -48,18 +48,18 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_NO_CACHE=1
 
 # Install system dependencies and uv
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends postgresql-client curl ca-certificates && \
+RUN apk add --no-cache postgresql-client curl ca-certificates && \
     curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    mv /root/.local/bin/uv* /usr/local/bin/ && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    mv /root/.local/bin/uv* /usr/local/bin/
 
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
 
-# Install only production dependencies using uv (no dev dependencies)
-RUN uv sync --frozen --no-dev
+# Install build dependencies, compile Python packages, then remove build deps
+RUN apk add --no-cache --virtual .build-deps \
+        gcc g++ musl-dev python3-dev linux-headers libffi-dev openssl-dev && \
+    uv sync --frozen --no-dev && \
+    apk del .build-deps
 
 # Copy application code
 COPY . .

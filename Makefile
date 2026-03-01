@@ -1,4 +1,4 @@
-.PHONY: help dev dev-full prod down logs logs-dev clean clean-slate drop-db reset-db push-images deploy
+.PHONY: help dev dev-full prod down logs logs-dev clean clean-slate drop-db reset-db push-images deploy scan-images
 
 VERSION ?= latest
 REGISTRY ?= ghcr.io/cardosofelipe/pragma-stack
@@ -21,6 +21,7 @@ help:
 	@echo "  make prod          - Start production stack"
 	@echo "  make deploy        - Pull and deploy latest images"
 	@echo "  make push-images   - Build and push images to registry"
+	@echo "  make scan-images   - Scan production images for CVEs (requires trivy)"
 	@echo "  make logs          - Follow production container logs"
 	@echo ""
 	@echo "Cleanup:"
@@ -88,6 +89,28 @@ push-images:
 	docker build -t $(REGISTRY)/frontend:$(VERSION) ./frontend
 	docker push $(REGISTRY)/backend:$(VERSION)
 	docker push $(REGISTRY)/frontend:$(VERSION)
+
+scan-images:
+	@docker info > /dev/null 2>&1 || (echo "❌ Docker is not running!"; exit 1)
+	@echo "🐳 Building and scanning production images for CVEs..."
+	docker build -t $(REGISTRY)/backend:scan --target production ./backend
+	docker build -t $(REGISTRY)/frontend:scan --target runner ./frontend
+	@echo ""
+	@echo "=== Backend Image Scan ==="
+	@if command -v trivy > /dev/null 2>&1; then \
+		trivy image --severity HIGH,CRITICAL --exit-code 1 $(REGISTRY)/backend:scan; \
+	else \
+		echo "ℹ️  Trivy not found locally, using Docker to run Trivy..."; \
+		docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --severity HIGH,CRITICAL --exit-code 1 $(REGISTRY)/backend:scan; \
+	fi
+	@echo ""
+	@echo "=== Frontend Image Scan ==="
+	@if command -v trivy > /dev/null 2>&1; then \
+		trivy image --severity HIGH,CRITICAL --exit-code 1 $(REGISTRY)/frontend:scan; \
+	else \
+		docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --severity HIGH,CRITICAL --exit-code 1 $(REGISTRY)/frontend:scan; \
+	fi
+	@echo "✅ No HIGH/CRITICAL CVEs found in production images!"
 
 # ============================================================================
 # Cleanup

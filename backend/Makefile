@@ -1,4 +1,4 @@
-.PHONY: help lint lint-fix format format-check type-check test test-cov validate clean install-dev sync check-docker install-e2e test-e2e test-e2e-schema test-all dep-audit license-check audit validate-all check
+.PHONY: help lint lint-fix format format-check type-check test test-cov validate clean install-dev sync check-docker install-e2e test-e2e test-e2e-schema test-all dep-audit license-check audit validate-all check benchmark benchmark-check benchmark-save scan-image test-api-security
 
 # Prevent a stale VIRTUAL_ENV in the caller's shell from confusing uv
 unexport VIRTUAL_ENV
@@ -18,12 +18,18 @@ help:
 	@echo "  make format        - Format code with Ruff"
 	@echo "  make format-check  - Check if code is formatted"
 	@echo "  make type-check    - Run pyright type checking"
-	@echo "  make validate      - Run all checks (lint + format + types)"
+	@echo "  make validate      - Run all checks (lint + format + types + schema fuzz)"
+	@echo ""
+	@echo "Performance:"
+	@echo "  make benchmark       - Run performance benchmarks"
+	@echo "  make benchmark-save  - Run benchmarks and save as baseline"
+	@echo "  make benchmark-check - Run benchmarks and compare against baseline"
 	@echo ""
 	@echo "Security & Audit:"
 	@echo "  make dep-audit     - Scan dependencies for known vulnerabilities"
 	@echo "  make license-check - Check dependency license compliance"
 	@echo "  make audit         - Run all security audits (deps + licenses)"
+	@echo "  make scan-image    - Scan Docker image for CVEs (requires trivy)"
 	@echo "  make validate-all  - Run all quality + security checks"
 	@echo "  make check         - Full pipeline: quality + security + tests"
 	@echo ""
@@ -77,8 +83,14 @@ type-check:
 	@echo "🔎 Running pyright type checking..."
 	@uv run pyright app/
 
-validate: lint format-check type-check
+validate: lint format-check type-check test-api-security
 	@echo "✅ All quality checks passed!"
+
+# API Security Testing (Schemathesis property-based fuzzing)
+test-api-security: check-docker
+	@echo "🔐 Running Schemathesis API security fuzzing..."
+	@IS_TEST=True PYTHONPATH=. uv run pytest tests/e2e/ -v -m "schemathesis" --tb=short -n 0
+	@echo "✅ API schema security tests passed!"
 
 # ============================================================================
 # Security & Audit
@@ -96,6 +108,17 @@ license-check:
 
 audit: dep-audit license-check
 	@echo "✅ All security audits passed!"
+
+scan-image: check-docker
+	@echo "🐳 Scanning Docker image for OS-level CVEs with Trivy..."
+	@docker build -t pragma-backend:scan -q --target production .
+	@if command -v trivy > /dev/null 2>&1; then \
+		trivy image --severity HIGH,CRITICAL --exit-code 1 pragma-backend:scan; \
+	else \
+		echo "ℹ️  Trivy not found locally, using Docker to run Trivy..."; \
+		docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --severity HIGH,CRITICAL --exit-code 1 pragma-backend:scan; \
+	fi
+	@echo "✅ No HIGH/CRITICAL CVEs found in Docker image!"
 
 validate-all: validate audit
 	@echo "✅ All quality + security checks passed!"
@@ -147,6 +170,24 @@ test-e2e: check-docker
 test-e2e-schema: check-docker
 	@echo "🧪 Running Schemathesis API schema tests..."
 	@IS_TEST=True PYTHONPATH=. uv run pytest tests/e2e/ -v -m "schemathesis" --tb=short -n 0
+
+# ============================================================================
+# Performance Benchmarks
+# ============================================================================
+
+benchmark:
+	@echo "⏱️  Running performance benchmarks..."
+	@IS_TEST=True PYTHONPATH=. uv run pytest tests/benchmarks/ -v --benchmark-only --benchmark-sort=mean -p no:xdist --override-ini='addopts='
+
+benchmark-save:
+	@echo "⏱️  Running benchmarks and saving baseline..."
+	@IS_TEST=True PYTHONPATH=. uv run pytest tests/benchmarks/ -v --benchmark-only --benchmark-save=baseline --benchmark-sort=mean -p no:xdist --override-ini='addopts='
+	@echo "✅ Benchmark baseline saved to .benchmarks/"
+
+benchmark-check:
+	@echo "⏱️  Running benchmarks and comparing against baseline..."
+	@IS_TEST=True PYTHONPATH=. uv run pytest tests/benchmarks/ -v --benchmark-only --benchmark-compare=0001_baseline --benchmark-sort=mean --benchmark-compare-fail=mean:200% -p no:xdist --override-ini='addopts='
+	@echo "✅ No performance regressions detected!"
 
 test-all:
 	@echo "🧪 Running ALL tests (unit + E2E)..."

@@ -72,6 +72,9 @@ dev = [
     "pip-licenses>=4.0.0",  # License compliance checking
     "detect-secrets>=1.5.0",  # Hardcoded secrets detection
 
+    # Performance benchmarking
+    "pytest-benchmark>=4.0.0",  # Performance regression detection
+
     # Pre-commit hooks
     "pre-commit>=4.0.0",  # Git pre-commit hook framework
 ]
@@ -206,12 +209,15 @@ addopts = [
     "--cov=app",
     "--cov-report=term-missing",
     "--cov-report=html",
+    "--ignore=tests/benchmarks",  # benchmarks are incompatible with xdist; run via 'make benchmark'
+    "-p", "no:benchmark",  # disable pytest-benchmark plugin during normal runs (conflicts with xdist)
 ]
 markers = [
     "sqlite: marks tests that should run on SQLite (mocked).",
     "postgres: marks tests that require a real PostgreSQL database.",
     "e2e: marks end-to-end tests requiring Docker containers.",
     "schemathesis: marks Schemathesis-generated API tests.",
+    "benchmark: marks performance benchmark tests.",
 ]
 asyncio_default_fixture_loop_scope = "function"
 
