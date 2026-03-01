@@ -72,8 +72,8 @@ The test suite includes two categories of performance tests:
 
 | Type | How it works | Examples |
 |------|-------------|----------|
-| **pytest-benchmark tests** | Uses the `benchmark` fixture for precise, multi-round timing | `test_health_endpoint_performance`, `test_openapi_schema_performance` |
-| **Manual latency tests** | Uses `time.perf_counter` with explicit thresholds (for async endpoints that pytest-benchmark doesn't support natively) | `test_login_latency`, `test_get_current_user_latency` |
+| **pytest-benchmark tests** | Uses the `benchmark` fixture for precise, multi-round timing | `test_health_endpoint_performance`, `test_openapi_schema_performance`, `test_password_hashing_performance`, `test_password_verification_performance`, `test_access_token_creation_performance`, `test_refresh_token_creation_performance`, `test_token_decode_performance` |
+| **Manual latency tests** | Uses `time.perf_counter` with explicit thresholds (for async endpoints that pytest-benchmark doesn't support natively) | `test_login_latency`, `test_get_current_user_latency`, `test_register_latency`, `test_token_refresh_latency`, `test_sessions_list_latency`, `test_user_profile_update_latency` |
 
 ### 3. Regression detection
 
@@ -130,12 +130,21 @@ This is a **relative ranking within the current run** — red does NOT mean the 
 
 For this project's current endpoints:
 
-| Endpoint | Expected range | Why |
-|----------|---------------|-----|
+| Test | Expected range | Why |
+|------|---------------|-----|
 | `GET /health` | ~1–1.5ms | Minimal logic, mocked DB check |
 | `GET /api/v1/openapi.json` | ~1.5–2.5ms | Serializes entire API schema |
-| `POST /api/v1/auth/login` | < 500ms threshold | Includes bcrypt password hashing |
+| `get_password_hash` | ~200ms | CPU-bound bcrypt hashing |
+| `verify_password` | ~200ms | CPU-bound bcrypt verification |
+| `create_access_token` | ~17–20µs | JWT encoding with HMAC-SHA256 |
+| `create_refresh_token` | ~17–20µs | JWT encoding with HMAC-SHA256 |
+| `decode_token` | ~20–25µs | JWT decoding and claim validation |
+| `POST /api/v1/auth/login` | < 500ms threshold | Includes bcrypt password verification |
+| `POST /api/v1/auth/register` | < 500ms threshold | Includes bcrypt password hashing |
+| `POST /api/v1/auth/refresh` | < 200ms threshold | Token rotation + DB session update |
 | `GET /api/v1/users/me` | < 200ms threshold | DB lookup + token validation |
+| `GET /api/v1/sessions/me` | < 200ms threshold | Session list query + token validation |
+| `PATCH /api/v1/users/me` | < 200ms threshold | DB update + token validation |
 
 ---
 
@@ -297,6 +306,6 @@ If StdDev is high relative to the Mean, results may be unreliable. Common causes
 
 Try running benchmarks on an idle system or increasing `min_rounds` in `pyproject.toml`.
 
-### Only 2 of 4 tests run
+### Only 7 of 13 tests run
 
-The async tests (`test_login_latency`, `test_get_current_user_latency`) are skipped during `--benchmark-only` runs because they don't use the `benchmark` fixture. They run as part of the normal test suite (`make test`) with manual threshold assertions.
+The async tests (`test_login_latency`, `test_get_current_user_latency`, `test_register_latency`, `test_token_refresh_latency`, `test_sessions_list_latency`, `test_user_profile_update_latency`) are skipped during `--benchmark-only` runs because they don't use the `benchmark` fixture. They run as part of the normal test suite (`make test`) with manual threshold assertions.
