@@ -27,11 +27,14 @@ except ImportError:
 pytestmark = [
     pytest.mark.e2e,
     pytest.mark.schemathesis,
-    pytest.mark.skipif(
-        not SCHEMATHESIS_AVAILABLE,
-        reason="schemathesis not installed - run: make install-e2e",
-    ),
 ]
+
+
+if not SCHEMATHESIS_AVAILABLE:
+
+    def test_schemathesis_compatibility():
+        """Gracefully handle missing schemathesis dependency."""
+        pytest.skip("schemathesis not installed - run: make install-e2e")
 
 
 if SCHEMATHESIS_AVAILABLE:
