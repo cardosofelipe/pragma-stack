@@ -43,7 +43,7 @@ EOF
 - Check current state: `python migrate.py current`
 
 **Frontend API Client Generation:**
-- Run `npm run generate:api` after backend schema changes
+- Run `bun run generate:api` after backend schema changes
 - Client is auto-generated from OpenAPI spec
 - Located in `frontend/src/lib/api/generated/`
 - NEVER manually edit generated files
@@ -51,8 +51,8 @@ EOF
 **Testing Commands:**
 - Backend unit/integration: `IS_TEST=True uv run pytest` (always prefix with `IS_TEST=True`)
 - Backend E2E (requires Docker): `make test-e2e`
-- Frontend unit: `npm test`
-- Frontend E2E: `npm run test:e2e`
+- Frontend unit: `bun test`
+- Frontend E2E: `bun run test:e2e`
 - Use `make test` or `make test-cov` in backend for convenience
 
 **Security & Quality Commands (Backend):**
@@ -174,7 +174,7 @@ with patch.object(session, 'commit', side_effect=mock_commit):
 1. Start with backend schema and CRUD
 2. Implement API route with proper authorization
 3. Write backend tests (aim for >90% coverage)
-4. Generate frontend API client: `npm run generate:api`
+4. Generate frontend API client: `bun run generate:api`
 5. Implement frontend components
 6. Write frontend unit tests
 7. Add E2E tests for critical flows
@@ -187,8 +187,8 @@ with patch.object(session, 'commit', side_effect=mock_commit):
 
 **When Debugging:**
 - Backend: Check `IS_TEST=True` environment variable is set
-- Frontend: Run `npm run type-check` first
-- E2E: Use `npm run test:e2e:debug` for step-by-step debugging
+- Frontend: Run `bun run type-check` first
+- E2E: Use `bun run test:e2e:debug` for step-by-step debugging
 - Check logs: Backend has detailed error logging
 
 **Demo Mode (Frontend-Only Showcase):**
@@ -196,7 +196,7 @@ with patch.object(session, 'commit', side_effect=mock_commit):
 - Uses MSW (Mock Service Worker) to intercept API calls in browser
 - Zero backend required - perfect for Vercel deployments
 - **Fully Automated**: MSW handlers auto-generated from OpenAPI spec
-  - Run `npm run generate:api` → updates both API client AND MSW handlers
+  - Run `bun run generate:api` → updates both API client AND MSW handlers
   - No manual synchronization needed!
 - Demo credentials (any password ≥8 chars works):
   - User: `demo@example.com` / `DemoPass123`

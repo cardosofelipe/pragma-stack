@@ -59,7 +59,7 @@ cd frontend
 echo "NEXT_PUBLIC_DEMO_MODE=true" > .env.local
 
 # Start frontend only (no backend needed)
-npm run dev
+bun run dev
 
 # Open http://localhost:3000
 ```
@@ -233,7 +233,7 @@ MSW never initializes during Jest tests:
 - 97%+ coverage maintained
 
 ```bash
-npm test  # MSW will NOT interfere
+bun test  # MSW will NOT interfere
 ```
 
 ### E2E Tests (Playwright)
@@ -247,14 +247,14 @@ MSW never initializes during Playwright tests:
 - All E2E tests pass unchanged
 
 ```bash
-npm run test:e2e  # MSW will NOT interfere
+bun run test:e2e  # MSW will NOT interfere
 ```
 
 ### Manual Testing in Demo Mode
 
 ```bash
 # Enable demo mode
-NEXT_PUBLIC_DEMO_MODE=true npm run dev
+NEXT_PUBLIC_DEMO_MODE=true bun run dev
 
 # Test flows:
 # 1. Open http://localhost:3000
@@ -304,7 +304,7 @@ NEXT_PUBLIC_APP_NAME=My Demo App
 ```bash
 # netlify.toml
 [build]
-  command = "npm run build"
+  command = "bun run build"
   publish = ".next"
 
 [build.environment]
@@ -321,10 +321,10 @@ module.exports = {
 }
 
 # Build
-NEXT_PUBLIC_DEMO_MODE=true npm run build
+NEXT_PUBLIC_DEMO_MODE=true bun run build
 
 # Deploy to GitHub Pages
-npm run deploy
+bun run deploy
 ```
 
 ## Troubleshooting

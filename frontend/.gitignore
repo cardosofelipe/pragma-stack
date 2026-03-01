@@ -42,5 +42,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Auto-generated files (regenerate with npm run generate:api)
+# Auto-generated files (regenerate with bun run generate:api)
 /src/mocks/handlers/generated.ts

@@ -9,7 +9,7 @@ MSW (Mock Service Worker) handlers are **automatically generated** from your Ope
 ```
 Backend API Changes
   ↓
-npm run generate:api
+bun run generate:api
   ↓
 ┌─────────────────────────────────────┐
 │  1. Fetches OpenAPI spec            │
@@ -30,7 +30,7 @@ src/mocks/handlers/
 When you run:
 
 ```bash
-npm run generate:api
+bun run generate:api
 ```
 
 The system:
@@ -125,7 +125,7 @@ Overrides are applied FIRST, so they take precedence over generated handlers.
 
 ```bash
 # Backend adds new endpoint
-# 1. Run npm run generate:api
+# 1. Run bun run generate:api
 # 2. Manually add MSW handler
 # 3. Test demo mode
 # 4. Fix bugs
@@ -136,7 +136,7 @@ Overrides are applied FIRST, so they take precedence over generated handlers.
 
 ```bash
 # Backend adds new endpoint
-npm run generate:api  # Done! MSW auto-synced
+bun run generate:api  # Done! MSW auto-synced
 ```
 
 ### ✅ Always In Sync
@@ -202,11 +202,11 @@ frontend/
 2. **Regenerate clients:**
    ```bash
    cd frontend
-   npm run generate:api
+   bun run generate:api
    ```
 3. **Test demo mode:**
    ```bash
-   NEXT_PUBLIC_DEMO_MODE=true npm run dev
+   NEXT_PUBLIC_DEMO_MODE=true bun run dev
    ```
 4. **Done!** New endpoint automatically works in demo mode
 
@@ -286,7 +286,7 @@ The generator (`scripts/generate-msw-handlers.ts`) does:
 
 **Check:**
 
-1. Is backend running? (`npm run generate:api` requires backend)
+1. Is backend running? (`bun run generate:api` requires backend)
 2. Check console for `[MSW]` warnings
 3. Verify `generated.ts` exists and has your endpoint
 4. Check path parameters match exactly
@@ -324,7 +324,7 @@ npx tsx scripts/generate-msw-handlers.ts /tmp/openapi.json
 
 ### ✅ Do
 
-- Run `npm run generate:api` after backend changes
+- Run `bun run generate:api` after backend changes
 - Use `overrides.ts` for complex logic
 - Keep mock data in `data/` files
 - Test demo mode regularly
@@ -380,7 +380,7 @@ http.get(`${API_BASE_URL}/api/v1/users/me`, async ({ request }) => {
 ### After (Automated)
 
 ```bash
-npm run generate:api  # Done! All 31+ endpoints handled automatically
+bun run generate:api  # Done! All 31+ endpoints handled automatically
 ```
 
 **Manual Code: 1500+ lines**
@@ -399,6 +399,6 @@ npm run generate:api  # Done! All 31+ endpoints handled automatically
 
 **This template is batteries-included.**
 Your API client and MSW handlers stay perfectly synchronized with zero manual work.
-Just run `npm run generate:api` and everything updates automatically.
+Just run `bun run generate:api` and everything updates automatically.
 
 That's the power of OpenAPI + automation! 🚀

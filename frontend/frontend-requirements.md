@@ -526,7 +526,7 @@ interface UserSession {
   - Development: `http://localhost:8000/api/v1/openapi.json`
   - Docker: `http://backend:8000/api/v1/openapi.json`
 - Generates TypeScript client in `src/lib/api/generated/`
-- Runs as npm script: `npm run generate:api`
+- Runs as script: `bun run generate:api`
 - Can be run independently for frontend-only development
 
 **Root Script** (`root/scripts/generate-frontend-api.sh`):
@@ -1724,7 +1724,7 @@ Provide 2-3 complete feature implementation walkthroughs, including:
 **Dependency Security:**
 
 - Regular dependency updates
-- Security audit via `npm audit`
+- Security audit via `bun audit`
 - Automated security scanning (Dependabot, Snyk)
 
 ### 12.5 SEO

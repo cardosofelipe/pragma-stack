@@ -1300,7 +1300,7 @@ import Image from 'next/image';
 **Bundle Size Monitoring:**
 
 ```bash
-npm run build && npm run analyze
+bun run build && bun run analyze
 # Use webpack-bundle-analyzer to identify large dependencies
 ```
 
@@ -1362,8 +1362,8 @@ npm run build && npm run analyze
 **Regular Audits:**
 
 ```bash
-npm audit
-npm audit fix
+bun audit
+bun audit fix
 ```
 
 **Automated Scanning:**
@@ -1496,11 +1496,11 @@ npm audit fix
 FROM node:20-alpine
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production
+RUN bun install --frozen-lockfile --only=production
 COPY . .
-RUN npm run build
+RUN bun run build
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["bun", "start"]
 ```
 
 ### 14.2 Environment Configuration
@@ -1536,15 +1536,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
       - name: Run tests
-        run: npm test
+        run: bun test
       - name: Run linter
-        run: npm run lint
+        run: bun run lint
       - name: Type check
-        run: npm run type-check
+        run: bun run type-check
       - name: Build
-        run: npm run build
+        run: bun run build
 ```
 
 ---

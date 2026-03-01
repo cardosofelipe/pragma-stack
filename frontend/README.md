@@ -47,16 +47,16 @@ Production-ready Next.js 16 frontend with TypeScript, authentication, admin pane
 ### Prerequisites
 
 - Node.js 18+
-- npm, yarn, or pnpm
+- [Bun](https://bun.sh/) (recommended runtime & package manager)
 
 ### Installation
 
 ```bash
 # Install dependencies
-npm install
+bun install
 
 # Run development server
-npm run dev
+bun run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
@@ -74,26 +74,26 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 ```bash
 # Development
-npm run dev          # Start dev server
-npm run build        # Production build
-npm run start        # Start production server
+bun run dev          # Start dev server
+bun run build        # Production build
+bun run start        # Start production server
 
 # Code Quality
-npm run lint         # Run ESLint
-npm run format       # Format with Prettier
-npm run format:check # Check formatting
-npm run type-check   # TypeScript type checking
-npm run validate     # Run all checks (lint + format + type-check)
+bun run lint         # Run ESLint
+bun run format       # Format with Prettier
+bun run format:check # Check formatting
+bun run type-check   # TypeScript type checking
+bun run validate     # Run all checks (lint + format + type-check)
 
 # Testing
-npm test             # Run unit tests
-npm run test:watch   # Watch mode
-npm run test:coverage # Coverage report
-npm run test:e2e     # Run E2E tests
-npm run test:e2e:ui  # Playwright UI mode
+bun test             # Run unit tests
+bun run test:watch   # Watch mode
+bun run test:coverage # Coverage report
+bun run test:e2e     # Run E2E tests
+bun run test:e2e:ui  # Playwright UI mode
 
 # API Client
-npm run generate:api # Generate TypeScript client from OpenAPI spec
+bun run generate:api # Generate TypeScript client from OpenAPI spec
 ```
 
 ## Project Structure
@@ -184,13 +184,13 @@ See [docs/I18N.md](./docs/I18N.md) for complete guide.
 
 ```bash
 # Run all tests
-npm test
+bun test
 
 # Watch mode
-npm run test:watch
+bun run test:watch
 
 # Coverage
-npm run test:coverage
+bun run test:coverage
 ```
 
 **Coverage**: 1,142+ tests covering components, hooks, utilities, and pages.
@@ -199,13 +199,13 @@ npm run test:coverage
 
 ```bash
 # Run E2E tests
-npm run test:e2e
+bun run test:e2e
 
 # UI mode (recommended for debugging)
-npm run test:e2e:ui
+bun run test:e2e:ui
 
 # Debug mode
-npm run test:e2e:debug
+bun run test:e2e:debug
 ```
 
 **Coverage**: 178+ tests covering authentication, navigation, admin panel, and user flows.
@@ -247,7 +247,7 @@ npm run test:e2e:debug
 
 1. Follow existing code patterns
 2. Write tests for new features
-3. Run `npm run validate` before committing
+3. Run `bun run validate` before committing
 4. Keep translations in sync (en.json & it.json)
 
 ## License

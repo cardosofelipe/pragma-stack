@@ -908,16 +908,16 @@ Before committing code, always run:
 
 ```bash
 # Type checking
-npm run type-check
+bun run type-check
 
 # Linting
-npm run lint
+bun run lint
 
 # Tests
-npm test
+bun test
 
 # Build check
-npm run build
+bun run build
 ```
 
 **In browser:**

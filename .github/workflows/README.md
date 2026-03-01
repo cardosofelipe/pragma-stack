@@ -41,7 +41,7 @@ To enable CI/CD workflows:
 - Runs on: Push to main/develop, PRs affecting frontend code
 - Tests: Frontend unit tests (Jest)
 - Coverage: Uploads to Codecov
-- Fast: Uses npm cache
+- Fast: Uses bun cache
 
 ### `e2e-tests.yml`
 - Runs on: All pushes and PRs

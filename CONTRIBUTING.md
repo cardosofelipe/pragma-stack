@@ -122,20 +122,20 @@ uvicorn app.main:app --reload
 cd frontend
 
 # Install dependencies
-npm install
+bun install
 
 # Setup environment
 cp .env.local.example .env.local
 
 # Generate API client
-npm run generate:api
+bun run generate:api
 
 # Run tests
-npm test
-npm run test:e2e:ui
+bun test
+bun run test:e2e:ui
 
 # Start dev server
-npm run dev
+bun run dev
 ```
 
 ---

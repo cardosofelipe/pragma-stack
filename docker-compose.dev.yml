@@ -62,7 +62,7 @@ services:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     depends_on:
       - backend
-    command: npm run dev
+    command: bun run dev
     networks:
       - app-network
 

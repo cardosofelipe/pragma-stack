@@ -166,7 +166,7 @@ Full OAuth 2.0 Authorization Server for Model Context Protocol (MCP) and third-p
 ```bash
 cd frontend
 echo "NEXT_PUBLIC_DEMO_MODE=true" > .env.local
-npm run dev
+bun run dev
 ```
 
 **Demo Credentials:**
@@ -298,17 +298,17 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 cd frontend
 
 # Install dependencies
-npm install
+bun install
 
 # Setup environment
 cp .env.local.example .env.local
 # Edit .env.local with your backend URL
 
 # Generate API client
-npm run generate:api
+bun run generate:api
 
 # Start development server
-npm run dev
+bun run dev
 ```
 
 Visit http://localhost:3000 to see your app!
@@ -390,13 +390,13 @@ open htmlcov/index.html
 cd frontend
 
 # Run unit tests
-npm test
+bun test
 
 # Run with coverage
-npm run test:coverage
+bun run test:coverage
 
 # Watch mode
-npm run test:watch
+bun run test:watch
 ```
 
 **Test types:**
@@ -414,10 +414,10 @@ npm run test:watch
 cd frontend
 
 # Run E2E tests
-npm run test:e2e
+bun run test:e2e
 
 # Run E2E tests in UI mode (recommended for development)
-npm run test:e2e:ui
+bun run test:e2e:ui
 
 # Run specific test file
 npx playwright test auth-login.spec.ts

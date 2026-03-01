@@ -13,10 +13,10 @@ uv run uvicorn app.main:app --reload  # Start dev server
 
 # Frontend (Node.js)
 cd frontend
-npm install                   # Install dependencies
-npm run dev                   # Start dev server
-npm run generate:api          # Generate API client from OpenAPI
-npm run test:e2e              # Run E2E tests
+bun install                   # Install dependencies
+bun run dev                   # Start dev server
+bun run generate:api          # Generate API client from OpenAPI
+bun run test:e2e              # Run E2E tests
 ```
 
 **Access points:**
@@ -121,7 +121,7 @@ OAUTH_ISSUER=https://api.yourdomain.com      # JWT issuer URL (must be HTTPS in 
 ### Frontend State Management
 - **Zustand stores**: Lightweight state management
 - **TanStack Query**: API data fetching/caching
-- **Auto-generated client**: From OpenAPI spec via `npm run generate:api`
+- **Auto-generated client**: From OpenAPI spec via `bun run generate:api`
 - **Dependency Injection**: ALWAYS use `useAuth()` from `AuthContext`, NEVER import `useAuthStore` directly
 
 ### Internationalization (i18n)
@@ -165,14 +165,14 @@ Permission dependencies in `api/dependencies/permissions.py`:
 **Frontend Unit Tests (Jest):**
 - 97% coverage
 - Component, hook, and utility testing
-- Run: `npm test`
-- Coverage: `npm run test:coverage`
+- Run: `bun test`
+- Coverage: `bun run test:coverage`
 
 **Frontend E2E Tests (Playwright):**
 - 56 passing, 1 skipped (zero flaky tests)
 - Complete user flows (auth, navigation, settings)
-- Run: `npm run test:e2e`
-- UI mode: `npm run test:e2e:ui`
+- Run: `bun run test:e2e`
+- UI mode: `bun run test:e2e:ui`
 
 ### Development Tooling
 
@@ -226,7 +226,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
 3. **Implement route** in `backend/app/api/routes/`
 4. **Register router** in `backend/app/api/main.py`
 5. **Write tests** in `backend/tests/api/`
-6. **Generate frontend client**: `npm run generate:api`
+6. **Generate frontend client**: `bun run generate:api`
 
 ### Database Migrations
 
@@ -243,7 +243,7 @@ python migrate.py auto "description"      # Generate + apply
 2. **Follow design system** (see `frontend/docs/design-system/`)
 3. **Use dependency injection** for auth (`useAuth()` not `useAuthStore`)
 4. **Write tests** in `frontend/tests/` or `__tests__/`
-5. **Run type check**: `npm run type-check`
+5. **Run type check**: `bun run type-check`
 
 ## Security Features
 

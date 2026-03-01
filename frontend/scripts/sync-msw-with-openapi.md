@@ -11,7 +11,7 @@ MSW handlers can drift out of sync with the backend API as it evolves.
 Install the package that auto-generates MSW handlers from OpenAPI:
 
 ```bash
-npm install --save-dev openapi-msw
+bun install --save-dev openapi-msw
 ```
 
 Then create a generation script:
@@ -39,9 +39,9 @@ generate();
 When you add/change backend endpoints:
 
 1. **Update Backend** → Make API changes
-2. **Generate Frontend Client** → `npm run generate:api`
+2. **Generate Frontend Client** → `bun run generate:api`
 3. **Update MSW Handlers** → Edit `src/mocks/handlers/*.ts`
-4. **Test Demo Mode** → `NEXT_PUBLIC_DEMO_MODE=true npm run dev`
+4. **Test Demo Mode** → `NEXT_PUBLIC_DEMO_MODE=true bun run dev`
 
 ### Option 3: Automated with Script Hook
 
@@ -50,7 +50,7 @@ Add to `package.json`:
 ```json
 {
   "scripts": {
-    "generate:api": "./scripts/generate-api-client.sh && npm run sync:msw",
+    "generate:api": "./scripts/generate-api-client.sh && bun run sync:msw",
     "sync:msw": "echo '⚠️  Don't forget to update MSW handlers in src/mocks/handlers/'"
   }
 }
@@ -100,7 +100,7 @@ Our MSW handlers currently cover:
 
 To check if MSW is missing handlers:
 
-1. Start demo mode: `NEXT_PUBLIC_DEMO_MODE=true npm run dev`
+1. Start demo mode: `NEXT_PUBLIC_DEMO_MODE=true bun run dev`
 2. Open browser console
 3. Look for `[MSW] Warning: intercepted a request without a matching request handler`
 4. Add missing handlers to appropriate file in `src/mocks/handlers/`

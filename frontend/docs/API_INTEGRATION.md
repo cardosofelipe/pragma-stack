@@ -35,7 +35,7 @@
 
 ```bash
 cd frontend
-npm run generate:api
+bun run generate:api
 ```
 
 This fetches the OpenAPI spec from the backend and generates TypeScript types and API client functions.
@@ -894,7 +894,7 @@ apiClient.interceptors.request.use((config) => {
 **Solution**: Regenerate API client to sync with backend
 
 ```bash
-npm run generate:api
+bun run generate:api
 ```
 
 ### 9.4 Stale Data
