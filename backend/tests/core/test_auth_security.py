@@ -9,8 +9,8 @@ Critical security tests covering:
 These tests cover critical security vulnerabilities that could be exploited.
 """
 
+import jwt
 import pytest
-from jose import jwt
 
 from app.core.auth import TokenInvalidError, create_access_token, decode_token
 from app.core.config import settings
@@ -38,8 +38,8 @@ class TestJWTAlgorithmSecurityAttacks:
         Attacker creates a token with "alg: none" to bypass signature verification.
 
         NOTE: Lines 209 and 212 in auth.py are DEFENSIVE CODE that's never reached
-        because python-jose library rejects "none" algorithm tokens BEFORE we get there.
-        This is good for security! The library throws JWTError which becomes TokenInvalidError.
+        because PyJWT rejects "none" algorithm tokens BEFORE we get there.
+        This is good for security! The library throws InvalidTokenError which becomes TokenInvalidError.
 
         This test verifies the overall protection works, even though our defensive
         checks at lines 209-212 don't execute because the library catches it first.
@@ -108,36 +108,33 @@ class TestJWTAlgorithmSecurityAttacks:
         Test that tokens with wrong algorithm are rejected.
 
         Attack Scenario:
-        Attacker changes algorithm from HS256 to RS256, attempting to use
-        the public key as the HMAC secret. This could allow token forgery.
+        Attacker changes the "alg" header to RS256 while keeping an HMAC
+        signature, attempting algorithm confusion to forge tokens.
 
         Reference: https://www.nccgroup.com/us/about-us/newsroom-and-events/blog/2019/january/jwt-algorithm-confusion/
-
-        NOTE: Like the "none" algorithm test, python-jose library catches this
-        before our defensive checks at line 212. This is good for security!
         """
+        import base64
+        import json
         import time
 
         now = int(time.time())
-
-        # Create a valid payload
         payload = {"sub": "user123", "exp": now + 3600, "iat": now, "type": "access"}
 
-        # Encode with wrong algorithm (RS256 instead of HS256)
-        # This simulates an attacker trying algorithm substitution
-        wrong_algorithm = "RS256" if settings.ALGORITHM == "HS256" else "HS256"
+        # Hand-craft a token claiming RS256 in the header — PyJWT cannot encode
+        # RS256 with an HMAC key, so we craft the header manually (same technique
+        # as the "alg: none" tests) to produce a token that actually reaches decode_token.
+        header = {"alg": "RS256", "typ": "JWT"}
+        header_encoded = (
+            base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
+        )
+        payload_encoded = (
+            base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
+        )
+        # Attach a fake signature to form a complete (but invalid) JWT
+        malicious_token = f"{header_encoded}.{payload_encoded}.fakesignature"
 
-        try:
-            malicious_token = jwt.encode(
-                payload, settings.SECRET_KEY, algorithm=wrong_algorithm
-            )
-
-            # Should reject the token (library catches mismatch)
-            with pytest.raises(TokenInvalidError):
-                decode_token(malicious_token)
-        except Exception:
-            # If encoding fails, that's also acceptable (library protection)
-            pass
+        with pytest.raises(TokenInvalidError):
+            decode_token(malicious_token)
 
     def test_reject_hs384_when_hs256_expected(self):
         """

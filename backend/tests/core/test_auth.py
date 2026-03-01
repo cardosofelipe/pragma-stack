@@ -2,8 +2,8 @@
 import uuid
 from datetime import UTC, datetime, timedelta
 
+import jwt
 import pytest
-from jose import jwt
 
 from app.core.auth import (
     TokenExpiredError,
@@ -215,6 +215,7 @@ class TestTokenDecoding:
         payload = {
             "sub": 123,  # sub should be a string, not an integer
             "exp": int((now + timedelta(minutes=30)).timestamp()),
+            "iat": int(now.timestamp()),
         }
 
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)

@@ -25,8 +25,8 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
-from jose import JWTError, jwt
-from jose.exceptions import ExpiredSignatureError
+import jwt
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
@@ -704,7 +704,7 @@ async def revoke_token(
                         "Revoked refresh token via access token JTI %s...", jti[:8]
                     )
                     return True
-        except JWTError:
+        except InvalidTokenError:
             pass
         except Exception:  # noqa: S110 - Intentional: invalid JWT not an error
             pass
@@ -827,7 +827,7 @@ async def introspect_token(
             }
         except ExpiredSignatureError:
             return {"active": False}
-        except JWTError:
+        except InvalidTokenError:
             pass
         except Exception:  # noqa: S110 - Intentional: invalid JWT falls through to refresh token check
             pass

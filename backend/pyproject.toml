@@ -43,9 +43,8 @@ dependencies = [
     "pytz>=2024.1",
     "pillow>=12.1.1",
     "apscheduler==3.11.0",
-    # Security and authentication (pinned for reproducibility)
-    "python-jose==3.4.0",
-    "passlib==1.7.4",
+    # Security and authentication
+    "PyJWT>=2.9.0",
     "bcrypt==4.2.1",
     "cryptography>=46.0.5",
     # OAuth authentication

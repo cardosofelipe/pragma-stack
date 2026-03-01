@@ -537,8 +537,9 @@ class OAuthService:
             AuthenticationError: If verification fails
         """
         import httpx
-        from jose import jwt as jose_jwt
-        from jose.exceptions import JWTError
+        import jwt as pyjwt
+        from jwt.algorithms import RSAAlgorithm
+        from jwt.exceptions import InvalidTokenError
 
         try:
             # Fetch Google's public keys (JWKS)
@@ -552,24 +553,27 @@ class OAuthService:
                 jwks = jwks_response.json()
 
             # Get the key ID from the token header
-            unverified_header = jose_jwt.get_unverified_header(id_token)
+            unverified_header = pyjwt.get_unverified_header(id_token)
             kid = unverified_header.get("kid")
             if not kid:
                 raise AuthenticationError("ID token missing key ID (kid)")
 
             # Find the matching public key
-            public_key = None
+            jwk_data = None
             for key in jwks.get("keys", []):
                 if key.get("kid") == kid:
-                    public_key = key
+                    jwk_data = key
                     break
 
-            if not public_key:
+            if not jwk_data:
                 raise AuthenticationError("ID token signed with unknown key")
 
+            # Convert JWK to a public key object for PyJWT
+            public_key = RSAAlgorithm.from_jwk(jwk_data)
+
             # Verify the token signature and decode claims
-            # jose library will verify signature against the JWK
-            payload = jose_jwt.decode(
+            # PyJWT will verify signature against the RSA public key
+            payload = pyjwt.decode(
                 id_token,
                 public_key,
                 algorithms=["RS256"],  # Google uses RS256
@@ -597,7 +601,7 @@ class OAuthService:
             logger.debug("Google ID token verified successfully")
             return payload
 
-        except JWTError as e:
+        except InvalidTokenError as e:
             logger.warning("Google ID token verification failed: %s", e)
             raise AuthenticationError("Invalid ID token signature")
         except httpx.HTTPError as e:

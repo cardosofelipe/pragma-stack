@@ -79,12 +79,13 @@ This FastAPI backend application follows a **clean layered architecture** patter
 
 ### Authentication & Security
 
-- **python-jose**: JWT token generation and validation
-  - Cryptographic signing
+- **PyJWT**: JWT token generation and validation
+  - Cryptographic signing (HS256, RS256)
   - Token expiration handling
   - Claims validation
+  - JWK support for Google ID token verification
 
-- **passlib + bcrypt**: Password hashing
+- **bcrypt**: Password hashing
   - Industry-standard bcrypt algorithm
   - Configurable cost factor
   - Salt generation

@@ -86,9 +86,7 @@ validate: lint format-check type-check
 
 dep-audit:
 	@echo "🔒 Scanning dependencies for known vulnerabilities..."
-	@# CVE-2024-23342: ecdsa timing attack via python-jose (transitive). No fix available.
-	@# We only use HS256 (not ECDSA signing), so this is not exploitable. Track python-jose replacement separately.
-	@uv run pip-audit --desc --skip-editable --ignore-vuln CVE-2024-23342
+	@uv run pip-audit --desc --skip-editable
 	@echo "✅ No known vulnerabilities found!"
 
 license-check:
