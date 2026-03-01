@@ -179,7 +179,11 @@ Permission dependencies in `api/dependencies/permissions.py`:
 **Backend:**
 - **uv**: Modern Python package manager (10-100x faster than pip)
 - **Ruff**: All-in-one linting/formatting (replaces Black, Flake8, isort)
-- **mypy**: Type checking with Pydantic plugin
+- **Pyright**: Static type checking (strict mode)
+- **pip-audit**: Dependency vulnerability scanning (OSV database)
+- **detect-secrets**: Hardcoded secrets detection
+- **pip-licenses**: License compliance checking
+- **pre-commit**: Git hook framework (Ruff, detect-secrets, standard checks)
 - **Makefile**: `make help` for all commands
 
 **Frontend:**
@@ -249,6 +253,10 @@ python migrate.py auto "description"      # Generate + apply
 - **CSRF protection**: Built into FastAPI
 - **Session revocation**: Database-backed session tracking
 - **Comprehensive security tests**: JWT algorithm attacks, session hijacking, privilege escalation
+- **Dependency vulnerability scanning**: `make dep-audit` (pip-audit against OSV database)
+- **License compliance**: `make license-check` (blocks GPL-3.0/AGPL)
+- **Secrets detection**: Pre-commit hook blocks hardcoded secrets
+- **Unified security pipeline**: `make audit` (all security checks), `make check` (quality + security + tests)
 
 ## Docker Deployment
 

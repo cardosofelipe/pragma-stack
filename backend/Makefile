@@ -1,4 +1,4 @@
-.PHONY: help lint lint-fix format format-check type-check test test-cov validate clean install-dev sync check-docker install-e2e test-e2e test-e2e-schema test-all
+.PHONY: help lint lint-fix format format-check type-check test test-cov validate clean install-dev sync check-docker install-e2e test-e2e test-e2e-schema test-all dep-audit license-check audit validate-all check
 
 # Prevent a stale VIRTUAL_ENV in the caller's shell from confusing uv
 unexport VIRTUAL_ENV
@@ -20,6 +20,13 @@ help:
 	@echo "  make type-check    - Run pyright type checking"
 	@echo "  make validate      - Run all checks (lint + format + types)"
 	@echo ""
+	@echo "Security & Audit:"
+	@echo "  make dep-audit     - Scan dependencies for known vulnerabilities"
+	@echo "  make license-check - Check dependency license compliance"
+	@echo "  make audit         - Run all security audits (deps + licenses)"
+	@echo "  make validate-all  - Run all quality + security checks"
+	@echo "  make check         - Full pipeline: quality + security + tests"
+	@echo ""
 	@echo "Testing:"
 	@echo "  make test          - Run pytest (unit/integration, SQLite)"
 	@echo "  make test-cov      - Run pytest with coverage report"
@@ -27,6 +34,7 @@ help:
 	@echo "  make test-e2e-schema - Run Schemathesis API schema tests"
 	@echo "  make test-all      - Run all tests (unit + E2E)"
 	@echo "  make check-docker  - Check if Docker is available"
+	@echo "  make check         - Full pipeline: quality + security + tests"
 	@echo ""
 	@echo "Cleanup:"
 	@echo "  make clean         - Remove cache and build artifacts"
@@ -71,6 +79,31 @@ type-check:
 
 validate: lint format-check type-check
 	@echo "✅ All quality checks passed!"
+
+# ============================================================================
+# Security & Audit
+# ============================================================================
+
+dep-audit:
+	@echo "🔒 Scanning dependencies for known vulnerabilities..."
+	@# CVE-2024-23342: ecdsa timing attack via python-jose (transitive). No fix available.
+	@# We only use HS256 (not ECDSA signing), so this is not exploitable. Track python-jose replacement separately.
+	@uv run pip-audit --desc --skip-editable --ignore-vuln CVE-2024-23342
+	@echo "✅ No known vulnerabilities found!"
+
+license-check:
+	@echo "📜 Checking dependency license compliance..."
+	@uv run pip-licenses --fail-on="GPL-3.0-or-later;AGPL-3.0-or-later" --format=plain
+	@echo "✅ All dependency licenses are compliant!"
+
+audit: dep-audit license-check
+	@echo "✅ All security audits passed!"
+
+validate-all: validate audit
+	@echo "✅ All quality + security checks passed!"
+
+check: validate-all test
+	@echo "✅ Full validation pipeline complete!"
 
 # ============================================================================
 # Testing

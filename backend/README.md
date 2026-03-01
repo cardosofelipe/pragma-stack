@@ -14,7 +14,9 @@ Features:
 - **Multi-tenancy**: Organization-based access control with roles (Owner/Admin/Member)
 - **Testing**: 97%+ coverage with security-focused test suite
 - **Performance**: Async throughout, connection pooling, optimized queries
-- **Modern Tooling**: uv for dependencies, Ruff for linting/formatting, mypy for type checking
+- **Modern Tooling**: uv for dependencies, Ruff for linting/formatting, Pyright for type checking
+- **Security Auditing**: Automated dependency vulnerability scanning, license compliance, secrets detection
+- **Pre-commit Hooks**: Ruff, detect-secrets, and standard checks on every commit
 
 ## Quick Start
 
@@ -149,7 +151,7 @@ uv pip list --outdated
 # Run any Python command via uv (no activation needed)
 uv run python script.py
 uv run pytest
-uv run mypy app/
+uv run pyright app/
 
 # Or activate the virtual environment
 source .venv/bin/activate
@@ -171,12 +173,22 @@ make lint          # Run Ruff linter (check only)
 make lint-fix      # Run Ruff with auto-fix
 make format        # Format code with Ruff
 make format-check  # Check if code is formatted
-make type-check    # Run mypy type checking
+make type-check    # Run Pyright type checking
 make validate      # Run all checks (lint + format + types)
+
+# Security & Audit
+make dep-audit     # Scan dependencies for known vulnerabilities (CVEs)
+make license-check # Check dependency license compliance
+make audit         # Run all security audits (deps + licenses)
+make validate-all  # Run all quality + security checks
+make check         # Full pipeline: quality + security + tests
 
 # Testing
 make test          # Run all tests
 make test-cov      # Run tests with coverage report
+make test-e2e      # Run E2E tests (PostgreSQL, requires Docker)
+make test-e2e-schema # Run Schemathesis API schema tests
+make test-all      # Run all tests (unit + E2E)
 
 # Utilities
 make clean         # Remove cache and build artifacts
@@ -352,18 +364,29 @@ open htmlcov/index.html
 # Using Makefile (recommended)
 make lint          # Ruff linting
 make format        # Ruff formatting
-make type-check    # mypy type checking
+make type-check    # Pyright type checking
 make validate      # All checks at once
+
+# Security audits
+make dep-audit     # Scan dependencies for CVEs
+make license-check # Check license compliance
+make audit         # All security audits
+make validate-all  # Quality + security checks
+make check         # Full pipeline: quality + security + tests
 
 # Using uv directly
 uv run ruff check app/ tests/
 uv run ruff format app/ tests/
-uv run mypy app/
+uv run pyright app/
 ```
 
 **Tools:**
 - **Ruff**: All-in-one linting, formatting, and import sorting (replaces Black, Flake8, isort)
-- **mypy**: Static type checking with Pydantic plugin
+- **Pyright**: Static type checking (strict mode)
+- **pip-audit**: Dependency vulnerability scanning against the OSV database
+- **pip-licenses**: Dependency license compliance checking
+- **detect-secrets**: Hardcoded secrets/credentials detection
+- **pre-commit**: Git hook framework for automated checks on every commit
 
 All configurations are in `pyproject.toml`.
 
@@ -589,13 +612,42 @@ Configured in `app/core/config.py`:
 - **Security Headers**: CSP, HSTS, X-Frame-Options, etc.
 - **Input Validation**: Pydantic schemas, SQL injection prevention (ORM)
 
+### Security Auditing
+
+Automated, deterministic security checks are built into the development workflow:
+
+```bash
+# Scan dependencies for known vulnerabilities (CVEs)
+make dep-audit
+
+# Check dependency license compliance (blocks GPL-3.0/AGPL)
+make license-check
+
+# Run all security audits
+make audit
+
+# Full pipeline: quality + security + tests
+make check
+```
+
+**Pre-commit hooks** automatically run on every commit:
+- **Ruff** lint + format checks
+- **detect-secrets** blocks commits containing hardcoded secrets
+- **Standard checks**: trailing whitespace, YAML/TOML validation, merge conflict detection, large file prevention
+
+Setup pre-commit hooks:
+```bash
+uv run pre-commit install
+```
+
 ### Security Best Practices
 
-1. **Never commit secrets**: Use `.env` files (git-ignored)
+1. **Never commit secrets**: Use `.env` files (git-ignored), enforced by detect-secrets pre-commit hook
 2. **Strong SECRET_KEY**: Min 32 chars, cryptographically random
 3. **HTTPS in production**: Required for token security
-4. **Regular updates**: Keep dependencies current (`uv sync --upgrade`)
+4. **Regular updates**: Keep dependencies current (`uv sync --upgrade`), run `make dep-audit` to check for CVEs
 5. **Audit logs**: Monitor authentication events
+6. **Run `make check` before pushing**: Validates quality, security, and tests in one command
 
 ---
 
@@ -645,7 +697,11 @@ logging.basicConfig(level=logging.INFO)
 **Built with modern Python tooling:**
 - 🚀 **uv** - 10-100x faster dependency management
 - ⚡ **Ruff** - 10-100x faster linting & formatting
-- 🔍 **mypy** - Static type checking
+- 🔍 **Pyright** - Static type checking (strict mode)
 - ✅ **pytest** - Comprehensive test suite
+- 🔒 **pip-audit** - Dependency vulnerability scanning
+- 🔑 **detect-secrets** - Hardcoded secrets detection
+- 📜 **pip-licenses** - License compliance checking
+- 🪝 **pre-commit** - Automated git hooks
 
 **All configured in a single `pyproject.toml` file!**

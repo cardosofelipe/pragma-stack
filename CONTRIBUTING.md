@@ -91,7 +91,10 @@ Ready to write some code? Awesome!
 cd backend
 
 # Install dependencies (uv manages virtual environment automatically)
-uv sync
+make install-dev
+
+# Setup pre-commit hooks
+uv run pre-commit install
 
 # Setup environment
 cp .env.example .env
@@ -100,8 +103,14 @@ cp .env.example .env
 # Run migrations
 python migrate.py apply
 
+# Run quality + security checks
+make validate-all
+
 # Run tests
-IS_TEST=True uv run pytest
+make test
+
+# Run full pipeline (quality + security + tests)
+make check
 
 # Start dev server
 uvicorn app.main:app --reload
@@ -316,7 +325,7 @@ Fixed stuff
 ### Before Submitting
 
 - [ ] Code follows project style guidelines
-- [ ] All tests pass locally
+- [ ] `make check` passes (quality + security + tests) in backend
 - [ ] New tests added for new features
 - [ ] Documentation updated if needed
 - [ ] No merge conflicts with `main`

@@ -1,7 +1,7 @@
 import logging
 import os
 from contextlib import asynccontextmanager
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -16,7 +16,7 @@ from slowapi.util import get_remote_address
 from app.api.main import api_router
 from app.api.routes.oauth_provider import wellknown_router as oauth_wellknown_router
 from app.core.config import settings
-from app.core.database import check_database_health
+from app.core.database import check_database_health, close_async_db
 from app.core.exceptions import (
     APIException,
     api_exception_handler,
@@ -72,6 +72,7 @@ async def lifespan(app: FastAPI):
     if os.getenv("IS_TEST", "False") != "True":
         scheduler.shutdown()
         logger.info("Scheduled jobs stopped")
+    await close_async_db()
 
 
 logger.info("Starting app!!!")
@@ -294,7 +295,7 @@ async def health_check() -> JSONResponse:
     """
     health_status: dict[str, Any] = {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "version": settings.VERSION,
         "environment": settings.ENVIRONMENT,
         "checks": {},

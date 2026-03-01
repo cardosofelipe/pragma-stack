@@ -181,12 +181,17 @@ backend/
 ├── docs/                           # Documentation
 │   ├── ARCHITECTURE.md             # This file
 │   ├── CODING_STANDARDS.md         # Coding standards
+│   ├── COMMON_PITFALLS.md          # Common mistakes to avoid
+│   ├── E2E_TESTING.md              # E2E testing guide
 │   └── FEATURE_EXAMPLE.md          # Feature implementation guide
 │
-├── requirements.txt                # Python dependencies
-├── pytest.ini                      # Pytest configuration
-├── .coveragerc                     # Coverage configuration
-└── alembic.ini                     # Alembic configuration
+├── pyproject.toml                  # Dependencies, tool configs (Ruff, pytest, coverage, Pyright)
+├── uv.lock                         # Locked dependency versions (commit to git)
+├── Makefile                        # Development commands (quality, security, testing)
+├── .pre-commit-config.yaml         # Pre-commit hook configuration
+├── .secrets.baseline               # detect-secrets baseline (known false positives)
+├── alembic.ini                     # Alembic configuration
+└── migrate.py                      # Migration helper script
 ```
 
 ## Layered Architecture
@@ -1015,23 +1020,27 @@ from app.services.session_cleanup import cleanup_expired_sessions
 
 scheduler = AsyncIOScheduler()
 
-@app.on_event("startup")
-async def startup_event():
-    """Start background jobs on application startup."""
-    if not settings.IS_TEST:  # Don't run in tests
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan context manager."""
+    # Startup
+    if os.getenv("IS_TEST", "False") != "True":
         scheduler.add_job(
             cleanup_expired_sessions,
             "cron",
             hour=2,  # Run at 2 AM daily
-            id="cleanup_expired_sessions"
+            id="cleanup_expired_sessions",
+            replace_existing=True,
         )
         scheduler.start()
         logger.info("Background jobs started")
 
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Stop background jobs on application shutdown."""
-    scheduler.shutdown()
+    yield
+
+    # Shutdown
+    if os.getenv("IS_TEST", "False") != "True":
+        scheduler.shutdown()
+    await close_async_db()  # Dispose database engine connections
 ```
 
 ### Job Implementation

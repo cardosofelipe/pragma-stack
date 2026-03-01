@@ -55,6 +55,12 @@ EOF
 - Frontend E2E: `npm run test:e2e`
 - Use `make test` or `make test-cov` in backend for convenience
 
+**Security & Quality Commands (Backend):**
+- `make validate` — lint + format + type checks
+- `make audit` — dependency vulnerabilities + license compliance
+- `make validate-all` — quality + security checks
+- `make check` — **full pipeline**: quality + security + tests
+
 **Backend E2E Testing (requires Docker):**
 - Install deps: `make install-e2e`
 - Run all E2E tests: `make test-e2e`
@@ -157,6 +163,10 @@ with patch.object(session, 'commit', side_effect=mock_commit):
 - Never skip security headers in production
 - Rate limiting is configured in route decorators: `@limiter.limit("10/minute")`
 - Session revocation is database-backed, not just JWT expiry
+- Run `make audit` to check for dependency vulnerabilities and license compliance
+- Run `make check` for the full pipeline: quality + security + tests
+- Pre-commit hooks enforce Ruff lint/format and detect-secrets on every commit
+- Setup hooks: `cd backend && uv run pre-commit install`
 
 ### Common Workflows Guidance
 
