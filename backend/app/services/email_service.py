@@ -58,8 +58,8 @@ class ConsoleEmailBackend(EmailBackend):
         logger.info("=" * 80)
         logger.info("EMAIL SENT (Console Backend)")
         logger.info("=" * 80)
-        logger.info(f"To: {', '.join(to)}")
-        logger.info(f"Subject: {subject}")
+        logger.info("To: %s", ", ".join(to))
+        logger.info("Subject: %s", subject)
         logger.info("-" * 80)
         if text_content:
             logger.info("Plain Text Content:")
@@ -199,7 +199,7 @@ The {settings.PROJECT_NAME} Team
                 text_content=text_content,
             )
         except Exception as e:
-            logger.error(f"Failed to send password reset email to {to_email}: {e!s}")
+            logger.error("Failed to send password reset email to %s: %s", to_email, e)
             return False
 
     async def send_email_verification(
@@ -287,7 +287,7 @@ The {settings.PROJECT_NAME} Team
                 text_content=text_content,
             )
         except Exception as e:
-            logger.error(f"Failed to send verification email to {to_email}: {e!s}")
+            logger.error("Failed to send verification email to %s: %s", to_email, e)
             return False
 
 

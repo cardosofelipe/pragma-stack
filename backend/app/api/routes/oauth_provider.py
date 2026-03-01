@@ -452,7 +452,7 @@ async def token(
             except Exception as e:
                 # Log malformed Basic auth for security monitoring
                 logger.warning(
-                    f"Malformed Basic auth header in token request: {type(e).__name__}"
+                    "Malformed Basic auth header in token request: %s", type(e).__name__
                 )
                 # Fall back to form body
 
@@ -563,7 +563,8 @@ async def revoke(
             except Exception as e:
                 # Log malformed Basic auth for security monitoring
                 logger.warning(
-                    f"Malformed Basic auth header in revoke request: {type(e).__name__}"
+                    "Malformed Basic auth header in revoke request: %s",
+                    type(e).__name__,
                 )
                 # Fall back to form body
 
@@ -585,7 +586,7 @@ async def revoke(
         )
     except Exception as e:
         # Log but don't expose errors per RFC 7009
-        logger.warning(f"Token revocation error: {e}")
+        logger.warning("Token revocation error: %s", e)
 
     # Always return 200 OK per RFC 7009
     return {"status": "ok"}
@@ -634,7 +635,8 @@ async def introspect(
             except Exception as e:
                 # Log malformed Basic auth for security monitoring
                 logger.warning(
-                    f"Malformed Basic auth header in introspect request: {type(e).__name__}"
+                    "Malformed Basic auth header in introspect request: %s",
+                    type(e).__name__,
                 )
                 # Fall back to form body
 
@@ -654,7 +656,7 @@ async def introspect(
             headers={"WWW-Authenticate": "Basic"},
         )
     except Exception as e:
-        logger.warning(f"Token introspection error: {e}")
+        logger.warning("Token introspection error: %s", e)
         return OAuthTokenIntrospectionResponse(active=False)  # pyright: ignore[reportCallIssue]
 
 

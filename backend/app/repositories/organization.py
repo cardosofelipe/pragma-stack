@@ -35,7 +35,7 @@ class OrganizationRepository(
             )
             return result.scalar_one_or_none()
         except Exception as e:
-            logger.error(f"Error getting organization by slug {slug}: {e!s}")
+            logger.error("Error getting organization by slug %s: %s", slug, e)
             raise
 
     async def create(
@@ -62,17 +62,15 @@ class OrganizationRepository(
                 or "unique" in error_msg.lower()
                 or "duplicate" in error_msg.lower()
             ):
-                logger.warning(f"Duplicate slug attempted: {obj_in.slug}")
+                logger.warning("Duplicate slug attempted: %s", obj_in.slug)
                 raise DuplicateEntryError(
                     f"Organization with slug '{obj_in.slug}' already exists"
                 )
-            logger.error(f"Integrity error creating organization: {error_msg}")
+            logger.error("Integrity error creating organization: %s", error_msg)
             raise IntegrityConstraintError(f"Database integrity error: {error_msg}")
         except Exception as e:
             await db.rollback()
-            logger.error(
-                f"Unexpected error creating organization: {e!s}", exc_info=True
-            )
+            logger.exception("Unexpected error creating organization: %s", e)
             raise
 
     async def get_multi_with_filters(
@@ -117,7 +115,7 @@ class OrganizationRepository(
 
             return organizations, total
         except Exception as e:
-            logger.error(f"Error getting organizations with filters: {e!s}")
+            logger.error("Error getting organizations with filters: %s", e)
             raise
 
     async def get_member_count(self, db: AsyncSession, *, organization_id: UUID) -> int:
@@ -134,7 +132,7 @@ class OrganizationRepository(
             return result.scalar_one() or 0
         except Exception as e:
             logger.error(
-                f"Error getting member count for organization {organization_id}: {e!s}"
+                "Error getting member count for organization %s: %s", organization_id, e
             )
             raise
 
@@ -207,9 +205,7 @@ class OrganizationRepository(
             return orgs_with_counts, total
 
         except Exception as e:
-            logger.error(
-                f"Error getting organizations with member counts: {e!s}", exc_info=True
-            )
+            logger.exception("Error getting organizations with member counts: %s", e)
             raise
 
     async def add_user(
@@ -259,11 +255,11 @@ class OrganizationRepository(
             return user_org
         except IntegrityError as e:
             await db.rollback()
-            logger.error(f"Integrity error adding user to organization: {e!s}")
+            logger.error("Integrity error adding user to organization: %s", e)
             raise IntegrityConstraintError("Failed to add user to organization")
         except Exception as e:
             await db.rollback()
-            logger.error(f"Error adding user to organization: {e!s}", exc_info=True)
+            logger.exception("Error adding user to organization: %s", e)
             raise
 
     async def remove_user(
@@ -289,7 +285,7 @@ class OrganizationRepository(
             return True
         except Exception as e:
             await db.rollback()
-            logger.error(f"Error removing user from organization: {e!s}", exc_info=True)
+            logger.exception("Error removing user from organization: %s", e)
             raise
 
     async def update_user_role(
@@ -324,7 +320,7 @@ class OrganizationRepository(
             return user_org
         except Exception as e:
             await db.rollback()
-            logger.error(f"Error updating user role: {e!s}", exc_info=True)
+            logger.exception("Error updating user role: %s", e)
             raise
 
     async def get_organization_members(
@@ -384,7 +380,7 @@ class OrganizationRepository(
 
             return members, total
         except Exception as e:
-            logger.error(f"Error getting organization members: {e!s}")
+            logger.error("Error getting organization members: %s", e)
             raise
 
     async def get_user_organizations(
@@ -407,7 +403,7 @@ class OrganizationRepository(
             result = await db.execute(query)
             return list(result.scalars().all())
         except Exception as e:
-            logger.error(f"Error getting user organizations: {e!s}")
+            logger.error("Error getting user organizations: %s", e)
             raise
 
     async def get_user_organizations_with_details(
@@ -456,9 +452,7 @@ class OrganizationRepository(
             ]
 
         except Exception as e:
-            logger.error(
-                f"Error getting user organizations with details: {e!s}", exc_info=True
-            )
+            logger.exception("Error getting user organizations with details: %s", e)
             raise
 
     async def get_user_role_in_org(
@@ -479,7 +473,7 @@ class OrganizationRepository(
 
             return user_org.role if user_org else None  # pyright: ignore[reportReturnType]
         except Exception as e:
-            logger.error(f"Error getting user role in org: {e!s}")
+            logger.error("Error getting user role in org: %s", e)
             raise
 
     async def is_user_org_owner(

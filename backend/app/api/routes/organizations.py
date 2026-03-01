@@ -77,7 +77,7 @@ async def get_my_organizations(
         return orgs_with_data
 
     except Exception as e:
-        logger.error(f"Error getting user organizations: {e!s}", exc_info=True)
+        logger.exception("Error getting user organizations: %s", e)
         raise
 
 
@@ -116,7 +116,7 @@ async def get_organization(
         return OrganizationResponse(**org_dict)
 
     except Exception as e:
-        logger.error(f"Error getting organization: {e!s}", exc_info=True)
+        logger.exception("Error getting organization: %s", e)
         raise
 
 
@@ -160,7 +160,7 @@ async def get_organization_members(
         return PaginatedResponse(data=member_responses, pagination=pagination_meta)
 
     except Exception as e:
-        logger.error(f"Error getting organization members: {e!s}", exc_info=True)
+        logger.exception("Error getting organization members: %s", e)
         raise
 
 
@@ -188,7 +188,7 @@ async def update_organization(
             db, org=org, obj_in=org_in
         )
         logger.info(
-            f"User {current_user.email} updated organization {updated_org.name}"
+            "User %s updated organization %s", current_user.email, updated_org.name
         )
 
         org_dict = {
@@ -207,5 +207,5 @@ async def update_organization(
         return OrganizationResponse(**org_dict)
 
     except Exception as e:
-        logger.error(f"Error updating organization: {e!s}", exc_info=True)
+        logger.exception("Error updating organization: %s", e)
         raise

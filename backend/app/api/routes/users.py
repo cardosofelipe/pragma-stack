@@ -90,7 +90,7 @@ async def list_users(
 
         return PaginatedResponse(data=users, pagination=pagination_meta)
     except Exception as e:
-        logger.error(f"Error listing users: {e!s}", exc_info=True)
+        logger.exception("Error listing users: %s", e)
         raise
 
 
@@ -143,15 +143,13 @@ async def update_current_user(
         updated_user = await user_service.update_user(
             db, user=current_user, obj_in=user_update
         )
-        logger.info(f"User {current_user.id} updated their profile")
+        logger.info("User %s updated their profile", current_user.id)
         return updated_user
     except ValueError as e:
-        logger.error(f"Error updating user {current_user.id}: {e!s}")
+        logger.error("Error updating user %s: %s", current_user.id, e)
         raise
     except Exception as e:
-        logger.error(
-            f"Unexpected error updating user {current_user.id}: {e!s}", exc_info=True
-        )
+        logger.exception("Unexpected error updating user %s: %s", current_user.id, e)
         raise
 
 
@@ -184,7 +182,9 @@ async def get_user_by_id(
     # Check permissions
     if str(user_id) != str(current_user.id) and not current_user.is_superuser:
         logger.warning(
-            f"User {current_user.id} attempted to access user {user_id} without permission"
+            "User %s attempted to access user %s without permission",
+            current_user.id,
+            user_id,
         )
         raise AuthorizationError(
             message="Not enough permissions to view this user",
@@ -229,7 +229,9 @@ async def update_user(
 
     if not is_own_profile and not current_user.is_superuser:
         logger.warning(
-            f"User {current_user.id} attempted to update user {user_id} without permission"
+            "User %s attempted to update user %s without permission",
+            current_user.id,
+            user_id,
         )
         raise AuthorizationError(
             message="Not enough permissions to update this user",
@@ -241,13 +243,13 @@ async def update_user(
 
     try:
         updated_user = await user_service.update_user(db, user=user, obj_in=user_update)
-        logger.info(f"User {user_id} updated by {current_user.id}")
+        logger.info("User %s updated by %s", user_id, current_user.id)
         return updated_user
     except ValueError as e:
-        logger.error(f"Error updating user {user_id}: {e!s}")
+        logger.error("Error updating user %s: %s", user_id, e)
         raise
     except Exception as e:
-        logger.error(f"Unexpected error updating user {user_id}: {e!s}", exc_info=True)
+        logger.exception("Unexpected error updating user %s: %s", user_id, e)
         raise
 
 
@@ -287,19 +289,19 @@ async def change_current_user_password(
         )
 
         if success:
-            logger.info(f"User {current_user.id} changed their password")
+            logger.info("User %s changed their password", current_user.id)
             return MessageResponse(
                 success=True, message="Password changed successfully"
             )
     except AuthenticationError as e:
         logger.warning(
-            f"Failed password change attempt for user {current_user.id}: {e!s}"
+            "Failed password change attempt for user %s: %s", current_user.id, e
         )
         raise AuthorizationError(
             message=str(e), error_code=ErrorCode.INVALID_CREDENTIALS
         )
     except Exception as e:
-        logger.error(f"Error changing password for user {current_user.id}: {e!s}")
+        logger.error("Error changing password for user %s: %s", current_user.id, e)
         raise
 
 
@@ -343,13 +345,13 @@ async def delete_user(
     try:
         # Use soft delete instead of hard delete
         await user_service.soft_delete_user(db, str(user_id))
-        logger.info(f"User {user_id} soft-deleted by {current_user.id}")
+        logger.info("User %s soft-deleted by %s", user_id, current_user.id)
         return MessageResponse(
             success=True, message=f"User {user_id} deleted successfully"
         )
     except ValueError as e:
-        logger.error(f"Error deleting user {user_id}: {e!s}")
+        logger.error("Error deleting user %s: %s", user_id, e)
         raise
     except Exception as e:
-        logger.error(f"Unexpected error deleting user {user_id}: {e!s}", exc_info=True)
+        logger.exception("Unexpected error deleting user %s: %s", user_id, e)
         raise

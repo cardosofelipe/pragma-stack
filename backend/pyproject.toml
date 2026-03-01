@@ -148,8 +148,6 @@ ignore = [
     "S607",   # Starting a process with a partial path (safe usage)
     "B008",   # FastAPI Depends() in function defaults (required by framework)
     "B904",   # Exception chaining (overly strict for FastAPI error handlers)
-    "G004",   # f-string logging (TODO: migrate existing 300+ occurrences to lazy %)
-    "G201",   # .exception() vs .error(exc_info=True) (TODO: migrate existing 64 occurrences)
 ]
 
 # Allow autofix for all enabled rules

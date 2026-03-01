@@ -28,7 +28,7 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
             result = await db.execute(select(User).where(User.email == email))
             return result.scalar_one_or_none()
         except Exception as e:
-            logger.error(f"Error getting user by email {email}: {e!s}")
+            logger.error("Error getting user by email %s: %s", email, e)
             raise
 
     async def create(self, db: AsyncSession, *, obj_in: UserCreate) -> User:
@@ -57,15 +57,15 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
             await db.rollback()
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
             if "email" in error_msg.lower():
-                logger.warning(f"Duplicate email attempted: {obj_in.email}")
+                logger.warning("Duplicate email attempted: %s", obj_in.email)
                 raise DuplicateEntryError(
                     f"User with email {obj_in.email} already exists"
                 )
-            logger.error(f"Integrity error creating user: {error_msg}")
+            logger.error("Integrity error creating user: %s", error_msg)
             raise DuplicateEntryError(f"Database integrity error: {error_msg}")
         except Exception as e:
             await db.rollback()
-            logger.error(f"Unexpected error creating user: {e!s}", exc_info=True)
+            logger.exception("Unexpected error creating user: %s", e)
             raise
 
     async def create_oauth_user(
@@ -93,13 +93,13 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
             await db.rollback()
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
             if "email" in error_msg.lower():
-                logger.warning(f"Duplicate email attempted: {email}")
+                logger.warning("Duplicate email attempted: %s", email)
                 raise DuplicateEntryError(f"User with email {email} already exists")
-            logger.error(f"Integrity error creating OAuth user: {error_msg}")
+            logger.error("Integrity error creating OAuth user: %s", error_msg)
             raise DuplicateEntryError(f"Database integrity error: {error_msg}")
         except Exception as e:
             await db.rollback()
-            logger.error(f"Unexpected error creating OAuth user: {e!s}", exc_info=True)
+            logger.exception("Unexpected error creating OAuth user: %s", e)
             raise
 
     async def update(
@@ -184,7 +184,7 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
             return users, total
 
         except Exception as e:
-            logger.error(f"Error retrieving paginated users: {e!s}")
+            logger.error("Error retrieving paginated users: %s", e)
             raise
 
     async def bulk_update_status(
@@ -206,12 +206,14 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
             await db.commit()
 
             updated_count = result.rowcount
-            logger.info(f"Bulk updated {updated_count} users to is_active={is_active}")
+            logger.info(
+                "Bulk updated %s users to is_active=%s", updated_count, is_active
+            )
             return updated_count
 
         except Exception as e:
             await db.rollback()
-            logger.error(f"Error bulk updating user status: {e!s}", exc_info=True)
+            logger.exception("Error bulk updating user status: %s", e)
             raise
 
     async def bulk_soft_delete(
@@ -246,12 +248,12 @@ class UserRepository(BaseRepository[User, UserCreate, UserUpdate]):
             await db.commit()
 
             deleted_count = result.rowcount
-            logger.info(f"Bulk soft deleted {deleted_count} users")
+            logger.info("Bulk soft deleted %s users", deleted_count)
             return deleted_count
 
         except Exception as e:
             await db.rollback()
-            logger.error(f"Error bulk deleting users: {e!s}", exc_info=True)
+            logger.exception("Error bulk deleting users: %s", e)
             raise
 
     def is_active(self, user: User) -> bool:

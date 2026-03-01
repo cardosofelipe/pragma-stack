@@ -50,7 +50,10 @@ class OAuthAccountRepository(
             return result.scalar_one_or_none()
         except Exception as e:  # pragma: no cover
             logger.error(
-                f"Error getting OAuth account for {provider}:{provider_user_id}: {e!s}"
+                "Error getting OAuth account for %s:%s: %s",
+                provider,
+                provider_user_id,
+                e,
             )
             raise
 
@@ -76,7 +79,7 @@ class OAuthAccountRepository(
             return result.scalar_one_or_none()
         except Exception as e:  # pragma: no cover
             logger.error(
-                f"Error getting OAuth account for {provider} email {email}: {e!s}"
+                "Error getting OAuth account for %s email %s: %s", provider, email, e
             )
             raise
 
@@ -97,7 +100,7 @@ class OAuthAccountRepository(
             )
             return list(result.scalars().all())
         except Exception as e:  # pragma: no cover
-            logger.error(f"Error getting OAuth accounts for user {user_id}: {e!s}")
+            logger.error("Error getting OAuth accounts for user %s: %s", user_id, e)
             raise
 
     async def get_user_account_by_provider(
@@ -122,7 +125,10 @@ class OAuthAccountRepository(
             return result.scalar_one_or_none()
         except Exception as e:  # pragma: no cover
             logger.error(
-                f"Error getting OAuth account for user {user_id}, provider {provider}: {e!s}"
+                "Error getting OAuth account for user %s, provider %s: %s",
+                user_id,
+                provider,
+                e,
             )
             raise
 
@@ -145,7 +151,9 @@ class OAuthAccountRepository(
             await db.refresh(db_obj)
 
             logger.info(
-                f"OAuth account created: {obj_in.provider} linked to user {obj_in.user_id}"
+                "OAuth account created: %s linked to user %s",
+                obj_in.provider,
+                obj_in.user_id,
             )
             return db_obj
         except IntegrityError as e:  # pragma: no cover
@@ -153,16 +161,18 @@ class OAuthAccountRepository(
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
             if "uq_oauth_provider_user" in error_msg.lower():
                 logger.warning(
-                    f"OAuth account already exists: {obj_in.provider}:{obj_in.provider_user_id}"
+                    "OAuth account already exists: %s:%s",
+                    obj_in.provider,
+                    obj_in.provider_user_id,
                 )
                 raise DuplicateEntryError(
                     f"This {obj_in.provider} account is already linked to another user"
                 )
-            logger.error(f"Integrity error creating OAuth account: {error_msg}")
+            logger.error("Integrity error creating OAuth account: %s", error_msg)
             raise DuplicateEntryError(f"Failed to create OAuth account: {error_msg}")
         except Exception as e:  # pragma: no cover
             await db.rollback()
-            logger.error(f"Error creating OAuth account: {e!s}", exc_info=True)
+            logger.exception("Error creating OAuth account: %s", e)
             raise
 
     async def delete_account(
@@ -189,18 +199,20 @@ class OAuthAccountRepository(
             deleted = result.rowcount > 0
             if deleted:
                 logger.info(
-                    f"OAuth account deleted: {provider} unlinked from user {user_id}"
+                    "OAuth account deleted: %s unlinked from user %s", provider, user_id
                 )
             else:
                 logger.warning(
-                    f"OAuth account not found for deletion: {provider} for user {user_id}"
+                    "OAuth account not found for deletion: %s for user %s",
+                    provider,
+                    user_id,
                 )
 
             return deleted
         except Exception as e:  # pragma: no cover
             await db.rollback()
             logger.error(
-                f"Error deleting OAuth account {provider} for user {user_id}: {e!s}"
+                "Error deleting OAuth account %s for user %s: %s", provider, user_id, e
             )
             raise
 
@@ -229,7 +241,7 @@ class OAuthAccountRepository(
             return account
         except Exception as e:  # pragma: no cover
             await db.rollback()
-            logger.error(f"Error updating OAuth tokens: {e!s}")
+            logger.error("Error updating OAuth tokens: %s", e)
             raise
 
 

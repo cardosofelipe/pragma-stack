@@ -68,7 +68,7 @@ class BaseRepository[
             else:
                 uuid_obj = uuid.UUID(str(id))
         except (ValueError, AttributeError, TypeError) as e:
-            logger.warning(f"Invalid UUID format: {id} - {e!s}")
+            logger.warning("Invalid UUID format: %s - %s", id, e)
             return None
 
         try:
@@ -81,7 +81,9 @@ class BaseRepository[
             result = await db.execute(query)
             return result.scalar_one_or_none()
         except Exception as e:
-            logger.error(f"Error retrieving {self.model.__name__} with id {id}: {e!s}")
+            logger.error(
+                "Error retrieving %s with id %s: %s", self.model.__name__, id, e
+            )
             raise
 
     async def get_multi(
@@ -113,7 +115,7 @@ class BaseRepository[
             return list(result.scalars().all())
         except Exception as e:
             logger.error(
-                f"Error retrieving multiple {self.model.__name__} records: {e!s}"
+                "Error retrieving multiple %s records: %s", self.model.__name__, e
             )
             raise
 
@@ -138,22 +140,24 @@ class BaseRepository[
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
             if "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
                 logger.warning(
-                    f"Duplicate entry attempted for {self.model.__name__}: {error_msg}"
+                    "Duplicate entry attempted for %s: %s",
+                    self.model.__name__,
+                    error_msg,
                 )
                 raise DuplicateEntryError(
                     f"A {self.model.__name__} with this data already exists"
                 )
-            logger.error(f"Integrity error creating {self.model.__name__}: {error_msg}")
+            logger.error(
+                "Integrity error creating %s: %s", self.model.__name__, error_msg
+            )
             raise IntegrityConstraintError(f"Database integrity error: {error_msg}")
         except (OperationalError, DataError) as e:  # pragma: no cover
             await db.rollback()
-            logger.error(f"Database error creating {self.model.__name__}: {e!s}")
+            logger.error("Database error creating %s: %s", self.model.__name__, e)
             raise IntegrityConstraintError(f"Database operation failed: {e!s}")
         except Exception as e:  # pragma: no cover
             await db.rollback()
-            logger.error(
-                f"Unexpected error creating {self.model.__name__}: {e!s}", exc_info=True
-            )
+            logger.exception("Unexpected error creating %s: %s", self.model.__name__, e)
             raise
 
     async def update(
@@ -184,22 +188,24 @@ class BaseRepository[
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
             if "unique" in error_msg.lower() or "duplicate" in error_msg.lower():
                 logger.warning(
-                    f"Duplicate entry attempted for {self.model.__name__}: {error_msg}"
+                    "Duplicate entry attempted for %s: %s",
+                    self.model.__name__,
+                    error_msg,
                 )
                 raise DuplicateEntryError(
                     f"A {self.model.__name__} with this data already exists"
                 )
-            logger.error(f"Integrity error updating {self.model.__name__}: {error_msg}")
+            logger.error(
+                "Integrity error updating %s: %s", self.model.__name__, error_msg
+            )
             raise IntegrityConstraintError(f"Database integrity error: {error_msg}")
         except (OperationalError, DataError) as e:
             await db.rollback()
-            logger.error(f"Database error updating {self.model.__name__}: {e!s}")
+            logger.error("Database error updating %s: %s", self.model.__name__, e)
             raise IntegrityConstraintError(f"Database operation failed: {e!s}")
         except Exception as e:
             await db.rollback()
-            logger.error(
-                f"Unexpected error updating {self.model.__name__}: {e!s}", exc_info=True
-            )
+            logger.exception("Unexpected error updating %s: %s", self.model.__name__, e)
             raise
 
     async def remove(self, db: AsyncSession, *, id: str) -> ModelType | None:
@@ -210,7 +216,7 @@ class BaseRepository[
             else:
                 uuid_obj = uuid.UUID(str(id))
         except (ValueError, AttributeError, TypeError) as e:
-            logger.warning(f"Invalid UUID format for deletion: {id} - {e!s}")
+            logger.warning("Invalid UUID format for deletion: %s - %s", id, e)
             return None
 
         try:
@@ -221,7 +227,7 @@ class BaseRepository[
 
             if obj is None:
                 logger.warning(
-                    f"{self.model.__name__} with id {id} not found for deletion"
+                    "%s with id %s not found for deletion", self.model.__name__, id
                 )
                 return None
 
@@ -231,15 +237,16 @@ class BaseRepository[
         except IntegrityError as e:
             await db.rollback()
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
-            logger.error(f"Integrity error deleting {self.model.__name__}: {error_msg}")
+            logger.error(
+                "Integrity error deleting %s: %s", self.model.__name__, error_msg
+            )
             raise IntegrityConstraintError(
                 f"Cannot delete {self.model.__name__}: referenced by other records"
             )
         except Exception as e:
             await db.rollback()
-            logger.error(
-                f"Error deleting {self.model.__name__} with id {id}: {e!s}",
-                exc_info=True,
+            logger.exception(
+                "Error deleting %s with id %s: %s", self.model.__name__, id, e
             )
             raise
 
@@ -298,7 +305,7 @@ class BaseRepository[
             return items, total
         except Exception as e:  # pragma: no cover
             logger.error(
-                f"Error retrieving paginated {self.model.__name__} records: {e!s}"
+                "Error retrieving paginated %s records: %s", self.model.__name__, e
             )
             raise
 
@@ -308,7 +315,7 @@ class BaseRepository[
             result = await db.execute(select(func.count(self.model.id)))
             return result.scalar_one()
         except Exception as e:
-            logger.error(f"Error counting {self.model.__name__} records: {e!s}")
+            logger.error("Error counting %s records: %s", self.model.__name__, e)
             raise
 
     async def exists(self, db: AsyncSession, id: str) -> bool:
@@ -330,7 +337,7 @@ class BaseRepository[
             else:
                 uuid_obj = uuid.UUID(str(id))
         except (ValueError, AttributeError, TypeError) as e:
-            logger.warning(f"Invalid UUID format for soft deletion: {id} - {e!s}")
+            logger.warning("Invalid UUID format for soft deletion: %s - %s", id, e)
             return None
 
         try:
@@ -341,12 +348,12 @@ class BaseRepository[
 
             if obj is None:
                 logger.warning(
-                    f"{self.model.__name__} with id {id} not found for soft deletion"
+                    "%s with id %s not found for soft deletion", self.model.__name__, id
                 )
                 return None
 
             if not hasattr(self.model, "deleted_at"):
-                logger.error(f"{self.model.__name__} does not support soft deletes")
+                logger.error("%s does not support soft deletes", self.model.__name__)
                 raise InvalidInputError(
                     f"{self.model.__name__} does not have a deleted_at column"
                 )
@@ -358,9 +365,8 @@ class BaseRepository[
             return obj
         except Exception as e:
             await db.rollback()
-            logger.error(
-                f"Error soft deleting {self.model.__name__} with id {id}: {e!s}",
-                exc_info=True,
+            logger.exception(
+                "Error soft deleting %s with id %s: %s", self.model.__name__, id, e
             )
             raise
 
@@ -376,7 +382,7 @@ class BaseRepository[
             else:
                 uuid_obj = uuid.UUID(str(id))
         except (ValueError, AttributeError, TypeError) as e:
-            logger.warning(f"Invalid UUID format for restoration: {id} - {e!s}")
+            logger.warning("Invalid UUID format for restoration: %s - %s", id, e)
             return None
 
         try:
@@ -388,14 +394,16 @@ class BaseRepository[
                 )
                 obj = result.scalar_one_or_none()
             else:
-                logger.error(f"{self.model.__name__} does not support soft deletes")
+                logger.error("%s does not support soft deletes", self.model.__name__)
                 raise InvalidInputError(
                     f"{self.model.__name__} does not have a deleted_at column"
                 )
 
             if obj is None:
                 logger.warning(
-                    f"Soft-deleted {self.model.__name__} with id {id} not found for restoration"
+                    "Soft-deleted %s with id %s not found for restoration",
+                    self.model.__name__,
+                    id,
                 )
                 return None
 
@@ -406,8 +414,7 @@ class BaseRepository[
             return obj
         except Exception as e:
             await db.rollback()
-            logger.error(
-                f"Error restoring {self.model.__name__} with id {id}: {e!s}",
-                exc_info=True,
+            logger.exception(
+                "Error restoring %s with id %s: %s", self.model.__name__, id, e
             )
             raise

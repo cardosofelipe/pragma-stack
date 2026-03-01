@@ -243,7 +243,7 @@ async def admin_get_stats(
 
     # 4. User Status - Active vs Inactive
     logger.info(
-        f"User status counts - Active: {active_count}, Inactive: {inactive_count}"
+        "User status counts - Active: %s, Inactive: %s", active_count, inactive_count
     )
 
     user_status = [
@@ -312,7 +312,7 @@ async def admin_list_users(
         return PaginatedResponse(data=users, pagination=pagination_meta)
 
     except Exception as e:
-        logger.error(f"Error listing users (admin): {e!s}", exc_info=True)
+        logger.exception("Error listing users (admin): %s", e)
         raise
 
 
@@ -336,13 +336,13 @@ async def admin_create_user(
     """
     try:
         user = await user_service.create_user(db, user_in)
-        logger.info(f"Admin {admin.email} created user {user.email}")
+        logger.info("Admin %s created user %s", admin.email, user.email)
         return user
     except DuplicateEntryError as e:
-        logger.warning(f"Failed to create user: {e!s}")
+        logger.warning("Failed to create user: %s", e)
         raise DuplicateError(message=str(e), error_code=ErrorCode.USER_ALREADY_EXISTS)
     except Exception as e:
-        logger.error(f"Error creating user (admin): {e!s}", exc_info=True)
+        logger.exception("Error creating user (admin): %s", e)
         raise
 
 
@@ -380,11 +380,11 @@ async def admin_update_user(
     try:
         user = await user_service.get_user(db, str(user_id))
         updated_user = await user_service.update_user(db, user=user, obj_in=user_in)
-        logger.info(f"Admin {admin.email} updated user {updated_user.email}")
+        logger.info("Admin %s updated user %s", admin.email, updated_user.email)
         return updated_user
 
     except Exception as e:
-        logger.error(f"Error updating user (admin): {e!s}", exc_info=True)
+        logger.exception("Error updating user (admin): %s", e)
         raise
 
 
@@ -413,14 +413,14 @@ async def admin_delete_user(
             )
 
         await user_service.soft_delete_user(db, str(user_id))
-        logger.info(f"Admin {admin.email} deleted user {user.email}")
+        logger.info("Admin %s deleted user %s", admin.email, user.email)
 
         return MessageResponse(
             success=True, message=f"User {user.email} has been deleted"
         )
 
     except Exception as e:
-        logger.error(f"Error deleting user (admin): {e!s}", exc_info=True)
+        logger.exception("Error deleting user (admin): %s", e)
         raise
 
 
@@ -440,14 +440,14 @@ async def admin_activate_user(
     try:
         user = await user_service.get_user(db, str(user_id))
         await user_service.update_user(db, user=user, obj_in={"is_active": True})
-        logger.info(f"Admin {admin.email} activated user {user.email}")
+        logger.info("Admin %s activated user %s", admin.email, user.email)
 
         return MessageResponse(
             success=True, message=f"User {user.email} has been activated"
         )
 
     except Exception as e:
-        logger.error(f"Error activating user (admin): {e!s}", exc_info=True)
+        logger.exception("Error activating user (admin): %s", e)
         raise
 
 
@@ -476,14 +476,14 @@ async def admin_deactivate_user(
             )
 
         await user_service.update_user(db, user=user, obj_in={"is_active": False})
-        logger.info(f"Admin {admin.email} deactivated user {user.email}")
+        logger.info("Admin %s deactivated user %s", admin.email, user.email)
 
         return MessageResponse(
             success=True, message=f"User {user.email} has been deactivated"
         )
 
     except Exception as e:
-        logger.error(f"Error deactivating user (admin): {e!s}", exc_info=True)
+        logger.exception("Error deactivating user (admin): %s", e)
         raise
 
 
@@ -528,8 +528,11 @@ async def admin_bulk_user_action(
         failed_count = requested_count - affected_count
 
         logger.info(
-            f"Admin {admin.email} performed bulk {bulk_action.action.value} "
-            f"on {affected_count} users ({failed_count} skipped/failed)"
+            "Admin %s performed bulk %s on %s users (%s skipped/failed)",
+            admin.email,
+            bulk_action.action.value,
+            affected_count,
+            failed_count,
         )
 
         return BulkActionResult(
@@ -541,7 +544,7 @@ async def admin_bulk_user_action(
         )
 
     except Exception as e:  # pragma: no cover
-        logger.error(f"Error in bulk user action: {e!s}", exc_info=True)
+        logger.exception("Error in bulk user action: %s", e)
         raise
 
 
@@ -602,7 +605,7 @@ async def admin_list_organizations(
         return PaginatedResponse(data=orgs_with_count, pagination=pagination_meta)
 
     except Exception as e:
-        logger.error(f"Error listing organizations (admin): {e!s}", exc_info=True)
+        logger.exception("Error listing organizations (admin): %s", e)
         raise
 
 
@@ -622,7 +625,7 @@ async def admin_create_organization(
     """Create a new organization."""
     try:
         org = await organization_service.create_organization(db, obj_in=org_in)
-        logger.info(f"Admin {admin.email} created organization {org.name}")
+        logger.info("Admin %s created organization %s", admin.email, org.name)
 
         # Add member count
         org_dict = {
@@ -639,10 +642,10 @@ async def admin_create_organization(
         return OrganizationResponse(**org_dict)
 
     except DuplicateEntryError as e:
-        logger.warning(f"Failed to create organization: {e!s}")
+        logger.warning("Failed to create organization: %s", e)
         raise DuplicateError(message=str(e), error_code=ErrorCode.ALREADY_EXISTS)
     except Exception as e:
-        logger.error(f"Error creating organization (admin): {e!s}", exc_info=True)
+        logger.exception("Error creating organization (admin): %s", e)
         raise
 
 
@@ -695,7 +698,7 @@ async def admin_update_organization(
         updated_org = await organization_service.update_organization(
             db, org=org, obj_in=org_in
         )
-        logger.info(f"Admin {admin.email} updated organization {updated_org.name}")
+        logger.info("Admin %s updated organization %s", admin.email, updated_org.name)
 
         org_dict = {
             "id": updated_org.id,
@@ -713,7 +716,7 @@ async def admin_update_organization(
         return OrganizationResponse(**org_dict)
 
     except Exception as e:
-        logger.error(f"Error updating organization (admin): {e!s}", exc_info=True)
+        logger.exception("Error updating organization (admin): %s", e)
         raise
 
 
@@ -733,14 +736,14 @@ async def admin_delete_organization(
     try:
         org = await organization_service.get_organization(db, str(org_id))
         await organization_service.remove_organization(db, str(org_id))
-        logger.info(f"Admin {admin.email} deleted organization {org.name}")
+        logger.info("Admin %s deleted organization %s", admin.email, org.name)
 
         return MessageResponse(
             success=True, message=f"Organization {org.name} has been deleted"
         )
 
     except Exception as e:
-        logger.error(f"Error deleting organization (admin): {e!s}", exc_info=True)
+        logger.exception("Error deleting organization (admin): %s", e)
         raise
 
 
@@ -784,9 +787,7 @@ async def admin_list_organization_members(
     except NotFoundError:
         raise
     except Exception as e:
-        logger.error(
-            f"Error listing organization members (admin): {e!s}", exc_info=True
-        )
+        logger.exception("Error listing organization members (admin): %s", e)
         raise
 
 
@@ -822,8 +823,11 @@ async def admin_add_organization_member(
         )
 
         logger.info(
-            f"Admin {admin.email} added user {user.email} to organization {org.name} "
-            f"with role {request.role.value}"
+            "Admin %s added user %s to organization %s with role %s",
+            admin.email,
+            user.email,
+            org.name,
+            request.role.value,
         )
 
         return MessageResponse(
@@ -831,14 +835,12 @@ async def admin_add_organization_member(
         )
 
     except DuplicateEntryError as e:
-        logger.warning(f"Failed to add user to organization: {e!s}")
+        logger.warning("Failed to add user to organization: %s", e)
         raise DuplicateError(
             message=str(e), error_code=ErrorCode.USER_ALREADY_EXISTS, field="user_id"
         )
     except Exception as e:
-        logger.error(
-            f"Error adding member to organization (admin): {e!s}", exc_info=True
-        )
+        logger.exception("Error adding member to organization (admin): %s", e)
         raise
 
 
@@ -871,7 +873,10 @@ async def admin_remove_organization_member(
             )
 
         logger.info(
-            f"Admin {admin.email} removed user {user.email} from organization {org.name}"
+            "Admin %s removed user %s from organization %s",
+            admin.email,
+            user.email,
+            org.name,
         )
 
         return MessageResponse(
@@ -882,9 +887,7 @@ async def admin_remove_organization_member(
     except NotFoundError:
         raise
     except Exception as e:  # pragma: no cover
-        logger.error(
-            f"Error removing member from organization (admin): {e!s}", exc_info=True
-        )
+        logger.exception("Error removing member from organization (admin): %s", e)
         raise
 
 
@@ -953,7 +956,10 @@ async def admin_list_sessions(
             session_responses.append(session_response)
 
         logger.info(
-            f"Admin {admin.email} listed {len(session_responses)} sessions (total: {total})"
+            "Admin %s listed %s sessions (total: %s)",
+            admin.email,
+            len(session_responses),
+            total,
         )
 
         pagination_meta = create_pagination_meta(
@@ -966,5 +972,5 @@ async def admin_list_sessions(
         return PaginatedResponse(data=session_responses, pagination=pagination_meta)
 
     except Exception as e:  # pragma: no cover
-        logger.error(f"Error listing sessions (admin): {e!s}", exc_info=True)
+        logger.exception("Error listing sessions (admin): %s", e)
         raise

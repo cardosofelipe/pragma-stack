@@ -35,12 +35,12 @@ async def cleanup_expired_sessions(keep_days: int = 30) -> int:
             # Use CRUD method to cleanup
             count = await session_crud.cleanup_expired(db, keep_days=keep_days)
 
-            logger.info(f"Session cleanup complete: {count} sessions deleted")
+            logger.info("Session cleanup complete: %s sessions deleted", count)
 
             return count
 
         except Exception as e:
-            logger.error(f"Error during session cleanup: {e!s}", exc_info=True)
+            logger.exception("Error during session cleanup: %s", e)
             return 0
 
 
@@ -79,10 +79,10 @@ async def get_session_statistics() -> dict:
                 "expired": expired_sessions,
             }
 
-            logger.info(f"Session statistics: {stats}")
+            logger.info("Session statistics: %s", stats)
 
             return stats
 
         except Exception as e:
-            logger.error(f"Error getting session statistics: {e!s}", exc_info=True)
+            logger.exception("Error getting session statistics: %s", e)
             return {}

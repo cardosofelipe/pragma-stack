@@ -139,7 +139,7 @@ def verify_pkce(code_verifier: str, code_challenge: str, method: str) -> bool:
     if method != "S256":
         # SECURITY: Reject any method other than S256
         # 'plain' method provides no security against code interception attacks
-        logger.warning(f"PKCE verification rejected for unsupported method: {method}")
+        logger.warning("PKCE verification rejected for unsupported method: %s", method)
         return False
 
     # SHA-256 hash, then base64url encode (RFC 7636 Section 4.2)
@@ -257,7 +257,9 @@ def validate_scopes(client: OAuthClient, requested_scopes: list[str]) -> list[st
     # Warn if some scopes were filtered out
     invalid = requested - allowed
     if invalid:
-        logger.warning(f"Client {client.client_id} requested invalid scopes: {invalid}")
+        logger.warning(
+            "Client %s requested invalid scopes: %s", client.client_id, invalid
+        )
 
     return list(valid)
 
@@ -320,7 +322,9 @@ async def create_authorization_code(
     )
 
     logger.info(
-        f"Created authorization code for user {user.id} and client {client.client_id}"
+        "Created authorization code for user %s and client %s",
+        user.id,
+        client.client_id,
     )
     return code
 
@@ -369,7 +373,8 @@ async def exchange_authorization_code(
         if existing_code and existing_code.used:
             # Code reuse is a security incident - revoke all tokens for this grant
             logger.warning(
-                f"Authorization code reuse detected for client {existing_code.client_id}"
+                "Authorization code reuse detected for client %s",
+                existing_code.client_id,
             )
             await revoke_tokens_for_user_client(
                 db, UUID(str(existing_code.user_id)), str(existing_code.client_id)
@@ -527,7 +532,7 @@ async def create_tokens(
         ip_address=ip_address,
     )
 
-    logger.info(f"Issued tokens for user {user.id} to client {client.client_id}")
+    logger.info("Issued tokens for user %s to client %s", user.id, client.client_id)
 
     return {
         "access_token": access_token,
@@ -580,7 +585,7 @@ async def refresh_tokens(
     if token_record.revoked:
         # Token reuse after revocation - security incident
         logger.warning(
-            f"Revoked refresh token reuse detected for client {token_record.client_id}"
+            "Revoked refresh token reuse detected for client %s", token_record.client_id
         )
         raise InvalidGrantError("Refresh token has been revoked")
 
@@ -672,7 +677,7 @@ async def revoke_token(
                 raise InvalidClientError("Token was not issued to this client")
 
             await oauth_provider_token_repo.revoke(db, token=refresh_record)
-            logger.info(f"Revoked refresh token {refresh_record.jti[:8]}...")
+            logger.info("Revoked refresh token %s...", refresh_record.jti[:8])
             return True
 
     # Try as access token (JWT)
@@ -696,7 +701,7 @@ async def revoke_token(
                         raise InvalidClientError("Token was not issued to this client")
                     await oauth_provider_token_repo.revoke(db, token=refresh_record)
                     logger.info(
-                        f"Revoked refresh token via access token JTI {jti[:8]}..."
+                        "Revoked refresh token via access token JTI %s...", jti[:8]
                     )
                     return True
         except JWTError:
@@ -731,7 +736,7 @@ async def revoke_tokens_for_user_client(
 
     if count > 0:
         logger.warning(
-            f"Revoked {count} tokens for user {user_id} and client {client_id}"
+            "Revoked %s tokens for user %s and client %s", count, user_id, client_id
         )
 
     return count
@@ -753,7 +758,7 @@ async def revoke_all_user_tokens(db: AsyncSession, user_id: UUID) -> int:
     count = await oauth_provider_token_repo.revoke_all_for_user(db, user_id=user_id)
 
     if count > 0:
-        logger.info(f"Revoked {count} OAuth provider tokens for user {user_id}")
+        logger.info("Revoked %s OAuth provider tokens for user %s", count, user_id)
 
     return count
 

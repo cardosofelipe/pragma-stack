@@ -29,7 +29,7 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
             )
             return result.scalar_one_or_none()
         except Exception as e:
-            logger.error(f"Error getting session by JTI {jti}: {e!s}")
+            logger.error("Error getting session by JTI %s: %s", jti, e)
             raise
 
     async def get_active_by_jti(
@@ -47,7 +47,7 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
             )
             return result.scalar_one_or_none()
         except Exception as e:
-            logger.error(f"Error getting active session by JTI {jti}: {e!s}")
+            logger.error("Error getting active session by JTI %s: %s", jti, e)
             raise
 
     async def get_user_sessions(
@@ -74,7 +74,7 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
             result = await db.execute(query)
             return list(result.scalars().all())
         except Exception as e:
-            logger.error(f"Error getting sessions for user {user_id}: {e!s}")
+            logger.error("Error getting sessions for user %s: %s", user_id, e)
             raise
 
     async def create_session(
@@ -100,14 +100,16 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
             await db.refresh(db_obj)
 
             logger.info(
-                f"Session created for user {obj_in.user_id} from {obj_in.device_name} "
-                f"(IP: {obj_in.ip_address})"
+                "Session created for user %s from %s (IP: %s)",
+                obj_in.user_id,
+                obj_in.device_name,
+                obj_in.ip_address,
             )
 
             return db_obj
         except Exception as e:
             await db.rollback()
-            logger.error(f"Error creating session: {e!s}", exc_info=True)
+            logger.exception("Error creating session: %s", e)
             raise IntegrityConstraintError(f"Failed to create session: {e!s}")
 
     async def deactivate(
@@ -117,7 +119,7 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
         try:
             session = await self.get(db, id=session_id)
             if not session:
-                logger.warning(f"Session {session_id} not found for deactivation")
+                logger.warning("Session %s not found for deactivation", session_id)
                 return None
 
             session.is_active = False
@@ -126,14 +128,16 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
             await db.refresh(session)
 
             logger.info(
-                f"Session {session_id} deactivated for user {session.user_id} "
-                f"({session.device_name})"
+                "Session %s deactivated for user %s (%s)",
+                session_id,
+                session.user_id,
+                session.device_name,
             )
 
             return session
         except Exception as e:
             await db.rollback()
-            logger.error(f"Error deactivating session {session_id}: {e!s}")
+            logger.error("Error deactivating session %s: %s", session_id, e)
             raise
 
     async def deactivate_all_user_sessions(
@@ -154,12 +158,12 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
 
             count = result.rowcount
 
-            logger.info(f"Deactivated {count} sessions for user {user_id}")
+            logger.info("Deactivated %s sessions for user %s", count, user_id)
 
             return count
         except Exception as e:
             await db.rollback()
-            logger.error(f"Error deactivating all sessions for user {user_id}: {e!s}")
+            logger.error("Error deactivating all sessions for user %s: %s", user_id, e)
             raise
 
     async def update_last_used(
@@ -174,7 +178,7 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
             return session
         except Exception as e:
             await db.rollback()
-            logger.error(f"Error updating last_used for session {session.id}: {e!s}")
+            logger.error("Error updating last_used for session %s: %s", session.id, e)
             raise
 
     async def update_refresh_token(
@@ -197,7 +201,7 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
         except Exception as e:
             await db.rollback()
             logger.error(
-                f"Error updating refresh token for session {session.id}: {e!s}"
+                "Error updating refresh token for session %s: %s", session.id, e
             )
             raise
 
@@ -221,12 +225,12 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
             count = result.rowcount
 
             if count > 0:
-                logger.info(f"Cleaned up {count} expired sessions using bulk DELETE")
+                logger.info("Cleaned up %s expired sessions using bulk DELETE", count)
 
             return count
         except Exception as e:
             await db.rollback()
-            logger.error(f"Error cleaning up expired sessions: {e!s}")
+            logger.error("Error cleaning up expired sessions: %s", e)
             raise
 
     async def cleanup_expired_for_user(self, db: AsyncSession, *, user_id: str) -> int:
@@ -235,7 +239,7 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
             try:
                 uuid_obj = uuid.UUID(user_id)
             except (ValueError, AttributeError):
-                logger.error(f"Invalid UUID format: {user_id}")
+                logger.error("Invalid UUID format: %s", user_id)
                 raise InvalidInputError(f"Invalid user ID format: {user_id}")
 
             now = datetime.now(UTC)
@@ -255,14 +259,16 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
 
             if count > 0:
                 logger.info(
-                    f"Cleaned up {count} expired sessions for user {user_id} using bulk DELETE"
+                    "Cleaned up %s expired sessions for user %s using bulk DELETE",
+                    count,
+                    user_id,
                 )
 
             return count
         except Exception as e:
             await db.rollback()
             logger.error(
-                f"Error cleaning up expired sessions for user {user_id}: {e!s}"
+                "Error cleaning up expired sessions for user %s: %s", user_id, e
             )
             raise
 
@@ -278,7 +284,7 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
             )
             return result.scalar_one()
         except Exception as e:
-            logger.error(f"Error counting sessions for user {user_id}: {e!s}")
+            logger.error("Error counting sessions for user %s: %s", user_id, e)
             raise
 
     async def get_all_sessions(
@@ -319,7 +325,7 @@ class SessionRepository(BaseRepository[UserSession, SessionCreate, SessionUpdate
             return sessions, total
 
         except Exception as e:
-            logger.error(f"Error getting all sessions: {e!s}", exc_info=True)
+            logger.exception("Error getting all sessions: %s", e)
             raise
 
 

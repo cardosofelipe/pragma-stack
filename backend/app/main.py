@@ -320,7 +320,7 @@ async def health_check() -> JSONResponse:
             "message": f"Database connection failed: {e!s}",
         }
         response_status = status.HTTP_503_SERVICE_UNAVAILABLE
-        logger.error(f"Health check failed - database error: {e}")
+        logger.error("Health check failed - database error: %s", e)
 
     return JSONResponse(status_code=response_status, content=health_status)
 

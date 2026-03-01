@@ -219,7 +219,7 @@ class OAuthService:
                 **auth_params,
             )
 
-        logger.info(f"OAuth authorization URL created for {provider}")
+        logger.info("OAuth authorization URL created for %s", provider)
         return url, state
 
     @staticmethod
@@ -254,8 +254,9 @@ class OAuthService:
         # This prevents authorization code injection attacks (RFC 6749 Section 10.6)
         if state_record.redirect_uri != redirect_uri:
             logger.warning(
-                f"OAuth redirect_uri mismatch: expected {state_record.redirect_uri}, "
-                f"got {redirect_uri}"
+                "OAuth redirect_uri mismatch: expected %s, got %s",
+                state_record.redirect_uri,
+                redirect_uri,
             )
             raise AuthenticationError("Redirect URI mismatch")
 
@@ -299,7 +300,7 @@ class OAuthService:
             except AuthenticationError:
                 raise
             except Exception as e:
-                logger.error(f"OAuth token exchange failed: {e!s}")
+                logger.error("OAuth token exchange failed: %s", e)
                 raise AuthenticationError("Failed to exchange authorization code")
 
             # Get user info from provider
@@ -312,7 +313,7 @@ class OAuthService:
                     client, provider, config, access_token
                 )
             except Exception as e:
-                logger.error(f"Failed to get user info: {e!s}")
+                logger.error("Failed to get user info: %s", e)
                 raise AuthenticationError(
                     "Failed to get user information from provider"
                 )
@@ -353,7 +354,7 @@ class OAuthService:
                     + timedelta(seconds=token.get("expires_in", 3600)),
                 )
 
-            logger.info(f"OAuth login successful for {user.email} via {provider}")
+            logger.info("OAuth login successful for %s via %s", user.email, provider)
 
         elif state_record.user_id:
             # Account linking flow (user is already logged in)
@@ -387,7 +388,7 @@ class OAuthService:
             )
             await oauth_account.create_account(db, obj_in=oauth_create)
 
-            logger.info(f"OAuth account linked: {provider} -> {user.email}")
+            logger.info("OAuth account linked: %s -> %s", provider, user.email)
 
         else:
             # New OAuth login - check for existing user by email
@@ -409,7 +410,9 @@ class OAuthService:
                 if existing_provider:
                     # This shouldn't happen if we got here, but safety check
                     logger.warning(
-                        f"OAuth account already linked (race condition?): {provider} -> {user.email}"
+                        "OAuth account already linked (race condition?): %s -> %s",
+                        provider,
+                        user.email,
                     )
                 else:
                     # Create OAuth account link
@@ -427,7 +430,9 @@ class OAuthService:
                     )
                     await oauth_account.create_account(db, obj_in=oauth_create)
 
-                logger.info(f"OAuth auto-linked by email: {provider} -> {user.email}")
+                logger.info(
+                    "OAuth auto-linked by email: %s -> %s", provider, user.email
+                )
 
             else:
                 # Create new user
@@ -447,7 +452,7 @@ class OAuthService:
                 )
                 is_new_user = True
 
-                logger.info(f"New user created via OAuth: {user.email} ({provider})")
+                logger.info("New user created via OAuth: %s (%s)", user.email, provider)
 
         # Generate JWT tokens
         claims = {
@@ -583,8 +588,9 @@ class OAuthService:
             token_nonce = payload.get("nonce")
             if token_nonce != expected_nonce:
                 logger.warning(
-                    f"OAuth ID token nonce mismatch: expected {expected_nonce}, "
-                    f"got {token_nonce}"
+                    "OAuth ID token nonce mismatch: expected %s, got %s",
+                    expected_nonce,
+                    token_nonce,
                 )
                 raise AuthenticationError("Invalid ID token nonce")
 
@@ -592,14 +598,14 @@ class OAuthService:
             return payload
 
         except JWTError as e:
-            logger.warning(f"Google ID token verification failed: {e}")
+            logger.warning("Google ID token verification failed: %s", e)
             raise AuthenticationError("Invalid ID token signature")
         except httpx.HTTPError as e:
-            logger.error(f"Failed to fetch Google JWKS: {e}")
+            logger.error("Failed to fetch Google JWKS: %s", e)
             # If we can't verify the ID token, fail closed for security
             raise AuthenticationError("Failed to verify ID token")
         except Exception as e:
-            logger.error(f"Unexpected error verifying Google ID token: {e}")
+            logger.error("Unexpected error verifying Google ID token: %s", e)
             raise AuthenticationError("ID token verification error")
 
     @staticmethod
@@ -701,7 +707,7 @@ class OAuthService:
         if not deleted:
             raise AuthenticationError(f"No {provider} account found to unlink")
 
-        logger.info(f"OAuth provider unlinked: {provider} from {user.email}")
+        logger.info("OAuth provider unlinked: %s from %s", provider, user.email)
         return True
 
     @staticmethod

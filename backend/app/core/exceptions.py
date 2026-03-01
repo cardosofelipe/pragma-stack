@@ -143,8 +143,11 @@ async def api_exception_handler(request: Request, exc: APIException) -> JSONResp
     Returns a standardized error response with error code and message.
     """
     logger.warning(
-        f"API exception: {exc.error_code} - {exc.message} "
-        f"(status: {exc.status_code}, path: {request.url.path})"
+        "API exception: %s - %s (status: %s, path: %s)",
+        exc.error_code,
+        exc.message,
+        exc.status_code,
+        request.url.path,
     )
 
     error_response = ErrorResponse(
@@ -186,7 +189,9 @@ async def validation_exception_handler(
             )
         )
 
-    logger.warning(f"Validation error: {len(errors)} errors (path: {request.url.path})")
+    logger.warning(
+        "Validation error: %s errors (path: %s)", len(errors), request.url.path
+    )
 
     error_response = ErrorResponse(errors=errors)
 
@@ -218,7 +223,10 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     )
 
     logger.warning(
-        f"HTTP exception: {exc.status_code} - {exc.detail} (path: {request.url.path})"
+        "HTTP exception: %s - %s (path: %s)",
+        exc.status_code,
+        exc.detail,
+        request.url.path,
     )
 
     error_response = ErrorResponse(
@@ -239,10 +247,11 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     Logs the full exception and returns a generic error response to avoid
     leaking sensitive information in production.
     """
-    logger.error(
-        f"Unhandled exception: {type(exc).__name__} - {exc!s} "
-        f"(path: {request.url.path})",
-        exc_info=True,
+    logger.exception(
+        "Unhandled exception: %s - %s (path: %s)",
+        type(exc).__name__,
+        exc,
+        request.url.path,
     )
 
     # In production, don't expose internal error details

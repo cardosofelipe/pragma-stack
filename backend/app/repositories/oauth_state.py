@@ -42,16 +42,16 @@ class OAuthStateRepository(BaseRepository[OAuthState, OAuthStateCreate, EmptySch
             await db.commit()
             await db.refresh(db_obj)
 
-            logger.debug(f"OAuth state created for {obj_in.provider}")
+            logger.debug("OAuth state created for %s", obj_in.provider)
             return db_obj
         except IntegrityError as e:  # pragma: no cover
             await db.rollback()
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
-            logger.error(f"OAuth state collision: {error_msg}")
+            logger.error("OAuth state collision: %s", error_msg)
             raise DuplicateEntryError("Failed to create OAuth state, please retry")
         except Exception as e:  # pragma: no cover
             await db.rollback()
-            logger.error(f"Error creating OAuth state: {e!s}", exc_info=True)
+            logger.exception("Error creating OAuth state: %s", e)
             raise
 
     async def get_and_consume_state(
@@ -65,7 +65,7 @@ class OAuthStateRepository(BaseRepository[OAuthState, OAuthStateCreate, EmptySch
             db_obj = result.scalar_one_or_none()
 
             if db_obj is None:
-                logger.warning(f"OAuth state not found: {state[:8]}...")
+                logger.warning("OAuth state not found: %s...", state[:8])
                 return None
 
             now = datetime.now(UTC)
@@ -74,7 +74,7 @@ class OAuthStateRepository(BaseRepository[OAuthState, OAuthStateCreate, EmptySch
                 expires_at = expires_at.replace(tzinfo=UTC)
 
             if expires_at < now:
-                logger.warning(f"OAuth state expired: {state[:8]}...")
+                logger.warning("OAuth state expired: %s...", state[:8])
                 await db.delete(db_obj)
                 await db.commit()
                 return None
@@ -82,11 +82,11 @@ class OAuthStateRepository(BaseRepository[OAuthState, OAuthStateCreate, EmptySch
             await db.delete(db_obj)
             await db.commit()
 
-            logger.debug(f"OAuth state consumed: {state[:8]}...")
+            logger.debug("OAuth state consumed: %s...", state[:8])
             return db_obj
         except Exception as e:  # pragma: no cover
             await db.rollback()
-            logger.error(f"Error consuming OAuth state: {e!s}")
+            logger.error("Error consuming OAuth state: %s", e)
             raise
 
     async def cleanup_expired(self, db: AsyncSession) -> int:
@@ -100,12 +100,12 @@ class OAuthStateRepository(BaseRepository[OAuthState, OAuthStateCreate, EmptySch
 
             count = result.rowcount
             if count > 0:
-                logger.info(f"Cleaned up {count} expired OAuth states")
+                logger.info("Cleaned up %s expired OAuth states", count)
 
             return count
         except Exception as e:  # pragma: no cover
             await db.rollback()
-            logger.error(f"Error cleaning up expired OAuth states: {e!s}")
+            logger.error("Error cleaning up expired OAuth states: %s", e)
             raise
 
 

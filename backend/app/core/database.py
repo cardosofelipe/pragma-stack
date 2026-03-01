@@ -139,7 +139,7 @@ async def async_transaction_scope() -> AsyncGenerator[AsyncSession, None]:
             logger.debug("Async transaction committed successfully")
         except Exception as e:
             await session.rollback()
-            logger.error(f"Async transaction failed, rolling back: {e!s}")
+            logger.error("Async transaction failed, rolling back: %s", e)
             raise
         finally:
             await session.close()
@@ -155,7 +155,7 @@ async def check_async_database_health() -> bool:
             await db.execute(text("SELECT 1"))
         return True
     except Exception as e:
-        logger.error(f"Async database health check failed: {e!s}")
+        logger.error("Async database health check failed: %s", e)
         return False
 
 

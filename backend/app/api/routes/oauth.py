@@ -84,14 +84,16 @@ async def _create_oauth_login_session(
         await session_service.create_session(db, obj_in=session_data)
 
         logger.info(
-            f"OAuth login successful: {user.email} via {provider} "
-            f"from {device_info.device_name} (IP: {device_info.ip_address})"
+            "OAuth login successful: %s via %s from %s (IP: %s)",
+            user.email,
+            provider,
+            device_info.device_name,
+            device_info.ip_address,
         )
     except Exception as session_err:
         # Log but don't fail login if session creation fails
-        logger.error(
-            f"Failed to create session for OAuth login {user.email}: {session_err!s}",
-            exc_info=True,
+        logger.exception(
+            "Failed to create session for OAuth login %s: %s", user.email, session_err
         )
 
 
@@ -176,13 +178,13 @@ async def get_authorization_url(
         }
 
     except AuthError as e:
-        logger.warning(f"OAuth authorization failed: {e!s}")
+        logger.warning("OAuth authorization failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
     except Exception as e:
-        logger.error(f"OAuth authorization error: {e!s}", exc_info=True)
+        logger.exception("OAuth authorization error: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create authorization URL",
@@ -250,13 +252,13 @@ async def handle_callback(
         return result
 
     except AuthError as e:
-        logger.warning(f"OAuth callback failed: {e!s}")
+        logger.warning("OAuth callback failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e),
         )
     except Exception as e:
-        logger.error(f"OAuth callback error: {e!s}", exc_info=True)
+        logger.exception("OAuth callback error: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="OAuth authentication failed",
@@ -337,13 +339,13 @@ async def unlink_account(
         )
 
     except AuthError as e:
-        logger.warning(f"OAuth unlink failed for {current_user.email}: {e!s}")
+        logger.warning("OAuth unlink failed for %s: %s", current_user.email, e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
     except Exception as e:
-        logger.error(f"OAuth unlink error: {e!s}", exc_info=True)
+        logger.exception("OAuth unlink error: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to unlink OAuth account",
@@ -419,13 +421,13 @@ async def start_link(
         }
 
     except AuthError as e:
-        logger.warning(f"OAuth link authorization failed: {e!s}")
+        logger.warning("OAuth link authorization failed: %s", e)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
     except Exception as e:
-        logger.error(f"OAuth link error: {e!s}", exc_info=True)
+        logger.exception("OAuth link error: %s", e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create authorization URL",

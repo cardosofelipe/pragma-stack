@@ -44,7 +44,8 @@ async def init_db() -> User | None:
     if not settings.FIRST_SUPERUSER_EMAIL or not settings.FIRST_SUPERUSER_PASSWORD:
         logger.warning(
             "First superuser credentials not configured in settings. "
-            f"Using defaults: {superuser_email}"
+            "Using defaults: %s",
+            superuser_email,
         )
 
     async with SessionLocal() as session:
@@ -53,7 +54,7 @@ async def init_db() -> User | None:
             existing_user = await user_crud.get_by_email(session, email=superuser_email)
 
             if existing_user:
-                logger.info(f"Superuser already exists: {existing_user.email}")
+                logger.info("Superuser already exists: %s", existing_user.email)
                 return existing_user
 
             # Create superuser if doesn't exist
@@ -69,7 +70,7 @@ async def init_db() -> User | None:
             await session.commit()
             await session.refresh(user)
 
-            logger.info(f"Created first superuser: {user.email}")
+            logger.info("Created first superuser: %s", user.email)
 
             # Create demo data if in demo mode
             if settings.DEMO_MODE:
@@ -79,7 +80,7 @@ async def init_db() -> User | None:
 
         except Exception as e:
             await session.rollback()
-            logger.error(f"Error initializing database: {e}")
+            logger.error("Error initializing database: %s", e)
             raise
 
 
@@ -92,7 +93,7 @@ async def load_demo_data(session):
     """Load demo data from JSON file."""
     demo_data_path = Path(__file__).parent / "core" / "demo_data.json"
     if not demo_data_path.exists():
-        logger.warning(f"Demo data file not found: {demo_data_path}")
+        logger.warning("Demo data file not found: %s", demo_data_path)
         return
 
     try:
@@ -119,7 +120,7 @@ async def load_demo_data(session):
                 session.add(org)
                 await session.flush()  # Flush to get ID
                 org_map[org.slug] = org
-                logger.info(f"Created demo organization: {org.name}")
+                logger.info("Created demo organization: %s", org.name)
             else:
                 # We can't easily get the ORM object from raw SQL result for map without querying again or mapping
                 # So let's just query it properly if we need it for relationships
@@ -174,7 +175,10 @@ async def load_demo_data(session):
                 )
 
                 logger.info(
-                    f"Created demo user: {user.email} (created {days_ago} days ago, active={user_data.get('is_active', True)})"
+                    "Created demo user: %s (created %s days ago, active=%s)",
+                    user.email,
+                    days_ago,
+                    user_data.get("is_active", True),
                 )
 
                 # Add to organization if specified
@@ -187,15 +191,15 @@ async def load_demo_data(session):
                         user_id=user.id, organization_id=org.id, role=role
                     )
                     session.add(member)
-                    logger.info(f"Added {user.email} to {org.name} as {role}")
+                    logger.info("Added %s to %s as %s", user.email, org.name, role)
             else:
-                logger.info(f"Demo user already exists: {existing_user.email}")
+                logger.info("Demo user already exists: %s", existing_user.email)
 
         await session.commit()
         logger.info("Demo data loaded successfully")
 
     except Exception as e:
-        logger.error(f"Error loading demo data: {e}")
+        logger.error("Error loading demo data: %s", e)
         raise
 
 

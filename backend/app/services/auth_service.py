@@ -85,7 +85,7 @@ class AuthService:
             # Delegate creation (hashing + commit) to the repository
             user = await user_repo.create(db, obj_in=user_data)
 
-            logger.info(f"User created successfully: {user.email}")
+            logger.info("User created successfully: %s", user.email)
             return user
 
         except (AuthenticationError, DuplicateError):
@@ -94,7 +94,7 @@ class AuthService:
         except DuplicateEntryError as e:
             raise DuplicateError(str(e))
         except Exception as e:
-            logger.error(f"Error creating user: {e!s}", exc_info=True)
+            logger.exception("Error creating user: %s", e)
             raise AuthenticationError(f"Failed to create user: {e!s}")
 
     @staticmethod
@@ -166,7 +166,7 @@ class AuthService:
             return AuthService.create_tokens(user)
 
         except (TokenExpiredError, TokenInvalidError) as e:
-            logger.warning(f"Token refresh failed: {e!s}")
+            logger.warning("Token refresh failed: %s", e)
             raise
 
     @staticmethod
@@ -201,7 +201,7 @@ class AuthService:
             new_hash = await get_password_hash_async(new_password)
             await user_repo.update_password(db, user=user, password_hash=new_hash)
 
-            logger.info(f"Password changed successfully for user {user_id}")
+            logger.info("Password changed successfully for user %s", user_id)
             return True
 
         except AuthenticationError:
@@ -210,9 +210,7 @@ class AuthService:
         except Exception as e:
             # Rollback on any database errors
             await db.rollback()
-            logger.error(
-                f"Error changing password for user {user_id}: {e!s}", exc_info=True
-            )
+            logger.exception("Error changing password for user %s: %s", user_id, e)
             raise AuthenticationError(f"Failed to change password: {e!s}")
 
     @staticmethod
@@ -241,5 +239,5 @@ class AuthService:
 
         new_hash = await get_password_hash_async(new_password)
         user = await user_repo.update_password(db, user=user, password_hash=new_hash)
-        logger.info(f"Password reset successfully for {email}")
+        logger.info("Password reset successfully for %s", email)
         return user

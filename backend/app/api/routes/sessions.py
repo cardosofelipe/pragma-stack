@@ -74,9 +74,7 @@ async def list_my_sessions(
                 # For now, we'll mark current based on most recent activity
             except Exception as e:
                 # Optional token parsing - silently ignore failures
-                logger.debug(
-                    f"Failed to decode access token for session marking: {e!s}"
-                )
+                logger.debug("Failed to decode access token for session marking: %s", e)
 
         # Convert to response format
         session_responses = []
@@ -98,7 +96,7 @@ async def list_my_sessions(
             session_responses.append(session_response)
 
         logger.info(
-            f"User {current_user.id} listed {len(session_responses)} active sessions"
+            "User %s listed %s active sessions", current_user.id, len(session_responses)
         )
 
         return SessionListResponse(
@@ -106,9 +104,7 @@ async def list_my_sessions(
         )
 
     except Exception as e:
-        logger.error(
-            f"Error listing sessions for user {current_user.id}: {e!s}", exc_info=True
-        )
+        logger.exception("Error listing sessions for user %s: %s", current_user.id, e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve sessions",
@@ -161,8 +157,10 @@ async def revoke_session(
         # Verify session belongs to current user
         if str(session.user_id) != str(current_user.id):
             logger.warning(
-                f"User {current_user.id} attempted to revoke session {session_id} "
-                f"belonging to user {session.user_id}"
+                "User %s attempted to revoke session %s belonging to user %s",
+                current_user.id,
+                session_id,
+                session.user_id,
             )
             raise AuthorizationError(
                 message="You can only revoke your own sessions",
@@ -173,8 +171,10 @@ async def revoke_session(
         await session_service.deactivate(db, session_id=str(session_id))
 
         logger.info(
-            f"User {current_user.id} revoked session {session_id} "
-            f"({session.device_name})"
+            "User %s revoked session %s (%s)",
+            current_user.id,
+            session_id,
+            session.device_name,
         )
 
         return MessageResponse(
@@ -185,7 +185,7 @@ async def revoke_session(
     except (NotFoundError, AuthorizationError):
         raise
     except Exception as e:
-        logger.error(f"Error revoking session {session_id}: {e!s}", exc_info=True)
+        logger.exception("Error revoking session %s: %s", session_id, e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to revoke session",
@@ -229,7 +229,7 @@ async def cleanup_expired_sessions(
         )
 
         logger.info(
-            f"User {current_user.id} cleaned up {deleted_count} expired sessions"
+            "User %s cleaned up %s expired sessions", current_user.id, deleted_count
         )
 
         return MessageResponse(
@@ -237,9 +237,8 @@ async def cleanup_expired_sessions(
         )
 
     except Exception as e:
-        logger.error(
-            f"Error cleaning up sessions for user {current_user.id}: {e!s}",
-            exc_info=True,
+        logger.exception(
+            "Error cleaning up sessions for user %s: %s", current_user.id, e
         )
         await db.rollback()
         raise HTTPException(

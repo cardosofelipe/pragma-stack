@@ -42,7 +42,7 @@ class OAuthClientRepository(
             )
             return result.scalar_one_or_none()
         except Exception as e:  # pragma: no cover
-            logger.error(f"Error getting OAuth client {client_id}: {e!s}")
+            logger.error("Error getting OAuth client %s: %s", client_id, e)
             raise
 
     async def create_client(
@@ -80,17 +80,17 @@ class OAuthClientRepository(
             await db.refresh(db_obj)
 
             logger.info(
-                f"OAuth client created: {obj_in.client_name} ({client_id[:8]}...)"
+                "OAuth client created: %s (%s...)", obj_in.client_name, client_id[:8]
             )
             return db_obj, client_secret
         except IntegrityError as e:  # pragma: no cover
             await db.rollback()
             error_msg = str(e.orig) if hasattr(e, "orig") else str(e)
-            logger.error(f"Error creating OAuth client: {error_msg}")
+            logger.error("Error creating OAuth client: %s", error_msg)
             raise DuplicateEntryError(f"Failed to create OAuth client: {error_msg}")
         except Exception as e:  # pragma: no cover
             await db.rollback()
-            logger.error(f"Error creating OAuth client: {e!s}", exc_info=True)
+            logger.exception("Error creating OAuth client: %s", e)
             raise
 
     async def deactivate_client(
@@ -107,11 +107,11 @@ class OAuthClientRepository(
             await db.commit()
             await db.refresh(client)
 
-            logger.info(f"OAuth client deactivated: {client.client_name}")
+            logger.info("OAuth client deactivated: %s", client.client_name)
             return client
         except Exception as e:  # pragma: no cover
             await db.rollback()
-            logger.error(f"Error deactivating OAuth client {client_id}: {e!s}")
+            logger.error("Error deactivating OAuth client %s: %s", client_id, e)
             raise
 
     async def validate_redirect_uri(
@@ -125,7 +125,7 @@ class OAuthClientRepository(
 
             return redirect_uri in (client.redirect_uris or [])
         except Exception as e:  # pragma: no cover
-            logger.error(f"Error validating redirect URI: {e!s}")
+            logger.error("Error validating redirect URI: %s", e)
             return False
 
     async def verify_client_secret(
@@ -158,7 +158,7 @@ class OAuthClientRepository(
                 secret_hash = hashlib.sha256(client_secret.encode()).hexdigest()
                 return secrets.compare_digest(stored_hash, secret_hash)
         except Exception as e:  # pragma: no cover
-            logger.error(f"Error verifying client secret: {e!s}")
+            logger.error("Error verifying client secret: %s", e)
             return False
 
     async def get_all_clients(
@@ -173,7 +173,7 @@ class OAuthClientRepository(
             result = await db.execute(query)
             return list(result.scalars().all())
         except Exception as e:  # pragma: no cover
-            logger.error(f"Error getting all OAuth clients: {e!s}")
+            logger.error("Error getting all OAuth clients: %s", e)
             raise
 
     async def delete_client(self, db: AsyncSession, *, client_id: str) -> bool:
@@ -186,14 +186,14 @@ class OAuthClientRepository(
 
             deleted = result.rowcount > 0
             if deleted:
-                logger.info(f"OAuth client deleted: {client_id}")
+                logger.info("OAuth client deleted: %s", client_id)
             else:
-                logger.warning(f"OAuth client not found for deletion: {client_id}")
+                logger.warning("OAuth client not found for deletion: %s", client_id)
 
             return deleted
         except Exception as e:  # pragma: no cover
             await db.rollback()
-            logger.error(f"Error deleting OAuth client {client_id}: {e!s}")
+            logger.error("Error deleting OAuth client %s: %s", client_id, e)
             raise
 
 
